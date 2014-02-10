@@ -1,0 +1,323 @@
+/*
+Theme Name:York Pipeline Interface
+Theme URI: http://simonfosterdesign.com
+Version: 1
+.
+Adapted from Simon Foster. simonfosterdesign.com  
+.
+*/
+
+/* reset  */
+html, body, div, a, p, img, ul, li, footer, header, section, h1, span, time, hr, hgroup, a img, aside, nav, form, input, article, h2, h3, h4, label, textarea, small {
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+  text-decoration:none;
+}
+footer, section, article, header, aside, nav { 
+    display:block;
+}
+:focus {
+    outline:none; 
+  }
+::-moz-selection, ::selection { 
+    color:#fff;
+  background:#c22a09; 
+  }
+ul {
+    list-style:none;
+  }
+h1, h2, h3, h4 {
+    font-weight:normal;
+  }
+
+/* end reset */
+
+html {
+   height:101%;
+   }
+   
+body {
+   font-size:125%;
+   color:#333;
+   border-top:solid 0.4em #333;
+   font-family:minion-pro, Georgia, Times new roman, serif;
+   font-weight:lighter;
+   -webkit-text-size-adjust:100%;
+   line-height:1.3em;
+   }
+
+/* header section */
+.masthead {
+    width:100%;
+    padding:7.25em 0;
+    } 
+.inner {
+  width:96%;
+  max-width:60em;
+  margin:0 auto;
+  overflow:auto;
+  }
+.inner_no_overflow {
+  width:96%;
+  max-width:60em;
+  margin:0 auto;
+  }
+.border_top {
+ border-top:solid 1px #eee;
+ border-bottom:solid 1px #eee;
+ padding:4em 0 0 0;
+}
+.masthead h1 {
+  width:100%;
+  text-align:center;
+  font-family:brandon-grotesque, Helvetica neue, Arial, sans-serif;
+  font-size:2.2em;
+  line-height:1em;
+  letter-spacing:1px;
+  }
+  h1 span {
+    margin:0 0 0 -2px;
+  }
+header a, .subnav a, .info_block a:hover, .subnav p a:hover, .portfolio_nav a, article a:hover {
+  color:#333;
+  }
+header a:hover, .subnav a:hover, article a, .info_block a, .subnav p a, .portfolio_nav a:hover { 
+    color:#c22a09; 
+  }
+.menu {
+  text-align:center;
+  display:block;
+  width:100%;
+  padding:0.277em 0 0 0;
+  font-size:0.9em;
+  }
+.menu li {
+  display:inline;
+  padding:0 9px;
+  }
+.menu a {
+  display:inline-block;
+  }
+
+/* layout */
+.block {
+  width:100%;
+}
+.textured {
+  background:url(images/texture.jpg) center top fixed;
+} 
+.texture {
+  background:url(http://www.peerpressureworks.com/wp-content/uploads/2010/08/shockedCat_1.jpg) center top fixed;
+  background-size:100px auto;
+}
+.texture img {
+  opacity:0;
+}
+
+/* home page */
+.main_image {
+  width:100%;
+  height:auto;
+}
+
+/* footer */
+footer { 
+  width:100%;
+  border-top:solid 1px #eee;
+   }
+footer small {
+  width:100%;
+  text-align:center;
+  padding:120px 0;
+  display:block;
+   }
+   
+/* portfolio articles */
+article  {
+  width:90%;
+  max-width:40em;
+  margin:0 auto;
+  overflow:auto;
+  padding:0 0 3em 0;
+  }
+.intro {
+  padding:3em 0;
+  max-width:35em;
+  }
+.single_inner {
+  width:98%;
+  max-width:45em;
+  margin:0 auto;
+  overflow:auto;
+  }
+article h1, .archive_header {
+  width:100%;
+  text-align:center;
+  padding:3em 0;
+  font-size:1.8em;
+  font-style:italic;
+  border-top:solid 1px #eee;
+  }
+article img {
+  width:100%;
+  max-width:40em;
+  height:auto;
+  }
+article img.border {
+  width:99.7%;
+  border:solid 1px #eee;
+  }
+article h3 {
+  margin:2em 0 1em 0;
+  font-size:1.5em;
+  font-style:italic;
+  }
+article p {
+  margin:0 0 3em 0;
+  clear:both;
+  line-height:1.5em;
+  font-size:1.1em;
+  word-spacing:1px;
+  } 
+article p.large {
+  font-size:1.2em;
+  }
+article ul {
+  font-size:1.1em;
+  margin: 0 0 3em 0;
+  line-height:1.5em;
+  }
+hr {
+  border:none;
+  height:1px;
+  background:#eee;
+  }
+article hr {
+  margin:3em 0 5em 0;
+  }
+
+/* portfolio archive section */
+.portfolio_nav {
+  width:100%;
+  float:left;
+  padding:0 0 4em 0;
+  }
+.portfolio_nav li {
+  width:33.33%;
+  float:left;
+  margin:0 0 3em 0;
+  position:relative;
+  }
+.portfolio_nav img {
+  width:100%;
+  height:auto;
+  float:left;
+  }
+.portfolio_nav img:hover {
+  opacity:0.8;
+  }
+.portfolio_nav h2 {
+  width:100%;
+  text-align:center;
+  }  
+
+
+/* ipad mq */ 
+@media (max-width: 1024px){
+article  {
+  max-width:30em;
+  }
+}
+
+@media (max-width: 768px){
+.masthead {
+  padding:4em 0;
+  } 
+.intro {
+  padding:2em 0;
+  }
+.portfolio_nav li {
+  width:50%;
+  }
+.portfolio_nav li.category-sketchbook {
+  width:33.33%;
+  }
+footer small {
+  padding:3em 0;
+  }
+} 
+
+/* iphone mq */
+@media (max-width: 600px) {
+  body {
+   font-size:112.5%;
+ }
+ .masthead {
+    padding:3.333em 0;
+    }
+.masthead h1 {
+  font-size:2.2em;
+  }
+article  {
+  padding:0 0 2.222em 0;
+  }
+.intro {
+  padding:0.555em 0;
+}
+article p.large {
+  font-size:1.3em;
+} 
+article p {
+  font-size:1.3em;
+  line-height:1.4em;
+  margin:0 0 1.709em 0;
+}
+article ul {
+  margin:0 0 2.222em 0;
+}
+article h3 {
+  font-size:1.5em;
+  }
+article hr {
+   margin:3.333em 0;
+   }  
+article img.border {
+  width:99%;
+  }
+.portfolio_nav {
+    padding:0 0 2.222em 0;
+   }
+.portfolio_nav li {
+    width:100%;
+    }
+.portfolio_nav li.category-sketchbook {
+    width:50%;
+    }
+article h1, .archive_header {
+  padding:2em 0 1.2em 0;
+}
+h3 {
+  width:100%;
+  text-align:center;
+}
+  }
+
+@media (max-width: 320px) {
+.masthead h1 {
+  font-size:2em;
+  }
+.portfolio_nav li {
+    margin:0 0 2.222em 0;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio : 1.5) {
+  h1 span {
+    margin:0 0 0 -1px;
+  }
+}

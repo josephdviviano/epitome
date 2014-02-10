@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="author" content="Joseph D Viviano">
+	<meta name="title" content="York MRI Pipeline Interface">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<title>York MRI Pipeline | Interface</title>
+	<link rel="stylesheet" href="file:////srv/CODE/PIPELINE/GUI/york_pipeline_interface.css"  media="screen">
+</head>
+
+<body>
+
+<header class="masthead">
+	<div class="inner_no_overflow">
+	<h1 title="York MRI Pipeline"><a href="file:////srv/CODE/PIPELINE/GUI/york_pipeline_interface.html">YORK MRI PIPELIN<span>E</span></a></h1>
+	<ul class="menu">
+	<li><a href="/path/to/documentation" title="Instructions">Instructions</a></li>
+	<li><a href="mailto:joseph.d.viviano@gmail.com" title="email the admin">Help</a></li>
+	</ul>
+	</div>
+</header>
+
+<div class="block textured">
+<div class="inner_no_overflow">
+	<img src="file:///srv/CODE/PIPELINE/GUI/images/not_a_pipe_wide.jpg" alt="mobile, desktop and tablet" class="main_image">
+</div>
+</div>
+
+<article class="intro" id="info">
+	<p>
+	Welcome to the York University MRI Pre-Processing Pipeline.
+	For this to work, your RAW data must be converted to the 
+	appropriate format in the WORKING directory. If it isn't, and you don't
+	understand what this means, feel free to talk to Joseph Viviano
+	about fixing it.
+	</p>
+	<p>
+	Below is an interface which will allow you to schedule your data
+	to be processed. Please note the system usage indicators. If the
+	server is currently carrying out a job, your data might take longer
+	than expected to be processed.
+	</p>
+
+<?php
+// define variables and set to empty values
+$name = $email = $gender = $comment = $website = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST")
+{
+   $name = test_input($_POST["name"]);
+   $email = test_input($_POST["email"]);
+   $website = test_input($_POST["website"]);
+   $comment = test_input($_POST["comment"]);
+   $gender = test_input($_POST["gender"]);
+}
+
+function test_input($data)
+{
+   $data = trim($data);
+   $data = stripslashes($data);
+   $data = htmlspecialchars($data);
+   return $data;
+}
+?>
+
+
+<form>
+  <h1>Pipeline settings.</h1>
+  <br>
+  Required fields are followed by <strong><abbr title="required">*</abbr></strong>.
+  <br>
+ 
+  <section>
+    <h3>Experiment Information:</h3>       
+    <p>
+      <label for="exp_name">
+        <span>Experiment name: </span>
+        <input type="text" id="exp_name" name="username" required />
+        <strong><abbr title="required">*</abbr></strong>
+      </label>
+      <em>string</em>
+    <br>
+      <label for="mail">
+        <span>E-mail: </span>
+        <input type="email" id="mail" name="usermail" required />
+        <strong><abbr title="required">*</abbr></strong>
+      </label>
+    </p>
+  </section>
+ 
+  <section>
+    <h3>Pre-Processing Settings:</h3>
+    
+    <p>
+      <label for="physio">
+        <span>Physiological data:</span>
+        <select id="physio" name="physio_regress">
+          <option value="physio_yes">Yes</option>
+          <option value="physio_no">No</option>
+        </select>
+      </label>
+    <br>
+      <label for="space">
+        <span>Final registration space for EPI data:</span>
+        <select id="space" name="reg_space">
+          <option value="MNI">MNI</option>
+          <option value="single_subject">Single Subject</option>
+        </select>
+      </label>
+    <br>
+      <label for="filtering">
+        <span>Time series filtering:</span>
+        <select id="filtering" name="reg_space">
+          <option value="standard">Standard Detrend</option>
+          <option value="nusiance_var">Nusiance Variable Regression</option>
+        </select>
+      </label>
+    <br>
+      <label for="detrend_order">
+        <span>Detrend Order:</span>
+        <input type="text" id="detrend_order" name="detrend" required />
+        <strong><abbr title="required">*</abbr></strong>
+        <em>single integer</em>
+      </label>
+    <br>
+      <label for="TRs_removed">
+        <span>Dropped TRs:</span>
+        <input type="text" id="date" name="expiration" required />
+        <strong><abbr title="required">*</abbr></strong>
+        <em>single integer</em>
+      </label>
+    </p>
+  </section>
+ 
+  <section>
+    <p>
+      <button>Process!</button>
+    </p>
+  </section>
+</form>
+
+
+</article>
+
+</body>
+
+<footer>
+	<div class="inner">
+	<small>&#169; "Next stop, Nature." - JDV, 
+		<script>
+			var theDate=new Date()
+			document.write(theDate.getFullYear())
+		</script>.	
+	</small>
+	</div>
+</footer>
+
+</body>
+
+</html>
