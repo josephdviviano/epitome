@@ -1,0 +1,50 @@
+cd ~/Desktop/SAB1_OUT/S2/*/*
+3dDeconvolve -input func_smooth1.nii.gz func_smooth2.nii.gz func_smooth3.nii.gz func_smooth4.nii.gz func_smooth5.nii.gz func_smooth6.nii.gz \
+             -mask anat_EPI_mask_register.nii.gz \
+             -polort 3 \
+             -num_stimts 9 \
+             -local_times \
+             -jobs 8 \
+             -x1D first_level_design.mat \
+             -stim_times 1 ControlEV.1D 'TENT(0,15,6)' \
+             -stim_times 2 UpdatingEV.1D 'TENT(0,15,6)' \
+             -stim_times 3 InhibitionEV.1D 'TENT(0,15,6)' \
+             -stim_times 4 UpdatingInhibitionEV.1D 'TENT(0,15,6)' \
+             -stim_times 5 TaskSwitchingEV.1D 'TENT(0,15,6)' \
+             -stim_times_IM 6 ControlBL.1D 'dmBLOCK(1)' \
+             -stim_times_IM 7 UpdatingBL.1D 'dmBLOCK(1)' \
+             -stim_times_IM 8 InhibitionBL.1D 'dmBLOCK(1)' \
+             -stim_times_IM 9 UpdatingInhibitionBL.1D 'dmBLOCK(1)' \
+             -stim_label 1 ControlEV \
+             -stim_label 2 UpdatingEV \
+             -stim_label 3 InhibitionEV \
+             -stim_label 4 UpdatingInhibitionEV \
+             -stim_label 5 TaskSwitchingEV \
+             -stim_label 6 ControlBL \
+             -stim_label 7 UpdatingBL \
+             -stim_label 8 InhibitionBL \
+             -stim_label 9 UpdatingInhibitionBL \
+             -ortvec motion.1D motion_paramaters \
+             -num_glt 8 \
+             -glt_label 1 UpdatingEV_vs_ControlEV \
+             -gltsym 'SYM: +UpdatingEV -ControlEV' \
+             -glt_label 2 InhibitionEV_vs_ControlEV \
+             -gltsym 'SYM: +InhibitionEV -ControlEV' \
+             -glt_label 3 UpdatingInhibitionEV_vs_ControlEV \
+             -gltsym 'SYM: +UpdatingInhibitionEV -ControlEV' \
+             -glt_label 4 TaskSwitchingEV_vs_ControlEV \
+             -gltsym 'SYM: +TaskSwitchingEV -ControlEV' \
+             -glt_label 5 UpdatingBL_vs_ControlBL \
+             -gltsym 'SYM: +UpdatingBL -ControlBL' \
+             -glt_label 6 InhibitionBL_vs_ControlBL \
+             -gltsym 'SYM: +InhibitionBL -ControlBL' \
+             -glt_label 7 UpdatingInhibitionBL_vs_ControlBL \
+             -gltsym 'SYM: +UpdatingInhibitionBL -ControlBL' \
+             -glt_label 8 UpdatingBL+InhibitionBL_vs_UpdatingInhibitionBL \
+             -gltsym 'SYM: +0.5*UpdatingBL +0.5*InhibitionBL -1*UpdatingInhibitionBL' \
+             -fitts ts_explained.nii.gz \
+             -bucket first_level.nii.gz \
+             -cbucket first_level_coeffs.nii.gz \
+             -fout \
+             -tout \
+             -xjpeg glm_matrix.jpg

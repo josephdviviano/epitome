@@ -1,0 +1,10 @@
+3dcalc -a rwdosenbach_01.nii -b rwdosenbach_02.nii -c rwdosenbach_03.nii -d \
+rwdosenbach_04.nii -e rwdosenbach_05.nii -f rwdosenbach_06.nii -g \
+ rwdosenbach_07.nii -expr 'a+b+c+d+e+f+g' -prefix core.nii; \
+3dcalc -a rwdosenbach_08.nii -b rwdosenbach_09.nii -c rwdosenbach_10.nii -d rwdosenbach_11.nii \
+-e rwdosenbach_12.nii -f rwdosenbach_13.nii -g rwdosenbach_14.nii -h rwdosenbach_15.nii \
+-i rwdosenbach_16.nii -j rwdosenbach_17.nii -k rwdosenbach_18.nii -expr \
+ 'a+b+c+d+e+f+g+h+i+j+k'  -prefix FP.nii; \
+\
+3dcalc -a rwdosenbach_21.nii -b rwdosenbach_22.nii -c rwdosenbach_23.nii -d
+ rwdosenbach_24.nii -e rwdosenbach_25.nii -f rwdosenbach_26.nii -g rwdosenbach_27.nii -h rwdosenbach_28.nii -i rwdosenbach_29.nii -j rwdosenbach_30.nii -expr 'a+b+c+d+e+f+g+h+i+j' -prefix visual.nii

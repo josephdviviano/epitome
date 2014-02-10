@@ -1,0 +1,63 @@
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d01-core
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask01.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d01-core --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d01-core/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d02-core
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask02.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d02-core --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d02-core/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d03-core
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask03.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d03-core --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d03-core/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d04-core
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask04.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d04-core --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d04-core/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d05-core
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask05.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d05-core --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d05-core/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d06-core
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask06.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d06-core --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d06-core/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d07-core
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask07.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d07-core --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d07-core/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d08-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask08.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d08-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d08-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d09-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask09.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d09-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d09-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d10-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask10.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d10-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d10-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d11-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask11.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d11-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d11-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d12-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask12.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d12-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d12-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d13-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask13.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d13-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d13-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d14-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask14.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d14-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d14-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d15-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask15.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d15-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d15-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d16-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask16.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d16-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d16-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d17-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask17.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d17-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d17-control/targets.txt --os2t --seedcountastext
+
+cd /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d18-control
+probtrackx --mode=seedmask -x /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/dMask18.nii  -l -c 0.2 -S 2000 --steplength=0.5 -P 5000 --forcedir --opd -s /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/merged -m /r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/DTI/Dtifit.bedpostX/nodif_brain_mask  --dir=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d18-control --targetmasks=/r/d2/despo/enhance/MRIdata_subjects/TRSE/1208-2/Despo/ROIs/Probtrackx/d18-control/targets.txt --os2t --seedcountastext
+
+
+
+
+
+
+
+
+
+

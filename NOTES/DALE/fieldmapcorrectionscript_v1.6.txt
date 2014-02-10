@@ -1,0 +1,299 @@
+# DTI and EPI Unwarping using FSL
+# Assumes data collected at Siemens Allegra 3T
+# Uses latest FSL version and NIFTI files (fugue 2.4 in d minor)
+
+# See this website for details:
+# http://www.fmrib.ox.ac.uk/fsl/fugue/index.html
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# OUTLINE OF STEPS FOR FIELD MAP UNWARPING OF EPI OR DTI DATA
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 1- Prepare mag and phase images.
+# 2- Smooth (aka regularise) the phase image to reduce noise.
+# 3- Create a brain mask from mag image, edit it, use it to create brain-only mag image
+# 4- Forward warp (aka distort) the brain-only mag image using the smoothed phase image.
+# 5- Register fwd warped brain-only mag to brain-only reference.
+# 6- Apply that registration to the smoothed phase image.
+# 7- Unwarp (aka undistort) the reference image.
+# 8- Unwarp (aka undistort) all of the data.
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# You need several files and pieces of information to proceed:
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 1- the motion-corrected EPI data OR eddy+motion-corrected DTI data in a large 4D concatenated file (prior to averaging).
+# 2- a motion-corrected reference EPI volume OR a eddy+motion-corrected reference B0 DTI volume (see my note further down about this).
+# 3- skull-stripped version of #2 above (for registration purposes).
+# 4- the phase image
+# 5- the magnitude image
+# 6- the EPI or DTI dwell time in seconds (aka echo spacing).
+*
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# Kastner Lab saved DTI and FMRI protocols:
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# Monkey DTI dwell time (echo spacing) = 1.01 ms (0.00101 sec)
+# Monkey DTI fieldmap asym time = 2.46 ms (0.00246 sec)
+# Monkey DTI unwarp direction (for straight "monkey axials"):
+#    	Coronal F->H = Coronal Sup-Inf bottom->up = y
+#		Coronal H->F = Coronal Sup-Inf top->bottom = y-
+#
+# Human DTI dwell time (echo spacing) = 0.61 ms (0.00061 sec)
+# Human DTI fieldmap asym time = 2.46 ms (0.00246 sec)
+# Human DTI unwarp direction (for straight "human axials"):
+#   	 Axial A->P = Axial A-P bottom->up = y
+#	 	 Axial P->A = Axial A-P top->bottom = y-
+#
+# Monkey fMRI dwell time (echo spacing) = 0.59 ms (0.00059 sec)
+# Monkey fMRI fieldmap asym time = 2.46 ms (0.00246 sec)
+# Monkey fMRI unwarp direction (for straight "monkey axials"):
+#    	Coronal F->H = Coronal Sup-Inf bottom->up = y-
+#		Coronal H->F = Coronal Sup-Inf top->bottom = y
+#
+# Human fMRI dwell time (echo spacing) = 0.69 ms (0.00069 sec)
+# Human fMRI fieldmap asym time = 2.46 ms (0.00246 sec)
+# Human fMRI unwarp direction (for straight "human axials"):
+#  	 	Axial A->P = Axial A-P bottom->up = y
+#		Axial P->A = Axial A-P top->bottom = y-
+#
+# See this website for a nice table showing which unwarp direction to choose:
+# http://cfmriweb.ucsd.edu/howto/fieldmap.html#3
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# SUGGESTED FIELDMAP PARAMETERS (from mgh)
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# These field map parameters are used by the Biomedical
+# Informatics Research Network (www.nbirn.net). For Siemens, NBIRN
+# recommends using the stock sequence called gre_field_mapping.  The
+# DeltaTE might differ slightly on individual systems from the values
+# listed below depending upon the exact strength (eg, 2.89T instead of
+# exactly 3T).
+# 
+# TR = 500ms (1000ms with phased-array)
+# TE1: Minimum possible
+# TE2 = TE1 + DeltaTE
+#
+# DeltaTE = 4.92ms for 1.5T
+# Flip Angle: 65 for 1.5T
+# DeltaTE = 2.46ms for 3T 
+# Flip Angle: 55 for 3T 
+# DeltaTE = 1.845ms for 4T
+# Flip Angle: 55 for 4T 
+#
+# FatSat: Off
+# Bandwidth: Maximum
+# Slice Prescription, FOV, Thickness, Skip, Pixel Resolution, Matrix Size: 
+# same as EPI or DTI
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# HOW TO CITE
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+#
+# For fugue:
+# M. Jenkinson. Improved Unwarping of EPI Volumes using Regularised B0
+# Maps International Conference on Human Brain Mapping - HBM2001.
+#
+# Jezzard, Peter, and Balaban, Robert S. Correction for Geometric
+# Distortion in Echo Planar Images from B0 Field Variations. Mag Res
+# Med, 1995, 34:65-73.
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# DTI NOTES
+# Your reference can be the reference b0 volume used for eddy_correct.  Just also create a skull-stripped version for registration purposes (reference_brain).
+# However, I prefer to use the average of all my eddy_corrected b0 volumes as my reference, and skull strip that average volume to create a reference_brain for registration purposes.
+# It probably doesn't make a difference, but it does reduce the noise in the image, and could help flirt during the registration steps.
+# You'll notice that when I skull strip, I use bet to just create a mask, allow you to edit the mask, and then apply it to the volume that needs skull-stripping.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 1- Prepare mag and phase images
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# For DTI data, you must fix the orientation of your phase and magnitude images 
+# so that they match the DTI data.
+# The actual DTI data should have already been oriented the same during DTI pre-processing (e.g. eddy_correct, etc).
+# AGAIN: REORIENT ONLY IF UNWARPING DTI DATA:
+# Phase
+# fslswapdim phase_orig x -y z phase_orig
+# fslorient -swaporient phase_orig
+# Magnitude
+# fslswapdim magnitude x -y z magnitude
+# fslorient -swaporient magnitude
+#---------------------------------------------------------------------------
+
+# This next step is specific to the 3T Allegra gre fieldmap sequence.
+# They will be different with fieldmap scans at different scanners, depending on how 
+# the phase information is encoded in the image.  Check FSL site for how to prep your phase image.
+
+# Convert phase units to radians/sec scale:
+fslmaths phase_orig.nii.gz -sub 2047 -mul 3.14159 -div 2047 -div 0.00246 phase_rads
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 2- Smooth (aka regularise) the phase image to reduce noise.
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+
+# Smooth the phase image in 3D by 2 mm- play with that value. I've seen 0.5 - 4mm.
+# It doesn't effect the unwarping except it helps clean up around the brain edges a bit. 
+
+fugue --loadfmap=phase_rads.nii.gz -s 2.0 --savefmap=phase_rads_s2
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 3- Create a brain mask from mag image, edit it, use it to create mag_brain image
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+
+# Check/edit as necessary to remove all skull, eyes, etc:
+# Make use of all of these bet options for optimal results:  (-c/-f/-r )  !
+
+bet magnitude.nii.gz magnitude_brain -n -m
+
+# Create a brain only mag image using the just-created mask:
+
+fslmaths magnitude.nii.gz -mas magnitude_brain_mask.nii.gz magnitude_brain
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 4- Forward warp (aka distort) the brain-only mag image using the smoothed phase image.
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+
+# Question: Should you specify the mag brain mask here?  
+# MGH script uses it but comments that they are not sure what it does here.
+# I've tried both, it makes no difference whatsoever, so I leave it out.
+# Check that forward warped mag image looks to have similar distortion as your reference (i.e. check your unwarp direction)
+
+fugue \
+--verbose \
+--in=magnitude_brain.nii.gz \
+--unwarpdir=y \
+--dwell=0.00101 \
+--asym=0.00246 \
+--loadfmap=phase_rads_s2.nii.gz \
+--nokspace \
+--warp=magnitude_brain_warped
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 5- Register fwd warped mag to reference_brain, check it.
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+
+# Register the mag_brain_warped to the reference_brain:
+# which is a skull-stripped eddy+motion corrected reference b0 volume for DTI,
+# or a skull-stripped motion corrected reference EPI volume.
+# We do this so we can get the transform matrix to get the phase into register with data."
+
+flirt \
+-in magnitude_brain_warped.nii.gz \
+-ref reference_brain.nii.gz \
+-dof 6 \
+-out magnitude_brain_warped_2_reference_brain \
+-omat fieldmap2reference_brain.mat
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 6- Use above transformation matrix to align the smoothed phase image to reference_brain
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+
+flirt \
+-in phase_rads_s2.nii.gz \
+-ref reference_brain.nii.gz \
+-applyxfm \
+-init fieldmap2reference_brain.mat \
+-out phase_rads_s2_2_reference_brain
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 7- Unwarp the reference images (try both the skull-stripped and non skull-stripped versions) and check the result. 
+#---------------------------------------------------------------------------
+#--------------------------------------------------------------------------- 
+
+fugue \
+--verbose \
+--in=reference_brain.nii.gz \
+--icorr \
+--unwarpdir=y- \
+--z=0.00101 \
+--asym=0.00246 \
+--loadfmap=phase_rads_s2_2_reference_brain.nii.gz \
+--unwarp=reference_brain_unwarped
+
+fugue \
+--verbose \
+--in=reference.nii.gz \
+--icorr \
+--unwarpdir=y- \
+--dwell=0.00101 \
+--asym=0.00246 \
+--loadfmap=phase_rads_s2_2_reference_brain.nii.gz \
+--unwarp=reference_unwarped
+
+# Check results by registering the magnitude_brain to reference_brain_unwarped
+
+# Register magnitude_brain to referenced_brain_unwarped
+flirt \
+-in magnitude_brain.nii.gz \
+-dof 6 \
+-ref reference_brain_unwarped.nii.gz \
+-out magnitude_brain_2_reference_brain_unwarped
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# 8- Unwarp all of your data. 
+#---------------------------------------------------------------------------
+#--------------------------------------------------------------------------- 
+# Unwarp your eddy+motion corrected DTI data (this is your large 4D concatenated dataset, not your average!), OR
+# your motion corrected EPI time series.
+
+fugue \
+--verbose \
+--in=data.nii.gz \
+--icorr \
+--unwarpdir=y- \
+--dwell=0.00101 \
+--asym=0.00246 \
+--loadfmap=phase_rads_s2_2_reference_brain.nii.gz \
+--unwarp=data_unwarped.nii.gz
+
+#------------------------------------------------------------
+# DONE !!!!!!!!!!!!!!!!!!!!
+# Now you should only have to use 6 DOF when registering your T1 structural scan to you DTI or EPI data.
+#------------------------------------------------------------
+
