@@ -41,7 +41,7 @@ for SUB in ${SUBJECTS}; do
 
                 # slice time correction
                 3dTshift -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
-                         -verbose -Fourier -tpattern altplus \
+                         -verbose -Fourier \
                           ${SESS}/func_tmp_despike.${NUM}.nii.gz
             fi
 
