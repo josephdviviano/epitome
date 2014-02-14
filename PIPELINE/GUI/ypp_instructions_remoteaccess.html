@@ -29,14 +29,17 @@
 	To facilitate easy access to the server from your personal computer, on or off campus, we have configured three standard access methods.
 	</p>
 
-	<h3>0.0 Finder access in OSX using AFP (Sherman only).</h3>
+	<h3>0.0 File access using Samba.</h3>
 	<p>
-	The major advantage of this method is it grants you access to server
-	files in a Finder window, just as if they were on your own computer.
-	This will only work with Mac computers, as it relies on Apple Filing Protocol (AFP). You cannot use it to access the MRI data at present for security reasons.
+	The major advantage of this method is it grants you access to server files in a window on your desktop, just as if they were on your own computer. You cannot use it to access the MRI data at present for security reasons.
 	</p>
 	<p>
-	First, click on your desktop. In your menu bar, select 'go', 'connect to server', and type 'afp://130.63.40.171', after which you need only to enter your username and password for the server. All non-MRI data will now be accessible and editable through the finder window, assuming you have permission to do so. Contact an administrator to change permissions.
+	If you would like Samba access, please contact the system administrator, who will need to authenticate you for Samba access and generate you a samba-specific password.
+	</p>
+
+	<h3>0.1 Finder access in OSX using Samba.</h3>
+	<p>
+	First, click on your desktop. In your menu bar, select 'go', 'connect to server', and type 'smb://130.63.40.171', after which you need only to enter your username and password for the server. All non-MRI data will now be accessible and editable through the finder window, assuming you have permission to do so. Contact an administrator to change permissions.
 	</p>
 
 	<h3>1.0 Terminal-only access using SSH.</h3>
