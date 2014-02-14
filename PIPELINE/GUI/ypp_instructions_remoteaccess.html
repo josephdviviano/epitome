@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="author" content="Joseph D Viviano">
+	<meta name="title" content="York MRI Pipeline Interface">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<title>York MRI Pipeline | Interface</title>
+	<link rel="stylesheet" href="file:/srv/CODE/PIPELINE/GUI/ypp_interface.css"  media="screen">
+</head>
+
+<body>
+
+<header class="masthead">
+	<div class="inner_no_overflow">
+	<h1 title="York MRI Pipeline"><a href="file:/srv/CODE/PIPELINE/GUI/ypp_interface.html">YORK MRI PIPELIN<span>E</span></a></h1>
+	<ul class="menu">
+	<li><a href="file:/srv/CODE/PIPELINE/GUI/ypp_instructions.html" title="Instructions">Instructions</a></li>
+	<li><a href="mailto:joseph.d.viviano@gmail.com" title="email the admin">Help</a></li>
+	</ul>
+	</div>
+</header>
+
+<article class="intro" id="info">
+	<h1>-=- Accessing the Server Remotely -=-</h1>
+	<h3>Name: Harford, IP Address: 130.63.40.171, Port: 45100</h3>
+	<br>
+	<p>
+	To facilitate easy access to the server from your personal computer, on or off campus, we have configured three standard access methods.
+	</p>
+
+	<h3>0.0 Finder access in OSX using AFP (Sherman only).</h3>
+	<p>
+	The major advantage of this method is it grants you access to server
+	files in a Finder window, just as if they were on your own computer.
+	This will only work with Mac computers, as it relies on Apple Filing Protocol (AFP). You cannot use it to access the MRI data at present for security reasons.
+	</p>
+	<p>
+	First, click on your desktop. In your menu bar, select 'go', 'connect to server', and type 'afp://130.63.40.171', after which you need only to enter your username and password for the server. All non-MRI data will now be accessible and editable through the finder window, assuming you have permission to do so. Contact an administrator to change permissions.
+	</p>
+
+	<h3>1.0 Terminal-only access using SSH.</h3>
+	<p> If you are comfortable with terminal-only access, you can use the 'ssh' command on all Mac or Linux systems (normally, this is already
+	installed). Windows users should install 'PuTTY' to gain access to
+	the ssh command in the Windows terminal (<A HREF="http://www.chiark.greenend.org.uk/~sgtatham/putty/">download
+	PuTTY</A>).
+	</p>
+	<p>
+	The major advantage of terminal-only access is lag-free operation on very slow network connections, and the ability to log in to the server from any computer with zero configuration. To access the server, enter the command 'ssh -p 45100 [your username]@130.63.40.171', where [your username] is the login name registered on Harford. If you require a username, please contact one of the administrators. You will next need to enter your case-sensitive password associated with your user account and should have access to the server.
+	</p>
+
+	<h3>2.0 Graphical desktop access using x2go.</h3>
+	<p>
+	Normally, you will likely want to view a full graphic-user interface while you interact with the server. This will allow you to easily view the data remotely, and make use of various programs not available with terminal-only access. We will attempt to optimize this connection for slower networks, but this solution might be fustrating with very slow internet connections (<A HREF="http://wiki.x2go.org/doku.php/doc:installation:x2goclient">download x2go</A>). On Windows and Mac, you should be able to open x2go by clicking on the installed icon. On Linux, you may need to type 'x2goclient' into the terminal.
+	</p>
+
+	<p>
+	<IMG SRC="file:///srv/CODE/PIPELINE/GUI/images/ypp_instructions_remoteaccess_aa6f17ec.jpg" NAME="graphics1" ALIGN=LEFT WIDTH=665 HEIGHT=600 BORDER=0> </IMG>
+	</p>
+
+	<p>
+	Configuring x2go is fairly straightforward. First, click the 'new session' button, and set these values:
+	<br>
+	Session name: [whatever you want ... I chose Harford]
+	<br>
+	Host: 171.63.40.171
+	<br>
+	Login: [your username]
+	<br>
+	SSH port: 45100
+	<br>
+	Session type: XFCE (or XDMPC)
+
+	<p>
+	<IMG SRC="file:///srv/CODE/PIPELINE/GUI/images/ypp_instructions_remoteaccess_2b1f3c1d.jpg" NAME="graphics2" ALIGN=LEFT WIDTH=665 HEIGHT=600 BORDER=0> </IMG>
+	</p>	
+
+	<p>
+	The rest of the items can remain blank. You do not need to configure anything specifically under the connection tab. However, here you can set perfomance values to your liking, especially to compensate for a slow connection. Try moving the slider to the left before changing the picture quality settings manually.
+	</p>
+	
+	<IMG SRC="file:///srv/CODE/PIPELINE/GUI/images/ypp_instructions_remoteaccess_9e36d69a.jpg" NAME="graphics3" ALIGN=LEFT WIDTH=661 HEIGHT=610 BORDER=0></IMG>
+	<p>
+	Finally, you can customize session settings such as screen resolution (which will greatly affect your speed), sound, and other misc. settings. These values can be safely left at their defaults.
+	</p>
+
+	<p>
+	Now you can click 'OK' and log into the server by clicking on the newly created button on the right hand side. You will need to enter your password for the server here.
+	</p>
+
+	<h3>2.1 Troubleshooting x2go access (OSX and Linux)</h3>
+
+	<p>
+	In some cases, you will recieve an error involving the RSA key, and will not be allowed to log into the server. Your RSA keys are stored in '~/.ssh/known_hosts'. You can inspect the contents of this file by typing 'cat ~/.ssh/known_hosts' into the terminal. If you find an entry that starts with 130.63.40.171, remove it using either: 'gedit ~/.ssh/known_hosts' or 'vi ~/.ssh/known_hosts' (<A HREF="http://glaciated.org/vi/" NAME="Here are some instructions for vi">here are some instructions for vi</A>). If you are having trouble doing this, you can simply reset the known_hosts file by removing it with 'rm ~/.ssh/known_hosts' (this might affect other systems relying on RSA keys, but I will assume it won't if you are following these instructions). You should now be able to log into the server using x2go.
+</article>
+
+</body>
+
+<footer>
+	<div class="inner">
+	<small>&#169; "Next stop, Nature." - JDV, 
+		<script>
+			var theDate=new Date()
+			document.write(theDate.getFullYear())
+		</script>.	
+	</small>
+	</div>
+</footer>
+
+</body>
+
+</html>
