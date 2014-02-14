@@ -3,15 +3,15 @@
 # defines paths, subjects, etc.
 
 def init():
-    oDir = '/srv/MRI/WORKING'                    # main directory
-    oType = 'REST'
-    oCores = 7
+    path = '/srv/MRI/WORKING'                    # main directory
+    mode = 'REST'
+    core = 7
 
-    oExp = 'BEBASD'
-    oSub = ['105', '106', '107', '108', '204', '205', '209']
+    expt = 'BEBASD'
+    subj = ['101', '102', '103']
 
-    # oExp = 'RSFC1'
-    # oSub = ['0023', '0028', '0031', '0035', '0038', 
+    # expt = 'RSFC1'
+    # subj = ['0023', '0028', '0031', '0035', '0038', 
     #         '0041', '0044', '0048', '0052', '0058',
     #         '0062', '0066', '0070', '0073', '0076',
     #         '0079', '0083', '0024', '0029', '0033',
@@ -23,16 +23,16 @@ def init():
     #         '0068', '0072', '0075', '0078', '0082']
 
 
-# oExp = 'atol'                                     # experiment directory
-# oSub = ['301', '302', '304', '305', '307', '308', 
+# expt = 'atol'                                     # experiment directory
+# subj = ['301', '302', '304', '305', '307', '308', 
 #         '309', '311', '312', '313', '316', '317', 
 #         '319', '320', '321', '322', '323', '324',
 #         '401', '403', '404', '405', '407', '408', 
 #         '409', '411', '412', '413', '414', '415', 
 #         '416', '418', '419', '420', '421', '422']
 
-    # oExp = 'TRSE'                                     # experiment directory
-    # oSub = ['1101', '1103', '1104', '1202', '1205', 
+    # expt = 'TRSE'                                     # experiment directory
+    # subj = ['1101', '1103', '1104', '1202', '1205', 
     #         '1208', '1209', '1210', '1212', '1214', 
     #         '1220', '1223', '1306', '1307', '1309', 
     #         '1310', '1311', '1313', '1314', '1318', 
@@ -42,9 +42,9 @@ def init():
     #         '1347', '1349', '1350']
 
 
-# oExp = 'trse_enhance'                              # experiment directory
-# oSub = ['700', '701', '702', '703', '704', '705',   # input participants
+# expt = 'trse_enhance'                              # experiment directory
+# subj = ['700', '701', '702', '703', '704', '705',   # input participants
 #         '706', '707', '708', '709', '710', '712']
 
 
-    return oDir, oExp, oSub, oType, oCores
+    return path, expt, subj, mode, core

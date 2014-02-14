@@ -47,7 +47,7 @@ for SUB in ${SUBJECTS}; do
             # EPI to T1
             flirt -in ${DIR}/${SESS}/anat_EPI_brain.nii.gz \
                   -ref ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
-                  -out ${DIR_T1}/${SESS}/reg_EPI_to_T1.nii.gz \
+                  -out ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz \
                   -omat ${DIR}/${SESS}/mat_EPI_to_T1.mat \
                   -dof 12 \
                   -cost corratio \

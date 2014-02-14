@@ -57,10 +57,10 @@ for SUB in ${SUBJECTS}; do
             if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
                  `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
                 3dcopy anat_EPI_brainEPI_to_T1+orig \
-                       ${DIR_T1}/${SESS}/reg_EPI_to_T1.nii.gz
+                       ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz
             else
                 3dcopy anat_EPI_brainEPI_to_T1+orig \
-                       ${DIR_T1}/SESS01/reg_EPI_to_T1.nii.gz
+                       ${DIR}/SESS01/reg_EPI_to_T1.nii.gz
             fi
 
             # Clean up leftovers in /tmp

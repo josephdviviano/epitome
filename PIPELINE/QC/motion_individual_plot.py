@@ -99,7 +99,7 @@ def main():
     """
 
     # declare all variables
-    Od, Oe, Os, Ot, Oc = ypp_inputs.init()
+    path, expt, subjects, mode, core = ypp_inputs.init()
     ax_x = 0
     ax_y = 0
     flag = 0
@@ -108,7 +108,7 @@ def main():
     dict_FD = {}
 
     # get subject numbers
-    subjects = get_subj(os.path.join(Od, Oe))
+    subjects = get_subj(os.path.join(path, expt))
 
     # get number of subjects
     n_subj = len(subjects)
@@ -116,8 +116,8 @@ def main():
     # sort subjects by FD lowest to highest
     for subj in subjects:
         FD = np.array([])
-        for session in os.walk(os.path.join(Od, Oe, subj, Ot)).next()[1]:
-            d = os.path.join(Od, Oe, subj, Ot, session)
+        for session in os.walk(os.path.join(path, expt, subj, mode)).next()[1]:
+            d = os.path.join(path, expt, subj, mode, session)
             for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
                 f = compute_FD(os.path.join(d, 'PARAMS/motion.' +
                                                '%02d' % run +'.1D'), head_r)      
@@ -168,8 +168,8 @@ def main():
             FD = np.array([])
             DV = np.array([])
             breaks = np.array([0])
-            for session in os.walk(os.path.join(Od, Oe, subj[0], Ot)).next()[1]:
-                d = os.path.join(Od, Oe, subj[0], Ot, session)
+            for session in os.walk(os.path.join(path, expt, subj[0], mode)).next()[1]:
+                d = os.path.join(path, expt, subj[0], mode, session)
                 for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
                     # framewise displacement
                     f = compute_FD(os.path.join(d, 'PARAMS/motion.' +
@@ -257,13 +257,13 @@ def main():
     fig_FD.subplots_adjust(hspace=0.7) # add some breathing room
     fig_DV.subplots_adjust(hspace=0.7)
 
-    fig_FD.savefig(os.path.join(Od, Oe, 'qc_FD_individual.pdf')) # save pdf
-    fig_DV.savefig(os.path.join(Od, Oe, 'qc_DVARS_individual.pdf'))
+    fig_FD.savefig(os.path.join(path, expt, 'qc_FD_individual.pdf')) # save pdf
+    fig_DV.savefig(os.path.join(path, expt, 'qc_DVARS_individual.pdf'))
     if quality >= 1:
-        fig_FD.savefig(os.path.join(Od, Oe, 'qc_FD_individual.eps')) # save eps
-        fig_DV.savefig(os.path.join(Od, Oe, 'qc_DVARS_individual.eps'))
+        fig_FD.savefig(os.path.join(path, expt, 'qc_FD_individual.eps')) # save eps
+        fig_DV.savefig(os.path.join(path, expt, 'qc_DVARS_individual.eps'))
 
-    print('Printed plots to ' + str(os.path.join(Od, Oe)) + '.')
+    print('Printed plots to ' + str(os.path.join(path, expt)) + '.')
 
 ## JDV Jan 29 2014
 
