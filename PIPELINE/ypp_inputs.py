@@ -4,11 +4,11 @@
 
 def init():
     path = '/srv/MRI/WORKING'                    # main directory
-    mode = 'REST'
+    mode = 'TASK'
     core = 7
 
     expt = 'BEBASD'
-    subj = ['101', '102', '103']
+    subj = ['101', '102', '103', '105', '108', '201', '202', '203', '204', '206', '207', '209', '211', '212', '213', '214']
 
     # expt = 'RSFC1'
     # subj = ['0023', '0028', '0031', '0035', '0038', 
