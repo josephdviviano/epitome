@@ -35,7 +35,7 @@ AFNI_DECONFLICT=OVERWRITE
 
 DIR_EXPT="BEBASD"
 #SUBJECTS="101 102 103 105 106 107 108 201 202 203 204 205 206 207 209 211 212 213 214"
-SUBJECTS="103 201 202 203 206 207 211 213"
+SUBJECTS="106 107 205"
 
 ## Options
 DELTR=0     # number of TRs to delete from the beginning of each run
@@ -56,7 +56,7 @@ export POLORT
 export BLUR_FWHM
 
 # pipeline
-#python PRE/freesurfer_T1_export.py
+python PRE/freesurfer_T1_export.py
 ./PRE/motioncorrect.sh
 ./PRE/linreg_calculate.sh
 ./PRE/linreg_FSATLAS_to_EPI.sh

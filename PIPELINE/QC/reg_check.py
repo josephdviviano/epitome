@@ -1,13 +1,16 @@
+#!/usr/bin/env python
+
+import os
+import datetime
+
 import nibabel as nib
 import numpy as np
 from scipy import ndimage as nd
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-import ypp_inputs
-import os
 
-orientation = 's'
-subj = '101'
+import ypp_inputs
 
 def get_subj(dir):
     """
@@ -21,67 +24,121 @@ def get_subj(dir):
 
 def main():
     """
-    Prints the central slice of the T1 and co-registered + deskulled EPI.
+    Prints the central slice of the T1 and co-registered + deskulled EPI, 
+    including an edge-detected version of the T1 (requires AFNI).
     """
 
     # declare all variables
     path, expt, subjects, mode, core = ypp_inputs.init()
 
     # get subject numbers
-    #subjects = get_subj(os.path.join(path, expt))
+    subjects = get_subj(os.path.join(path, expt))
 
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 'qc_reg_EPI_to_T1.pdf'))
     for subj in subjects:
 
+        edge = os.path.join(path, expt, subj, 'T1/SESS01/anat_T1_edge.nii.gz')
+        anat = os.path.join(path, expt, subj, 'T1/SESS01/anat_T1_brain.nii.gz')
+        reg = os.path.join(path, expt, subj, mode, 'SESS01/reg_EPI_to_T1.nii.gz')
+
+        # create edge dataset if it doesn't exist
+        if os.path.isfile(edge) == False:
+            os.system('3dedge3 -input ' + anat + ' -prefix ' + edge)
+
         # load in data
-        anat = nib.load(os.path.join(path, expt, subj, 'T1/SESS01/anat_T1_brain.nii.gz')).get_data()
-        reg = nib.load(os.path.join(path, expt, subj,'T1/SESS01/reg_EPI_to_T1.nii.gz')).get_data()
+        edge = nib.load(edge).get_data()
+        anat = nib.load(anat).get_data()
+        reg = nib.load(reg).get_data()
+
+        # reorient the data to radiological
+        edge = np.transpose(edge, (2,0,1))
+        edge = np.rot90(edge, 2)
+        anat = np.transpose(anat, (2,0,1))
+        anat = np.rot90(anat, 2)
+        reg = np.transpose(reg, (2,0,1))
+        reg = np.rot90(reg, 2)
 
         # get size ratio between over + underlay
         dsfactor = [a/float(r) for a,r in zip(anat.shape, reg.shape)]
         # match over + underlay dimensions
         reg_to_anat = nd.interpolation.zoom(reg, zoom=dsfactor)
         # set small values in overlay to be transparent
-        reg_to_anat = np.ma.masked_where(reg_to_anat < 100, reg_to_anat)
+        reg_to_anat = np.ma.masked_where(reg_to_anat < 50, reg_to_anat)
         cmap = plt.cm.Reds
         cmap.set_bad('g', 0)
 
-        # generate the image
-
-        plt.subplot(2,2,1)
+        # generate the overlay image
+        plt.subplot(2,3,1)
         mid = np.round(anat.shape[0] / 2)
         plt.imshow(anat[mid, :, :], cmap=plt.cm.gray,
                                     interpolation='nearest')
         plt.imshow(reg_to_anat[mid, :, :], cmap=cmap,
                                            interpolation='nearest',
                                            alpha=0.5)
+        plt.axis('off')
 
-        plt.subplot(2,2,2)
+        plt.subplot(2,3,2)
         mid = np.round(anat.shape[1] / 2)
         plt.imshow(anat[:, mid, :], cmap=plt.cm.gray,
                                     interpolation='nearest')
         plt.imshow(reg_to_anat[:, mid, :], cmap=cmap,
                                            interpolation='nearest',
                                            alpha=0.5)
+        plt.axis('off')
 
-        plt.subplot(2,2,3)
+        plt.subplot(2,3,3)
         mid = np.round(anat.shape[2] / 2)
         plt.imshow(anat[:, :, mid], cmap=plt.cm.gray,
                                     interpolation='nearest')
         plt.imshow(reg_to_anat[:, :, mid], cmap=cmap,
                                            interpolation='nearest',
                                            alpha=0.5)
+        plt.axis('off')
+
+        # set zeros in edge to be transparent
+        edge = np.ma.masked_where(edge == 0, edge)
+        cmap = plt.cm.winter
+        cmap.set_bad('g', 0)
+
+        # generate the edge image
+        plt.subplot(2,3,4)
+        mid = np.round(edge.shape[0] / 2)
+        plt.imshow(reg_to_anat[mid, :, :], cmap=plt.cm.gray,
+                                           interpolation='nearest')
+        plt.imshow(edge[mid, :, :], cmap=cmap,
+                                    interpolation='nearest')
+        plt.axis('off')
+
+        plt.subplot(2,3,5)
+        mid = np.round(edge.shape[1] / 2)
+        plt.imshow(reg_to_anat[:, mid, :], cmap=plt.cm.gray,
+                                           interpolation='nearest')
+        plt.imshow(edge[:, mid, :], cmap=cmap,
+                                    interpolation='nearest')
+        plt.axis('off')
+
+        plt.subplot(2,3,6)
+        mid = np.round(edge.shape[2] / 2)
+        plt.imshow(reg_to_anat[:, :, mid], cmap=plt.cm.gray,
+                                           interpolation='nearest')
+        plt.imshow(edge[:, :, mid], cmap=cmap,
+                                    interpolation='nearest')
+        plt.axis('off')
 
         plt.suptitle(str(expt) + ' ' + str(mode) + ': ' + str(subj))
-        pdf.savefig()
+        plt.tight_layout()
+        plt.savefig(pdf, format='pdf')
         plt.close()
 
-        # # We can also set the file's metadata via the PdfPages object:
-        # d = pdf.infodict()
-        # d['Title'] = 'Multipage PDF Example'
-        # d['Author'] = u'Jouni K. Sepp\xe4nen'
-        # d['Subject'] = 'How to create a multipage pdf file and set its metadata'
-        # d['Keywords'] = 'PdfPages multipage keywords author title subject'
-        # d['CreationDate'] = datetime.datetime(2009, 11, 13)
-        # d['ModDate'] = datetime.datetime.today()
+    # Add some metadata and close the PDF object
+    d = pdf.infodict()
+    d['Title'] = 'Quality Control: Registration of the EPI template to the T1'
+    d['Author'] = u'Joseph D Viviano\xe4nen'
+    d['Subject'] = 'Quality Control'
+    d['Keywords'] = 'QC registration EPI T1'
+    d['CreationDate'] = datetime.datetime.today()
+    d['ModDate'] = datetime.datetime.today()
+    pdf.close()
+
+## JDV Feb 18 2014

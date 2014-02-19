@@ -5,10 +5,14 @@ import os
 import csv
 import glob
 import operator
+import datetime
+
 import numpy as np
 import scipy as sp
-from scipy.stats import ttest_ind
+
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
 import ypp_inputs
 
 ## Options: will eventually be set at command line
@@ -257,15 +261,30 @@ def main():
     fig_FD.subplots_adjust(hspace=0.7) # add some breathing room
     fig_DV.subplots_adjust(hspace=0.7)
 
-    fig_FD.savefig(os.path.join(path, expt, 'qc_FD_individual.pdf')) # save pdf
-    fig_DV.savefig(os.path.join(path, expt, 'qc_DVARS_individual.pdf'))
-    if quality >= 1:
-        fig_FD.savefig(os.path.join(path, expt, 'qc_FD_individual.eps')) # save eps
-        fig_DV.savefig(os.path.join(path, expt, 'qc_DVARS_individual.eps'))
+    # export PDF
+    pdf = PdfPages(os.path.join(path, expt, 'qc_motion_individual.pdf'))
+    fig_FD.savefig(pdf, format='pdf')
+    fig_DV.savefig(pdf, format='pdf')
+
+    #fig_FD.savefig(os.path.join(path, expt, 'qc_FD_individual.pdf')) # save pdf
+    #fig_DV.savefig(os.path.join(path, expt, 'qc_DVARS_individual.pdf'))
+    #if quality >= 1:
+    #    fig_FD.savefig(os.path.join(path, expt, 'qc_FD_individual.eps')) # save eps
+    #    fig_DV.savefig(os.path.join(path, expt, 'qc_DVARS_individual.eps'))
+
+    # Add some metadata and close the PDF object
+    d = pdf.infodict()
+    d['Title'] = 'Quality Control: Individual Subject Motion Paramaters'
+    d['Author'] = u'Joseph D Viviano\xe4nen'
+    d['Subject'] = 'Quality Control'
+    d['Keywords'] = 'QC particpant head motion'
+    d['CreationDate'] = datetime.datetime.today()
+    d['ModDate'] = datetime.datetime.today()
+    pdf.close()
 
     print('Printed plots to ' + str(os.path.join(path, expt)) + '.')
 
-## JDV Jan 29 2014
+## JDV Feb 18 2014
 
 # labels for x-y axis (not really needed)
 # ax_FD[ax_y][ax_x].set_xlabel('Time (TRs)')
