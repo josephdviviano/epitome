@@ -5,8 +5,8 @@
 cd /tmp
 for SUB in ${SUBJECTS}; do
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
-    for SESS in `basename ${DIR_SESS}`; do
-        
+    for SESS in ${DIR_SESS}; do
+        SESS=`basename ${SESS}`        
         DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
         DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
         # register aparc atlas to EPI

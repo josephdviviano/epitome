@@ -8,7 +8,8 @@
 cd /tmp
 for SUB in ${SUBJECTS}; do
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
-    for SESS in `basename ${DIR_SESS}`; do
+    for SESS in ${DIR_SESS}; do
+        SESS=`basename ${SESS}`
         DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
         DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
         if [ ! -f ${DIR_T1}/${SESS}/reg_EPI_to_T1.nii.gz ]; then
