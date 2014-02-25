@@ -4,7 +4,7 @@ import csv
 
 def unique(seq):
     """
-    Returns all unique enteries in a list.
+    Returns all unique entries in a list.
     """
     seen = set()
     seen_add = seen.add
@@ -77,30 +77,33 @@ def create_template_3(n):
     template = list(template)
     return template
 
-def generate_block_list():
+def generate_block_names():
     # define block names
-    control_list = ['control_1', 'control_2', 'control_3']
-    inhibit_list = ['inhibit_1', 'inhibit_2', 'inhibit_3']
-    twoback_list = ['twoback_1', 'twoback_2', 'twoback_3']
-    twobkin_list = ['twobkin_1', 'twobkin_2', 'twobkin_3']
+    control_names = ['control_1', 'control_2', 'control_3']
+    inhibit_names = ['inhibit_1', 'inhibit_2', 'inhibit_3']
+    twoback_names = ['twoback_1', 'twoback_2', 'twoback_3']
+    twobkin_names = ['twobkin_1', 'twobkin_2', 'twobkin_3']
     # generate random list of blocks
-    block_list = list(control_list)
-    block_list.extend(inhibit_list)
-    block_list.extend(twoback_list)
-    block_list.extend(twobkin_list)
-    random.shuffle(block_list)
-    return block_list
+    block_names = list(control_names)
+    block_names.extend(inhibit_names)
+    block_names.extend(twoback_names)
+    block_names.extend(twobkin_names)
+    random.shuffle(block_names)
+    return block_names
 
 def create_stimulus_order():
     # init output dicts
     block_stimuli = {}
     block_answers = {}
+    block_mb = {}
+    block_update = {}
+    block_inhibit = {}
 
     # define block names
-    control_list = ['control_1', 'control_2', 'control_3']
-    inhibit_list = ['inhibit_1', 'inhibit_2', 'inhibit_3']
-    twoback_list = ['twoback_1', 'twoback_2', 'twoback_3']
-    twobkin_list = ['twobkin_1', 'twobkin_2', 'twobkin_3']
+    control_names = ['control_1', 'control_2', 'control_3']
+    inhibit_names = ['inhibit_1', 'inhibit_2', 'inhibit_3']
+    twoback_names = ['twoback_1', 'twoback_2', 'twoback_3']
+    twobkin_names = ['twobkin_1', 'twobkin_2', 'twobkin_3']
 
     # generate the possible stimuli
     stimuli = generate_stimuli(3) # 3 = number of boxes in stimulus array
@@ -116,27 +119,32 @@ def create_stimulus_order():
     inhibit_non = list(set(stimuli) - set(inhibit))
 
     # generate block list
-    block_list = generate_block_list()
-    for block in block_list:
+    block_names = generate_block_names()
+    for block in block_names:
         
-        stimuli_list = []
-        answers_list = []
+        stimuli_list = [] # correct stimuli
+        answers_list = [] # correct answer for task
+        mb_list = []      # 1 = trial contains middle blue
+        twoback_list = [] # 1 = 2 trials 
+        inhibit_list = []
         
         # control condition
-        if any(b in block for b in control_list):
+        if any(b in block for b in control_names):
             stimuli_list = [] # init stimuli
             answers_list = [] # init answers
             template = create_template_2(12) # random set of n trials, 2 conditions
             for i in range(len(template)): # iterate through trials
+                # if this is a yes trial
                 if template[i] == 0:
                     stimuli_list.append(random.choice(control_mb))
                     answers_list.append(1)
+                # if this is a no trial
                 elif template[i] == 1:
                     stimuli_list.append(random.choice(control_my))
                     answers_list.append(2)
 
         # two back condition
-        elif any(b in block for b in twoback_list):
+        elif any(b in block for b in twoback_names):
             # ensure the first two trials are no trials (because twoback)
             while 1:
                 template = create_template_2(12)
@@ -158,7 +166,7 @@ def create_stimulus_order():
                 stimuli_list.append(random.choice(stimuli))
 
         # inhibit condition
-        elif any(b in block for b in inhibit_list):
+        elif any(b in block for b in inhibit_names):
             template = create_template_3(12)
             for i in range(len(template)):
                 if template[i] == 0:
@@ -172,7 +180,7 @@ def create_stimulus_order():
                     answers_list.append('')
 
         # two-back + inhibit condition
-        elif any(b in block for b in twobkin_list):
+        elif any(b in block for b in twobkin_names):
             # ensure the first two trials are no trials (because twoback)
             while 1:
                 template = create_template_3(12)
@@ -181,7 +189,7 @@ def create_stimulus_order():
             # start with 2 no answers at the beginning (because twoback)
             for i in range(len(template)):
                 if i < 2:
-                    answers_list.append(2) # 'no'
+                    answers_list.append(2)
                     if template[i+2] == 0:
                         stimuli_list.append(random.choice(inhibit_mb))
                     elif template[i+2] == 1:
@@ -221,14 +229,34 @@ def create_stimulus_order():
                     elif template[i] == 2:
                         stimuli_list.append(random.choice(inhibit))
                         answers_list.append('')
+
+        # now fill in those pesky answers (I hate you, Sabrina :D)
+        for i in range(12):
+            if i <=2:
+                twoback_list.append(0)
+            elif any(s in stimuli_list[i-2] for s in control_mb):
+                twoback_list.append(1)
+            else:
+                twoback_list.append(0)
+            if any(s in stimuli_list[i] for s in control_mb):
+                mb_list.append(1)
+            else:
+                mb_list.append(0)
+            if any(s in stimuli_list[i] for s in inhibit):
+                inhibit_list.append(1)
+            else:
+                inhibit_list.append(0)
         
         block_stimuli[block] = stimuli_list
         block_answers[block] = answers_list
-    return block_stimuli, block_answers, block_list
+        block_mb[block] = mb_list
+        block_update[block] = twoback_list
+        block_inhibit[block] = inhibit_list
+    return block_stimuli, block_answers, block_mb, block_update, block_inhibit, block_names
 
 def write_outputs(run):
     # grab the randomized data for a run
-    block_stimuli, block_answers, block_list = create_stimulus_order()
+    block_stimuli, block_answers, block_mb, block_update, block_inhibit, block_names = create_stimulus_order()
 
     # generate jitters, and ensure jitters happen in chunks < 3 in a row.
     while 1:
@@ -236,7 +264,7 @@ def write_outputs(run):
         if all(sum(tup) == 4 for tup in test) == False:
             break
 
-    # write out 
+    # write out stimuli
     with open(str(run+1) + '_BlockList.txt', 'wb') as csvfile:
         out = csv.writer(csvfile, delimiter='\t')
         out.writerow(['Weight'] + 
@@ -245,7 +273,7 @@ def write_outputs(run):
                      ['CueJitter1'] + 
                      ['CueJitter2'] + 
                      ['CueJitter3'])
-        for block in block_list:
+        for block in block_names:
             # grab the jitters 3 at a time, and sort them
             jitter = []
             for x in range(3):
@@ -260,7 +288,7 @@ def write_outputs(run):
                           [jitter[2]*2000])
     csvfile.close()
 
-    for block in block_list:
+    for block in block_names:
         with open(str(run+1) + '_' + block + '.txt', 'wb') as csvfile:
             out = csv.writer(csvfile, delimiter='\t')
             out.writerow(['Weight'] + 
@@ -275,26 +303,32 @@ def write_outputs(run):
                          ['NullTrial1'] + 
                          ['NullTrial2'] + 
                          ['NullTrial3'])
-            for x, stim in enumerate(block_stimuli[block]):
-                # generate jitters in chunks < 3 in a row.
-                while 1:
-                    jitter_list, test = create_jitter(6,1,12,3)
-                    if all(sum(tup) == 4 for tup in test) == False:
-                        break
+            # generate jitters in chunks < 3 in a row.
+            while 1:
+                jitter_list, test = create_jitter(6,1,12,3)
+                if all(sum(tup) == 4 for tup in test) == False:
+                    break
+            for i, stim in enumerate(block_stimuli[block]):
+                # is this a switch trial?
+                if i == 0:
+                    switch = 1
+                else:
+                    switch = 0
                 # grab the jitters 3 at a time, and sort them
                 jitter = []
                 for x in range(3):
                     jitter.append(jitter_list.pop())
                 jitter.sort(reverse=True)
+                # write out the information
                 out.writerow(['1']  + 
                              [''] + 
                              [block] + 
                              [stim + '.bmp'] + 
-                             [str(block_answers[block][x])] +
-                             ['0'] +
-                             ['0'] +
-                             ['0'] +
-                             ['0'] +
+                             [str(block_answers[block][i])] + 
+                             [str(block_mb[block][i])] + 
+                             [str(block_update[block][i])] + 
+                             [str(block_inhibit[block][i])] + 
+                             [str(switch)] + 
                              [jitter[0]*2000] + 
                              [jitter[1]*2000] + 
                              [jitter[2]*2000])
