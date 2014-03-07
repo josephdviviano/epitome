@@ -32,8 +32,8 @@ def main():
     path, expt, subjects, mode, core = ypp_inputs.init()
 
     # get subject numbers
-    #subjects = get_subj(os.path.join(path, expt))
-    subjects = ['211']
+    subjects = get_subj(os.path.join(path, expt))
+    #subjects = ['211']
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 'qc_masks.pdf'))
     for subj in subjects:
