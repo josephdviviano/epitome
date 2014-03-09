@@ -39,10 +39,17 @@ for SUB in ${SUBJECTS}; do
                           -ssave ${SESS}/PARAMS/spikes.${NUM}.nii.gz \
                           ${SESS}/func_tmp_del.${NUM}.nii.gz
 
-                # slice time correction
-                3dTshift -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
-                         -verbose -Fourier \
-                          ${SESS}/func_tmp_despike.${NUM}.nii.gz
+                # slice time correction (can include specified timings)
+                if [ -f ${SESS}/PARAMS/slice_timing.1D ]; then
+                    3dTshift -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
+                             -verbose -Fourier \
+                             -tpattern @ ${SESS}/PARAMS/slice_timing.1D \
+                              ${SESS}/func_tmp_despike.${NUM}.nii.gz
+                else
+                    3dTshift -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
+                             -verbose -Fourier \
+                              ${SESS}/func_tmp_despike.${NUM}.nii.gz
+                fi
             fi
 
             # 2: Deoblique, motion correct, and scale data
