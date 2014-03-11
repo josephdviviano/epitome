@@ -1,4 +1,5 @@
 import numpy as np
+import nibabel as nib
 import matplotlib.pyplot as plt
 import scipy.fftpack as fft
 import scipy.signal as sig
