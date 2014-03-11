@@ -1,10 +1,24 @@
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
 import scipy.fftpack as fft
 import scipy.signal as sig
 import scipy as sp
 import os
+
+import ypp_inputs
+
+def get_subj(dir):
+    """
+    Gets all folder names in a directory.
+    """
+    subjects = []
+    for subj in os.walk(dir).next()[1]:
+        if os.path.isdir(os.path.join(dir, subj)) == True:
+            subjects.append(subj)
+    return subjects
 
 def load_periodogram(path, n):
     power = np.genfromtxt(path)
@@ -14,7 +28,7 @@ def load_periodogram(path, n):
     power = power / sum(power)
     return power
 
-def load_welch_PSD(path):
+def load_PSD(path, fs):
     tmp = np.genfromtxt(path)
     tmp = sig.welch(tmp, fs=fs, 
                          window='hann', 
@@ -26,174 +40,314 @@ def load_welch_PSD(path):
     power = tmp[1] / np.sum(tmp[1])
     return freqs, power
 
-# some frequency stuff
-# fslhd func_MNI.01.nii.gz | sed -n 22p
-TR = 2.5
+def main():
+    # declare all variables
+    path, expt, subjects, mode, core = ypp_inputs.init()
 
-if TR >= 1000:
-    TR = TR / 1000
+    # get subject numbers
+    subjects = get_subj(os.path.join(path, expt))
 
-fs = 1.0 / TR
-ny = fs / 2.0
+    # loop through all subjects
+    pdf = PdfPages(os.path.join(path, expt, 'qc_regressor_spectra.pdf'))
+    for subj in subjects:
 
-# number and list of frequency bins
-#n = len(np.genfromtxt('PARAMS/global_mean.02.1D'))/2
-#freq = np.linspace(0, ny, n)
+        subjpath = os.path.join(path, expt, subj)
+        modepath = os.path.join(path, expt, subj, mode)
+        # some frequency stuff
+        # fslhd func_MNI.01.nii.gz | sed -n 22p
+        TR = 2.5
+        if TR >= 1000:
+            TR = TR / 1000
+        fs = 1.0 / TR
+        ny = fs / 2.0
 
-freq = load_welch_PSD('PARAMS/global_mean.02.1D')[0]
-n = len(freq) 
+        # get the number of sessions
+        sessions = len([f for f in os.listdir(modepath) 
+                           if os.path.isdir(os.path.join(modepath, f)) 
+                          and f[0:4] == 'SESS'])
 
-# load normalized periodograms
-files = os.listdir('PARAMS')
-dv = np.zeros(n)
-vent = np.zeros(n)
-gm = np.zeros(n)
+        # number and list of frequency bins
+        #n = len(np.genfromtxt('PARAMS/global_mean.02.1D'))/2
+        #freq = np.linspace(0, ny, n)
 
-for i, f in enumerate(files):
-    if files[i][:-6] == 'global_mean':
-        #power = load_periodogram(os.path.join('PARAMS', f), n)
-        freqs, power = load_welch_PSD(os.path.join('PARAMS', f))
-        dv = np.vstack((dv, power))
+        for sess in range(sessions):
 
-    elif files[i][:-6] == 'dv':
-        #power = load_periodogram(os.path.join('PARAMS', f), n)
-        freqs, power = load_welch_PSD(os.path.join('PARAMS', f))
-        vent = np.vstack((vent, power))
+            freq = load_PSD(os.path.join(modepath, 'SESS' + '%02d'%(sess+1), 
+                                              'PARAMS/global_mean.01.1D'), fs)[0]
+            n = len(freq) 
 
-    elif files[i][:-6] == 'vent':
-        #power = load_periodogram(os.path.join('PARAMS', f), n)
-        freqs, power = load_welch_PSD(os.path.join('PARAMS', f))
-        gm = np.vstack((gm, power))
+            # get the number of runs
+            runs = len([f for f in os.listdir(os.path.join(modepath, 'SESS' + '%02d'%(sess+1))) 
+                                if os.path.isdir(os.path.join(modepath, 'SESS' + '%02d'%(sess+1), f)) 
+                                and f[0:3] == 'RUN'])
 
-dv = dv[1:, :]
-vent = vent[1:, :]
-gm = gm[1:, :]
+            # load in the subject brain mask
+            ma = nib.load(os.path.join(modepath, 'SESS' + '%02d'%(sess+1), 'anat_gm.nii.gz')).get_data()
+            ma = ma.reshape(ma.shape[0]*ma.shape[1]*ma.shape[2])
+            idx = np.where(ma > 0)[0]
 
-# load in full noise model
-ts = nib.load('func_noise.01.nii.gz').get_data()
-ma = nib.load('anat_gm.nii.gz').get_data()
-dim = ts.shape
-ts = ts.reshape(dim[0]*dim[1]*dim[2], dim[3])
-ma = ma.reshape(dim[0]*dim[1]*dim[2])
-idx = np.where(ma > 0)[0]
-ts = ts[idx, :]
-noise = np.zeros((len(idx), len(freq)))
+            # init the data arrays
+            dv = np.zeros(n)
+            vent = np.zeros(n)
+            gm = np.zeros(n)
+            raw = np.zeros((len(idx) * runs, len(freq)))
+            noise = np.zeros((len(idx) * runs, len(freq)))
+            signal = np.zeros((len(idx) * runs, len(freq)))
 
-for i, t in enumerate(ts):
-    power = sig.welch(t, fs=fs, 
-                       window='hann', 
-                       nperseg=20, 
-                       noverlap=None, 
-                       return_onesided=True)
+            ind = 0
 
-    power = power[1] / np.sum(power[1])
-    noise[i, :] = power
+            for run in range(runs):
+                # load normalized periodograms
+                files = os.listdir(os.path.join(modepath, 'SESS' + '%02d'%(sess+1), 'PARAMS'))
+                for i, f in enumerate(files):
+                    if files[i][:-6] == 'global_mean':
+                        #power = load_periodogram(os.path.join('PARAMS', f), n)
+                        freqs, power = load_PSD(os.path.join(modepath, 
+                            'SESS' + '%02d'%(sess+1),'PARAMS', f), fs)
+                        dv = np.vstack((dv, power))
 
-# load in retained signal
-ts = nib.load('func_filtered.01.nii.gz').get_data()
-ma = nib.load('anat_gm.nii.gz').get_data()
-dim = ts.shape
-ts = ts.reshape(dim[0]*dim[1]*dim[2], dim[3])
-ma = ma.reshape(dim[0]*dim[1]*dim[2])
-idx = np.where(ma > 0)[0]
-ts = ts[idx, :]
+                    elif files[i][:-6] == 'dv':
+                        #power = load_periodogram(os.path.join('PARAMS', f), n)
+                        freqs, power = load_PSD(os.path.join(modepath, 
+                            'SESS' + '%02d'%(sess+1),'PARAMS', f), fs)
+                        vent = np.vstack((vent, power))
 
-signal = np.zeros((len(idx), len(freq)))
-for i, t in enumerate(ts):
-    power = sig.welch(t, fs=fs, 
-                       window='hann', 
-                       nperseg=20, 
-                       noverlap=None, 
-                       return_onesided=True)
+                    elif files[i][:-6] == 'vent':
+                        #power = load_periodogram(os.path.join('PARAMS', f), n)
+                        freqs, power = load_PSD(os.path.join(modepath, 
+                            'SESS' + '%02d'%(sess+1),'PARAMS', f), fs)
+                        gm = np.vstack((gm, power))
 
-    power = power[1] / np.sum(power[1])
-    signal[i, :] = power
+                # load in unfiltered data
+                ts = nib.load(os.path.join(path, expt, subj, mode,
+                                          'SESS' + '%02d'%(sess+1),
+                                          'func_scaled.' + '%02d'%(run+1) + '.nii.gz')).get_data()
+                ts = ts.reshape(ts.shape[0]*ts.shape[1]*ts.shape[2], ts.shape[3])
+                ts = ts[idx, :]
+                
+                for i, t in enumerate(ts):
+                    power = sig.welch(t, fs=fs, 
+                                         window='hann', 
+                                         nperseg=20, 
+                                         noverlap=None, 
+                                         return_onesided=True)
+                    
+                    if np.sum(power[1] > 0):
+                        power = power[1] / np.sum(power[1])
+                        raw[i + ind, :] = power
+                    else:
+                        print 'hello doctor! ind = ' + str(i)
+                        raw[i+ind, :] = raw[i+ind-1, :]
 
-noise_sem  = np.std(noise, axis=0) / np.repeat(np.sqrt(noise.shape[0]), noise.shape[1])
-noise_mean = np.mean(noise, axis=0)
+                # load in full noise model
+                ts = nib.load(os.path.join(path, expt, subj, mode,
+                                          'SESS' + '%02d'%(sess+1),
+                                          'func_noise.' + '%02d'%(run+1) + '.nii.gz')).get_data()
+                ts = ts.reshape(ts.shape[0]*ts.shape[1]*ts.shape[2], ts.shape[3])
+                ts = ts[idx, :]
+                
+                for i, t in enumerate(ts):
+                    power = sig.welch(t, fs=fs, 
+                                         window='hann', 
+                                         nperseg=20, 
+                                         noverlap=None, 
+                                         return_onesided=True)
+                    if np.sum(power[1] > 0):
+                        power = power[1] / np.sum(power[1])
+                        noise[i + ind, :] = power
+                    else:
+                        print 'hello nurse! ind = ' + str(i)
+                        noise[i+ind, :] = noise[i+ind-1, :]
 
-signal_sem  = np.std(signal, axis=0) / np.repeat(np.sqrt(signal.shape[0]), signal.shape[1])
-signal_mean = np.mean(signal, axis=0)
+                # load in residual signal
+                filename = 'func_filtered.' + '%02d'%(run+1) + '.nii.gz'
+                ts = nib.load(os.path.join(path, expt, subj, mode,
+                                          'SESS' + '%02d'%(sess+1),
+                                          filename)).get_data()
+                ts = ts.reshape(ts.shape[0]*ts.shape[1]*ts.shape[2], ts.shape[3])
+                ts = ts[idx, :]
 
-dv_sem = np.std(dv, axis=0) / np.repeat(np.sqrt(dv.shape[0]), n)
-dv_mean = np.mean(dv, axis=0)
+                for i, t in enumerate(ts):
+                    power = sig.welch(t, fs=fs, 
+                                         window='hann', 
+                                         nperseg=20, 
+                                         noverlap=None, 
+                                         return_onesided=True)
 
-vent_sem = np.std(vent, axis=0) / np.repeat(np.sqrt(vent.shape[0]), n)
-vent_mean = np.mean(vent, axis=0)
+                    if np.sum(power[1] > 0):
+                        power = power[1] / np.sum(power[1])
+                        signal[i + ind, :] = power
+                    else:
+                        print 'hello judge! ind = ' + str(i)
+                        signal[i + ind, :] = signal[i+ind-1, :]
 
-gm_sem = np.std(gm, axis=0) / np.repeat(np.sqrt(gm.shape[0]), n)
-gm_mean = np.mean(gm, axis=0)
+                ind = ind + len(idx)
 
-# # normalized peridograms of timeseries
-# plt.subplot(2,1,1)
+            # strip off empty vector
+            dv = dv[1:, :]
+            vent = vent[1:, :]
+            gm = gm[1:, :]
 
-# # draining vessles
-# markerline, stemlines, baseline = plt.stem(freqs, dv_mean)
-# plt.setp(markerline, 'markerfacecolor', 'red')
-# plt.setp(stemlines, 'color','red', 'linewidth', 2)
+            # calculate mean, sd, sem from data
+            sd_raw = np.std(raw, axis=0)
+            sd_fit = np.std(noise, axis=0)
+            sd_sig = np.std(signal, axis=0)
+            sd_drv = np.std(dv, axis=0)
+            sd_vnt = np.std(vent, axis=0)
+            sd_grm = np.std(gm, axis=0)
 
-# # ventricles
-# markerline, stemlines, baseline = plt.stem(freqs, vent_mean)
-# plt.setp(markerline, 'markerfacecolor', 'blue')
-# plt.setp(stemlines, 'color','blue', 'linewidth', 2)
+            se_raw = sd_raw / np.repeat(np.sqrt(raw.shape[0]), raw.shape[1])
+            se_fit = sd_fit / np.repeat(np.sqrt(noise.shape[0]), noise.shape[1])
+            se_sig = sd_sig / np.repeat(np.sqrt(signal.shape[0]), signal.shape[1])
+            se_drv = sd_drv / np.repeat(np.sqrt(dv.shape[0]), n)
+            se_vnt = sd_vnt / np.repeat(np.sqrt(vent.shape[0]), n)
+            se_grm = sd_grm / np.repeat(np.sqrt(gm.shape[0]), n)
 
-# # global signal oh my
-# markerline, stemlines, baseline = plt.stem(freqs, gm_mean)
-# plt.setp(markerline, 'markerfacecolor', 'green')
-# plt.setp(stemlines, 'color','green', 'linewidth', 2)
+            mu_raw = np.mean(raw, axis=0)
+            mu_fit = np.mean(noise, axis=0)
+            mu_sig = np.mean(signal, axis=0)
+            mu_drv = np.mean(dv, axis=0) 
+            mu_vnt = np.mean(vent, axis=0)
+            mu_grm = np.mean(gm, axis=0)
 
-# labels = []
-# bins = plt.xticks()[0]
-# for ind in bins:
-#     ind = int(ind)
-#     if ind > 0:
-#         ind = ind - 1
-#     label = str(freq[int(ind)])
-#     labels.append(label[:4])
-# plt.xticks(bins, labels)
-# plt.xticks(bins, labels)
-
-# # set bottom to be black as the night
-# plt.setp(baseline, 'color','black', 'linewidth', 1)
-
-# loglog plot
-y_min = np.min(np.concatenate((dv_mean[1:], vent_mean[1:], gm_mean[1:], noise_mean[1:])))
-y_max = np.max(np.concatenate((dv_mean, vent_mean, gm_mean, noise_mean[1:])))
+            ## loglog spectra plot : brain noise as scale free?
+            y_min = np.min(np.concatenate((mu_drv[1:],
+                                           mu_vnt[1:],
+                                           mu_grm[1:],
+                                           mu_fit[1:],
+                                           mu_sig[1:])))
+            y_max = np.max(np.concatenate((mu_drv,
+                                           mu_vnt,
+                                           mu_grm,
+                                           mu_fit,
+                                           mu_sig)))
 
 
-# compare noise and signal models
-plt.subplot(2,1,1)
+            # compare noise and signal models
+            plt.subplot(3,1,1)
 
-# full noise model
-plt.loglog(freq, noise_mean, color='black')
-plt.loglog(freq, noise_mean + noise_sem, color='black', alpha=0.5)
-plt.loglog(freq, noise_mean - noise_sem, color='black', alpha=0.5)
+            # raw data model
+            plt.loglog(freq, mu_raw, color='black', linewidth=2, label='Raw Data')
+            plt.fill_between(freq, mu_raw + sd_raw, mu_raw, color='black', 
+                                                            alpha=0.5)
+            plt.fill_between(freq, mu_raw - sd_raw, mu_raw, color='black', 
+                                                            alpha=0.5)
+            plt.loglog(freq, mu_raw + se_raw, color='black', linestyle='-.', 
+                                                             linewidth=0.5)
+            plt.loglog(freq, mu_raw - se_raw, color='black', linestyle='-.', 
+                                                             linewidth=0.5)
 
-# full signal model
-plt.loglog(freq, signal_mean, color='grey')
-plt.loglog(freq, signal_mean + signal_sem, color='grey', alpha=0.5)
-plt.loglog(freq, signal_mean - signal_sem, color='grey', alpha=0.5)
+            # full noise model
+            plt.loglog(freq, mu_fit, color='blue', linewidth=2, label='Noise Model')
+            plt.fill_between(freq, mu_fit + sd_fit, mu_fit, color='blue', 
+                                                            alpha=0.5)
+            plt.fill_between(freq, mu_fit - sd_fit, mu_fit, color='blue', 
+                                                            alpha=0.5)
+            plt.loglog(freq, mu_fit + se_fit, color='blue', linestyle='-.', 
+                                                            linewidth=0.5)
+            plt.loglog(freq, mu_fit - se_fit, color='blue', linestyle='-.', 
+                                                            linewidth=0.5)
 
-plt.ylim((y_min, y_max))
-plt.xlim((freq[1], freq[-1]))
+            # full signal model
+            plt.loglog(freq, mu_sig, color='red', linewidth=2, label='Residuals')
+            plt.fill_between(freq, mu_sig + sd_sig, mu_sig, color='red', 
+                                                            alpha=0.5)
+            plt.fill_between(freq, mu_sig - sd_sig, mu_sig, color='red', 
+                                                            alpha=0.5)
+            plt.loglog(freq, mu_sig + se_sig, color='red', linestyle='-.', 
+                                                           linewidth=0.5)
+            plt.loglog(freq, mu_sig - se_sig, color='red', linestyle='-.', 
+                                                           linewidth=0.5)
 
-# compare individual regressors
-plt.subplot(2,1,2)
+            plt.ylim((y_min, y_max))
+            plt.xlim((freq[1], freq[-1]))
 
-# draining vessels
-plt.loglog(freq, dv_mean, color='green')
-plt.loglog(freq, dv_mean + dv_sem, color='green', alpha=0.5)
-plt.loglog(freq, dv_mean + dv_sem, color='green', alpha=0.5)
+            plt.legend(loc=3, fontsize=10, frameon=False)
 
-# ventricles
-plt.loglog(freq, vent_mean, color='blue')
-plt.loglog(freq, vent_mean + vent_sem, color='blue', alpha=0.5)
-plt.loglog(freq, vent_mean - vent_sem, color='blue', alpha=0.5)
+            # compare individual regressors
+            plt.subplot(3,1,2)
 
-# global mean
-plt.loglog(freq, gm_mean, color='red')
-plt.loglog(freq, gm_mean + gm_sem, color='red', alpha=0.5)
-plt.loglog(freq, gm_mean - gm_sem, color='red', alpha=0.5)
+            # draining vessels
+            plt.loglog(freq, mu_drv, color='black', linewidth=2, label='Draining Veins')
+            plt.fill_between(freq, mu_drv + sd_drv, mu_drv, color='black', 
+                                                            alpha=0.5)
+            plt.fill_between(freq, mu_drv - sd_drv, mu_drv, color='black', 
+                                                            alpha=0.5)
+            plt.loglog(freq, mu_drv + se_drv,  color='black', linestyle='-.', 
+                                                              linewidth=0.5)
+            plt.loglog(freq, mu_drv + se_drv,  color='black', linestyle='-.', 
+                                                              linewidth=0.5)
 
-plt.ylim((y_min, y_max))
-plt.xlim((freq[1], freq[-1]))
+            # ventricles
+            plt.loglog(freq, mu_vnt, color='blue', linewidth=2, label='Ventricles')
+            plt.fill_between(freq, mu_vnt + sd_vnt, mu_vnt, color='blue', 
+                                                            alpha=0.5)
+            plt.fill_between(freq, mu_vnt - sd_vnt, mu_vnt, color='blue', 
+                                                            alpha=0.5)
+            plt.loglog(freq, mu_vnt + se_vnt, color='blue', linestyle='-.', 
+                                                            linewidth=0.5)
+            plt.loglog(freq, mu_vnt - se_vnt, color='blue', linestyle='-.', 
+                                                            linewidth=0.5)
+
+            # global mean
+            plt.loglog(freq, mu_grm, color='red', linewidth=2, label='Global Mean')
+            plt.fill_between(freq, mu_grm + sd_grm, mu_grm, color='red', 
+                                                            alpha=0.5)
+            plt.fill_between(freq, mu_grm - sd_grm, mu_grm, color='red', 
+                                                            alpha=0.5)
+            plt.loglog(freq, mu_grm + se_grm, color='red', linewidth=0.5, 
+                                                           linestyle='-.')
+            plt.loglog(freq, mu_grm - se_grm, color='red', linewidth=0.5, 
+                                                           linestyle='-.')
+
+            plt.ylim((y_min, y_max))
+            plt.xlim((freq[1], freq[-1]))
+
+            plt.legend(loc=3, fontsize=10, frameon=False)
+
+            # compare global mean with mean spectra
+            plt.subplot(3,1,3)
+
+            # raw data model
+            plt.loglog(freq, mu_raw, color='black', linewidth=2, label='Raw Data')
+            plt.fill_between(freq, mu_raw + sd_raw, mu_raw, color='black', 
+                                                            alpha=0.5)
+            plt.fill_between(freq, mu_raw - sd_raw, mu_raw, color='black', 
+                                                            alpha=0.5)
+            plt.loglog(freq, mu_raw + se_raw, color='black', linestyle='-.', 
+                                                             linewidth=0.5)
+            plt.loglog(freq, mu_raw - se_raw, color='black', linestyle='-.', 
+                                                             linewidth=0.5)
+
+            # global mean
+            plt.loglog(freq, mu_grm, color='red', linewidth=2, label='Global Mean')
+            plt.fill_between(freq, mu_grm + sd_grm, mu_grm, color='red', 
+                                                            alpha=0.5)
+            plt.fill_between(freq, mu_grm - sd_grm, mu_grm, color='red', 
+                                                            alpha=0.5)
+            plt.loglog(freq, mu_grm + se_grm, color='red', linestyle='-.', 
+                                                           linewidth=0.5)
+            plt.loglog(freq, mu_grm - se_grm, color='red', linestyle='-.', 
+                                                           linewidth=0.5)
+
+            plt.ylim((y_min, y_max))
+            plt.xlim((freq[1], freq[-1]))
+
+            plt.legend(loc=3, fontsize=10, frameon=False)
+
+            plt.suptitle(str(expt) + ' ' + str(mode) + ': ' + str(subj))
+            plt.tight_layout()
+            plt.savefig(pdf, format='pdf')
+            plt.close()
+
+    # Add some metadata and close the PDF object
+    d = pdf.infodict()
+    d['Title'] = 'Quality Control: Registration of the EPI template to the T1'
+    d['Author'] = u'Joseph D Viviano\xe4nen'
+    d['Subject'] = 'Quality Control'
+    d['Keywords'] = 'QC registration EPI T1'
+    d['CreationDate'] = datetime.datetime.today()
+    d['ModDate'] = datetime.datetime.today()
+    pdf.close()
+
+    # JDV
