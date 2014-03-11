@@ -157,8 +157,8 @@ gm_mean = np.mean(gm, axis=0)
 # plt.setp(baseline, 'color','black', 'linewidth', 1)
 
 # loglog plot
-y_min = np.min(np.concatenate((dv_mean[1:], vent_mean[1:], gm_mean[1:], pxx_mean[1:])))
-y_max = np.max(np.concatenate((dv_mean, vent_mean, gm_mean, pxx_mean[1:])))
+y_min = np.min(np.concatenate((dv_mean[1:], vent_mean[1:], gm_mean[1:], noise_mean[1:])))
+y_max = np.max(np.concatenate((dv_mean, vent_mean, gm_mean, noise_mean[1:])))
 
 
 # compare noise and signal models
