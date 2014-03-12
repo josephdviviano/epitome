@@ -7,8 +7,8 @@
 #  Slice time correction (assumes good headers)
 #  Deobliques data
 #  Motion correction (outputs motion files for TR censoring a la Power 2012)
-#  Scales each run to have mode = 1000
 #  Creates session mean deskulled EPIs and masks
+#  Scales each run to have mode = 1000, removing obviously non-brain data
 #  Calculates various statistics + time series
 
 cd /tmp
@@ -67,17 +67,6 @@ for SUB in ${SUBJECTS}; do
                          -1Dmatrix_save ${SESS}/PARAMS/3dvolreg.${NUM}.aff12.1D \
                           ${SESS}/func_tmp_ob.${NUM}.nii.gz
             fi
-
-            if [ ! -f ${SESS}/func_scaled.${NUM}.nii.gz ]; then
-                # scale each run to have mode = 1000
-                3dTstat -prefix ${SESS}/func_tmp_mode.${NUM}.nii.gz \
-                         ${SESS}/func_motion.${NUM}.nii.gz
-                
-                3dcalc -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
-                       -a ${SESS}/func_motion.${NUM}.nii.gz \
-                       -b ${SESS}/func_tmp_mode.${NUM}.nii.gz \
-                       -expr 'min(2000, a/b*1000)*step(a)*step(b)'
-            fi
             
             # create TS mean for each run
             if [ ! -f ${SESS}/anat_EPI_brain.nii.gz ]; then
@@ -106,10 +95,29 @@ for SUB in ${SUBJECTS}; do
                    -expr 'a*b'
         fi
 
-        # this used to say: `ls -d -- ${SESS}/run*/ | sort -n -t n -k 4`
         DIR_RUNS=`ls -d -- ${SESS}/RUN*`
         for RUN in ${DIR_RUNS}; do
             NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+            if [ ! -f ${SESS}/func_scaled.${NUM}.nii.gz ]; then
+                # scale each run to have mode = 1000
+                3dTstat -prefix ${SESS}/func_tmp_median.${NUM}.nii.gz \
+                        -median \
+                         ${SESS}/func_motion.${NUM}.nii.gz
+
+                3dmaskave -median -quiet \
+                          -mask ${SESS}/anat_EPI_brain.nii.gz \
+                          ${SESS}/func_tmp_median.${NUM}.nii.gz > ${SESS}/tmp_median.1D
+
+                MEDIAN=`cat tmp_median.1D`
+                3dcalc -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
+                       -a ${SESS}/func_motion.${NUM}.nii.gz \
+                       -b ${SESS}/func_tmp_median.${NUM}.nii.gz \
+                       -c ${SESS}/anat_EPI_mask.nii.gz \
+                       -expr "a*(1000/b)*astep(a, ${MEDIAN}*0.10)*c" \
+                       -datum float
+                rm ${SESS}/tmp_median.1D
+            fi
 
             ## % signal change DVARS (Power et. al Neuroimage 2012)
             if [ ! -f ${SESS}/PARAMS/DVARS.${NUM}.1D ]; then
@@ -139,5 +147,3 @@ for SUB in ${SUBJECTS}; do
     done
 done
 cd ${DIR_PIPE}
-
-## JDV Jan 30 2014

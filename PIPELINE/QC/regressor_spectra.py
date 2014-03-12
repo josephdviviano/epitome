@@ -1,12 +1,14 @@
+import os
+import datetime
+
 import numpy as np
+import scipy as sp
+import scipy.signal as sig
+
 import nibabel as nib
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-
-import scipy.fftpack as fft
-import scipy.signal as sig
-import scipy as sp
-import os
 
 import ypp_inputs
 
@@ -19,14 +21,6 @@ def get_subj(dir):
         if os.path.isdir(os.path.join(dir, subj)) == True:
             subjects.append(subj)
     return subjects
-
-def load_periodogram(path, n):
-    power = np.genfromtxt(path)
-    power = sig.detrend(power)
-    power = fft.fft(power)[0:n]
-    power = np.abs(power)
-    power = power / sum(power)
-    return power
 
 def load_PSD(path, fs):
     tmp = np.genfromtxt(path)
@@ -224,128 +218,122 @@ def main():
 
 
             # compare noise and signal models
-            plt.subplot(3,1,1)
+            fig, ax = plt.subplots(nrows=3, 
+                                   ncols=1,
+                                   figsize=(4, 12),
+                                   dpi=72,
+                                   facecolor='white')
 
-            # raw data model
-            plt.loglog(freq, mu_raw, color='black', linewidth=2, label='Raw Data')
-            plt.fill_between(freq, mu_raw + sd_raw, mu_raw, color='black', 
+            # compare overall models
+            ax[0].loglog(freq, mu_raw, color='black', linewidth=2, label='Raw Data')
+            ax[0].fill_between(freq, mu_raw + sd_raw, mu_raw, color='black', 
                                                             alpha=0.5)
-            plt.fill_between(freq, mu_raw - sd_raw, mu_raw, color='black', 
+            ax[0].fill_between(freq, mu_raw - sd_raw, mu_raw, color='black', 
                                                             alpha=0.5)
-            plt.loglog(freq, mu_raw + se_raw, color='black', linestyle='-.', 
+            ax[0].loglog(freq, mu_raw + se_raw, color='black', linestyle='-.', 
                                                              linewidth=0.5)
-            plt.loglog(freq, mu_raw - se_raw, color='black', linestyle='-.', 
+            ax[0].loglog(freq, mu_raw - se_raw, color='black', linestyle='-.', 
                                                              linewidth=0.5)
 
-            # full noise model
-            plt.loglog(freq, mu_fit, color='blue', linewidth=2, label='Noise Model')
-            plt.fill_between(freq, mu_fit + sd_fit, mu_fit, color='blue', 
+            ax[0].loglog(freq, mu_fit, color='blue', linewidth=2, label='Noise Model')
+            ax[0].fill_between(freq, mu_fit + sd_fit, mu_fit, color='blue', 
                                                             alpha=0.5)
-            plt.fill_between(freq, mu_fit - sd_fit, mu_fit, color='blue', 
+            ax[0].fill_between(freq, mu_fit - sd_fit, mu_fit, color='blue', 
                                                             alpha=0.5)
-            plt.loglog(freq, mu_fit + se_fit, color='blue', linestyle='-.', 
+            ax[0].loglog(freq, mu_fit + se_fit, color='blue', linestyle='-.', 
                                                             linewidth=0.5)
-            plt.loglog(freq, mu_fit - se_fit, color='blue', linestyle='-.', 
+            ax[0].loglog(freq, mu_fit - se_fit, color='blue', linestyle='-.', 
                                                             linewidth=0.5)
 
-            # full signal model
-            plt.loglog(freq, mu_sig, color='red', linewidth=2, label='Residuals')
-            plt.fill_between(freq, mu_sig + sd_sig, mu_sig, color='red', 
+            ax[0].loglog(freq, mu_sig, color='red', linewidth=2, label='Residuals')
+            ax[0].fill_between(freq, mu_sig + sd_sig, mu_sig, color='red', 
                                                             alpha=0.5)
-            plt.fill_between(freq, mu_sig - sd_sig, mu_sig, color='red', 
+            ax[0].fill_between(freq, mu_sig - sd_sig, mu_sig, color='red', 
                                                             alpha=0.5)
-            plt.loglog(freq, mu_sig + se_sig, color='red', linestyle='-.', 
+            ax[0].loglog(freq, mu_sig + se_sig, color='red', linestyle='-.', 
                                                            linewidth=0.5)
-            plt.loglog(freq, mu_sig - se_sig, color='red', linestyle='-.', 
+            ax[0].loglog(freq, mu_sig - se_sig, color='red', linestyle='-.', 
                                                            linewidth=0.5)
 
-            plt.ylim((y_min, y_max))
-            plt.xlim((freq[1], freq[-1]))
+            ax[0].set_ylim((y_min, y_max))
+            ax[0].set_xlim((freq[1], freq[-1]))
 
-            plt.legend(loc=3, fontsize=10, frameon=False)
+            ax[0].legend(loc=3, fontsize=10, frameon=False)
 
             # compare individual regressors
-            plt.subplot(3,1,2)
-
-            # draining vessels
-            plt.loglog(freq, mu_drv, color='black', linewidth=2, label='Draining Veins')
-            plt.fill_between(freq, mu_drv + sd_drv, mu_drv, color='black', 
+            ax[1].loglog(freq, mu_drv, color='black', linewidth=2, label='Draining Veins')
+            ax[1].fill_between(freq, mu_drv + sd_drv, mu_drv, color='black', 
                                                             alpha=0.5)
-            plt.fill_between(freq, mu_drv - sd_drv, mu_drv, color='black', 
+            ax[1].fill_between(freq, mu_drv - sd_drv, mu_drv, color='black', 
                                                             alpha=0.5)
-            plt.loglog(freq, mu_drv + se_drv,  color='black', linestyle='-.', 
+            ax[1].loglog(freq, mu_drv + se_drv,  color='black', linestyle='-.', 
                                                               linewidth=0.5)
-            plt.loglog(freq, mu_drv + se_drv,  color='black', linestyle='-.', 
+            ax[1].loglog(freq, mu_drv + se_drv,  color='black', linestyle='-.', 
                                                               linewidth=0.5)
 
-            # ventricles
-            plt.loglog(freq, mu_vnt, color='blue', linewidth=2, label='Ventricles')
-            plt.fill_between(freq, mu_vnt + sd_vnt, mu_vnt, color='blue', 
+            ax[1].loglog(freq, mu_vnt, color='blue', linewidth=2, label='Ventricles')
+            ax[1].fill_between(freq, mu_vnt + sd_vnt, mu_vnt, color='blue', 
                                                             alpha=0.5)
-            plt.fill_between(freq, mu_vnt - sd_vnt, mu_vnt, color='blue', 
+            ax[1].fill_between(freq, mu_vnt - sd_vnt, mu_vnt, color='blue', 
                                                             alpha=0.5)
-            plt.loglog(freq, mu_vnt + se_vnt, color='blue', linestyle='-.', 
+            ax[1].loglog(freq, mu_vnt + se_vnt, color='blue', linestyle='-.', 
                                                             linewidth=0.5)
-            plt.loglog(freq, mu_vnt - se_vnt, color='blue', linestyle='-.', 
+            ax[1].loglog(freq, mu_vnt - se_vnt, color='blue', linestyle='-.', 
                                                             linewidth=0.5)
 
-            # global mean
-            plt.loglog(freq, mu_grm, color='red', linewidth=2, label='Global Mean')
-            plt.fill_between(freq, mu_grm + sd_grm, mu_grm, color='red', 
+            ax[1].loglog(freq, mu_grm, color='red', linewidth=2, label='Global Mean')
+            ax[1].fill_between(freq, mu_grm + sd_grm, mu_grm, color='red', 
                                                             alpha=0.5)
-            plt.fill_between(freq, mu_grm - sd_grm, mu_grm, color='red', 
+            ax[1].fill_between(freq, mu_grm - sd_grm, mu_grm, color='red', 
                                                             alpha=0.5)
-            plt.loglog(freq, mu_grm + se_grm, color='red', linewidth=0.5, 
+            ax[1].loglog(freq, mu_grm + se_grm, color='red', linewidth=0.5, 
                                                            linestyle='-.')
-            plt.loglog(freq, mu_grm - se_grm, color='red', linewidth=0.5, 
+            ax[1].loglog(freq, mu_grm - se_grm, color='red', linewidth=0.5, 
                                                            linestyle='-.')
 
-            plt.ylim((y_min, y_max))
-            plt.xlim((freq[1], freq[-1]))
+            ax[1].set_ylim((y_min, y_max))
+            ax[1].set_xlim((freq[1], freq[-1]))
 
-            plt.legend(loc=3, fontsize=10, frameon=False)
+            ax[1].legend(loc=3, fontsize=10, frameon=False)
 
             # compare global mean with mean spectra
-            plt.subplot(3,1,3)
-
-            # raw data model
-            plt.loglog(freq, mu_raw, color='black', linewidth=2, label='Raw Data')
-            plt.fill_between(freq, mu_raw + sd_raw, mu_raw, color='black', 
+            ax[2].loglog(freq, mu_raw, color='black', linewidth=2, label='Raw Data')
+            ax[2].fill_between(freq, mu_raw + sd_raw, mu_raw, color='black', 
                                                             alpha=0.5)
-            plt.fill_between(freq, mu_raw - sd_raw, mu_raw, color='black', 
+            ax[2].fill_between(freq, mu_raw - sd_raw, mu_raw, color='black', 
                                                             alpha=0.5)
-            plt.loglog(freq, mu_raw + se_raw, color='black', linestyle='-.', 
+            ax[2].loglog(freq, mu_raw + se_raw, color='black', linestyle='-.', 
                                                              linewidth=0.5)
-            plt.loglog(freq, mu_raw - se_raw, color='black', linestyle='-.', 
+            ax[2].loglog(freq, mu_raw - se_raw, color='black', linestyle='-.', 
                                                              linewidth=0.5)
 
-            # global mean
-            plt.loglog(freq, mu_grm, color='red', linewidth=2, label='Global Mean')
-            plt.fill_between(freq, mu_grm + sd_grm, mu_grm, color='red', 
+            ax[2].loglog(freq, mu_grm, color='red', linewidth=2, label='Global Mean')
+            ax[2].fill_between(freq, mu_grm + sd_grm, mu_grm, color='red', 
                                                             alpha=0.5)
-            plt.fill_between(freq, mu_grm - sd_grm, mu_grm, color='red', 
+            ax[2].fill_between(freq, mu_grm - sd_grm, mu_grm, color='red', 
                                                             alpha=0.5)
-            plt.loglog(freq, mu_grm + se_grm, color='red', linestyle='-.', 
+            ax[2].loglog(freq, mu_grm + se_grm, color='red', linestyle='-.', 
                                                            linewidth=0.5)
-            plt.loglog(freq, mu_grm - se_grm, color='red', linestyle='-.', 
+            ax[2].loglog(freq, mu_grm - se_grm, color='red', linestyle='-.', 
                                                            linewidth=0.5)
 
-            plt.ylim((y_min, y_max))
-            plt.xlim((freq[1], freq[-1]))
+            ax[2].set_ylim((y_min, y_max))
+            ax[2].set_xlim((freq[1], freq[-1]))
 
-            plt.legend(loc=3, fontsize=10, frameon=False)
+            ax[2].legend(loc=3, fontsize=10, frameon=False)
+
+            fig.subplots_adjust(hspace=0.15)
 
             plt.suptitle(str(expt) + ' ' + str(mode) + ': ' + str(subj))
-            plt.tight_layout()
             plt.savefig(pdf, format='pdf')
             plt.close()
 
     # Add some metadata and close the PDF object
     d = pdf.infodict()
-    d['Title'] = 'Quality Control: Registration of the EPI template to the T1'
+    d['Title'] = 'Quality Control: Spectra of data, modelled noise, residuals'
     d['Author'] = u'Joseph D Viviano\xe4nen'
     d['Subject'] = 'Quality Control'
-    d['Keywords'] = 'QC registration EPI T1'
+    d['Keywords'] = 'QC modelled noise spectra'
     d['CreationDate'] = datetime.datetime.today()
     d['ModDate'] = datetime.datetime.today()
     pdf.close()
