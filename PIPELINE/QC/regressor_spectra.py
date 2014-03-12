@@ -225,35 +225,47 @@ def main():
                                    facecolor='white')
 
             # compare overall models
-            ax[0].loglog(freq, mu_raw, color='black', linewidth=2, label='Raw Data')
+            ax[0].loglog(freq, mu_raw, color='black', 
+                                       linewidth=2,
+                                       label='Raw Data')
             ax[0].fill_between(freq, mu_raw + sd_raw, mu_raw, color='black', 
-                                                            alpha=0.5)
+                                                              alpha=0.5)
             ax[0].fill_between(freq, mu_raw - sd_raw, mu_raw, color='black', 
-                                                            alpha=0.5)
-            ax[0].loglog(freq, mu_raw + se_raw, color='black', linestyle='-.', 
-                                                             linewidth=0.5)
-            ax[0].loglog(freq, mu_raw - se_raw, color='black', linestyle='-.', 
-                                                             linewidth=0.5)
+                                                              alpha=0.5)
+            ax[0].loglog(freq, mu_raw + se_raw, color='black', 
+                                                linestyle='-.', 
+                                                linewidth=0.5)
+            ax[0].loglog(freq, mu_raw - se_raw, color='black', 
+                                                linestyle='-.', 
+                                                linewidth=0.5)
 
-            ax[0].loglog(freq, mu_fit, color='blue', linewidth=2, label='Noise Model')
+            ax[0].loglog(freq, mu_fit, color='blue', 
+                                       linewidth=2,
+                                       label='Noise Model')
             ax[0].fill_between(freq, mu_fit + sd_fit, mu_fit, color='blue', 
-                                                            alpha=0.5)
+                                                              alpha=0.5)
             ax[0].fill_between(freq, mu_fit - sd_fit, mu_fit, color='blue', 
-                                                            alpha=0.5)
-            ax[0].loglog(freq, mu_fit + se_fit, color='blue', linestyle='-.', 
-                                                            linewidth=0.5)
-            ax[0].loglog(freq, mu_fit - se_fit, color='blue', linestyle='-.', 
-                                                            linewidth=0.5)
+                                                              alpha=0.5)
+            ax[0].loglog(freq, mu_fit + se_fit, color='blue', 
+                                                linestyle='-.', 
+                                                linewidth=0.5)
+            ax[0].loglog(freq, mu_fit - se_fit, color='blue', 
+                                                linestyle='-.', 
+                                                linewidth=0.5)
 
-            ax[0].loglog(freq, mu_sig, color='red', linewidth=2, label='Residuals')
+            ax[0].loglog(freq, mu_sig, color='red', 
+                                       linewidth=2,
+                                       label='Residuals')
             ax[0].fill_between(freq, mu_sig + sd_sig, mu_sig, color='red', 
-                                                            alpha=0.5)
+                                                              alpha=0.5)
             ax[0].fill_between(freq, mu_sig - sd_sig, mu_sig, color='red', 
-                                                            alpha=0.5)
-            ax[0].loglog(freq, mu_sig + se_sig, color='red', linestyle='-.', 
-                                                           linewidth=0.5)
-            ax[0].loglog(freq, mu_sig - se_sig, color='red', linestyle='-.', 
-                                                           linewidth=0.5)
+                                                              alpha=0.5)
+            ax[0].loglog(freq, mu_sig + se_sig, color='red', 
+                                                linestyle='-.', 
+                                                linewidth=0.5)
+            ax[0].loglog(freq, mu_sig - se_sig, color='red', 
+                                                linestyle='-.', 
+                                                linewidth=0.5)
 
             ax[0].set_ylim((y_min, y_max))
             ax[0].set_xlim((freq[1], freq[-1]))
@@ -261,35 +273,47 @@ def main():
             ax[0].legend(loc=3, fontsize=10, frameon=False)
 
             # compare individual regressors
-            ax[1].loglog(freq, mu_drv, color='black', linewidth=2, label='Draining Veins')
+            ax[1].loglog(freq, mu_drv, color='black', 
+                                       linewidth=2, 
+                                       label='Draining Veins')
             ax[1].fill_between(freq, mu_drv + sd_drv, mu_drv, color='black', 
-                                                            alpha=0.5)
+                                                              alpha=0.5)
             ax[1].fill_between(freq, mu_drv - sd_drv, mu_drv, color='black', 
-                                                            alpha=0.5)
-            ax[1].loglog(freq, mu_drv + se_drv,  color='black', linestyle='-.', 
-                                                              linewidth=0.5)
-            ax[1].loglog(freq, mu_drv + se_drv,  color='black', linestyle='-.', 
-                                                              linewidth=0.5)
+                                                              alpha=0.5)
+            ax[1].loglog(freq, mu_drv + se_drv, color='black',
+                                                linestyle='-.', 
+                                                linewidth=0.5)
+            ax[1].loglog(freq, mu_drv + se_drv, color='black',
+                                                linestyle='-.', 
+                                                linewidth=0.5)
 
-            ax[1].loglog(freq, mu_vnt, color='blue', linewidth=2, label='Ventricles')
+            ax[1].loglog(freq, mu_vnt, color='blue',
+                                       linewidth=2,
+                                       label='Ventricles')
             ax[1].fill_between(freq, mu_vnt + sd_vnt, mu_vnt, color='blue', 
-                                                            alpha=0.5)
+                                                              alpha=0.5)
             ax[1].fill_between(freq, mu_vnt - sd_vnt, mu_vnt, color='blue', 
-                                                            alpha=0.5)
-            ax[1].loglog(freq, mu_vnt + se_vnt, color='blue', linestyle='-.', 
-                                                            linewidth=0.5)
-            ax[1].loglog(freq, mu_vnt - se_vnt, color='blue', linestyle='-.', 
-                                                            linewidth=0.5)
+                                                              alpha=0.5)
+            ax[1].loglog(freq, mu_vnt + se_vnt, color='blue', 
+                                                linestyle='-.', 
+                                                linewidth=0.5)
+            ax[1].loglog(freq, mu_vnt - se_vnt, color='blue',
+                                                linestyle='-.', 
+                                                linewidth=0.5)
 
-            ax[1].loglog(freq, mu_grm, color='red', linewidth=2, label='Global Mean')
+            ax[1].loglog(freq, mu_grm, color='red',
+                                       linewidth=2,
+                                       label='Global Mean')
             ax[1].fill_between(freq, mu_grm + sd_grm, mu_grm, color='red', 
-                                                            alpha=0.5)
+                                                              alpha=0.5)
             ax[1].fill_between(freq, mu_grm - sd_grm, mu_grm, color='red', 
-                                                            alpha=0.5)
-            ax[1].loglog(freq, mu_grm + se_grm, color='red', linewidth=0.5, 
-                                                           linestyle='-.')
-            ax[1].loglog(freq, mu_grm - se_grm, color='red', linewidth=0.5, 
-                                                           linestyle='-.')
+                                                              alpha=0.5)
+            ax[1].loglog(freq, mu_grm + se_grm, color='red', 
+                                                linewidth=0.5, 
+                                                linestyle='-.')
+            ax[1].loglog(freq, mu_grm - se_grm, color='red', 
+                                                linewidth=0.5, 
+                                                linestyle='-.')
 
             ax[1].set_ylim((y_min, y_max))
             ax[1].set_xlim((freq[1], freq[-1]))
@@ -297,25 +321,33 @@ def main():
             ax[1].legend(loc=3, fontsize=10, frameon=False)
 
             # compare global mean with mean spectra
-            ax[2].loglog(freq, mu_raw, color='black', linewidth=2, label='Raw Data')
+            ax[2].loglog(freq, mu_raw, color='black', 
+                                       linewidth=2, 
+                                       label='Raw Data')
             ax[2].fill_between(freq, mu_raw + sd_raw, mu_raw, color='black', 
-                                                            alpha=0.5)
+                                                              alpha=0.5)
             ax[2].fill_between(freq, mu_raw - sd_raw, mu_raw, color='black', 
-                                                            alpha=0.5)
-            ax[2].loglog(freq, mu_raw + se_raw, color='black', linestyle='-.', 
-                                                             linewidth=0.5)
-            ax[2].loglog(freq, mu_raw - se_raw, color='black', linestyle='-.', 
-                                                             linewidth=0.5)
+                                                              alpha=0.5)
+            ax[2].loglog(freq, mu_raw + se_raw, color='black', 
+                                                linestyle='-.', 
+                                                linewidth=0.5)
+            ax[2].loglog(freq, mu_raw - se_raw, color='black',
+                                                linestyle='-.',
+                                                linewidth=0.5)
 
-            ax[2].loglog(freq, mu_grm, color='red', linewidth=2, label='Global Mean')
+            ax[2].loglog(freq, mu_grm, color='red', 
+                                       linewidth=2, 
+                                       label='Global Mean')
             ax[2].fill_between(freq, mu_grm + sd_grm, mu_grm, color='red', 
-                                                            alpha=0.5)
+                                                              alpha=0.5)
             ax[2].fill_between(freq, mu_grm - sd_grm, mu_grm, color='red', 
-                                                            alpha=0.5)
-            ax[2].loglog(freq, mu_grm + se_grm, color='red', linestyle='-.', 
-                                                           linewidth=0.5)
-            ax[2].loglog(freq, mu_grm - se_grm, color='red', linestyle='-.', 
-                                                           linewidth=0.5)
+                                                              alpha=0.5)
+            ax[2].loglog(freq, mu_grm + se_grm, color='red',
+                                                linewidth=0.5,
+                                                linestyle='-.')
+            ax[2].loglog(freq, mu_grm - se_grm, color='red',
+                                                linewidth=0.5,
+                                                linestyle='-.')
 
             ax[2].set_ylim((y_min, y_max))
             ax[2].set_xlim((freq[1], freq[-1]))
