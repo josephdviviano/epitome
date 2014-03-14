@@ -23,10 +23,10 @@ for subject in oSub:
                         if filename.endswith(".nii") == True or filename.endswith(".nii.gz") == True:
                             command = command + ' -i ' + os.path.join(directory, session, run, filename)
 
-                # add the qcache flag (for cortical thickness analysis)
-                command = command + ' -qcache'
-                # create a list of commands
-                stack.append(command)
+            # add the qcache flag (for cortical thickness analysis)
+            command = command + ' -qcache'
+            # create a list of commands
+            stack.append(command)
     
 # run multiple instances of Freesurfer in parallel
 for cmd in stack:

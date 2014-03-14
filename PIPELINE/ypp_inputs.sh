@@ -13,9 +13,8 @@ AFNI_DECONFLICT=OVERWRITE
 DIR_EXPT="TRSE"
 SUBJECTS="1101 1103 1104 1202 1205 1208 1209 1210 1212 1214 1220 1223 \
           1306 1307 1309 1310 1311 1313 1314 1318 1325 1326 1328 1329 \
-          1331 1332 1333 1336 1337 1338 1339 1340 1343 1344 1346 1347 \
-          1349 1350"
-
+          1331 1332 1333 1336 1337 1338 1339 1340 1341 1342 1343 1344 \
+          1346 1347 1349 1350"
 
 #DIR_EXPT="SAB1"
 #SUBJECTS="0001 0002 0003 0004 0005 0006 0007 0008 0009 0010 0011 0012"
@@ -58,11 +57,12 @@ export BLUR_FWHM
 
 # pipeline
 #python PRE/freesurfer_T1_export.py
-./PRE/motioncorrect.sh
-./PRE/linreg_calculate.sh
-./PRE/linreg_FSATLAS_to_EPI.sh
-./PRE/create_regressors.sh
+#./PRE/motioncorrect.sh
+#./PRE/linreg_calculate.sh
+#./PRE/linreg_FSATLAS_to_EPI.sh
+#./PRE/create_regressors.sh
 #./PRE/filter.sh
-./PRE/linreg_EPI_to_MNI.sh
+#./PRE/linreg_EPI_to_MNI.sh
 
 #./UTIL/cleanup_functionals.sh
+./UTIL/check_runs.sh
