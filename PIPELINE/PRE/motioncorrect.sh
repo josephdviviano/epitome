@@ -109,7 +109,7 @@ for SUB in ${SUBJECTS}; do
                           -mask ${SESS}/anat_EPI_brain.nii.gz \
                           ${SESS}/func_tmp_median.${NUM}.nii.gz > ${SESS}/tmp_median.1D
 
-                MEDIAN=`cat tmp_median.1D`
+                MEDIAN=`cat ${SESS}/tmp_median.1D`
                 3dcalc -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
                        -a ${SESS}/func_motion.${NUM}.nii.gz \
                        -b ${SESS}/func_tmp_median.${NUM}.nii.gz \

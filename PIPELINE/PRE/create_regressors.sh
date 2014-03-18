@@ -16,8 +16,8 @@
 cd /tmp
 for SUB in ${SUBJECTS}; do
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
-    for SESS in `basename ${DIR_SESS}`; do
-
+    for SESS in ${DIR_SESS}; do
+        SESS=`basename ${SESS}`
         DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
         # make eroded white matter mask
         if [ ! -f ${DIR}/anat_wm_ero.nii.gz ]; then
