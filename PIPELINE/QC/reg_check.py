@@ -35,7 +35,7 @@ def main():
     subjects = get_subj(os.path.join(path, expt))
 
     # loop through all subjects
-    pdf = PdfPages(os.path.join(path, expt, 'qc_reg_EPI_to_T1.pdf'))
+    pdf = PdfPages(os.path.join('/srv/MRI/ANALYSIS', expt, 'qc_reg_EPI_to_T1.pdf'))
     for subj in subjects:
 
         edge = os.path.join(path, expt, subj, 'T1/SESS01/anat_T1_edge.nii.gz')
@@ -140,5 +140,8 @@ def main():
     d['CreationDate'] = datetime.datetime.today()
     d['ModDate'] = datetime.datetime.today()
     pdf.close()
+
+if __name__ == "__main__":
+	main()
 
 ## JDV Feb 18 2014

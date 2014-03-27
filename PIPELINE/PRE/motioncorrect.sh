@@ -39,16 +39,53 @@ for SUB in ${SUBJECTS}; do
                           -ssave ${SESS}/PARAMS/spikes.${NUM}.nii.gz \
                           ${SESS}/func_tmp_del.${NUM}.nii.gz
 
+                # RetroICORR correction for physiological noise, if exists
+                if [ -f ${RUN}/*.phys ]; then
+                    # get the relevant variables
+                    X=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
+                             | sed -n 6p | cut -c 5-`
+                    Y=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
+                             | sed -n 7p | cut -c 5-`
+                    Z=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
+                             | sed -n 8p | cut -c 5-`
+                    SLICE=`perl -e "@xyz=(${X},${Y},${Z}); \
+                                    @slice=(sort{$a<=>$b}@xyz)[0]; \
+                                    print @slice"`
+                    SAMP=`cat 130013_3T_rfMRI_REST1_LR_Physio_log.txt | wc -l`
+                    NTRS=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
+                             | sed -n 9p | cut -c 5-`
+                    TR=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
+                             | sed -n 22p | cut -c 9-`
+                    
+                    # compute sampling rate of physio recording
+                    UNITS=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
+                                 | sed -n 14p | cut -c 11- | xargs`
+                    # convert ms to seconds, if necessary
+                    if [ ${UNITS} = 's' ]; then
+                        TIME=`perl -e "print ${NTRS} \* ${TR}"`
+                    elif [ ${UNITS} = 'ms' ]; then
+                          TIME=`perl -e "print ${NTRS} * ${TR} / 1000"`
+                    fi 
+                    FS=`perl -e "print ${SAMP} / ${TIME}"`
+                    # McRetroTS Respfile Cardfile VolTR Nslices PhysFS Graph
+                    McRetroTS resp.phys card.phys ${TR} ${SLICE} ${FS} 0
+   
+                else
+                    # just skip this stage & match ouput file names
+                    mv ${SESS}/func_tmp_despike.${NUM}.nii.gz \
+                       ${SESS}/func_tmp_retroic.${NUM}.nii.gz
+                fi
+
                 # slice time correction (can include specified timings)
-                if [ -f ${SESS}/PARAMS/slice_timing.1D ]; then
+                if [ -f ${RUN}/slice_timing.1D ]; then
                     3dTshift -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
                              -verbose -Fourier \
-                             -tpattern @ ${SESS}/PARAMS/slice_timing.1D \
-                              ${SESS}/func_tmp_despike.${NUM}.nii.gz
+                             -tpattern @ ${RUN}/slice_timing.1D \
+                              ${SESS}/func_tmp_retroic.${NUM}.nii.gz
                 else
                     3dTshift -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
                              -verbose -Fourier \
-                              ${SESS}/func_tmp_despike.${NUM}.nii.gz
+                              ${SESS}/func_tmp_retroic.${NUM}.nii.gz
                 fi
             fi
 
