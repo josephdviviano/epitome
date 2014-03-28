@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import sys
 import datetime
 
 import nibabel as nib
@@ -14,11 +13,14 @@ from matplotlib.backends.backend_pdf import PdfPages
 import ypp_inputs
 import ypp_utilities
 
-def reg_check(path, expt, mode):
+def main():
     """
     Prints the central slice of the T1 and co-registered + deskulled EPI, 
     including an edge-detected version of the T1 (requires AFNI).
     """
+
+    # declare all variables
+    path, expt, subjects, mode, core = ypp_inputs.init()
 
     # get subject numbers
     subjects = ypp_utilities.get_subj(os.path.join(path, expt))
@@ -123,15 +125,15 @@ def reg_check(path, expt, mode):
 
     # Add some metadata and close the PDF object
     d = pdf.infodict()
-    d['Title'] = 'Quality Control: Registration of the EPI template to the T1'
+    d['Title'] = 'Quality Control: Registration of the T1 to MNI'
     d['Author'] = u'Joseph D Viviano\xe4nen'
     d['Subject'] = 'Quality Control'
-    d['Keywords'] = 'QC registration EPI T1'
+    d['Keywords'] = 'QC registration T1 MNI'
     d['CreationDate'] = datetime.datetime.today()
     d['ModDate'] = datetime.datetime.today()
     pdf.close()
 
 if __name__ == "__main__":
-	reg_check(sys.argv[1], sys.argv[2], sys.argv[3])
+	main()
 
 ## JDV Feb 18 2014

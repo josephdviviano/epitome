@@ -11,16 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import ypp_inputs
-
-def get_subj(dir):
-    """
-    Gets all folder names in a directory.
-    """
-    subjects = []
-    for subj in os.walk(dir).next()[1]:
-        if os.path.isdir(os.path.join(dir, subj)) == True:
-            subjects.append(subj)
-    return subjects
+import ypp_utilities
 
 def load_PSD(path, fs):
     tmp = np.genfromtxt(path)
@@ -39,7 +30,7 @@ def main():
     path, expt, subjects, mode, core = ypp_inputs.init()
 
     # get subject numbers
-    subjects = get_subj(os.path.join(path, expt))
+    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
 
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 'qc_regressor_spectra.pdf'))

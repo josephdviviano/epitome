@@ -29,7 +29,7 @@ cd /srv/MRI/RAW/
 for EXP in `ls -d */`; do
     chown -R grandvizier ${EXP}
     chgrp -R staff ${EXP}
-    chmod -R 740 ${EXP}
+    chmod -R 750 ${EXP}
 done
 
 # sets proper experiment permissions for /srv/MRI/ANALYSIS

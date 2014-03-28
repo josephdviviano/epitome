@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import ypp_inputs
+import ypp_utilities
 
 ## Options: will eventually be set at command line
 head_r = 50   # head diamater in mm
@@ -30,16 +31,6 @@ def factors(n):
     """
     return set(reduce(list.__add__, 
                 ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
-
-def get_subj(dir):
-    """
-    Gets all folder names in a directory.
-    """
-    subjects = []
-    for subj in os.walk(dir).next()[1]:
-        if os.path.isdir(os.path.join(dir, subj)) == True:
-            subjects.append(subj)
-    return subjects
 
 def compute_FD(f, head_radius):
     """
@@ -112,7 +103,7 @@ def main():
     dict_FD = {}
 
     # get subject numbers
-    subjects = get_subj(os.path.join(path, expt))
+    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
 
     # get number of subjects
     n_subj = len(subjects)
