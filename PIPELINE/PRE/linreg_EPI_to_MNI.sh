@@ -14,17 +14,17 @@ for SUB in ${SUBJECTS}; do
         for RUN in ${DIR_RUNS}; do
             NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-            # smooth data
+            # smooth data within grey matter boundaries
             if [ ! -f ${SESS}/func_smooth.${NUM}.nii.gz ]; then
                 if [ ! -f ${SESS}/func_filtered.${NUM}.nii.gz ]; then
                     3dBlurInMask -prefix ${SESS}/func_smooth.${NUM}.nii.gz \
                                  -FWHM ${BLUR_FWHM} \
-                                 -mask ${SESS}/anat_EPI_mask.nii.gz \
+                                 -mask ${SESS}/anat_gm.nii.gz \
                                  -input ${SESS}/func_scaled.${NUM}.nii.gz
                 else
                     3dBlurInMask -prefix ${SESS}/func_smooth.${NUM}.nii.gz \
                         -FWHM ${BLUR_FWHM} \
-                        -mask ${SESS}/anat_EPI_mask.nii.gz \
+                        -mask ${SESS}/anat_gm.nii.gz \
                         -input ${SESS}/func_filtered.${NUM}.nii.gz
                 fi
             fi
