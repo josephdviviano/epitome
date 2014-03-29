@@ -85,6 +85,7 @@ for SUB in ${SUBJECTS}; do
                 else
                     3dTshift -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
                              -verbose -Fourier \
+                             -tpattern ${TPATTERN} \
                               ${SESS}/func_tmp_retroic.${NUM}.nii.gz
                 fi
             fi
