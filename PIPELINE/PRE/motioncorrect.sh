@@ -92,18 +92,19 @@ for SUB in ${SUBJECTS}; do
 
             # 2: Deoblique, motion correct, and scale data
             if [ ! -f ${SESS}/func_motion.${NUM}.nii.gz ]; then
-                3dWarp -prefix ${SESS}/func_tmp_ob.${NUM}.nii.gz \
+                3dWarp -prefix ${SESS}/func_ob.${NUM}.nii.gz \
                        -deoblique -quintic -verb \
-                       -newgrid ${DIMS} ${SESS}/func_tshift.${NUM}.nii.gz
+                       -gridset ${SESS}/func_tshift.01.nii.gz \
+                       ${SESS}/func_tshift.${NUM}.nii.gz
 
                 # motion correct to 8th sub-brick of 1st run
                 3dvolreg -prefix ${SESS}/func_motion.${NUM}.nii.gz \
-                         -base ${SESS}'/func_tmp_ob.01.nii.gz[8]' \
+                         -base ${SESS}'/func_ob.01.nii.gz[8]' \
                          -twopass -twoblur 3 -twodup \
                          -Fourier -zpad 2 -float \
                          -1Dfile ${SESS}/PARAMS/motion.${NUM}.1D \
                          -1Dmatrix_save ${SESS}/PARAMS/3dvolreg.${NUM}.aff12.1D \
-                          ${SESS}/func_tmp_ob.${NUM}.nii.gz
+                          ${SESS}/func_ob.${NUM}.nii.gz
             fi
             
             # create TS mean for each run

@@ -2,6 +2,7 @@
 
 import fnmatch
 import os
+import sys
 import csv
 import glob
 import operator
@@ -85,7 +86,7 @@ def figure_quality(q):
         dpi = 72
     return size, dpi 
 
-def main():
+def individual_motion_plot(path, expt, mode):
     """
     This plots a trace of the framewise displacement measure and DVARS measure 
     for each participant (Power et al. 2012). Participants are sorted in the 
@@ -93,8 +94,7 @@ def main():
     qualitative participant rejection, if that's how you roll.
     """
 
-    # declare all variables
-    path, expt, subjects, mode, core = ypp_inputs.init()
+    # initialize variables
     ax_x = 0
     ax_y = 0
     flag = 0
@@ -274,6 +274,9 @@ def main():
     pdf.close()
 
     print('Printed plots to ' + str(os.path.join(path, expt)) + '.')
+
+if __name__ == "__main__":
+    individual_motion_plot(sys.argv[1], sys.argv[2], sys.argv[3])
 
 ## JDV Feb 18 2014
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import datetime
 
 import nibabel as nib
@@ -11,20 +12,17 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import ypp_inputs
-import ypp_utilites
+import ypp_utilities
 
-def main():
+def mask_check(path, expt, mode):
     """
     Prints the central slice of the T1 and co-registered + deskulled EPI, 
     including an edge-detected version of the T1 (requires AFNI).
     """
 
-    # declare all variables
-    path, expt, subjects, mode, core = ypp_inputs.init()
-
     # get subject numbers
     subjects = ypp_utilities.get_subj(os.path.join(path, expt))
-    #subjects = ['211']
+
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 'qc_masks.pdf'))
     for subj in subjects:
@@ -187,5 +185,8 @@ def main():
     d['CreationDate'] = datetime.datetime.today()
     d['ModDate'] = datetime.datetime.today()
     pdf.close()
+
+if __name__ == "__main__":
+    mask_check(sys.argv[1], sys.argv[2], sys.argv[3])
 
 ## JDV Feb 24 2014

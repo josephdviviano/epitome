@@ -7,6 +7,7 @@
 # segmentations for nusiance time series regression, if desired
 
 import os
+import sys
 import fnmatch
 import ypp_inputs
 import ypp_utilities
@@ -62,6 +63,6 @@ def T1_export(path, expt):
                 os.system(cmd6) # orient to RAI orientation
 
 if __name__ == "__main__":
-    T1_export((sys.argv[1], sys.argv[2]))
+    T1_export(sys.argv[1], sys.argv[2])
 
 ## JDV
