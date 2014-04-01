@@ -11,25 +11,25 @@ then
 for SUB in ${SUBJECTS}; do
 
     # remove any multisession files
-    rm ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_*
+    rm ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_* >& /dev/null
 
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
     for SESS in ${DIR_SESS}; do
         
         # remove per-session files
-        rm -r ${SESS}/PARAMS/
-        rm ${SESS}/anat_*
-        rm ${SESS}/func_*
-        rm ${SESS}/mat_*
-        rm ${SESS}/reg_*
+        rm -r ${SESS}/PARAMS/ >& /dev/null
+        rm ${SESS}/anat_* >& /dev/null
+        rm ${SESS}/func_* >& /dev/null
+        rm ${SESS}/mat_* >& /dev/null
+        rm ${SESS}/reg_* >& /dev/null
         
     done
 
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/`
     for SESS in ${DIR_SESS}; do
 
-        rm ${SESS}/reg_*
-        rm ${SESS}/anat_*
+        rm ${SESS}/reg_* >& /dev/null
+        rm ${SESS}/anat_* >& /dev/null
 
     done
 done
