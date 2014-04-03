@@ -15,7 +15,7 @@ CORES=7
 #DIR_EXPT="TRSEEN"
 #DIR_EXPT="RSFC1"
 DIR_EXPT="RSFC2"
-#DIR_EXPT="BEBASD"
+#DIR_EXPT="BEBAnSD"
 
 SUBJECTS=`python ${DIR_PIPE}/ypp_inputs.py ${DIR_DATA} ${DIR_EXPT}`
 
@@ -86,8 +86,8 @@ export REG_DOF
 export DATA_QUALITY
 
 # PIPELINE
-python ${DIR_PIPE}/PRE/freesurfer_T1_export.py ${DIR_DATA} ${DIR_EXPT}
-${DIR_PIPE}/PRE/motioncorrect.sh
+#python ${DIR_PIPE}/PRE/freesurfer_T1_export.py ${DIR_DATA} ${DIR_EXPT}
+#${DIR_PIPE}/PRE/motioncorrect.sh
 #${DIR_PIPE}/PRE/linreg_calculate.sh
 #${DIR_PIPE}/PRE/linreg_FSATLAS_to_EPI.sh
 #${DIR_PIPE}/PRE/create_regressors.sh
@@ -96,7 +96,7 @@ ${DIR_PIPE}/PRE/motioncorrect.sh
 
 # QUALITY CONTROL
 #python ${DIR_PIPE}/QC/mask_check.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}
-#python ${DIR_PIPE}/QC/motion_individual_plot.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}
+python ${DIR_PIPE}/QC/motion_individual_plot.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}
 #python ${DIR_PIPE}/QC/reg_check.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}
 #python ${DIR_PIPE}/QC/reg_check_T12MNI.py
 #python ${DIR_PIPE}/QC/regressor_spectra.py
@@ -104,8 +104,9 @@ ${DIR_PIPE}/PRE/motioncorrect.sh
 ##############
 # HARD RESET #
 ##############
-#${DIR_PIPE}/UTIL/cleanup_functionals.sh
-#${DIR_PIPE}/UTIL/cleanup_registration_only.sh
+#${DIR_PIPE}/UTIL/cleanup_everything.sh
+#${DIR_PIPE}/UTIL/cleanup_MNI.sh
+#${DIR_PIPE}/UTIL/cleanup_registration.sh
 #${DIR_PIPE}/UTIL/check_runs.sh
 
 ## JDV

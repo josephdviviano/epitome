@@ -19,12 +19,12 @@ for SUB in ${SUBJECTS}; do
                 if [ ! -f ${SESS}/func_filtered.${NUM}.nii.gz ]; then
                     3dBlurInMask -prefix ${SESS}/func_smooth.${NUM}.nii.gz \
                                  -FWHM ${BLUR_FWHM} \
-                                 -mask ${SESS}/anat_gm.nii.gz \
+                                 -mask ${SESS}/anat_EPI_mask.nii.gz \
                                  -input ${SESS}/func_scaled.${NUM}.nii.gz
                 else
                     3dBlurInMask -prefix ${SESS}/func_smooth.${NUM}.nii.gz \
                         -FWHM ${BLUR_FWHM} \
-                        -mask ${SESS}/anat_gm.nii.gz \
+                        -mask ${SESS}/anat_EPI_mask.nii.gz \
                         -input ${SESS}/func_filtered.${NUM}.nii.gz
                 fi
             fi

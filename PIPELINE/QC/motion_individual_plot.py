@@ -189,13 +189,13 @@ def individual_motion_plot(path, expt, mode):
             ax_FD[ax_y][ax_x].axhline(y=FD_t, xmin=0, xmax=1, color='red')
             ax_FD[ax_y][ax_x].plot(t, FD.T, lw=1, label=subj[0], color='blue')
             ax_FD[ax_y][ax_x].set_xlim((-3, len(t) + 3))
-            ax_FD[ax_y][ax_x].set_title(str(subj[0]), fontsize=10)
+            ax_FD[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
             for b in breaks:
                 ax_DV[ax_y][ax_x].axvline(x=b, ymin=0, ymax=100, color='black')
             ax_DV[ax_y][ax_x].axhline(y=DV_t, xmin=0, xmax=1, color='red')
             ax_DV[ax_y][ax_x].plot(t, DV.T, lw=1, label=subj[0], color='green')
             ax_DV[ax_y][ax_x].set_xlim((-3, len(t) + 3))
-            ax_DV[ax_y][ax_x].set_title(str(subj[0]), fontsize=10)
+            ax_DV[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
 
             ax_x = ax_x + 1  # this keeps us moving through the grid of plots
             if ax_x > factor[1]-1:
