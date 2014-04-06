@@ -183,21 +183,38 @@ def individual_motion_plot(path, expt, mode):
             
             t = np.arange(len(DV)) # time axis
             
-            # plot FD, DVARS, thresholds, and runs for each subject
+            ## plot FD, DVARS, thresholds, and runs for each subject
+            
+            # add vertical lines demarking runs
             for b in breaks:
                 ax_FD[ax_y][ax_x].axvline(x=b, ymin=0, ymax=100, color='black')
+            
             ax_FD[ax_y][ax_x].axhline(y=FD_t, xmin=0, xmax=1, color='red')
             ax_FD[ax_y][ax_x].plot(t, FD.T, lw=1, label=subj[0], color='blue')
             ax_FD[ax_y][ax_x].set_xlim((-3, len(t) + 3))
-            ax_FD[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
+            
+            # crop subject numbers to the last 6 digits, if it is longer than 6
+            if len(subj[0]) > 6:
+                ax_FD[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
+            else:
+                ax_FD[ax_y][ax_x].set_title(str(subj[0]), fontsize=6)
+
+            # add vertical lines demarking runs
             for b in breaks:
                 ax_DV[ax_y][ax_x].axvline(x=b, ymin=0, ymax=100, color='black')
+
             ax_DV[ax_y][ax_x].axhline(y=DV_t, xmin=0, xmax=1, color='red')
             ax_DV[ax_y][ax_x].plot(t, DV.T, lw=1, label=subj[0], color='green')
             ax_DV[ax_y][ax_x].set_xlim((-3, len(t) + 3))
-            ax_DV[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
+            
+            # crop subject numbers to the last 6 digits, if it is longer than 6
+            if len(subj[0]) > 6:
+                ax_DV[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
+            else:
+                ax_DV[ax_y][ax_x].set_title(str(subj[0]), fontsize=6)
 
-            ax_x = ax_x + 1  # this keeps us moving through the grid of plots
+            # this keeps us moving through the grid of plots
+            ax_x = ax_x + 1
             if ax_x > factor[1]-1:
                 ax_x = 0
                 ax_y = ax_y + 1
@@ -257,12 +274,6 @@ def individual_motion_plot(path, expt, mode):
     fig_FD.savefig(pdf, format='pdf')
     fig_DV.savefig(pdf, format='pdf')
 
-    #fig_FD.savefig(os.path.join(path, expt, 'qc_FD_individual.pdf')) # save pdf
-    #fig_DV.savefig(os.path.join(path, expt, 'qc_DVARS_individual.pdf'))
-    #if quality >= 1:
-    #    fig_FD.savefig(os.path.join(path, expt, 'qc_FD_individual.eps')) # save eps
-    #    fig_DV.savefig(os.path.join(path, expt, 'qc_DVARS_individual.eps'))
-
     # Add some metadata and close the PDF object
     d = pdf.infodict()
     d['Title'] = 'Quality Control: Individual Subject Motion Paramaters'
@@ -278,7 +289,7 @@ def individual_motion_plot(path, expt, mode):
 if __name__ == "__main__":
     individual_motion_plot(sys.argv[1], sys.argv[2], sys.argv[3])
 
-## JDV Feb 18 2014
+## JDV
 
 # labels for x-y axis (not really needed)
 # ax_FD[ax_y][ax_x].set_xlabel('Time (TRs)')

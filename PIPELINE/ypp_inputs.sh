@@ -13,9 +13,9 @@ CORES=7
 #DIR_EXPT="SAB1"
 #DIR_EXPT="ATOL"
 #DIR_EXPT="TRSEEN"
-#DIR_EXPT="RSFC1"
-DIR_EXPT="RSFC2"
-#DIR_EXPT="BEBAnSD"
+DIR_EXPT="RSFC1"
+#DIR_EXPT="RSFC2"
+#DIR_EXPT="BEBASD"
 
 SUBJECTS=`python ${DIR_PIPE}/ypp_inputs.py ${DIR_DATA} ${DIR_EXPT}`
 
@@ -94,9 +94,14 @@ export DATA_QUALITY
 #${DIR_PIPE}/PRE/filter.sh
 #${DIR_PIPE}/PRE/linreg_EPI_to_MNI.sh
 
+${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
+
+#${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI '50' '0.3' '0.3'
+#path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=0.3, thresh_DV=3
+
 # QUALITY CONTROL
 #python ${DIR_PIPE}/QC/mask_check.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}
-python ${DIR_PIPE}/QC/motion_individual_plot.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}
+#python ${DIR_PIPE}/QC/motion_individual_plot.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}
 #python ${DIR_PIPE}/QC/reg_check.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}
 #python ${DIR_PIPE}/QC/reg_check_T12MNI.py
 #python ${DIR_PIPE}/QC/regressor_spectra.py

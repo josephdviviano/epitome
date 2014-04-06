@@ -56,7 +56,8 @@ for SUB in ${SUBJECTS}; do
         DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
         for SESS in ${DIR_SESS}; do
             # this used to say `ls ${SESS}/func_smooth* | sort -n -t h -k 2` 
-            FILES=`ls ${SESS}/func_MNI*`
+            #FILES=`ls ${SESS}/func_MNI*`
+            FILES=`ls ${SESS}/func_scrubbed*`
             INPUT="${INPUT} ${FILES}"
         done    
         
