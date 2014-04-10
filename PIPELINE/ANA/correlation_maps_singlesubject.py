@@ -22,7 +22,7 @@ dir_mri = '/srv/MRI/WORKING/'
 experiments = ['RSFC1', 'RSFC2']
 in_file = 'func_MNI_concat_noscrub.nii.gz'
 #in_file = 'func_MNI_concat_noscrub.nii.gz'
-ROI_file = 'ROIs_noATOL.nii.gz'
+ROI_file = 'ROIs_ATOL.nii.gz'
 
 # get us to the right directory
 os.system('cd ' + dir_ana)
@@ -30,19 +30,6 @@ os.system('cd ' + dir_ana)
 ## Rational: All we're doing here is calculating the whole-brain correlation
 #  map from each seed defined by the ROI mask with every other voxel in the
 #  brain, defined as the intersection of the two group-masks.
-
-labels = ['d_attn_A', 
-          'd_attn_B', 
-          'd_attn_C', 
-          'd_attn_D', 
-          'd_attn_E', 
-          'd_attn_F', 
-          'def_A',
-          'def_B',
-          'def_C',
-          'def_D',
-          'def_E',
-          'def_F']
 
 # labels = ['d_attn_A', 
 #           'd_attn_B', 
@@ -53,9 +40,22 @@ labels = ['d_attn_A',
 #           'def_A',
 #           'def_B',
 #           'def_C',
-#           'ATOL_MPFC',
+#           'def_D',
 #           'def_E',
-#           'ATOL_PCC']
+#           'def_F']
+
+labels = ['d_attn_A', 
+          'd_attn_B', 
+          'd_attn_C', 
+          'd_attn_D', 
+          'd_attn_E', 
+          'd_attn_F', 
+          'def_A',
+          'def_B',
+          'def_C',
+          'ATOL_MPFC',
+          'def_E',
+          'ATOL_PCC']
 
 groups = {
     '1': ['0023', '0024', '0025', '0028', '0030', '0031', 

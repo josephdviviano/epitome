@@ -132,5 +132,5 @@ def TR_drop(path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=0.3,
     f.close() # write out the report
 
 if __name__ == "__main__":
-    TR_drop(sys.argv[1], sys.argv[2], sys.argv[3], 
-            sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
+    TR_drop(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], 
+            sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8])

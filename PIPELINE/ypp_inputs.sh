@@ -94,10 +94,10 @@ export DATA_QUALITY
 #${DIR_PIPE}/PRE/filter.sh
 #${DIR_PIPE}/PRE/linreg_EPI_to_MNI.sh
 
-${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
+#${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
 
-#${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI '50' '0.3' '0.3'
-#path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=0.3, thresh_DV=3
+${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI 50 1.5 32344 
+#path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=1.5, thresh_DV=30000
 
 # QUALITY CONTROL
 #python ${DIR_PIPE}/QC/mask_check.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE}

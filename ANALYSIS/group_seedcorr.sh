@@ -3,7 +3,7 @@
 #IN_PRE='def_F'
 #IN_PRE='d_attn_C'
 #IN_PRE='ATOL_MPFC'
-IN_PRE='ATOL_PCC'
+#IN_PRE='ATOL_PCC'
 
 CMD1=`echo '"'group1/*${IN_PRE}.nii.gz[1]'"'`
 
