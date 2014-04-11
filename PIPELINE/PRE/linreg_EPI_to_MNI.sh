@@ -50,18 +50,16 @@ for SUB in ${SUBJECTS}; do
         fi
     done
     
-    # create concatenated runs in order -- this needs to be fixed!!!
+    # create concatenated runs in order
     if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz ]; then
         INPUT=``
         DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
         for SESS in ${DIR_SESS}; do
-            # this used to say `ls ${SESS}/func_smooth* | sort -n -t h -k 2` 
-            #FILES=`ls ${SESS}/func_MNI*`
-            FILES=`ls ${SESS}/func_scrubbed*`
+            FILES=`ls ${SESS}/func_MNI*`
             INPUT="${INPUT} ${FILES}"
         done    
         
-        3dTcat -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat_scrub.nii.gz \
+        3dTcat -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz \
                `echo ${INPUT}` 
 
         # 3dresample -prefix ${DIR_DATA}/${DIR_EXPT}/mask_tmp_group_resample.nii.gz \
@@ -88,5 +86,3 @@ if [ ! -f ${DIR_DATA}/${DIR_EXPT}/mask_group.nii.gz ]; then
 # 3dCalc -prefix ${DIR}/mask_group.nii.gz -expr 'astep(a, 1)' -a ${DIR}/mask_tmp_group_mean.nii.gz 
 fi
 cd ${DIR_PIPE}
-
-## JDV Jan 30 2014

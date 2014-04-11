@@ -114,5 +114,3 @@ export DATA_QUALITY
 #${DIR_PIPE}/UTIL/cleanup_registration.sh
 ${DIR_PIPE}/UTIL/cleanup_postmotioncorrect.sh
 #${DIR_PIPE}/UTIL/check_runs.sh
-
-## JDV

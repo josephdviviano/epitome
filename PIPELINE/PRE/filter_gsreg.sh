@@ -121,5 +121,3 @@ for SUB in ${SUBJECTS}; do
     done
 done
 cd ${DIR_PIPE}
-
-## JDV Jan 30 2014
