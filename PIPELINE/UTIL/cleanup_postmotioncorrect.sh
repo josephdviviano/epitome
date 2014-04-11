@@ -17,19 +17,11 @@ for SUB in ${SUBJECTS}; do
     for SESS in ${DIR_SESS}; do
         
         # remove per-session files
-        rm -r ${SESS}/PARAMS/ >& /dev/null
-        rm ${SESS}/anat_* >& /dev/null
-        rm ${SESS}/func_* >& /dev/null
-        rm ${SESS}/mat_* >& /dev/null
-        rm ${SESS}/reg_* >& /dev/null
-        
-    done
-
-    DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/`
-    for SESS in ${DIR_SESS}; do
-
-        rm ${SESS}/reg_* >& /dev/null
-        rm ${SESS}/anat_* >& /dev/null
+        rm ${SESS}/func_smooth* >& /dev/null
+        rm ${SESS}/func_noise* >& /dev/null
+        rm ${SESS}/func_scrubbed* >& /dev/null
+        rm ${SESS}/func_MNI* >& /dev/null
+        rm ${SESS}/func_tSNR* >& /dev/null
 
     done
 done

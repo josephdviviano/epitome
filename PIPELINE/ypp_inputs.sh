@@ -13,8 +13,8 @@ CORES=7
 #DIR_EXPT="SAB1"
 #DIR_EXPT="ATOL"
 #DIR_EXPT="TRSEEN"
-DIR_EXPT="RSFC1"
-#DIR_EXPT="RSFC2"
+#DIR_EXPT="RSFC1"
+DIR_EXPT="RSFC2"
 #DIR_EXPT="BEBASD"
 
 SUBJECTS=`python ${DIR_PIPE}/ypp_inputs.py ${DIR_DATA} ${DIR_EXPT}`
@@ -96,7 +96,7 @@ export DATA_QUALITY
 
 #${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
 
-${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI 50 1.5 32344 
+#${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI 50 1.5 32344 
 #path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=1.5, thresh_DV=30000
 
 # QUALITY CONTROL
@@ -112,6 +112,7 @@ ${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_M
 #${DIR_PIPE}/UTIL/cleanup_everything.sh
 #${DIR_PIPE}/UTIL/cleanup_MNI.sh
 #${DIR_PIPE}/UTIL/cleanup_registration.sh
+${DIR_PIPE}/UTIL/cleanup_postmotioncorrect.sh
 #${DIR_PIPE}/UTIL/check_runs.sh
 
 ## JDV

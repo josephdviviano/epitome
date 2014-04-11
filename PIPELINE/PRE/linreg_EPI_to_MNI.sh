@@ -61,7 +61,7 @@ for SUB in ${SUBJECTS}; do
             INPUT="${INPUT} ${FILES}"
         done    
         
-        3dTcat -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz \
+        3dTcat -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat_scrub.nii.gz \
                `echo ${INPUT}` 
 
         # 3dresample -prefix ${DIR_DATA}/${DIR_EXPT}/mask_tmp_group_resample.nii.gz \
