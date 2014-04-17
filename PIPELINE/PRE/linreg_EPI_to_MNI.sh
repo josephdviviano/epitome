@@ -51,15 +51,15 @@ for SUB in ${SUBJECTS}; do
     done
     
     # create concatenated runs in order
-    if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz ]; then
+    if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat_scrubbed.nii.gz ]; then
         INPUT=``
         DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
         for SESS in ${DIR_SESS}; do
-            FILES=`ls ${SESS}/func_MNI*`
+            FILES=`ls ${SESS}/func_scrubbed*`
             INPUT="${INPUT} ${FILES}"
         done    
         
-        3dTcat -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz \
+        3dTcat -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat_scrubbed.nii.gz \
                `echo ${INPUT}` 
 
         # 3dresample -prefix ${DIR_DATA}/${DIR_EXPT}/mask_tmp_group_resample.nii.gz \

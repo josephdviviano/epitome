@@ -19,7 +19,7 @@ import ypp_stats
 dir_ana = '/srv/MRI/ANALYSIS/REST'
 dir_mri = '/srv/MRI/WORKING/'
 experiments = ['RSFC1', 'RSFC2']
-in_file = 'func_MNI_concat_scrub.nii.gz'
+in_file = 'func_MNI_concat.nii.gz'
 ROI_file = 'ROIs_ATOL.nii.gz'
 
 use_gcor = 0
@@ -35,19 +35,6 @@ os.system('cd ' + dir_ana)
 #  and conduct a t-test between the groups at each cell of the graph. We correct
 #  for multiple comparisons and star the statistically-different cells.
 
-labels = ['Dorsal attention A', 
-          'Dorsal attention B', 
-          'Dorsal attention C', 
-          'Dorsal attention D', 
-          'Dorsal attention E', 
-          'Dorsal attention F', 
-          'Default A',
-          'Default B',
-          'Default C',
-          'Default D',
-          'Default E',
-          'Default F']
-
 # labels = ['Dorsal attention A', 
 #           'Dorsal attention B', 
 #           'Dorsal attention C', 
@@ -57,9 +44,22 @@ labels = ['Dorsal attention A',
 #           'Default A',
 #           'Default B',
 #           'Default C',
-#           'ATOL MPFC',
+#           'Default D',
 #           'Default E',
-#           'ATOL PCC']
+#           'Default F']
+
+labels = ['Dorsal attention A', 
+          'Dorsal attention B', 
+          'Dorsal attention C', 
+          'Dorsal attention D', 
+          'Dorsal attention E', 
+          'Dorsal attention F', 
+          'Default A',
+          'Default B',
+          'Default C',
+          'ATOL MPFC',
+          'Default E',
+          'ATOL PCC']
 
 ##
 
@@ -98,7 +98,7 @@ group2 = ['0044', '0046', '0047', '0048', '0050', '0051',
 
 ## THIS IS FOR HARD_THRESHOLD_ALT (SCRUB AT 1.5mm)
 
-# group1 = ['23', '25', '28', '29', '30', '31', 
+# group1 = ['0023', '0025', '0028', '0029', '0030', '0031', 
 #           '0033', '0034', '0035', '0036', '0037', '0038', 
 #           '0039', '0040', '0041', '0042', '0043', 
 #           '060623_4TT00022', '060701_4TT00025', '060701_4TT00026', 

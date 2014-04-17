@@ -79,17 +79,19 @@ def create_template_3(n):
 
 def generate_block_names():
     # define block names
-    control_names = ['control_1', 'control_2', 'control_3']
-    inhibit_names = ['inhibit_1', 'inhibit_2', 'inhibit_3']
-    twoback_names = ['twoback_1', 'twoback_2', 'twoback_3']
-    twobkin_names = ['twobkin_1', 'twobkin_2', 'twobkin_3']
+    control_names = ['Control1', 'Control2', 'Control3']
+    inhibit_names = ['Inhibition1', 'Inhibition2', 'Inhibition3']
+    twoback_names = ['Updating1', 'Updating2', 'Updating3']
+    twobkin_names = ['UpInhib1', 'UpInhib2', 'UpInhib3']
     # generate random list of blocks
     block_names = list(control_names)
     block_names.extend(inhibit_names)
     block_names.extend(twoback_names)
     block_names.extend(twobkin_names)
     random.shuffle(block_names)
-    return block_names
+    test = window(block_names, 2)
+    test = list(test)
+    return block_names, test
 
 def create_stimulus_order():
     # init output dicts
@@ -100,10 +102,10 @@ def create_stimulus_order():
     block_inhibit = {}
 
     # define block names
-    control_names = ['control_1', 'control_2', 'control_3']
-    inhibit_names = ['inhibit_1', 'inhibit_2', 'inhibit_3']
-    twoback_names = ['twoback_1', 'twoback_2', 'twoback_3']
-    twobkin_names = ['twobkin_1', 'twobkin_2', 'twobkin_3']
+    control_names = ['Control1', 'Control2', 'Control3']
+    inhibit_names = ['Inhibition1', 'Inhibition2', 'Inhibition3']
+    twoback_names = ['Updating1', 'Updating2', 'Updating3']
+    twobkin_names = ['UpInhib1', 'UpInhib2', 'UpInhib3']
 
     # generate the possible stimuli
     stimuli = generate_stimuli(3) # 3 = number of boxes in stimulus array
@@ -118,8 +120,16 @@ def create_stimulus_order():
     inhibit_my = list(set(stimuli) - set(inhibit_mb) - set(inhibit))
     inhibit_non = list(set(stimuli) - set(inhibit))
 
-    # generate block list
-    block_names = generate_block_names()
+    # generate block list, ensure a switch each time
+    while 1:
+        block_names, test = generate_block_names()
+        counter = 0
+        for x in range(len(test)):
+            if test[x][0][:-2] == test[x][1][:-2]:
+                counter = counter + 1
+        if counter == 0:
+            break
+
     for block in block_names:
         
         stimuli_list = [] # correct stimuli
@@ -130,8 +140,6 @@ def create_stimulus_order():
         
         # control condition
         if any(b in block for b in control_names):
-            stimuli_list = [] # init stimuli
-            answers_list = [] # init answers
             template = create_template_2(12) # random set of n trials, 2 conditions
             for i in range(len(template)): # iterate through trials
                 # if this is a yes trial
@@ -232,7 +240,7 @@ def create_stimulus_order():
 
         # now fill in those pesky answers (I hate you, Sabrina :D)
         for i in range(12):
-            if i <=2:
+            if i <=1:
                 twoback_list.append(0)
             elif any(s in stimuli_list[i-2] for s in control_mb):
                 twoback_list.append(1)
@@ -319,10 +327,21 @@ def write_outputs(run):
                 for x in range(3):
                     jitter.append(jitter_list.pop())
                 jitter.sort(reverse=True)
+
+                # rename the blocks --> subprocesses
+                if block[:-1] == 'Updating':
+                    subproc = 'UpdProc' + block[-1:]
+                elif block[:-1] == 'Control':
+                    subproc = 'ContProc' + block[-1:]
+                elif block[:-1] == 'Inhibition':
+                    subproc = 'InhibProc' + block[-1:]
+                elif block[:-1] == 'UpInhib':
+                    subproc = 'UpInhibProc' + block[-1:]
+
                 # write out the information
                 out.writerow(['1']  + 
                              [''] + 
-                             [block] + 
+                             [subproc] + 
                              [stim + '.bmp'] + 
                              [str(block_answers[block][i])] + 
                              [str(block_mb[block][i])] + 

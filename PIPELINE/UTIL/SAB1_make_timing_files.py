@@ -56,7 +56,7 @@ def make_output_dict(runs=4):
 
 def check_directory(directory):
     if os.path.isdir(directory) == True:
-        if os.path.isfile(os.path.join(directory, '1_Blocklist.txt')) == True
+        if os.path.isfile(os.path.join(directory, '1_BlockList.txt')) == True:
             return True
         else:
             return False
@@ -69,7 +69,8 @@ def write_afni_files(directory, runs=4):
     if check_directory(directory) == True:
         pass
     else:
-    except 'your directoy is not correct :('
+        print 'your directoy is not correct :('
+        #raise
 
     # loop through runs, writing outputs
     for i, run in enumerate(range(runs)):

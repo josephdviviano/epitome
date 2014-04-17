@@ -92,11 +92,12 @@ export DATA_QUALITY
 #${DIR_PIPE}/PRE/linreg_FSATLAS_to_EPI.sh
 #${DIR_PIPE}/PRE/create_regressors.sh
 #${DIR_PIPE}/PRE/filter.sh
+#${DIR_PIPE}/PRE/filter_gsreg.sh
 #${DIR_PIPE}/PRE/linreg_EPI_to_MNI.sh
 
-#${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
+#${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI 50 0.3 65403 
+${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
 
-#${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI 50 1.5 32344 
 #path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=1.5, thresh_DV=30000
 
 # QUALITY CONTROL
@@ -112,5 +113,5 @@ export DATA_QUALITY
 #${DIR_PIPE}/UTIL/cleanup_everything.sh
 #${DIR_PIPE}/UTIL/cleanup_MNI.sh
 #${DIR_PIPE}/UTIL/cleanup_registration.sh
-${DIR_PIPE}/UTIL/cleanup_postmotioncorrect.sh
+#${DIR_PIPE}/UTIL/cleanup_postmotioncorrect.sh
 #${DIR_PIPE}/UTIL/check_runs.sh

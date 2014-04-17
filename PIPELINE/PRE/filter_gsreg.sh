@@ -73,9 +73,11 @@ for SUB in ${SUBJECTS}; do
             fi
 
             if [ ! -f ${SESS}/PARAMS/det.global_mean.${NUM}.1D ]; then
-                3dDetrend -prefix ${SESS}/PARAMS/det.global_mean.${NUM}.1D \
+                3dDetrend -prefix - \
+                          -DAFNI_1D_TRANOUT=YES \
                           -polort ${POLORT} \
-                          ${SESS}/PARAMS/global_mean.${NUM}.1D
+                          ${SESS}/PARAMS/global_mean.${NUM}.1D\' > \
+                          ${SESS}/PARAMS/det.global_mean.${NUM}.1D
             fi
 
             # fits each run with all nusiance variables

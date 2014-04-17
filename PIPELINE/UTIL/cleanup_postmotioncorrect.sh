@@ -17,11 +17,13 @@ for SUB in ${SUBJECTS}; do
     for SESS in ${DIR_SESS}; do
         
         # remove per-session files
-        rm ${SESS}/func_smooth* >& /dev/null
+
+        rm ${SESS}/func_tSNR* >& /dev/null
         rm ${SESS}/func_noise* >& /dev/null
+        rm ${SESS}/func_filtered* >& /dev/null
+        rm ${SESS}/func_smooth* >& /dev/null
         rm ${SESS}/func_scrubbed* >& /dev/null
         rm ${SESS}/func_MNI* >& /dev/null
-        rm ${SESS}/func_tSNR* >& /dev/null
 
     done
 done
