@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # a simple file containing the participants to be analyzed
+# this will become more sophisticated soon...
 
 ## Directories ##
 DIR_PIPE='/srv/CODE/PIPELINE'
@@ -9,13 +10,7 @@ DIR_AFNI='/usr/local/abin'
 AFNI_DECONFLICT=OVERWRITE
 CORES=7
 
-#DIR_EXPT="TRSE"
-#DIR_EXPT="SAB1"
-#DIR_EXPT="ATOL"
-#DIR_EXPT="TRSEEN"
-#DIR_EXPT="RSFC1"
-DIR_EXPT="RSFC2"
-#DIR_EXPT="BEBASD"
+DIR_EXPT="RSFC2" #"TRSE","SAB1","ATOL","TRSEEN","RSFC1","BEBASD"
 
 SUBJECTS=`python ${DIR_PIPE}/ypp_inputs.py ${DIR_DATA} ${DIR_EXPT}`
 
@@ -25,16 +20,12 @@ DELTR=4              # number of TRs to delete from the beginning of each run
 DIMS=3               # set voxel dimensions post-reslice (iso)
 POLORT=4             # degree of legendre polynomials to detrend data against
 BLUR_FWHM=6          # blur FWHM
-
-# slice time correction
 TPATTERN='alt+z'     # MRI acquisition specific slice timing (for correction)
-
-# registration
 DATA_QUALITY='low'   # options = 'low' and 'high'
 COST='lpc+zz'        # registration cost function
 REG_DOF='giant_move' # registration constraints
 
-## TPATTERN OPTIONS ##
+## TPATTERN ##
 #    alt+z = altplus   = alternating in the plus direction
 #    alt+z2            = alternating, starting at slice #1 instead of #0
 #    alt-z = altminus  = alternating in the minus direction
@@ -43,12 +34,11 @@ REG_DOF='giant_move' # registration constraints
 #    seq-z = seqminus  = sequential in the minus direction
 #
 
-## DATA QUALITY OPTIONS ##
+## DATA QUALITY ##
 #    high       = Good internal contrast (default)
 #    low        = Poor internal contrast, mostly for old data
 
-
-## COST FXN OPTIONS ##
+## COST FUNCTION ##
 #    ls   *OR*  leastsq         = Least Squares [Pearson Correlation]
 #    mi   *OR*  mutualinfo      = Mutual Information [H(b)+H(s)-H(b,s)]
 #    crM  *OR*  corratio_mul    = Correlation Ratio (Symmetrized*)
@@ -65,7 +55,7 @@ REG_DOF='giant_move' # registration constraints
 #    ncd  *OR*  NormCompDist    = Normalized Compression Distance
 #    lpc+zz                     = Local Pearson Correlation Signed + Magic
 
-## REG_DOF OPTIONS ##
+## REGISTRATION DEGREES OF FREEDOM ##
 #    big_move           = Smaller moves (if giant gives bad registration)
 #    giant_move         = Large search space allowed (generally safe)
 
@@ -96,7 +86,7 @@ export DATA_QUALITY
 #${DIR_PIPE}/PRE/linreg_EPI_to_MNI.sh
 
 #${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI 50 0.3 65403 
-${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
+#${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
 
 #path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=1.5, thresh_DV=30000
 

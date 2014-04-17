@@ -11,18 +11,38 @@
 #  Scales each run to have mode = 1000, removing obviously non-brain data
 #  Calculates various statistics + time series
 
+echo '*************************************************************************'
+echo '    Motion Correction and General Pre-processing for all fMRI data'
+echo ''
+echo '    Running with the following options:'
+echo '        EXPERIMENT           :' ${DIR_EXPT}
+echo '        DATA TYPE            :' ${DATA_TYPE}
+echo '        # OF TRs TO REMOVE   :' ${DELTR}
+echo '        FINAL DIMENSIONS (mm):' ${DIMS}
+echo '        DETREND ORDER        :' ${POLORT}
+echo '        BLUR FWHM            :' ${BLUR_FWHM}
+echo '        SLICE TIMING         :' ${TPATTERN}
+echo '        DATA QUALITY         :' ${DATA_QUALITY}
+echo '        REGISTRATION COST FXN:' ${COST}
+echo '        REGISTRATION DOF     :' ${REG_DOF}
+echo ''
+echo '*************************************************************************'
+
 cd /tmp
+
+# loop through subjects, sessions, and runs, respectively
 for SUB in ${SUBJECTS}; do
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+
     for SESS in ${DIR_SESS}; do
         mkdir ${SESS}/PARAMS
-        # this used to be here: `ls -d -- ${SESS}/run*/ | sort -n -t n -k 4`
         DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+
         for RUN in ${DIR_RUNS}; do
             NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
             FILE=`echo ${RUN}/*.nii.gz`
 
-            # 1: Reorient, delete initial timepoints, despike, slice time correct 
+            # 1: Reorient, delete initial TRs, despike, slice time correct 
             if [ ! -f ${SESS}/func_tshift.${NUM}.nii.gz ]; then
                 # ensure all data is in RAI
                 3daxialize \
@@ -228,7 +248,7 @@ for SUB in ${SUBJECTS}; do
                 rm ${SESS}/tmp_median.1D
             fi
 
-            ## % signal change DVARS (Power et. al Neuroimage 2012)
+            # % signal change DVARS (Power et. al Neuroimage 2012)
             if [ ! -f ${SESS}/PARAMS/DVARS.${NUM}.1D ]; then
                 3dcalc \
                     -a ${SESS}/func_scaled.${NUM}.nii.gz \
@@ -246,7 +266,6 @@ for SUB in ${SUBJECTS}; do
                     -a ${SESS}/PARAMS/tmp_backdif.${NUM}.1D \
                     -expr 'sqrt(a)' \
                     > ${SESS}/PARAMS/DVARS.${NUM}.1D
-                #3dTstat -mean -stdev -prefix %s.backdif2.avg.dvars.stats.1D %s.backdif2.avg.dvars.1D\\\'
             fi
 
             # Global mean
@@ -263,5 +282,3 @@ for SUB in ${SUBJECTS}; do
     done
 done
 cd ${DIR_PIPE}
-
-# JDV

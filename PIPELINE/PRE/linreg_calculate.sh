@@ -113,5 +113,3 @@ for SUB in ${SUBJECTS}; do
     done
 done
 cd ${DIR_PIPE}
-
-## JDV
