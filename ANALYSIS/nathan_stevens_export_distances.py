@@ -7,19 +7,6 @@ import numpy as np
 dir_ana = '/srv/MRI/ANALYSIS/REST/'
 
 # define the things
-labels = [('Dorsal attention A', (-22, -2, 54)), 
-          ('Dorsal attention B', (-34, -38, 44)), 
-          ('Dorsal attention C', (-18, -69, 51)),
-          ('Dorsal attention D', (-51, -64, -2)),
-          ('Dorsal attention E', (-8, -63, 57)),
-          ('Dorsal attention F', (-49, 3, 34)), 
-          ('Default A', (-27, 23, 48)),
-          ('Default B', (-41, -60, 29)),
-          ('Default C', (-64, -20, -9)),
-          ('Default D', (-7, 49, 18)),
-          ('Default E', (-25, -32, -18)),
-          ('Default F', (-7, -52, 26))]
-
 # labels = [('Dorsal attention A', (-22, -2, 54)), 
 #           ('Dorsal attention B', (-34, -38, 44)), 
 #           ('Dorsal attention C', (-18, -69, 51)),
@@ -29,9 +16,22 @@ labels = [('Dorsal attention A', (-22, -2, 54)),
 #           ('Default A', (-27, 23, 48)),
 #           ('Default B', (-41, -60, 29)),
 #           ('Default C', (-64, -20, -9)),
-#           ('ATOL mPFC', (-4, 62, 14)),
+#           ('Default D', (-7, 49, 18)),
 #           ('Default E', (-25, -32, -18)),
-#           ('ATOL PCC', (-10, -48, 36))]
+#           ('Default F', (-7, -52, 26))]
+
+labels = [('Dorsal attention A', (-22, -2, 54)), 
+          ('Dorsal attention B', (-34, -38, 44)), 
+          ('Dorsal attention C', (-18, -69, 51)),
+          ('Dorsal attention D', (-51, -64, -2)),
+          ('Dorsal attention E', (-8, -63, 57)),
+          ('Dorsal attention F', (-49, 3, 34)), 
+          ('Default A', (-27, 23, 48)),
+          ('Default B', (-41, -60, 29)),
+          ('Default C', (-64, -20, -9)),
+          ('ATOL mPFC', (-4, 62, 14)),
+          ('Default E', (-25, -32, -18)),
+          ('ATOL PCC', (-10, -48, 36))]
 
 # do the things
 
