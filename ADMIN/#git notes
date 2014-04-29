@@ -1,0 +1,12 @@
+#git notes
+
+# remove all deleted files from repo
+git ls-files --deleted -z | xargs -0 git rm
+
+# add all changed files and push to server
+git add *
+git commit -m 'something i did'
+git push origin master
+
+# sync local files with server files
+git pull --rebase
