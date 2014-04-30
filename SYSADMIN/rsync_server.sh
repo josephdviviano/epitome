@@ -1,1 +1,0 @@
-sudo rsync -PRav /srv/. admin@192.168.0.102:/volume1/NetBackup/.
