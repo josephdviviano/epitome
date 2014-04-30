@@ -1,0 +1,186 @@
+%% Harford User Manual, Viviano, Joseph David Apr. 2014
+\documentclass[final,titlepage,letterpaper,oneside,12pt]{article}
+\usepackage[usenames,dvipsnames]{xcolor} % colors
+\usepackage{tikz}                       % graphs
+\usepackage{caption}                    % figure captions
+\usepackage[utf8]{inputenc}             % utf8 encoding compatibility
+\usepackage{fourier}                    % fonts
+\usepackage[T1]{fontenc}                % fonts
+\usepackage{natbib}                     % bibliography
+\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=MidnightBlue, citecolor=MidnightBlue,urlcolor=MidnightBlue]{hyperref}                % custom colors
+\usetikzlibrary{arrows}                 % arrows
+\usepackage{amsmath}                    % equations
+\usepackage{epigraph}                   % quotation
+\renewcommand\epigraphflush{flushright} % 
+\renewcommand\epigraphsize{\normalsize} % 
+\setlength\epigraphwidth{0.7\textwidth} % 
+\definecolor{titlepagecolor}{cmyk}{1,.60,0,.40} % custom color
+
+%% Title Page
+\makeatletter                       
+\def\printauthor{%                  
+    {\normalsize \@author}}              
+\makeatother
+\author{%
+    Joseph D. Viviano \\
+    Department of Biology \\
+    York University \\
+    Toronto, ON, CA \\
+    joseph.d.viviano@gmail.com
+}
+
+\newcommand\titlepagedecoration{%
+\begin{tikzpicture}[remember picture,overlay,shorten >= -10pt]
+
+\coordinate (aux1) at ([yshift=-15pt]current page.north east);
+\coordinate (aux2) at ([yshift=-410pt]current page.north east);
+\coordinate (aux3) at ([xshift=-4.5cm]current page.north east);
+\coordinate (aux4) at ([yshift=-150pt]current page.north east);
+
+\end{tikzpicture}%
+}
+
+\begin{document}
+\begin{titlepage}
+
+\noindent
+\begin{center}
+\begin{Huge}
+Harford\par
+the\par
+York University MRI Analysis Server\par
+\end{Huge}
+\end{center}
+\vspace*{2cm}
+\epigraph{The more we discover scientifically about the brain the more clearly do we distinguish between the brain events and the mental phenomena and the more wonderful do the mental phenomena become. Promissory materialism is simply a superstition held by dogmatic materialists. It has all the features of a Messianic prophecy, with the promise of a future freed of all problems—a kind of Nirvana for our unfortunate successors.}%
+{\textit{How the Self Controls Its Brain}\\ \textsc{John Carew Eccles}}
+\null\vfill
+\vspace*{1cm}
+\noindent
+\hfill
+\begin{minipage}{0.55\linewidth}
+    \begin{flushright}
+        \printauthor
+    \end{flushright}
+\end{minipage}
+%
+\begin{minipage}{0.02\linewidth}
+    \rule{1pt}{72pt}
+\end{minipage}
+\titlepagedecoration
+\end{titlepage}
+
+%% Document
+\section{Introduction}
+
+This server was built by a complete stranger to server-building, and I undoubtably made some silly mistakes along the way. This document is my effort to crystalize these decisions for those who paid for it (henseforth \textit{the money}) and whoever takes over responsibility from me (henseforth \textit{the unlucky}). Hopefully this isn't my last job ever, and I still walk this earth. If that is true, feel free to contact me at any time \texttt{joseph.d.viviano@gmail.com} 
+
+\section{Connecting}
+
+\section{Hardware}
+
+Harford is a \verb=Thinkserver TS440 (8 x 3.5" HDD Hot-Swappable model)= server loaded with 4 HHD at the moment.
+
+Hard drive caddy part \verb=# 03X3969, FRU HS 3.5” HDD Tray V3.0=.
+
+It is loaded with 4 X Westerm Digital RED 4.0 TB 5400 HDD, configured in RAID 1+0. This currently leaves us with 8 TB of usable hard drive space, and it can easily be expanded to 2$\times$ that with an additional 4 drives.
+
+\section{Server Architecture}
+\subsection{Partitions}
+Partition one is a 200 MB boot partition and is integral to the life of the server. Partition two is a 75 GB partition containing all user /home folders and software, and is mounted at `/'. This \textit{should} be large enough, if people don't store data in their home folders. Partition three is a 6.59 TB patition containing all of our data, and it mounted at `/srv'.
+
+Note carefully: this means that the lion's share of the disk space is found under `/srv' and therefore large files should \textit{always} be kept there!
+
+\subsection{Operating System}
+
+I chose Ubuntu Server 12.04 LTS for its excellent support, modern features, and compatibility with the NeuroDebian project (\url{neuro.debian.net}). I named the server Harford after the Kubrickian hero.
+
+When I first installed the server, I was left only with a basic terminal. To get things normal-looking, I had to \texttt{sudo apt-get install} the following: \\
+
+\noindent
+\texttt{openssh-server \\
+xfce4 \\
+kde-plasma-desktop \\
+synaptic \\
+lightdm-gtk-greeter \\
+jockey-gtk \\
+dmz-cursor-theme 
+xubuntu-icon-theme \\
+elementary-icon-theme
+}
+
+\subsection{Directories}
+\subsection{Permissions}
+
+The MRI data is seperated into 3 main branches: RAW, WORKING, and ANALYSIS. These different tiers are more or less editable by various users of the server to strike a balance between data-security and usability. As a general rule, we also don't let unauthorized people look at data they aren't supposed to for both privacy and competative reasons. These permissions are maintained by a root-level nightly \texttt{CRON} job \color{red}{\verb=maintain_permissions.sh=}.\color{black}
+
+The \texttt{grandvizier} user should be used by the system administrators to preform various tasks without the need of dropping to \texttt{root}, which I am trying to discourage as it can be dangerous to spend too much time with so much power. If you can see a file owned by the \texttt{grandvizier}, that typically means it is being protected.  
+
+\subsubsection{RAW}
+
+These are DICOM files. Mostly used for archival purposes. Shouldn't be edited.
+
+\begin{flushleft}
+\texttt{owner = grandvizier, rwx \\
+        group = staff      , r-x \\
+        else  =            , ---} \\
+\end{flushleft}
+
+\subsubsection{WORKING}
+
+These are the files manipulated by the pipeline code. Generally, these files should only be accessed by the pipeline and not manually. Right now, experiment specific group-wise permissions allow for you to go in and delete everything \textit{except} the input RAW data at the bottom of the WORKING tree. This allows you to `reset' problem subjects or whole users using the \texttt{cleanup} programs, or manually remove problem files.
+
+\begin{flushleft}
+
+\texttt{owner = grandvizier, rwx \\
+        group = [experiment], rwx (except inputs which are r-x) \\
+        else  =            , ---} \\
+\end{flushleft}
+
+\subsubsection{ANALYSIS}
+
+These folders are where people \textit{are} allowed to mess around. Generally, outputs from the pipeline can be copied into the ANALYSIS tree for manipulation. This is zero-risk as there is always an identical copy of the pre-processed files in the WORKING directory.
+
+\begin{flushleft}
+\texttt{owner = grandvizier, rwx \\
+        group = [exrperiment], rwx \\
+        else  =            , ---} \\
+\end{flushleft}
+
+\subsubsection{Privacy Notes}
+
+The \texttt{grandvizier} user is special, and shared among \textit{the money} and \textit{the unlucky}. The \texttt{grandvizier} is also capible of  destroying millions of tax-payer dollars in a one-line command, so it shouldn't be used by anyone unless required.
+
+All pipeline code will be run by the individuals within an experiment group -- and the code will work so long as the individual is permitted to interact with a given data set. This is safe because the pipeline code isn't editable by the users in the first place, so we can't do undue harm to our data by mistake.
+
+\subsection{Security}
+\subsection{Backup}
+\section{Software \& Configuration}
+
+The following a basic list of the software installed on the server, and is likely way out of date. I tried.
+
+\noindent
+\texttt{FSL5.0 \\
+DICOM2NIFTI \\
+Python tools (NIBABEL etc.) \\
+AFNI \\
+FREESURFER \\
+CARET \\
+R \\
+GEDIT \\
+TERMINATOR \\
+LIBREOFFICE \\
+EVINCE \\
+FIREFOX \\
+PYTHON: NUMPY, SCIPY, IPYTHON, NIBABEL, SCIKIT-LEARN, SCIKIT-IMAGE, PyMVPA \\
+}
+
+\subsection{MRI Tools}
+\subsection{Programming Languages}
+\section{Further Reading}
+
+%% End of document. Go to reference list.
+\newpage 
+\bibliographystyle{apalike}
+\bibliography{phd1}
+\end{document}
