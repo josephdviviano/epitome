@@ -10,18 +10,18 @@ DIR_AFNI='/usr/local/abin'
 AFNI_DECONFLICT=OVERWRITE
 CORES=7
 
-DIR_EXPT="RSFC2" #"TRSE","SAB1","ATOL","TRSEEN","RSFC1","BEBASD"
+DIR_EXPT="TRSEEN" #"RSFC2" #"TRSE","SAB1","ATOL","TRSEEN","RSFC1","BEBASD"
 
 SUBJECTS=`python ${DIR_PIPE}/ypp_inputs.py ${DIR_DATA} ${DIR_EXPT}`
 
 ## Options
-DATA_TYPE='REST'
-DELTR=4              # number of TRs to delete from the beginning of each run
+DATA_TYPE='LOCALIZER'
+DELTR=0              # number of TRs to delete from the beginning of each run
 DIMS=3               # set voxel dimensions post-reslice (iso)
 POLORT=4             # degree of legendre polynomials to detrend data against
 BLUR_FWHM=6          # blur FWHM
 TPATTERN='alt+z'     # MRI acquisition specific slice timing (for correction)
-DATA_QUALITY='low'   # options = 'low' and 'high'
+DATA_QUALITY='high'   # options = 'low' and 'high'
 COST='lpc+zz'        # registration cost function
 REG_DOF='giant_move' # registration constraints
 
@@ -77,13 +77,13 @@ export DATA_QUALITY
 
 # PIPELINE
 #python ${DIR_PIPE}/PRE/freesurfer_T1_export.py ${DIR_DATA} ${DIR_EXPT}
-#${DIR_PIPE}/PRE/motioncorrect.sh
-#${DIR_PIPE}/PRE/linreg_calculate.sh
+${DIR_PIPE}/PRE/motioncorrect.sh
+${DIR_PIPE}/PRE/linreg_calculate.sh
 #${DIR_PIPE}/PRE/linreg_FSATLAS_to_EPI.sh
 #${DIR_PIPE}/PRE/create_regressors.sh
 #${DIR_PIPE}/PRE/filter.sh
 #${DIR_PIPE}/PRE/filter_gsreg.sh
-#${DIR_PIPE}/PRE/linreg_EPI_to_MNI.sh
+${DIR_PIPE}/PRE/linreg_EPI_to_MNI.sh
 
 #${DIR_PIPE}/WIP/headmotion_TRdrop.py ${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} func_MNI anat_EPI_mask_MNI 50 0.3 65403 
 #${DIR_PIPE}/PRE/calculate_globalcorrelation.sh
