@@ -59,7 +59,7 @@ for SUB in ${SUBJECTS}; do
         INPUT=``
         DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
         for SESS in ${DIR_SESS}; do
-            FILES=`ls ${SESS}/func_scrubbed*`
+            FILES=`ls ${SESS}/func_MNI*`
             INPUT="${INPUT} ${FILES}"
         done    
         

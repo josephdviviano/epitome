@@ -1,6 +1,20 @@
-import itertools as it
-import random
+#!/usr/bin/env python
+
+"""
+Generates E-Prime files for Sabrina's brilliant experimental paradigm that I 
+named after this Pokemon
+
+http://bulbapedia.bulbagarden.net/wiki/Exeggutor_%28Pok%C3%A9mon%29
+
+You simply feed this program a single number for the number of runs per 
+participant. This program must be run once for each participant in the folder
+you want the stimulus files to end up in.
+"""
+
 import csv
+import sys
+import random
+import itertools as it
 
 def unique(seq):
     """
@@ -353,7 +367,17 @@ def write_outputs(run):
                              [jitter[2]*2000])
         csvfile.close()
 
-def main(num_runs=4):
+def init(num_runs=4):
     # loop through runs, writing outputs
     for run in range(num_runs):
         write_outputs(run)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print('Using default number of runs (4).')
+        init()
+    elif len(sys.argv) == 2:
+        print('Using ' + str(sys.argv[1]) + ' number of runs.')
+        init(sys.argv[1])
+    else:
+        print('Gave me too many inputs! I only need 1 (the number of runs)')

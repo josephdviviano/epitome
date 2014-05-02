@@ -1,8 +1,21 @@
-import itertools as it
-import random
-import csv
+#!/usr/bin/env python
+
 import os
+import csv
+import sys
+import random
 import numpy as np
+import itertools as it
+
+"""
+Generates AFNI GLM rapid-event timing files for Sabrina's brilliant
+experimental paradigm I named after this Pokemon
+
+http://bulbapedia.bulbagarden.net/wiki/Exeggutor_%28Pok%C3%A9mon%29
+
+This program requires you supply it with a path to the input stimulus timing
+files and the number of experimental runs.
+"""
 
 def load_blocks(directory, run):
     filename = str(run) + '_BlockList.txt'
@@ -69,7 +82,7 @@ def write_afni_files(directory, runs=4):
     if check_directory(directory) == True:
         pass
     else:
-        print 'your directoy is not correct :('
+        print 'your directory is not correct :('
         #raise
 
     # loop through runs, writing outputs
@@ -99,19 +112,19 @@ def write_afni_files(directory, runs=4):
             time = time + jitter
             # load in the events
             block_type = block[2] # get the block name
-            block_type = block_type[:-2] # strip the trailing number
+            block_type = block_type[:-1] # strip the trailing number
 
             # save onset times
-            if block_type == 'control':
+            if block_type == 'Control':
                 out['blocks_control'][i, j_control] = time
                 j_control = j_control + 1
-            elif block_type == 'inhibit':
+            elif block_type == 'Inhibition':
                 out['blocks_inhibit'][i, j_inhibit] = time
                 j_inhibit = j_inhibit + 1
-            elif block_type == 'twoback':
+            elif block_type == 'Updating':
                 out['blocks_twoback'][i, j_twoback] = time
                 j_twoback = j_twoback + 1
-            elif block_type == 'twobkin':
+            elif block_type == 'UpInhib':
                 out['blocks_twobkin'][i, j_twobkin] = time
                 j_twobkin = j_twobkin + 1
 
@@ -122,16 +135,16 @@ def write_afni_files(directory, runs=4):
                 if event[8] == 1:
                     out['events_switch'][i, k_switch] = time
                     k_switch = k_switch + 1
-                if block_type == 'control':
+                if block_type == 'Control':
                     out['events_control'][i, k_control] = time
                     k_control = k_control + 1
-                elif block_type == 'inhibit' and event[4] == -1: # inhibit only
+                elif block_type == 'Inhibition' and event[4] == -1: # inhibit
                     out['events_inhibit'][i, k_inhibit] = time
                     k_inhibit = k_inhibit + 1
-                elif block_type == 'twoback':
+                elif block_type == 'Updating':
                     out['events_twoback'][i, k_twoback] = time
                     k_twoback = k_twoback + 1
-                elif block_type == 'twobkin':
+                elif block_type == 'UpInhib':
                     out['events_twobkin'][i, k_twobkin] = time
                     k_twobkin = k_twobkin + 1
 
@@ -161,3 +174,19 @@ def write_afni_files(directory, runs=4):
                    out['events_twobkin'], delimiter='', fmt='%10.2f')
         np.savetxt(os.path.join(directory, 'events_switch.1D'),
                    out['events_switch'], delimiter='', fmt='%10.2f')
+
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        directory = os.getcwd()
+        print('Dir:' + str(directory) + ', runs: 4.')
+        write_afni_files(directory)
+    elif len(sys.argv) == 2:
+        print('Dir: ' + str(sys.argv[1]) + ', runs: 4.')
+        write_afni_files(sys.argv[1])
+    elif len(sys.argv) == 3:
+        print('Dir: ' + str(sys.argv[1]) + ' runs: ' + str(sys.argv[2]) + '.')
+        write_afni_files(sys.argv[1], sys.argv[2])
+    else:
+        print('Too many inputs! I only need 2 (directory, the # of runs)')
