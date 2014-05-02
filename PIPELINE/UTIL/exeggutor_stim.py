@@ -378,6 +378,6 @@ if __name__ == "__main__":
         init()
     elif len(sys.argv) == 2:
         print('Using ' + str(sys.argv[1]) + ' number of runs.')
-        init(sys.argv[1])
+        init(int(sys.argv[1]))
     else:
         print('Gave me too many inputs! I only need 1 (the number of runs)')

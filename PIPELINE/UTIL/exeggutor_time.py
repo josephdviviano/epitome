@@ -175,18 +175,15 @@ def write_afni_files(directory, runs=4):
         np.savetxt(os.path.join(directory, 'events_switch.1D'),
                    out['events_switch'], delimiter='', fmt='%10.2f')
 
-
-
 if __name__ == "__main__":
+    # maybe this will also become a command-line thing, right now we 
+    # only consider the present working directory
+    directory = os.getcwd()
     if len(sys.argv) < 2:
-        directory = os.getcwd()
         print('Dir:' + str(directory) + ', runs: 4.')
         write_afni_files(directory)
     elif len(sys.argv) == 2:
-        print('Dir: ' + str(sys.argv[1]) + ', runs: 4.')
-        write_afni_files(sys.argv[1])
-    elif len(sys.argv) == 3:
-        print('Dir: ' + str(sys.argv[1]) + ' runs: ' + str(sys.argv[2]) + '.')
-        write_afni_files(sys.argv[1], sys.argv[2])
+        print('Dir: ' + str(directory) + ', runs: ' + str(sys.argv[1]))
+        write_afni_files(directory, sys.argv[1])
     else:
-        print('Too many inputs! I only need 2 (directory, the # of runs)')
+        print('Too many inputs! I only need 1 (the number of runs!)')
