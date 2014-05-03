@@ -11,6 +11,8 @@
 \usetikzlibrary{arrows}                 % arrows
 \usepackage{amsmath}                    % equations
 \usepackage{epigraph}                   % quotation
+\renewcommand{\texttt}[2][BrickRed]{\textcolor{#1}{\ttfamily #2}}% \texttt[<color>]{<stuff>}
+\newcommand{\atilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
 \renewcommand\epigraphflush{flushright} % 
 \renewcommand\epigraphsize{\normalsize} % 
 \setlength\epigraphwidth{0.7\textwidth} % 
@@ -72,24 +74,62 @@ York University MRI Analysis Server\par
 \titlepagedecoration
 \end{titlepage}
 
-%% Document
+% Table of contents
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
 This server was built by a complete stranger to server-building, and I undoubtedly made some silly mistakes along the way. This document is my effort to crystallize these decisions for those who paid for it (henceforth \textit{the money}) and whoever takes over responsibility from me (henceforth \textit{the unlucky}). Hopefully this isn't my last job ever, and I still walk this earth. If that is true, feel free to contact me at any time \texttt{joseph.d.viviano@gmail.com} 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% How to Connect to the Server Remotely
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Connecting}
 
 To facilitate easy access to the server from your personal computer, on or off campus, we have configured three standard access methods.
 
-\subsection{Samba}
+\subsection{Samba: Finder access in OS X}
+First, click on your desktop. In your menu bar, select \texttt{go}, \texttt{connect to server}, and type \texttt{smb://130.63.40.171}, after which you need only to enter your username and password for the server. All non-MRI data will now be accessible and editable through the finder window, assuming you have permission to do so. Contact an administrator to change permissions.
+
+Note to administrators: samba is annoying and maintains its own set of passwords and permissions. This is particularly annoying because you will need to find an elegant way for users to set this password up. I haven't.
+
+First, you need to add an existing user to samba using \texttt{smbpasswd -a [username]}. Next we add \texttt{[username]}  to the \texttt{/etc/samba/smbusers} file in the form \texttt{[username] = "[username]"}. I've configured samba to mount \texttt{/srv/CNNLAB} as a writable directory structure in \texttt{/etc/samba/smb.conf} under the \texttt{[CNNLAB]} section. More directories could be added in this way. 
+
 \subsection{SSH}
+
+If you are comfortable with terminal-only access, you can use the \texttt{ssh} command on all Mac or Linux systems (normally, this is already installed). Windows users should install \href{http://www.chiark.greenend.org.uk/~sgtatham/putty/}{PuTTY} to gain access to the \texttt{ssh} command in the Windows terminal.
+
+The major advantage of terminal-only access is lag-free operation on very slow network connections, and the ability to log in to the server from any computer with zero configuration. To access the server, enter the command \texttt{ssh -p 45100 [your username]@130.63.40.171}, where \texttt{[your username]} is the login name registered on Harford. If you require a username, please contact one of the administrators. You will next need to enter your case-sensitive password associated with your user account and should have access to the server.
+
 \subsection{x2go}
 
 Normally, you will want to view a full graphic-user interface while you interact with the server. This will allow you to easily view the data remotely, and make use of various programs not available with terminal-only access. To do this, we use x2go (\href{http://wiki.x2go.org/doku.php}{download x2go client here}). On Windows and Mac, you should be able to open x2go by clicking on the installed icon. On Linux, you may need to type \texttt{x2goclient} into the terminal.
 
+Configuring x2go is fairly straightforward. First, click the `new session' button, and set these values:
+
+\begin{itemize} \itemsep-2pt
+    \item{Session name: [whatever you want ... I chose Harford]}
+    \item{Host: 130.63.40.171}
+    \item{Login: [your username]}
+    \item{SSH port: 45100}
+    \item{Session type: KDE (or XFCE on Windows or Linux only!)}
+\end{itemize}
+
+You might notice that this is almost identical to the information that we use to \texttt{ssh} into the server, because that is what we are actually doing! The only additional setting regards the \texttt{session type}, as we now need to specify the graphic user interface.
+
+A quick note on KDE \& XFCE. If you are on a Macintosh computing device, and you try to use XFCE, your keyboard will not work properly. Therefore, you must select KDE.  
+
+The rest of the items can remain blank. You do not need to configure anything specifically under the connection tab. However, here you can set performance values to your liking, especially to compensate for a slow connection. Try moving the slider to the left before changing the picture quality settings manually.
+
+Finally, you can customize session settings such as screen resolution (which will greatly affect your speed), sound, and other misc. settings. These values can be safely left at their defaults. Now you can click `OK' and log into the server by clicking on the newly created button on the right hand side. You will need to enter your password for the server here.
+
 \subsubsection{Troubleshooting x2go}
 
-In some cases, you will receive an error involving the RSA key, and will not be allowed to log into the server. Your RSA keys are stored in \texttt{~/.ssh/known\_hosts}. You can inspect the contents of this file by typing \texttt{cat ~/.ssh/known\_hosts} into the terminal. If you find an entry that starts with \texttt{130.63.40.171}, remove it using either: \texttt{gedit ~/.ssh/known\_hosts} or \texttt{vi ~/.ssh/known\_hosts} (\href{http://glaciated.org/vi/}{here are some instructions for vi}). If you are having trouble doing this, you can simply reset the \texttt{known\_hosts} file by removing it with \texttt{rm ~/.ssh/known\_hosts} (this might affect other systems relying on RSA keys, but I will assume it won't if you are following these instructions). You should now be able to log into the server using x2go.
+In some cases, you will receive an error involving the RSA key, and will not be allowed to log into the server. Your RSA keys are stored in \texttt{\atilde/.ssh/known\_hosts}. You can inspect the contents of this file by typing \texttt{cat \atilde/.ssh/known\_hosts} into the terminal. If you find an entry that starts with \texttt{130.63.40.171}, remove it using either: \texttt{gedit \atilde/.ssh/known\_hosts} or \texttt{vi \atilde/.ssh/known\_hosts} (\href{http://glaciated.org/vi/}{here are some instructions for vi}). If you are having trouble doing this, you can simply reset the \texttt{known\_hosts} file by removing it with \texttt{rm \atilde/.ssh/known\_hosts} (this might affect other systems relying on RSA keys, but I will assume it won't if you are following these instructions). You should now be able to log into the server using x2go.
 
 \subsection{Passwords}
 
@@ -109,7 +149,7 @@ Your default password can be changed to something more easily remembered by doin
             \item{1 symbol (i.e., *, \_\#\$\%)}
             \item{12 characters length minimum.}
         \end{itemize}
-        \item{This does not need to be hard to remember! Computer don't think like us.}
+        \item{This does not need to be hard to remember! Computer no think like human.}
         \begin{itemize} \itemsep-2pt
             \item{\texttt{\#sQ\_} is easy for a computer to guess.}
             \item{\texttt{Br4in-fun-4eva!} is much harder.}
@@ -121,10 +161,25 @@ Be sure to write your password down. If you forget your password, an administrat
 
 Also, recall that samba and unix passwords are \textit{not} automatically synchronized. [This really should be fixed.]
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The Hardware we have here
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Hardware}
 
 Harford is a \texttt{Thinkserver TS440 ($8 \times 3.5"$) HDD Hot-Swappable} server loaded with 4 HHD at the moment. Hard drive caddy part \texttt{\# 03X3969, FRU HS 3.5” HDD Tray V3.0}. It is loaded with 4 $\times$ Western Digital RED 4.0 TB 5400 HDD, configured in RAID 1+0. This currently leaves us with 8 TB of usable hard drive space, striped arrays, and on-site redundancy. It can easily be expanded to 2$\times$ that with an additional 4 drives.
 
+\subsection{Hardware List}
+
+Currently, Harford contains:
+
+\begin{enumerate} \itemsep-2pt
+    \item{Thinkserver TS440 [70AQ000CUX].}
+    \item{20 GB RAM [2$\times$8 GB added, 2$\times$2 GB stock].}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The way I set things up
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Server Architecture}
 \subsection{Partitions}
 
@@ -213,6 +268,10 @@ All pipeline code will be run by the individuals within an experiment group -- a
 
 \subsection{Security}
 \subsection{Backup}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The stuff I installed
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Software \& Configuration}
 
 The following is a list of the software installed on the server, and if you are lucky, it is even up-to-date.
@@ -270,6 +329,17 @@ The following is a list of the software installed on the server, and if you are 
 
 \subsection{MRI Tools}
 \subsection{Programming Languages}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The functionality of the pipeline
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Pipeline}
+
+For the pipeline to work, your RAW data must be converted to the appropriate format in the WORKING directory.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% References, both on server building and MRI analysis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
 
 %% End of document. Go to reference list.
