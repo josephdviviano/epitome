@@ -22,11 +22,33 @@
 </header>
 
 <article class="intro" id="info">
+	<h1>-=- Setting Your Password -=-</h1>
+	<h3>Unix command 'passwd'</h3>
+	<br>
 	<p>
-	<A HREF="file:/srv/CODE/EPItome-xl/GUI/remote.html">1. Remote Access</A> <br>
-	<A HREF="file:/srv/CODE/EPItome-xl/GUI/pw.html">2. Changing Passwords</A>
+	Your default password can be changed to something more easily remembered by doing the following:
 	</p>
 
+	<h3>0.0 SSH into the server using port 45100.</h3>
+	<p>
+	Harford uses a non-standard SSH port to prevent random attacks. This requires you to specify it at the command line with the following command: 'ssh -p 45100 [your username]@130.63.40.171'.
+	</p>
+
+	<h3>0.1 Use the 'passwd' command.</h3>
+	<p> If you type passwd at the command line, you will be prompted for your old annoying password, and asked to enter a new one.Your new password must satisfy the following conditions:
+	</p>
+	
+	<p>
+	1 Uppercase letter, <br>
+	1 lowercase letter,	<br>
+	1 number, <br>
+	1 symbol (i.e., *, _#$%), <br>
+	12 characters length minimum.
+	</p>
+	
+	<p>
+	Be sure to write your password down. If you forget your password, please contact one of the administrators.
+	</p>
 </article>
 
 </body>
