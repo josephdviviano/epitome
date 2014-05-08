@@ -40,3 +40,19 @@ for EXP in `ls -d */`; do
     chmod -R 770 ${EXP}
 done
 
+# sets proper experiment permissions for /srv/MRI/QUARANTINE
+cd /srv/MRI/QUARANTINE/
+for EXP in `ls -d */`; do
+    EXP="${EXP%?}"
+    GROUPNAME=`echo ${EXP} | tr '[:upper:]' '[:lower:]'`
+    groupadd -f ${GROUPNAME}
+
+    chown -R grandvizier ${EXP}
+    chgrp -R ${GROUPNAME} ${EXP}
+    chmod -R 770 ${EXP}
+
+    for RUN in `ls -d ${EXP}/*/*/*/RUN??/`; do
+        chmod -R 750 ${RUN}
+    done
+done
+
