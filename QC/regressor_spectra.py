@@ -10,7 +10,6 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import ypp_inputs
 import ypp_utilities
 
 def load_PSD(path, fs):
@@ -25,9 +24,9 @@ def load_PSD(path, fs):
     power = tmp[1] / np.sum(tmp[1])
     return freqs, power
 
-def main():
-    # declare all variables
-    path, expt, subjects, mode, core = ypp_inputs.init()
+def regressor_spectra(path, expt, mode):
+    """
+    """
 
     # get subject numbers
     subjects = ypp_utilities.get_subj(os.path.join(path, expt))
@@ -353,12 +352,13 @@ def main():
 
     # Add some metadata and close the PDF object
     d = pdf.infodict()
-    d['Title'] = 'Quality Control: Spectra of data, modelled noise, residuals'
+    d['Title'] = 'Quality Control: Spectra of data, modeled noise, residuals'
     d['Author'] = u'Joseph D Viviano\xe4nen'
     d['Subject'] = 'Quality Control'
-    d['Keywords'] = 'QC modelled noise spectra'
+    d['Keywords'] = 'QC modeled noise spectra'
     d['CreationDate'] = datetime.datetime.today()
     d['ModDate'] = datetime.datetime.today()
     pdf.close()
 
-    # JDV
+if __name__ == "__main__":
+    regressor_spectra(sys.argv[1], sys.argv[2], sys.argv[3])

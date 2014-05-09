@@ -10,17 +10,13 @@ from scipy import ndimage as nd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import ypp_inputs
 import ypp_utilities
 
-def main():
+def reg_check_T12MNI(path, expt, mode):
     """
     Prints the central slice of the T1 and co-registered + deskulled EPI, 
     including an edge-detected version of the T1 (requires AFNI).
     """
-
-    # declare all variables
-    path, expt, subjects, mode, core = ypp_inputs.init()
 
     # get subject numbers
     subjects = ypp_utilities.get_subj(os.path.join(path, expt))
@@ -134,6 +130,4 @@ def main():
     pdf.close()
 
 if __name__ == "__main__":
-	main()
-
-## JDV Feb 18 2014
+	reg_check_T12MNI(sys.argv[1], sys.argv[2], sys.argv[3])

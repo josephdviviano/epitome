@@ -9,23 +9,7 @@
 import os
 import sys
 import fnmatch
-import ypp_inputs
 import ypp_utilities
-
-def T1_export(path, expt):
-    
-    # get subject numbers
-    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
- 
-    # get directory of sessions
-    for subj in subjects:
-        directory = os.path.join(path, expt, subj, 'T1')
-        
-        # get all sessions
-        for session in os.listdir(directory):
-            if os.path.isdir(os.path.join(directory, session)) == True:
-                #export all FREESURFER data per session
-                run_commands(path, directory, expt, subj, session)
 
 def run_commands(path, directory, expt, subj, session):
     
@@ -86,6 +70,21 @@ def run_commands(path, directory, expt, subj, session):
                 '-prefix ' + dir_o + '/anat_aparc2009_brain.nii.gz ' + 
                 '-axial '  + dir_o + '/anat_aparc2009_fs.nii.gz')
         os.system(cmd6)
+
+def T1_export(path, expt):
+    
+    # get subject numbers
+    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
+ 
+    # get directory of sessions
+    for subj in subjects:
+        directory = os.path.join(path, expt, subj, 'T1')
+        
+        # get all sessions
+        for session in os.listdir(directory):
+            if os.path.isdir(os.path.join(directory, session)) == True:
+                #export all FREESURFER data per session
+                run_commands(path, directory, expt, subj, session)
 
 if __name__ == "__main__":
     T1_export(sys.argv[1], sys.argv[2])

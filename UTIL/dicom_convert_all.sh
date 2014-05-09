@@ -7,7 +7,13 @@ for d in *; do \
     mkdir ${directory}/DICOM_OUT/${subject}
     for f in ${d}/SourceDICOMs/*; do \
         file=`basename ${f}`
-        Dimon -infile_prefix ${f}/IM -gert_create_dataset -gert_write_as_nifti -dicom_org
+
+        Dimon \
+            -infile_prefix ${f}/IM \
+            -gert_create_dataset \
+            -gert_write_as_nifti \
+            -dicom_org
+
         mv *.nii ${directory}/DICOM_OUT/${subject}/${file}.nii.gz
         rm dimon.files.run*
         rm GERT_Reco_dicom*

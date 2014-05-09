@@ -11,7 +11,6 @@ from scipy import ndimage as nd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import ypp_inputs
 import ypp_utilities
 
 def reg_check(path, expt, mode):
@@ -133,5 +132,3 @@ def reg_check(path, expt, mode):
 
 if __name__ == "__main__":
 	reg_check(sys.argv[1], sys.argv[2], sys.argv[3])
-
-## JDV Feb 18 2014

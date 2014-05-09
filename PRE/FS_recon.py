@@ -6,10 +6,7 @@ import fnmatch
 import ypp_inputs
 import ypp_utilities
 
-def main():
-
-    # import appropriate variables
-    root, expt, subjects, mode, core = ypp_inputs.init()
+def FS_recon(root, expt, mode, core):
 
     # get subject numbers
     subjects = ypp_utilities.get_subj(os.path.join(root, expt))
@@ -54,5 +51,4 @@ def main():
             p.wait();
 
 if __name__ == "__main__":
-    main()
-
+    FS_recon(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

@@ -11,7 +11,6 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
-import ypp_inputs
 import ypp_utilities
 
 

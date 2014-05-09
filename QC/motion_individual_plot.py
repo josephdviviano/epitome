@@ -14,17 +14,14 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import ypp_inputs
 import ypp_utilities
 
 ## Options: will eventually be set at command line
-head_r = 50   # head diamater in mm
+head_r = 50   # head diameter in mm
 FD_t = 2    #
 DV_t = 10   #
 quality = 0  # set to 1 for dpi = 300, eps output
 blacklist = []  # participants to exclude
-
-##
 
 def factors(n):    
     """
@@ -288,19 +285,3 @@ def individual_motion_plot(path, expt, mode):
 
 if __name__ == "__main__":
     individual_motion_plot(sys.argv[1], sys.argv[2], sys.argv[3])
-
-## JDV
-
-# labels for x-y axis (not really needed)
-# ax_FD[ax_y][ax_x].set_xlabel('Time (TRs)')
-# ax_FD[ax_y][ax_x].set_ylabel('FD (mm/TR)')
-# ax_DV[ax_y][ax_x].set_xlabel('Time (TRs)')
-# ax_DV[ax_y][ax_x].set_ylabel('DVARS (\% signal)')
-
-# old stuff...
-# ax[0].tick_params(axis='both', which='both', size=10)
-# ax[0].set_xlim([0, len(t)-1])
-# xTicks = np.linspace(0, len(t), 5)
-# xTicks[-1] = xTicks[-1] - 1
-# ax[0].set_xticks(xTicks)
-# ax[0].set_xticklabels((xTicks+1).astype(np.int))
