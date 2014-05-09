@@ -32,12 +32,12 @@ def TR_drop(path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=0.3,
 
     # give feedback
     print("")
-    print(" ********************** TR Scrubbing Module ********************** ")
+    print(" ********************** TR Scrubbing Module ********************* ")
     print(" Running experiment " + str(expt) + ", datatype " + str(mode) + ".")
-    print(" With framewise displacement threshold = " + str(thresh_FD) + " mm,")
-    print("      DVARS threshold                  = " + str(thresh_DV) + " %,")
-    print("      head radius                      = " + str(head_size) + " mm.")
-    print(" ***************************************************************** ")
+    print(" Framewise displacement threshold     = " + str(thresh_FD) + " mm,")
+    print("      DVARS threshold                 = " + str(thresh_DV) + " %,")
+    print("      head radius                     = " + str(head_size) + " mm.")
+    print(" **************************************************************** ")
     print("")
 
     # open up a csv
@@ -122,7 +122,7 @@ def TR_drop(path, expt, mode, func_name, mask_name, head_size=50, thresh_FD=0.3,
                         outF.to_filename(os.path.join(directory, sess, 
                                                     'func_scrubbed.' + str(count) + '.nii.gz'))
 
-                        # updatae us and continue the loop
+                        # update us and continue the loop
                         print('subject ' + subj + ' run ' + str(count) + ' complete')
 
         # write out files and number of retained TRs
