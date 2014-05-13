@@ -24,9 +24,7 @@ def load_blocks(directory, run):
                            dtype=[('Weight', 'i8'),
                                   ('Nested', 'f8'),
                                   ('Procedure', 'S15'),
-                                  ('Jitter1', 'i8'),
-                                  ('Jitter2', 'i8'),
-                                  ('Jitter3', 'i8')])
+                                  ('Jitter1', 'i8')])
     blocks = blocks[1:] # strip header
     return blocks
 
@@ -43,9 +41,7 @@ def load_events(directory, run, blocktype):
                                   ('Upd', 'i8'),
                                   ('Inhib', 'i8'),
                                   ('Switch', 'i8'),
-                                  ('Jitter1', 'i8'),
-                                  ('Jitter2', 'i8'),
-                                  ('Jitter3', 'i8')])
+                                  ('Jitter1', 'i8')])
     events = events[1:] # strip header
     return events
 
@@ -108,7 +104,7 @@ def write_afni_files(directory, runs=4):
             # add the cue time
             time = time + 2
             # add jitter from the cue
-            jitter = (block[3] + block[4] + block[5]) / 1000
+            jitter = block[3] / 1000
             time = time + jitter
             # load in the events
             block_type = block[2] # get the block name
@@ -152,7 +148,7 @@ def write_afni_files(directory, runs=4):
                 time = time + 2
 
                 # calculate jitter, add to time
-                jitter = (event[9] + event[10] + event[11]) / 1000
+                jitter = event[9] / 1000
                 time = time + jitter
 
         # save the output files
