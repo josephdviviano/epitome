@@ -27,7 +27,7 @@ def unique(seq):
 
 def window(seq, n=2):
     """
-    Returns a sliding window of width n over data from the iterable"
+    Returns a sliding window of width n over data from the iterable
     s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...                   
     """
     iteration = iter(seq)
@@ -292,22 +292,19 @@ def write_outputs(run):
         out.writerow(['Weight'] + 
                      ['Nested'] + 
                      ['Procedure'] + 
-                     ['CueJitter1'] + 
-                     ['CueJitter2'] + 
-                     ['CueJitter3'])
+                     ['CueJitter1'])
         for block in block_names:
             # grab the jitters 3 at a time, and sort them
             jitter = []
             for x in range(3):
                 jitter.append(jitter_list.pop())
-            jitter.sort(reverse=True)
+            #jitter.sort(reverse=True)
+            jitter = sum(jitter)
             # write out the parameters for a given block
             out.writerow(['1'] + 
                           [''] + 
                           [block] + 
-                          [jitter[0]*2000] + 
-                          [jitter[1]*2000] + 
-                          [jitter[2]*2000])
+                          [1000 + (jitter*2000)])
     csvfile.close()
 
     for block in block_names:
@@ -322,9 +319,7 @@ def write_outputs(run):
                          ['Upd'] + 
                          ['Inhib'] + 
                          ['Switch'] + 
-                         ['NullTrial1'] + 
-                         ['NullTrial2'] + 
-                         ['NullTrial3'])
+                         ['NullTrial1'])
             # generate jitters in chunks < 3 in a row.
             while 1:
                 jitter_list, test = create_jitter(6,1,12,3)
@@ -340,7 +335,8 @@ def write_outputs(run):
                 jitter = []
                 for x in range(3):
                     jitter.append(jitter_list.pop())
-                jitter.sort(reverse=True)
+                #jitter.sort(reverse=True)
+                jitter = sum(jitter)
 
                 # rename the blocks --> subprocesses
                 if block[:-1] == 'Updating':
@@ -362,9 +358,7 @@ def write_outputs(run):
                              [str(block_update[block][i])] + 
                              [str(block_inhibit[block][i])] + 
                              [str(switch)] + 
-                             [jitter[0]*2000] + 
-                             [jitter[1]*2000] + 
-                             [jitter[2]*2000])
+                             [1500 + (jitter*2000)])
         csvfile.close()
 
 def init(num_runs=4):
