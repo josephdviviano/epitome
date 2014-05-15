@@ -155,8 +155,9 @@ def write_afni_files(directory, runs=4):
     out['events_inhibit'] = out['events_inhibit'].astype('str')
 
     for run in range(runs):
-        if out['events_inhibit'][run][11] == '0.0':
-            out['events_inhibit'][run][11] = ''
+        for idx in [9, 10, 11]:
+            if out['events_inhibit'][run][idx] == '0.0':
+                out['events_inhibit'][run][idx] = ''
 
     # save the output files
     np.savetxt(os.path.join(directory, 'blocks_control.1D'),
