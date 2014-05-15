@@ -299,12 +299,12 @@ def write_outputs(run):
             for x in range(3):
                 jitter.append(jitter_list.pop())
             #jitter.sort(reverse=True)
-            jitter = sum(jitter)
+            jitter = (sum(jitter)*2000) + 1000
             # write out the parameters for a given block
             out.writerow(['1'] + 
                           [''] + 
                           [block] + 
-                          [1000 + (jitter*2000)])
+                          [jitter])
     csvfile.close()
 
     for block in block_names:

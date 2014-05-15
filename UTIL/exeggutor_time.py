@@ -57,10 +57,10 @@ def make_output_dict(runs=4):
 
     # event matricies
     out['events_switch'] = np.zeros((runs, 12))
-    out['events_control'] = np.zeros((runs, 36))
+    out['events_control'] = np.zeros((runs, 33))
     out['events_inhibit'] = np.zeros((runs, 12))
-    out['events_twoback'] = np.zeros((runs, 36))
-    out['events_twobkin'] = np.zeros((runs, 36))
+    out['events_twoback'] = np.zeros((runs, 33))
+    out['events_twobkin'] = np.zeros((runs, 33))
     return out
 
 def check_directory(directory):
@@ -82,7 +82,7 @@ def write_afni_files(directory, runs=4):
         #raise
 
     # loop through runs, writing outputs
-    for i, run in enumerate(range(runs)):
+    for run in range(runs):
 
         # block indicies
         j_control = 0
@@ -98,13 +98,13 @@ def write_afni_files(directory, runs=4):
         k_twobkin = 0
 
         blocks = load_blocks(directory, run+1)
-        time = 0 # start the timer
+        time = 30 # start the timer at 36s (for rest)
         for block in blocks:
 
             # add the cue time
-            time = time + 2
+            time = time + 1.0
             # add jitter from the cue
-            jitter = block[3] / 1000
+            jitter = block[3] / 1000.0
             time = time + jitter
             # load in the events
             block_type = block[2] # get the block name
@@ -112,16 +112,16 @@ def write_afni_files(directory, runs=4):
 
             # save onset times
             if block_type == 'Control':
-                out['blocks_control'][i, j_control] = time
+                out['blocks_control'][run, j_control] = time
                 j_control = j_control + 1
             elif block_type == 'Inhibition':
-                out['blocks_inhibit'][i, j_inhibit] = time
+                out['blocks_inhibit'][run, j_inhibit] = time
                 j_inhibit = j_inhibit + 1
             elif block_type == 'Updating':
-                out['blocks_twoback'][i, j_twoback] = time
+                out['blocks_twoback'][run, j_twoback] = time
                 j_twoback = j_twoback + 1
             elif block_type == 'UpInhib':
-                out['blocks_twobkin'][i, j_twobkin] = time
+                out['blocks_twobkin'][run, j_twobkin] = time
                 j_twobkin = j_twobkin + 1
 
             # now run through the events
@@ -129,47 +129,54 @@ def write_afni_files(directory, runs=4):
             for event in events:
                 # save onset times
                 if event[8] == 1:
-                    out['events_switch'][i, k_switch] = time
+                    out['events_switch'][run, k_switch] = time
                     k_switch = k_switch + 1
-                if block_type == 'Control':
-                    out['events_control'][i, k_control] = time
-                    k_control = k_control + 1
                 elif block_type == 'Inhibition' and event[4] == -1: # inhibit
-                    out['events_inhibit'][i, k_inhibit] = time
+                    out['events_inhibit'][run, k_inhibit] = time
                     k_inhibit = k_inhibit + 1
+                elif block_type == 'Control':
+                    out['events_control'][run, k_control] = time
+                    k_control = k_control + 1
                 elif block_type == 'Updating':
-                    out['events_twoback'][i, k_twoback] = time
+                    out['events_twoback'][run, k_twoback] = time
                     k_twoback = k_twoback + 1
                 elif block_type == 'UpInhib':
-                    out['events_twobkin'][i, k_twobkin] = time
+                    out['events_twobkin'][run, k_twobkin] = time
                     k_twobkin = k_twobkin + 1
 
                 # add event length to time
-                time = time + 2
+                time = time + 0.5
 
                 # calculate jitter, add to time
-                jitter = event[9] / 1000
+                jitter = event[9] / 1000.0
                 time = time + jitter
 
-        # save the output files
-        np.savetxt(os.path.join(directory, 'blocks_control.1D'),
-                   out['blocks_control'], delimiter='', fmt='%10.2f')
-        np.savetxt(os.path.join(directory, 'blocks_inhibit.1D'),
-                   out['blocks_inhibit'], delimiter='', fmt='%10.2f')
-        np.savetxt(os.path.join(directory, 'blocks_twoback.1D'),
-                   out['blocks_twoback'], delimiter='', fmt='%10.2f')
-        np.savetxt(os.path.join(directory, 'blocks_twobkin.1D'),
-                   out['blocks_twobkin'], delimiter='', fmt='%10.2f')
-        np.savetxt(os.path.join(directory, 'events_control.1D'),
-                   out['events_control'], delimiter='', fmt='%10.2f')
-        np.savetxt(os.path.join(directory, 'events_inhibit.1D'),
-                   out['events_inhibit'], delimiter='', fmt='%10.2f')
-        np.savetxt(os.path.join(directory, 'events_twoback.1D'),
-                   out['events_twoback'], delimiter='', fmt='%10.2f')
-        np.savetxt(os.path.join(directory, 'events_twobkin.1D'),
-                   out['events_twobkin'], delimiter='', fmt='%10.2f')
-        np.savetxt(os.path.join(directory, 'events_switch.1D'),
-                   out['events_switch'], delimiter='', fmt='%10.2f')
+    # strip missing inhibit trials (must convert to strings...)
+    out['events_inhibit'] = out['events_inhibit'].astype('str')
+
+    for run in range(runs):
+        if out['events_inhibit'][run][11] == '0.0':
+            out['events_inhibit'][run][11] = ''
+
+    # save the output files
+    np.savetxt(os.path.join(directory, 'blocks_control.1D'),
+               out['blocks_control'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'blocks_inhibit.1D'),
+               out['blocks_inhibit'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'blocks_twoback.1D'),
+               out['blocks_twoback'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'blocks_twobkin.1D'),
+               out['blocks_twobkin'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'events_control.1D'),
+               out['events_control'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'events_inhibit.1D'),
+               out['events_inhibit'], delimiter=' ', fmt='%5s')
+    np.savetxt(os.path.join(directory, 'events_twoback.1D'),
+               out['events_twoback'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'events_twobkin.1D'),
+               out['events_twobkin'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'events_switch.1D'),
+               out['events_switch'], delimiter='', fmt='%10.1f')
 
 if __name__ == "__main__":
     # maybe this will also become a command-line thing, right now we 

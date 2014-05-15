@@ -21,4 +21,3 @@ for SUB in ${SUBJECTS}; do
     done # session
 done # subject
 cd ${DIR_PIPE}
-

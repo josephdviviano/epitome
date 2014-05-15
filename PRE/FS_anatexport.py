@@ -4,7 +4,7 @@
 # takes the processed T1 from freesurfer to use as a standard anatomical
 # this is slow, but provides the highest-quality registration target.
 # this also allows us to take advantage of the high-quality freesurfer
-# segmentations for nusiance time series regression, if desired
+# segmentations for nuisance time series regression, if desired
 
 import os
 import sys
