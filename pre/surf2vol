@@ -1,0 +1,50 @@
+#!/bin/bash
+
+## projects volume cortical data onto a freesurfer-surface
+cd /tmp
+INPUT=`echo 'func_'${1}`
+TARGET=`echo 'func_'${2}`
+FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
+
+for SUB in ${SUBJECTS}; do
+    DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+    for SESS in ${DIR_SESS}; do
+        SESS=`basename ${SESS}`        
+        DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
+        DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
+        DIR_FS=`echo ${FS}/${DIR_EXPT}_${SUB}_${SESS}`
+        
+        if [ ! -f ${DIR}/func_ctx.${NUM}.nii.gz ]; then
+            # project surface data --> volume
+            3dSurf2Vol \
+              -prefix ${DIR}/func_tmp_ctx.R.${NUM}.nii.gz \
+              -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
+              -surf_A ${DIR_FS}/SUMA/rh.white.asc \
+              -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
+              -grid_parent ${DIR}/${TARGET}.${NUM}.nii.gz \
+              -map_func median \
+              -f_steps 15 \
+              -f_index nodes \
+              -sdata ${DIR}/${INPUT}.R.${NUM}.niml.dset
+
+            3dSurf2Vol \
+              -prefix ${DIR}/func_tmp_ctx.L.${NUM}.nii.gz \
+              -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
+              -surf_A ${DIR_FS}/SUMA/lh.white.asc \
+              -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
+              -grid_parent ${DIR}/${TARGET}.${NUM}.nii.gz \
+              -map_func median \
+              -f_steps 15 \
+              -f_index nodes \
+              -sdata ${DIR}/${INPUT}.L.${NUM}.niml.dset
+
+            # add all volumes to create smoothed cortical dataset
+            3dcalc \
+              -prefix ${DIR}/func_ctx.${NUM}.nii.gz \
+              -a ${DIR}/tmp/func_tmp_ctx.R.${NUM}.nii.gz \
+              -b ${DIR}/tmp/func_tmp_ctx.L.${NUM}.nii.gz \
+              -expr 'a+b'
+        fi
+    done
+done
+cd ${DIR_PIPE}
