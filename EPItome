@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # a simple file containing the participants to be analyzed
-# this will become more sophisticated soon...
 
 ## Setup
 export DIR_PIPE='/srv/CODE/PIPELINE'
@@ -22,40 +21,6 @@ export TPATTERN='alt+z'     # MRI acquisition specific slice timing
 export DATA_QUALITY='high'  # options = 'low' and 'high'
 export COST='lpc+zz'        # registration cost function
 export REG_DOF='giant_move' # registration constraints
-
-## TPATTERN ##
-#    alt+z = altplus   = alternating in the plus direction
-#    alt+z2            = alternating, starting at slice #1 instead of #0
-#    alt-z = altminus  = alternating in the minus direction
-#    alt-z2            = alternating, starting at slice #nz-2 instead of #nz-1
-#    seq+z = seqplus   = sequential in the plus direction
-#    seq-z = seqminus  = sequential in the minus direction
-#
-
-## DATA QUALITY ##
-#    high       = Good internal contrast (default)
-#    low        = Poor internal contrast, mostly for old data
-
-## COST FUNCTION ##
-#    ls   *OR*  leastsq         = Least Squares [Pearson Correlation]
-#    mi   *OR*  mutualinfo      = Mutual Information [H(b)+H(s)-H(b,s)]
-#    crM  *OR*  corratio_mul    = Correlation Ratio (Symmetrized*)
-#    nmi  *OR*  norm_mutualinfo = Normalized MI [H(b,s)/(H(b)+H(s))]
-#    hel  *OR*  hellinger       = Hellinger metric
-#    crA  *OR*  corratio_add    = Correlation Ratio (Symmetrized+)
-#    crU  *OR*  corratio_uns    = Correlation Ratio (Unsym)
-#    sp   *OR*  spearman        = Spearman [rank] Correlation
-#    je   *OR*  jointentropy    = Joint Entropy [H(b,s)]
-#    lss  *OR*  signedPcor      = Signed Pearson Correlation
-#    lpc  *OR*  localPcorSigned = Local Pearson Correlation Signed
-#    lpa  *OR*  localPcorAbs    = Local Pearson Correlation Abs
-#    lpc+ *OR*  localPcor+Others= Local Pearson Signed + Others
-#    ncd  *OR*  NormCompDist    = Normalized Compression Distance
-#    lpc+zz                     = Local Pearson Correlation Signed + Magic
-
-## REGISTRATION DEGREES OF FREEDOM ##
-#    big_move           = Smaller moves (if giant gives bad registration)
-#    giant_move         = Large search space allowed (generally safe)
 
 # PIPELINE
 #python ${DIR_PIPE}/PRE/freesurfer_T1_export.py ${DIR_DATA} ${DIR_EXPT}

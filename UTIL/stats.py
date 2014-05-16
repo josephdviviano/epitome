@@ -1,6 +1,8 @@
 """
-A collection of statisical routines useful for large data sets.
+A collection of statistical routines useful for large data sets.
 """
+
+import numpy as np
 
 def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
 
@@ -19,8 +21,6 @@ def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
               test with no assumptions. Default = 'yes'.
     - `crit`: if crit='yes', also returns the critical p-value . Default = 'no'.
     """
-
-    import numpy as np
 
     # initialize numpy array with > 2 p values
     if isinstance(p, np.ndarray) == False:
@@ -53,7 +53,7 @@ def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
         threshold = vec / size * q / np.sum([1 / vec])
     del(vec)
 
-    # find largest p value below threhold
+    # find largest p value below threshold
     H0_rej = dat <= threshold
     try:
         crit_p = np.max(dat[H0_rej])
@@ -94,8 +94,6 @@ def FDR_threshold(p=[], q=0.05, iid='yes'):
               test with no assumptions. Default = 'yes'.
     """
 
-    import numpy as np
-
     # initialize numpy array with > 2 p values
     if isinstance(p, np.ndarray) == False:
         p = np.array(p)
@@ -131,7 +129,7 @@ def FDR_threshold(p=[], q=0.05, iid='yes'):
         threshold = vec / size * q / np.sum([1 / vec])
     del(vec)
 
-    # find largest p value below threhold
+    # find largest p value below threshold
     H0_rej = dat <= threshold
     try:
         crit_p = np.max(dat[H0_rej])

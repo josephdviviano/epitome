@@ -4,6 +4,7 @@
 
 INPUT=`echo 'func_${1}'`
 MASK=`echo 'anat_${2}'`
+DIMS=`echo ${3}` 
 
 cd /tmp
 for SUB in ${SUBJECTS}; do
@@ -13,20 +14,11 @@ for SUB in ${SUBJECTS}; do
         for RUN in ${DIR_RUNS}; do
             NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-            # smooth data within mask
-            if [ ! -f ${SESS}/func_smooth.${NUM}.nii.gz ]; then
-                3dBlurInMask \
-                    -prefix ${SESS}/func_smooth.${NUM}.nii.gz \
-                    -FWHM ${BLUR_FWHM} \
-                    -mask ${SESS}/${MASK}.nii.gz \
-                    -input ${SESS}/${INPUT}.${NUM}.nii.gz
-            fi
-
             # register runs with MNI
             if [ ! -f ${SESS}/func_MNI.${NUM}.nii.gz ]; then
                 3dAllineate \
                     -prefix ${SESS}/func_MNI.${NUM}.nii.gz \
-                    -input ${SESS}/func_smooth.${NUM}.nii.gz \
+                    -input ${SESS}/${INPUT}.${NUM}.nii.gz \
                     -1Dmatrix_apply ${SESS}/mat_EPI_to_TAL.aff12.1D \
                     -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
                     -float \
@@ -38,8 +30,8 @@ for SUB in ${SUBJECTS}; do
         # register session masks with MNI
         if [ ! -f ${SESS}/anat_EPI_mask_MNI.nii.gz ]; then
             3dAllineate \
-                -prefix ${SESS}/anat_EPI_mask_MNI.nii.gz \
-                -input ${SESS}/anat_EPI_mask.nii.gz \
+                -prefix ${SESS}/${MASK}_MNI.nii.gz \
+                -input ${SESS}/${MASK}.nii.gz \
                 -1Dmatrix_apply ${SESS}/mat_EPI_to_TAL.aff12.1D \
                 -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
                 -float \
@@ -66,7 +58,7 @@ done
 # create experiment wide mask
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/mask_group.nii.gz ]; then
     3dmask_tool \
-        -input ${DIR_DATA}/${DIR_EXPT}/*/${DATA_TYPE}/*/anat_EPI_mask_MNI.nii.gz \
+        -input ${DIR_DATA}/${DIR_EXPT}/*/${DATA_TYPE}/*/${MASK}_MNI.nii.gz \
         -prefix ${DIR_DATA}/${DIR_EXPT}/mask_group_MNI.nii.gz -frac 1.0
 fi
 cd ${DIR_PIPE}

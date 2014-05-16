@@ -2,6 +2,7 @@
 
 ## projects volume cortical data onto a freesurfer-surface
 cd /tmp
+INPUT=`echo 'func_'${1}`
 FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
 
 for SUB in ${SUBJECTS}; do
@@ -35,7 +36,7 @@ for SUB in ${SUBJECTS}; do
               -surf_A ${DIR_FS}/SUMA/rh.white.asc \
               -surf_B ${DIR_FS}/SUMA/rh.pial.asc \
               -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
-              -grid_parent ${DIR}/func_filtered.${NUM}.nii.gz \
+              -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
               -map_func median \
               -f_steps 15 \
               -f_index nodes \
@@ -50,7 +51,7 @@ for SUB in ${SUBJECTS}; do
               -surf_A ${DIR_FS}/SUMA/lh.white.asc \
               -surf_B ${DIR_FS}/SUMA/lh.pial.asc \
               -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
-              -grid_parent ${DIR}/func_filtered.${NUM}.nii.gz \
+              -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
               -map_func median \
               -f_steps 15 \
               -f_index nodes \

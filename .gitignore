@@ -76,3 +76,6 @@ docs/_build/
 *.mtc1
 *.out
 *.synctex.gz
+
+# Notes to myself
+*.txt

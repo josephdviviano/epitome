@@ -14,7 +14,7 @@ for SUB in ${SUBJECTS}; do
                 @compute_gcor \
                     -input ${FILE} \
                     -verb 0 \
-                    -mask ${SESS}/anat_${2}.nii.gz \
+                    -mask ${SESS}/${MASK}.nii.gz \
                     > ${SESS}/${PARAMS}/${FNAME}.gcorr
             fi
         done # file

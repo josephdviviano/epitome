@@ -6,8 +6,9 @@
 # Computed temporal SNR
 # Subtracts noise time series from each voxel, retaining the mean
 
-INPUT=`echo 'func_${1}'`
-GS_FLAG=`echo ${2}`
+INPUT=`echo 'func_'${1}`
+POLORT=`echo ${2}` # detrend 
+GS_FLAG=`echo ${3}` # if this = 1, then regress global signal like a chump
 
 cd /tmp
 for SUB in ${SUBJECTS}; do
@@ -154,4 +155,3 @@ for SUB in ${SUBJECTS}; do
     done
 done
 cd ${DIR_PIPE}
-

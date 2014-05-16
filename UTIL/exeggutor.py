@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-Generates E-Prime files for Sabrina's brilliant experimental paradigm that I 
-named after this Pokemon
+Generates E-Prime files, and AFNI timing files for Sabrina's brilliant 
+experimental paradigm that I named after this Pokemon
 
 http://bulbapedia.bulbagarden.net/wiki/Exeggutor_%28Pok%C3%A9mon%29
 
@@ -10,10 +10,11 @@ You simply feed this program a single number for the number of runs per
 participant. This program must be run once for each participant in the folder
 you want the stimulus files to end up in.
 """
-
+import os
 import csv
 import sys
 import random
+import numpy as np
 import itertools as it
 
 def unique(seq):
@@ -106,6 +107,61 @@ def generate_block_names():
     test = window(block_names, 2)
     test = list(test)
     return block_names, test
+
+def load_blocks(directory, run):
+    filename = str(run) + '_BlockList.txt'
+    blocks = np.genfromtxt(os.path.join(directory, filename),
+                           delimiter='\t',
+                           dtype=[('Weight', 'i8'),
+                                  ('Nested', 'f8'),
+                                  ('Procedure', 'S15'),
+                                  ('Jitter1', 'i8')])
+    blocks = blocks[1:] # strip header
+    return blocks
+
+def load_events(directory, run, blocktype):
+    filename = str(run) + '_' + str(blocktype) + '.txt'
+    events = np.genfromtxt(os.path.join(directory, filename),
+                           delimiter='\t',
+                           dtype=[('Weight', 'i8'),
+                                  ('Nested', 'f8'), 
+                                  ('Procedure', 'S15'),
+                                  ('Stimuli', 'S15'),
+                                  ('Ans', 'i8'),
+                                  ('MB', 'i8'),
+                                  ('Upd', 'i8'),
+                                  ('Inhib', 'i8'),
+                                  ('Switch', 'i8'),
+                                  ('Jitter1', 'i8')])
+    events = events[1:] # strip header
+    return events
+
+def make_output_dict(runs=4):
+    # init output
+    out = {}
+
+    # block matricies
+    out['blocks_control'] = np.zeros((runs, 3))
+    out['blocks_inhibit'] = np.zeros((runs, 3))
+    out['blocks_twoback'] = np.zeros((runs, 3))
+    out['blocks_twobkin'] = np.zeros((runs, 3))
+
+    # event matricies
+    out['events_switch'] = np.zeros((runs, 12))
+    out['events_control'] = np.zeros((runs, 33))
+    out['events_inhibit'] = np.zeros((runs, 12))
+    out['events_twoback'] = np.zeros((runs, 33))
+    out['events_twobkin'] = np.zeros((runs, 33))
+    return out
+
+def check_directory(directory):
+    if os.path.isdir(directory) == True:
+        if os.path.isfile(os.path.join(directory, '1_BlockList.txt')) == True:
+            return True
+        else:
+            return False
+    else:
+        return False
 
 def create_stimulus_order():
     # init output dicts
@@ -361,12 +417,127 @@ def write_outputs(run):
                              [1500 + (jitter*2000)])
         csvfile.close()
 
-def init(num_runs=4):
+def write_afni_files(directory, runs=4):
+    out = make_output_dict(runs)
+
+    if check_directory(directory) == True:
+        pass
+    else:
+        print 'your directory is not correct :('
+        #raise
+
+    # loop through runs, writing outputs
+    for run in range(runs):
+
+        # block indicies
+        j_control = 0
+        j_inhibit = 0
+        j_twoback = 0
+        j_twobkin = 0
+
+        # event indicies
+        k_switch = 0
+        k_control = 0
+        k_inhibit = 0
+        k_twoback = 0
+        k_twobkin = 0
+
+        blocks = load_blocks(directory, run+1)
+        time = 30 # start the timer at 36s (for rest)
+        for block in blocks:
+
+            # add the cue time
+            time = time + 1.0
+            # add jitter from the cue
+            jitter = block[3] / 1000.0
+            time = time + jitter
+            # load in the events
+            block_type = block[2] # get the block name
+            block_type = block_type[:-1] # strip the trailing number
+
+            # save onset times
+            if block_type == 'Control':
+                out['blocks_control'][run, j_control] = time
+                j_control = j_control + 1
+            elif block_type == 'Inhibition':
+                out['blocks_inhibit'][run, j_inhibit] = time
+                j_inhibit = j_inhibit + 1
+            elif block_type == 'Updating':
+                out['blocks_twoback'][run, j_twoback] = time
+                j_twoback = j_twoback + 1
+            elif block_type == 'UpInhib':
+                out['blocks_twobkin'][run, j_twobkin] = time
+                j_twobkin = j_twobkin + 1
+
+            # now run through the events
+            events = load_events(directory, run+1, block[2])
+            for event in events:
+                # save onset times
+                if event[8] == 1:
+                    out['events_switch'][run, k_switch] = time
+                    k_switch = k_switch + 1
+                elif block_type == 'Inhibition' and event[4] == -1: # inhibit
+                    out['events_inhibit'][run, k_inhibit] = time
+                    k_inhibit = k_inhibit + 1
+                elif block_type == 'Control':
+                    out['events_control'][run, k_control] = time
+                    k_control = k_control + 1
+                elif block_type == 'Updating':
+                    out['events_twoback'][run, k_twoback] = time
+                    k_twoback = k_twoback + 1
+                elif block_type == 'UpInhib':
+                    out['events_twobkin'][run, k_twobkin] = time
+                    k_twobkin = k_twobkin + 1
+
+                # add event length to time
+                time = time + 0.5
+
+                # calculate jitter, add to time
+                jitter = event[9] / 1000.0
+                time = time + jitter
+
+    # strip missing inhibit trials (must convert to strings...)
+    out['events_inhibit'] = out['events_inhibit'].astype('str')
+
+    for run in range(runs):
+        for idx in [9, 10, 11]:
+            if out['events_inhibit'][run][idx] == '0.0':
+                out['events_inhibit'][run][idx] = ''
+
+    # save the output files
+    np.savetxt(os.path.join(directory, 'blocks_control.1D'),
+               out['blocks_control'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'blocks_inhibit.1D'),
+               out['blocks_inhibit'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'blocks_twoback.1D'),
+               out['blocks_twoback'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'blocks_twobkin.1D'),
+               out['blocks_twobkin'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'events_control.1D'),
+               out['events_control'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'events_inhibit.1D'),
+               out['events_inhibit'], delimiter=' ', fmt='%5s')
+    np.savetxt(os.path.join(directory, 'events_twoback.1D'),
+               out['events_twoback'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'events_twobkin.1D'),
+               out['events_twobkin'], delimiter='', fmt='%10.1f')
+    np.savetxt(os.path.join(directory, 'events_switch.1D'),
+               out['events_switch'], delimiter='', fmt='%10.1f')
+
+def init(directory, num_runs=4):    
     # loop through runs, writing outputs
     for run in range(num_runs):
         write_outputs(run)
+    
+    # and generate AFNI files
+    write_afni_files(directory, num_runs)
 
 if __name__ == "__main__":
+    
+    # get current directory (could become command line thing)
+    directory = os.getcwd()
+    
+    # print very important text
     print("""                                                    
 			                                                           
 			"Exeggutor, go!"  
@@ -412,9 +583,11 @@ if __name__ == "__main__":
 	     """)
     if len(sys.argv) < 2:
         print('Using default number of runs (4).')
-        init()
+        init(directory)
+   
     elif len(sys.argv) == 2:
         print('Using ' + str(sys.argv[1]) + ' number of runs.')
-        init(int(sys.argv[1]))
+        init(directory, int(sys.argv[1]))
+    
     else:
         print('Gave me too many inputs! I only need 1 (the number of runs)')

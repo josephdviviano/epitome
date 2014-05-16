@@ -1,12 +1,10 @@
 #!/bin/bash
 
 ## Standard Space Module: Prepares data for analysis in standard space
-#
-#
-#
 
 INPUT=`echo 'func_${1}'`
 MASK=`echo 'anat_${2}'`
+DIMS=`echo ${3}` 
 
 cd /tmp
 for SUB in ${SUBJECTS}; do
@@ -25,18 +23,9 @@ for SUB in ${SUBJECTS}; do
         for RUN in ${DIR_RUNS}; do
             NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-            # smooth data within mask
-            if [ ! -f ${SESS}/func_smooth.${NUM}.nii.gz ]; then
-                3dBlurInMask \
-                    -prefix ${SESS}/func_smooth.${NUM}.nii.gz \
-                    -FWHM ${BLUR_FWHM} \
-                    -mask ${SESS}/${MASK}.nii.gz \
-                    -input ${SESS}/${INPUT}.${NUM}.nii.gz
-            fi
-
-            # register runs with individual T1s, and MNI
+            # register runs with individual T1s
             if [ ! -f ${DIR}/func_T1.${NUM}.nii.gz ]; then
-                flirt -in ${DIR}/func_smooth.${NUM}.nii.gz \
+                flirt -in ${DIR}/${INPUT}.${NUM}.nii.gz \
                       -ref ${DIR}/anat_EPI_reg_target.nii.gz \
                       -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
                       -out ${DIR}/func_T1.${NUM}.nii.gz
@@ -45,7 +34,7 @@ for SUB in ${SUBJECTS}; do
                       # -sincwindow blackman \
             fi
 
-
+            # register runs with MNI
             if [ ! -f ${DIR}/func_MNI.${NUM}.nii.gz ]; then
                 3dAllineate -prefix ${DIR}/func_MNI.${NUM}.nii.gz \
                             -input ${DIR}/func_T1.${NUM}.nii.gz \
@@ -58,14 +47,14 @@ for SUB in ${SUBJECTS}; do
         
         # register session masks with MNI
         if [ ! -f ${DIR}/anat_EPI_mask_MNI.nii.gz ]; then
-            flirt -in ${DIR}/anat_EPI_mask.nii.gz \
+            flirt -in ${DIR}/${MASK}.nii.gz \
                   -ref ${DIR}/anat_EPI_reg_target.nii.gz \
                   -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
                   -interp nearestneighbour \
-                  -out ${DIR}/anat_EPI_mask_T1.nii.gz
+                  -out ${DIR}/${MASK}_T1.nii.gz
 
-            3dAllineate -prefix ${DIR}/anat_EPI_mask_MNI.nii.gz \
-                        -input ${DIR}/anat_EPI_mask_T1.nii.gz \
+            3dAllineate -prefix ${DIR}/${MASK}_MNI.nii.gz \
+                        -input ${DIR}/${MASK}_T1.nii.gz \
                         -1Dmatrix_apply ${DIR_T1}/mat_T1_to_TAL.1D \
                         -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
                         -float -final NN \
@@ -90,8 +79,7 @@ done
 
 # create experiment wide mask
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/mask_group.nii.gz ]; then
-    3dmask_tool -input ${DIR_DATA}/${DIR_EXPT}/*/${DATA_TYPE}/*/anat_EPI_mask_MNI.nii.gz \
+    3dmask_tool -input ${DIR_DATA}/${DIR_EXPT}/*/${DATA_TYPE}/*/${MASK}_MNI.nii.gz \
                 -prefix ${DIR_DATA}/${DIR_EXPT}/mask_group_MNI.nii.gz -frac 1.0
 fi
 cd ${DIR_PIPE}
-
