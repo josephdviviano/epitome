@@ -5,6 +5,12 @@
 # Calculates: EPI <--> T1 <--> MNI152
 # Generates: EPI template registered to T1 & T1 registered to EPI (sessionwise)
 
+## NB -- This module is WAY out of date -- jdv
+
+COST=`echo ${1}`
+REG_DOF=`echo ${2}`
+DATA_QUALITY=`echo ${3}`
+
 cd /tmp
 for SUB in ${SUBJECTS}; do
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

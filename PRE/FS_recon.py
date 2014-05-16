@@ -3,7 +3,7 @@
 import subprocess
 import os
 import fnmatch
-import ypp_utilities
+import utilities
 
 def FS_recon(root, expt, mode, core):
 

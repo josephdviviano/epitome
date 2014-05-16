@@ -9,7 +9,7 @@
 import os
 import sys
 import fnmatch
-import ypp_utilities
+import utilities
 
 def run_commands(path, directory, expt, subj, session):
     

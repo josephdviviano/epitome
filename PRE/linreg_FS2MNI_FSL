@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Brings T1-associated files to single participant / single session space
+## Brings Freesurfer atlases in line with MNI brain.
 
 cd /tmp
 for SUB in ${SUBJECTS}; do
