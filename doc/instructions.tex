@@ -48,7 +48,7 @@
 \noindent
 \begin{center}
 \begin{Huge}
-EPItome-XL\par
+EPItome-xl\par
 \begin{small}
 on\par
 \end{small}
@@ -328,6 +328,7 @@ The following is a list of the software installed on the server, and if you are 
         \item{\href{https://wiki.gnome.org/Apps/Dia}{Dia}}
         \item{\href{http://www.videolan.org/vlc/index.html}{VLC}}
         \item{\href{https://www.samba.org/}{Samba}}
+        \item{\href{http://www.socher.org/index.php/Main/HowToInstallSunGridEngineOnUbuntu}{Oracle Sun-Grid Engine}}
     \end{itemize}
     
     \item{Python Packages:}
@@ -349,9 +350,12 @@ The following is a list of the software installed on the server, and if you are 
         \item{\href{http://www.mathworks.com/products/compiler/mcr/}{MATLAB Compiler Runtime}}
         \item{\href{http://afni.nimh.nih.gov/sscc/dglen/McRetroTS}{McRetro}}
     \end{itemize}
+
 \end{itemize}
 \end{small}
 
+\subsection{Oracle Sun-Grid Engine}
+The server, and EPItome-xl, rely on Oracle's Sun-Grid engine to schedule jobs. At the moment this feature is merely cosmetic, but it will help immensely when multiple users are attemping to run their experiments through the pipeline at the same time (such as 4 days before SfN abstracts are due). The EPItome-xl pipeline actually handles most of the nitty-gritty here, which I will document later (i.e., {\color{red}never}). In order to install and configure the scheduler, I followed \href{http://www.socher.org/index.php/Main/HowToInstallSunGridEngineOnUbuntu}{these instructions}.  
 \subsection{MRI Tools}
 \subsection{Programming Languages}
 
