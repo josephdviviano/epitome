@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 A collection of statistical routines useful for large data sets.
 """
