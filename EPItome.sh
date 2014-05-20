@@ -6,8 +6,9 @@
 export DIR_PIPE='/srv/CODE/PIPELINE'
 export DIR_DATA='/srv/MRI/WORKING'
 export DIR_AFNI='/usr/local/abin'
-export AFNI_DECONFLICT=OVERWRITE
 export CORES=7
+
+export AFNI_DECONFLICT=OVERWRITE
 export SUBJECTS=`python ${DIR_PIPE}/ypp_inputs.py ${DIR_DATA} ${DIR_EXPT}`
 
 ## Options

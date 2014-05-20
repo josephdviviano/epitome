@@ -23,9 +23,11 @@ Usage:
 
 import os
 import sys
+import config
 
 def print_modules():
     print """I'm printing some modules!"""
+
 
 def check_paths():
     print """I'm checking some paths!"""
