@@ -11,7 +11,7 @@ from scipy import ndimage as nd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import ypp_utilities
+import utilities
 
 def mask_check(path, expt, mode):
     """

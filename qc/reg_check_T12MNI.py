@@ -10,7 +10,7 @@ from scipy import ndimage as nd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import ypp_utilities
+import utilities
 
 def reg_check_T12MNI(path, expt, mode):
     """

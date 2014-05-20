@@ -10,7 +10,7 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import ypp_utilities
+import utilities
 
 def load_PSD(path, fs):
     tmp = np.genfromtxt(path)

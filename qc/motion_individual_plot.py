@@ -14,7 +14,7 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import ypp_utilities
+import utilities
 
 ## Options: will eventually be set at command line
 head_r = 50   # head diameter in mm
