@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-import bioread as bio
 import numpy as np
 
-data = bio.read_file("22005.acq")
+import bioread as bio
 
+data = bio.read_file("22005.acq")
 data.channels
 
 # [Channel resp: 2462018 samples, 500.0 samples/sec,

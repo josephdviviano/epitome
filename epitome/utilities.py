@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import sys
-
 def get_subj(dir):
     """
     Gets all folder names in a directory.

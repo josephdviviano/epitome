@@ -3,11 +3,13 @@
 import fnmatch
 import os
 import csv
+
 import numpy as np
 import scipy as sp
-import nibabel as nib
-import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import matplotlib.pyplot as plt
+
+import nibabel as nib
 
 ## Options ###
 oPre = 'func_brain'
