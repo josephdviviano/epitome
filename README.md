@@ -7,7 +7,7 @@ This project depends on the following free software: numpy, scipy, matplotlib, n
 
 + `git clone` this repository to a directory of your choosing.
 + Edit `config` to point to your EPItome-xl directory and your MRI data directory.
-+ Add `epitome` to your path.
++ Intstall using `easy_install epitome`.
 + Add some MRI data to your data directory.
 + Check your work using `epitome check <experiment>`.
 + Generate some pre-processing scripts using `epitome run`.
