@@ -8,4 +8,5 @@ setup(name='EPItome-xl',
       author_email='joseph.d.viviano@gmail.com',
       license='MIT',
       packages=['epitome'],
+      scripts=['bin/epitome'],
       zip_safe=False)

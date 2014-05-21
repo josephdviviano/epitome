@@ -11,7 +11,7 @@ from scipy import ndimage as nd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import utilities
+import epitome as epi
 
 def mask_check(path, expt, mode):
     """
@@ -20,7 +20,7 @@ def mask_check(path, expt, mode):
     """
 
     # get subject numbers
-    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
+    subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 'qc_masks.pdf'))

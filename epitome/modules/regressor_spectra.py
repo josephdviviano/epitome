@@ -36,7 +36,7 @@ def regressor_spectra(path, expt, mode):
     for subj in subjects:
 
         subjpath = os.path.join(path, expt, subj)
-        modepath = os.path.join(path, expt, subj, mode)
+        modepath = os.path.join(subjpath, mode)
         # some frequency stuff
         # fslhd func_MNI.01.nii.gz | sed -n 22p
         TR = 2.5

@@ -1,0 +1,187 @@
+#!/usr/bin/env python
+
+"""
+###############################################################################
+
+                       _  _ ___
+                      |_ |_) | _|_  _  ._ _   _ __ \/ |  
+                      |_ |  _|_ |_ (_) | | | (/_   /\ |_ 
+
+Usage:
+
+    epitome modules            -- returns a list of all available modules.
+    epitome <module> -help     -- returns usage for a single module.
+
+    epitome check              -- returns installation paths.
+    epitome experiments        -- returns a list of all available experiments.
+    epitome check <experiment> -- checks directory structure for a given 
+                                  experiment.
+
+    epitome run                -- boots up the user interface (which prints
+                                  out a set of processing scripts).
+
+#######################################################################jdv2014#
+
+"""
+
+import os, sys
+import epitome as epi
+
+def print_modules():
+    print 'Im printing some modules!'
+
+def print_experiments():
+    print 'Im printing some experiments!'
+
+def check_run(expt, subj, mode, sess, run):
+    """
+    Returns True if RUN folder contains a NIFTI file, False otherwise.
+
+    Usage:
+        truth = check_run(experiment, subject, image modality, session, run)
+    """
+
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+
+    # retrieve the files within each run folder
+    dir_file = os.path.join(dir_data, expt, subj, mode, sess, run)
+    file_list = [d for d in os.listdir(dir_file)
+                         if os.path.isfile(os.path.join(dir_file, d))]
+
+    # return True if any file ends with a NIFTI extension
+    if any(f[-7:] == '.nii.gz' or f[-4] == '.nii' for f in file_list):
+        return True
+    else:
+        return False
+
+def check_mode(expt, subj, mode):
+    """
+    This returns each image modality's total number of runs and checks for run
+    folders with missing data.
+    """
+
+    # start a run counter
+    n_runs = 0
+
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+
+    
+    # retrieve the sessions for a given image modality
+    dir_mode = os.path.join(dir_data, expt, subj, mode)
+    sess_list = [d for d in os.listdir(dir_mode)
+                         if os.path.isdir(os.path.join(dir_mode, d))]
+    
+    # retrieve runs for a given session
+    for sess in sess_list:
+        dir_sess = os.path.join(dir_mode, sess)
+        run_list = [d for d in os.listdir(dir_sess)
+                            if os.path.isdir(os.path.join(dir_sess, d))
+                            and d[0:3] == 'RUN']
+
+        # check for runs missing NIFTI files, print a warning if required
+        for run in run_list:
+            if check_run(expt, subj, mode, sess, run) == True:
+                n_runs = n_runs + 1
+            else:
+                print('subject ' + str(subj) +
+                      ', image modality ' + str(mode) +
+                      ', session ' + str(sess) +
+                      ', run ' + str(run) +
+                      ' contains no NIFTI file.')
+
+    return n_runs
+
+def check_directories(expt):
+    """
+    This checks the image modalities for each subject in an experiment. It also
+    reports the number of subjects with each kind of image modality.
+    """
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+    
+    # attempt to access the subjects for a given experiment
+    try:
+        subjects = epi.utilities.get_subj(os.path.join(dir_data, expt))
+    except:
+        print 'Your experiment path is incorrect ' + str(expt)
+
+    # this dict will hold our count
+    mode_dict = {}
+
+    # loop through subjects, returning image modality counts, and record
+    for subj in subjects:
+        
+        # retrieve the image modalities for a given subject 
+        dir_subj = os.path.join(dir_data, expt, subj)
+        mode_list = [d for d in os.listdir(dir_subj) 
+                             if os.path.isdir(os.path.join(dir_subj, d))]
+        
+        for mode in mode_list:    
+            # check inside each modality, get the number of sessions
+            n_runs = check_mode(expt, subj, mode)
+            
+            # add them to the count
+            try:
+                mode_dict[str(mode)] = mode_dict[str(mode)] + n_runs
+            except:
+                mode_dict[str(mode)] = n_runs
+
+    # print out the file counts per image modality
+    for mode_key in mode_dict:
+        print str(mode_dict[mode_key]) + ' NIFTIs found in ' + str(mode_key)
+
+def check_paths():
+
+    """
+    This ensures paths defined in config.py are actual directories.
+    """
+
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+    
+    if os.path.isdir(dir_data) == False:
+        print 'Data directory does not exist:' + str(dir_data) 
+    elif os.path.isdir(dir_pipe) == False:
+        print 'EPItome-XL directory does not exist:' + str(dir_pipe)
+    elif os.path.isdir(dir_afni) == False:
+        print 'AFNI directory does not exist:' + str(dir_afni)
+    else:
+        print 'config.py appears to be properly configured! '
+        print '     data directory: ' + str(dir_data)
+        print '     pipeline directory: ' + str(dir_pipe)
+        print '     AFNI directory: ' + str(dir_afni)
+
+def print_help(module):
+    print """I'm printing the help file for """ + str(module) + '!'
+
+def run_epitome():
+    print """I'm running EPItome-XL!"""
+
+# this is the command-line usage bit
+if __name__ == "__main__":
+    
+    if len(sys.argv) == 2 and sys.argv[1] == 'list':
+        print_modules()
+    
+    # a set of convenience functions
+    elif len(sys.argv) == 2 and sys.argv[1] == 'check':
+        check_paths()
+    
+    elif len(sys.argv) == 3 and sys.argv[1] == 'check':
+        check_directories(sys.argv[2]) 
+    
+    elif len(sys.argv) > 3 and sys.argv[1] == 'check':
+        print 'epitome check only works with 1 experiment at a time!'
+
+    # for printing help
+    elif len(sys.argv) == 3 and sys.argv[2] == '-help':
+        print_help(sys.argv[1])
+
+    # for running the command-line interface
+    elif len(sys.argv) == 2 and sys.argv[1] == 'run':
+        run_epitome()
+
+    # return the usage if the user does a silly thing
+    else:
+        print __doc__

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-
+"""
+Temporary solution: users must define relevant system-wide options here.
+"""
 def return_paths():
     """
     Returns the paths to the data, pipeline, AFNI, and specifies the number of 
@@ -8,7 +10,7 @@ def return_paths():
     # the data directory absolute path
     dir_data = '/srv/MRI/WORKING'
     # the pipeline directory absolute path
-    dir_pipe = '/srv/CODE/EPItome-xl'
+    dir_pipe = '/srv/CODE/epitome'
     # AFNI directory absolute path
     dir_afni = '/usr/local/abin'
     # number of cores to use
