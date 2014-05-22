@@ -1,40 +1,42 @@
 #!/bin/bash
-
 ## projects volume cortical data onto a freesurfer-surface
+
+# set variables
+cat <<EOF
 cd /tmp
 INPUT=`echo 'func_'${1}`
 FWHM=`echo ${2}`
 FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
+EOF
 
-for SUB in ${SUBJECTS}; do
-    DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
-    for SESS in ${DIR_SESS}; do
-        SESS=`basename ${SESS}`        
-        DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
-        DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
-        DIR_FS=`echo ${FS}/${DIR_EXPT}_${SUB}_${SESS}`
+cat<<"EOF"
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    SESS=`basename ${SESS}`        
+    DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
+    DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
+    DIR_FS=`echo ${FS}/${DIR_EXPT}_${SUB}_${SESS}`
         
-        # smooth data on the cortical surface to FWHM
-        if [ ! -f ${DIR}/func_smooth.L.${NUM}.niml.dset ]; then
-            SurfSmooth \
-              -met HEAT_07 \
-              -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
-              -surf_A ${DIR_FS}/SUMA/rh.white.asc \
-              -input ${DIR}/${INPUT}.L.${NUM}.niml.dset \
-              -target_fwhm ${FWHM} \
-              -output ${DIR}/func_smooth.L.${NUM}.niml.dset
-        fi
+    # smooth data on the cortical surface to FWHM
+    if [ ! -f ${DIR}/func_smooth.L.${NUM}.niml.dset ]; then
+        SurfSmooth \
+          -met HEAT_07 \
+          -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
+          -surf_A ${DIR_FS}/SUMA/rh.white.asc \
+          -input ${DIR}/${INPUT}.L.${NUM}.niml.dset \
+          -target_fwhm ${FWHM} \
+          -output ${DIR}/func_smooth.L.${NUM}.niml.dset
+    fi
 
-        if [ ! -f ${DIR}/func_smooth.R.${NUM}.niml.dset ]; then
-            SurfSmooth \
-              -met HEAT_07 \
-              -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
-              -surf_A ${DIR_FS}/SUMA/rh.white.asc \
-              -input ${DIR}/${INPUT}.R.${NUM}.niml.dset \
-              -target_fwhm ${FWHM} \
-              -output ${DIR}/func_smooth.R.${NUM}.niml.dset
-        fi
-    done
+    if [ ! -f ${DIR}/func_smooth.R.${NUM}.niml.dset ]; then
+        SurfSmooth \
+          -met HEAT_07 \
+          -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
+          -surf_A ${DIR_FS}/SUMA/rh.white.asc \
+          -input ${DIR}/${INPUT}.R.${NUM}.niml.dset \
+          -target_fwhm ${FWHM} \
+          -output ${DIR}/func_smooth.R.${NUM}.niml.dset
+    fi
 done
 cd ${DIR_PIPE}
 

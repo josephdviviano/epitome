@@ -1,0 +1,6 @@
+{
+	"check_runs" : "Generates a .csv containing the 4 dimensions of each raw  NIFTI within an experiment modality, for identifying truncated data.",
+
+	"surfsmooth" : "dd"
+
+}
