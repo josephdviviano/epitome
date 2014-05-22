@@ -28,10 +28,51 @@ import os, sys
 import epitome as epi
 
 def print_modules():
-    print 'Im printing some modules!'
+    """
+    Prints the available modules.
+    """
+
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+
+    # get a sorted list of the modules
+    dir_modules = os.path.join(dir_pipe, 'epitome', 'modules')
+    module_list = [f for f in os.listdir(dir_modules)
+                           if os.path.isfile(os.path.join(dir_modules, f))]
+    module_list.sort()
+
+    # print information to the screen
+    print 'Modules found:'
+    print ''
+    for module in module_list:
+        print module
+    print ''
+    print """You can access help for each using 'epitome <module> --help'."""
 
 def print_experiments():
-    print 'Im printing some experiments!'
+    """
+    Prints the available experiments.
+    """
+
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+
+    # get a sorted list of the experiments
+    expt_list = [d for d in os.listdir(dir_data)
+                         if os.path.isdir(os.path.join(dir_data, d))]
+    expt_list.sort()
+    
+    print 'Experiments found:'
+    print ''
+    for expt in expt_list:
+        if expt != 'FREESURFER':
+            print expt
+    print ''
+    print """You can inspect each experiment's folder structure using"""
+    print """'epitome check <experiment>'.""" 
+
+def print_help(module):
+    print """I'm printing the help file for """ + str(module) + '!'
 
 def check_run(expt, subj, mode, sess, run):
     """
@@ -98,6 +139,7 @@ def check_directories(expt):
     This checks the image modalities for each subject in an experiment. It also
     reports the number of subjects with each kind of image modality.
     """
+
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
     
@@ -133,11 +175,11 @@ def check_directories(expt):
         print str(mode_dict[mode_key]) + ' NIFTIs found in ' + str(mode_key)
 
 def check_paths():
-
     """
     This ensures paths defined in config.py are actual directories.
     """
 
+    # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
     
     if os.path.isdir(dir_data) == False:
@@ -151,9 +193,6 @@ def check_paths():
         print '     data directory: ' + str(dir_data)
         print '     pipeline directory: ' + str(dir_pipe)
         print '     AFNI directory: ' + str(dir_afni)
-
-def print_help(module):
-    print """I'm printing the help file for """ + str(module) + '!'
 
 def run_epitome():
     print """I'm running EPItome-XL!"""
@@ -175,7 +214,7 @@ if __name__ == "__main__":
         print 'epitome check only works with 1 experiment at a time!'
 
     # for printing help
-    elif len(sys.argv) == 3 and sys.argv[2] == '-help':
+    elif len(sys.argv) == 3 and sys.argv[2] == '--help':
         print_help(sys.argv[1])
 
     # for running the command-line interface
