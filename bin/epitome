@@ -59,10 +59,10 @@ def get_modules(interactive=False):
         # attempt to retrieve the selected module
         try:
             selection = module_list[int(response-1)]
-            return selection
-        else:
+        except:
             print """You didn't give me a valid module number! Try again."""
-            return None 
+            selection = None 
+        return selection
 
 def print_experiments():
     """
@@ -98,6 +98,18 @@ def print_help(module):
     # print the contents of the JSON line by line
     for line in helpfile[module]:
         print line
+
+def help_query():
+
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+
+    # present the user with a list
+    print 'Which program do you need help with?'
+    module = get_modules(interactive=True)
+
+    # print help for that module
+    print_help(module)
     
 def check_run(expt, subj, mode, sess, run):
     """
