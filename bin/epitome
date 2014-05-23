@@ -24,12 +24,13 @@ Usage:
 
 """
 
+import json
 import os, sys
 import epitome as epi
 
-def print_modules():
+def get_modules(interactive=False):
     """
-    Prints the available modules.
+    Prints the available modules. Optionally prompts the user to select one.
     """
 
     # retrieve settings from config.py
@@ -44,10 +45,24 @@ def print_modules():
     # print information to the screen
     print 'Modules found:'
     print ''
-    for module in module_list:
-        print module
+    for i, module in enumerate(module_list):
+        print str(i+1) + ': ' + module
     print ''
-    print """You can access help for each using 'epitome <module> --help'."""
+
+    # either print a helpful message, or prompt the user to select a module    
+    if interactive == False:
+        print """Access help for each using 'epitome <module> --help'."""
+    else:
+        print """Indicate next module"""
+        response = input('module #: ')
+        
+        # attempt to retrieve the selected module
+        try:
+            selection = module_list[int(response-1)]
+            return selection
+        else:
+            print """You didn't give me a valid module number! Try again."""
+            return None 
 
 def print_experiments():
     """
@@ -72,8 +87,18 @@ def print_experiments():
     print """'epitome check <experiment>'.""" 
 
 def print_help(module):
-    print """I'm printing the help file for """ + str(module) + '!'
+    
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
+    # load in the help data
+    fname = open(os.path.join(dir_pipe, 'epitome/help.json'), 'rb')
+    helpfile = json.load(fname)
+
+    # print the contents of the JSON line by line
+    for line in helpfile[module]:
+        print line
+    
 def check_run(expt, subj, mode, sess, run):
     """
     Returns True if RUN folder contains a NIFTI file, False otherwise.
@@ -183,11 +208,14 @@ def check_paths():
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
     
     if os.path.isdir(dir_data) == False:
-        print 'Data directory does not exist:' + str(dir_data) 
+        print 'Data directory does not exist:' + str(dir_data)
+
     elif os.path.isdir(dir_pipe) == False:
         print 'EPItome-XL directory does not exist:' + str(dir_pipe)
+
     elif os.path.isdir(dir_afni) == False:
         print 'AFNI directory does not exist:' + str(dir_afni)
+
     else:
         print 'config.py appears to be properly configured! '
         print '     data directory: ' + str(dir_data)

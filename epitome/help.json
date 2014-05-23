@@ -1,6 +1,315 @@
 {
-	"check_runs" : "Generates a .csv containing the 4 dimensions of each raw  NIFTI within an experiment modality, for identifying truncated data.",
 
-	"surfsmooth" : "dd"
+    "cleanup_everything" :
+        ["Usage:",
+         "    cleanup_everything",
+         "Deletes every processed bit of data for a given experiment."
+        ],
+
+    "cleanup_MNI" :
+        ["Usage:",
+         "    cleanup_MNI",
+         "Deletes MNI-space transformed data for a given experiment."
+        ],
+
+    "cleanup_postmotioncorrect" :
+        ["Usage:",
+         "    cleanup_postmotioncorrect",
+         "Deletes all functional data pre-processing beyond those computed",
+         "during 'init_EPI'."
+        ],
+
+    "cleanup_registration" :
+        ["Usage:",
+         "    cleanup_registration",
+         "Deletes all registration-related files."
+        ],
+
+    "filter" :
+        ["Usage:",
+         "    filter <func_prefix> <detrend_order> <gs_regress_flag>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "detrend_order -- polynomial order to detrend each voxel against.",
+         "gs_regress_flag -- if 1, regress global signal (like a chump)",
+         "",
+         "This computes detrended nuisance time series, fits each run with a",
+         "computed noise model, and subtracts the fit. Computes temporal SNR."
+        ],
+
+    "FS_anatexport.py" :
+        ["Usage:",
+         "    FS_anatexport.py <data_directory> <experiment>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed."
+         "",
+         "Imports processed T1s from freesurfer to the experiment directory."
+        ],
+
+    "FS_recon.py" :
+        ["Usage:",
+         "    FS_recon.py <data_directory> <experiment> <modality> <cores>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- image modality to import (normally T1).",
+         "cores -- number of cores to dedicate (one core per run).",
+         "",
+         "This sends each subject's T1s through the freesurfer pipeline. It ",
+         "uses multiple T1s per imaging session, but does not combine them",
+         "between sessions. Data is output to the dedicated FREESURFER",
+         "directory, and should be exported to the MRI analysis folders using",
+         "FS_anatexport.py."
+        ],
+
+    "gen_gcor" :
+        ["Usage:",
+         "    gen_gcor <func_prefix> <mask_prefix>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "mask_prefix -- mask prefix (eg., EPI_brain in anat_EPI_brain).",
+         "",
+         "Calls an AFNI script to calculate the global correlation for each",
+         "concatenated set of runs (across all sessions). Useful for resting",
+         "state functional connectivity experiments."
+        ],
+
+    "gen_regressors" :
+        ["Usage:",
+         "    gen_regressors",
+         "Creates a series of regressors from fMRI data and a freesurfer",
+         "segmentation:", 
+         "    white matter + eroded mask,",
+         "    ventricles + eroded mask,",
+         "    grey matter mask,",
+         "    brain stem mask,",
+         "    dialated whole-brain mask,",
+         "    draining vessels mask,",
+         "    local white matter regressors + 1 temporal lag,",
+         "    ventricle regressors + 1 temporal lag,",
+         "    draining vessel regressors + 1 temporal lag."
+        ],
+
+    "init_EPI" : 
+        ["Usage:",
+         "    init_EPI",
+         "General pre-processing for all fMRI data:",
+         "    Orients data to RAI,",
+         "    Deletes initial time points (optionally),",
+         "    Removes data outliers,",
+         "    Slice time correction,",
+         "    Deobliques & motion corrects data,",
+         "    Creates session mean deskulled EPIs and whole-brain masks,",
+         "    Scales each run to have mode = 1000, removing small values,",
+         "    Calculates various statistics + time series."
+        ],
+
+    "linreg_calc_AFNI" :
+        ["Usage:",
+         "linreg_calc_AFNI <cost> <reg_dof> <data_quality>",
+         "cost -- cost function minimized during registration:",
+         "    'ls'     = Pearson Correlation]",
+         "    'mi'     = Mutual Information [H(b)+H(s)-H(b,s)]",
+         "    'crM'    = Correlation Ratio (Symmetrized*)",
+         "    'nmi'    = Normalized MI [H(b,s)/(H(b)+H(s))]",
+         "    'hel'    = Hellinger metric",
+         "    'crA'    = Correlation Ratio (Symmetrized+)",
+         "    'crU'    = Correlation Ratio (Unsym)",
+         "    'sp'     = Spearman [rank] Correlation",
+         "    'je'     = Joint Entropy [H(b,s)]",
+         "    'lss'    = Signed Pearson Correlation",
+         "    'lpc'    = Local Pearson Correlation Signed (Default)",
+         "    'lpa'    = Local Pearson Correlation Abs",
+         "    'lpc+'   = Local Pearson Signed + Others",
+         "    'ncd'    = Normalized Compression Distance",
+         "    'lpc+zz' = Local Pearson Correlation Signed + Magic",
+         "reg_dof -- registration degrees of freedom:",
+         "    'big_move' = Smaller moves (if giant gives bad registration)",
+         "    'giant_move' = Large search space allowed (default)",
+         "data_quality -- changes registration strategy:",
+         "    'high' = Good internal contrast, reg using EPI mean (default)",
+         "    'low' = Poor internal contrast, reg using pre-stable TR",
+         "",
+         "Calculates linear registration between EPI <--> T1 <--> MNI152, and",
+         "generates an EPI template registered to T1 & T1 registered to EPI,"
+         "(sessionwise)."
+        ],
+
+    "linreg_calc_FSL" :
+        ["Usage:",
+         "linreg_calc_FSL <cost> <reg_dof> <data_quality>",
+         "cost -- cost function minimized during registration:",
+         "    'ls'     = Pearson Correlation]",
+         "    'mi'     = Mutual Information [H(b)+H(s)-H(b,s)]",
+         "    'crM'    = Correlation Ratio (Symmetrized*)",
+         "    'nmi'    = Normalized MI [H(b,s)/(H(b)+H(s))]",
+         "    'hel'    = Hellinger metric",
+         "    'crA'    = Correlation Ratio (Symmetrized+)",
+         "    'crU'    = Correlation Ratio (Unsym)",
+         "    'sp'     = Spearman [rank] Correlation",
+         "    'je'     = Joint Entropy [H(b,s)]",
+         "    'lss'    = Signed Pearson Correlation",
+         "    'lpc'    = Local Pearson Correlation Signed (Default)",
+         "    'lpa'    = Local Pearson Correlation Abs",
+         "    'lpc+'   = Local Pearson Signed + Others",
+         "    'ncd'    = Normalized Compression Distance",
+         "    'lpc+zz' = Local Pearson Correlation Signed + Magic",
+         "reg_dof -- registration degrees of freedom:",
+         "    'big_move' = Smaller moves (if giant gives bad registration)",
+         "    'giant_move' = Large search space allowed (default)",
+         "data_quality -- changes registration strategy:",
+         "    'high' = Good internal contrast, reg using EPI mean (default)",
+         "    'low' = Poor internal contrast, reg using pre-stable TR",
+         "",
+         "Calculates linear registration between EPI <--> T1 <--> MNI152, and",
+         "generates an EPI template registered to T1 & T1 registered to EPI,"
+         "(sessionwise)."
+        ],
+
+    "linreg_EPI2MNI_AFNI" :
+        ["Usage:",
+         "    linreg_EPI2MNI_AFNI <func_prefix> <mask_prefix> <voxel_dims>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "mask_prefix -- mask prefix (eg., EPI_brain in anat_EPI_brain).",
+         "voxel_dims -- target voxel dimensions (isotropic).",
+         "",
+         "Prepares data for analysis in MNI standard space."
+        ],
+
+    "linreg_EPI2MNI_FSL" :
+        ["Usage:",
+         "    linreg_EPI2MNI_FSL <func_prefix> <mask_prefix> <voxel_dims>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "mask_prefix -- mask prefix (eg., EPI_brain in anat_EPI_brain).",
+         "voxel_dims -- target voxel dimensions (isotropic).",
+         "",
+         "Prepares data for analysis in MNI standard space."
+        ],
+
+    "linreg_FS2EPI_AFNI" :
+        ["Usage:",
+         "    linreg_FS2EPI_AFNI",
+         "Brings Freesurfer atlases in register with single-subject EPIs."
+        ],
+
+    "linreg_FS2EPI_FSL" :
+        ["Usage:",
+         "    linreg_FS2EPI_FSL",
+         "Brings Freesurfer atlases in register with single-subject EPIs."
+        ],
+
+    "linreg_FS2MNI_FSL" :
+        ["Usage:",
+         "    linreg_FS2MNI_FSL",
+         "Brings Freesurfer atlases in register with MNI standard space."
+        ],
+
+    "qc_checkmask.py" :
+        ["Usage:",
+         "    qc_checkmask.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "Prints the central slice of the T1 and co-registered regressor",
+         "masks, including an edge-detected version of the T1, to a PDF."
+        ],
+
+    "qc_checkreg_EPI2T1.py" :
+        ["Usage:",
+         "    qc_checkreg_EPI2T1.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "Prints the central slice of the T1 and co-registered, deskulled",
+         "EPI, including an edge-detected version of the T1."
+        ],
+
+    "qc_checkreg_T12MNI.py" :
+        ["Usage:",
+         "    qc_checkreg_T12MNI.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "Prints the central slice of the MNI T1 and co-registered, deskulled",
+         "T1, including an edge-detected version of the MNI T1."
+        ],
+
+    "qc_checkruns" :
+        ["Usage:",
+         "    qc_checkruns",
+         "Generates a .csv containing the 4 dimensions of each raw NIFTI",
+         "within an experiment modality, for identifying truncated data."
+        ],
+    
+    "qc_motionind.py" :
+        ["Usage:",
+         "    qc_motionind.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "This plots a trace of the framewise displacement measure and DVARS",
+         "measure for each participant (Power et al. 2012). Participants are",
+         "sorted in the plot from best to worst behaved, and thresholds are",
+         "printed to facilitate qualitative participant rejection, if that's",
+         "how you roll."
+        ],
+
+    "qc_tissuespectra.py" :
+        ["Usage:",
+         "    qc_tissuespectra.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "This plots the loglog spectra of each tissue regressor per",
+         "participant."
+        ],
+
+    "surf2vol" : 
+        ["Usage:",
+         "    surf2vol <func_prefix> <target_prefix>"
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "target_prefix -- target data prefix (eg.,smooth in func_smooth).",
+         "",
+         "This projects surface data back into a functional volume with the",
+         "same properties as <target_prefix>."
+        ],
+
+    "surfsmooth" : 
+        ["Usage:",
+         "    surfsmooth <func_prefix> <FWHM>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "FWHM -- full-width half-maximum of the gaussian kernel convolved",
+         "        with the surface data.",
+         "",
+         "This spatially-smooths cortical data along the surface mesh",
+         "estimated by freesurfer."
+        ],
+
+    "TRdrop.py" : 
+        ["Usage:",
+        "    TRdrop.py <data_directory> <experiment> <func_prefix>",
+        "              <mask_prefix>, <head_size>, <FD_thresh>, <DV_thresh>",
+        "data_directory -- full path to your MRI/WORKING directory.",
+        "experiment -- name of the experiment being analyzed.",
+        "func_prefix -- functional data prefix (e.g., 'func_filtered')",
+        "mask_name -- mask file name (e.g., 'anat_EPI_mask')",
+        "head_size -- head radius in mm (def. 50 mm)",
+        "thresh_FD -- censor TRs with delta motion > x mm (def. 0.3 mm)",
+        "thresh_DV -- censor TRs with delta GS change > x % (def. 0.3 %)",
+        ""
+        "This removes motion-corrupted TRs from fMRI scans and outputs",
+        "shortened versions for connectivity analysis (mostly)."
+        ],
+
+    "vol2surf" : 
+        ["Usage:",
+         "    vol2surf <func_prefix>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "",
+         "Projects functional data from volume space to a freesurfer ",
+         "generated cortical mesh."
+        ],
 
 }
