@@ -12,7 +12,7 @@
          "Deletes MNI-space transformed data for a given experiment."
         ],
 
-    "cleanup_postmotioncorrect" :
+    "cleanup_postmc" :
         ["Usage:",
          "    cleanup_postmotioncorrect",
          "Deletes all functional data pre-processing beyond those computed",

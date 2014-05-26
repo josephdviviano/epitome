@@ -1,4 +1,6 @@
-# test that all runs have the expected number of TRs
+#!/bin/bash
+
+# report raw data's file dimensions (4D)
 echo 'Generating 4D file dimensions for '${DIR_EXPT}
 echo Subj_ID,Session,Run,X,Y,Z,TR > ${DIR_DATA}/${DIR_EXPT}/EPI_overview.csv
 for SUB in ${SUBJECTS}; do
@@ -20,5 +22,3 @@ for SUB in ${SUBJECTS}; do
     done
 done
 echo 'Wrote data to '${DIR_DATA}/${DIR_EXPT}/EPI_overview.csv
-
-# JDV Mar 14 2014
