@@ -68,7 +68,6 @@ def get_modules(interactive=False, moduletype='pre'):
     if interactive == False:
         print """Access help for each using 'epitome <module> --help'."""
     else:
-        print('Indicate next module.')
         response = raw_input('module #: ')
         
         # attempt to retrieve the selected module
@@ -115,7 +114,6 @@ def get_mode(expt, interactive=False):
     if interactive == False:
         print("""Wasn't that fun?""")
     else:
-        print('Indicate image modality.')
         response = raw_input('modality #:')
 
         # attempt to retrieve the selected experiment
@@ -161,7 +159,6 @@ def get_experiments(interactive=False):
         print("""You can inspect each experiment's folder structure using""")
         print("""'epitome check <experiment>'.""")
     else:
-        print('Indicate experiment.')
         response = raw_input('experiment #:')
 
         # attempt to retrieve the selected experiment
@@ -347,12 +344,23 @@ def check_paths():
         print '     pipeline directory: ' + str(dir_pipe)
         print '     AFNI directory: ' + str(dir_afni)
 
+def writer(pipe_list, line, cmd, f, output, bkup):
+    
+    # output will == None if we made a mistake
+    if output != None:
+        out_line = line + ' >> ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd + '\n'
+        f.write(out_line)
+        pipe_list.append(line)
+
+    # if we did make a mistake, restore the old output
+    else:
+        output = copy.copy(bkup)
+
+    return pipe_list, output
+
 def run_epitome():
-    print('******************************************************************')
-    print('*************************** EPItome-XL ***************************')
-    print('******************************************************************')
     print('')
-    print('             Hello! Which experiment should I process?            ')
+    print('Running EPItome-XL. Select experiment.')
     print('')
 
     # retrieve settings from config.py
@@ -368,9 +376,7 @@ def run_epitome():
             flag = 1
     
     print('')
-    print('                  Experiment: ' + str(expt) + '.                  ')
-    print('')
-    print('             Which image modality should I analyze?               ')
+    print('Experiment: ' + str(expt) + '. Select image modality.')
     print('')
 
     # get the mode
@@ -383,9 +389,7 @@ def run_epitome():
             flag = 1
 
     print('')
-    print('              Image Modality: ' + str(mode) + '.                  ')
-    print('')
-    print('                 *** Stage 1: Freesurfer ***                      ')
+    print('Image Modality: ' + str(mode) + '. Adding Freesurfer stages.')
     print('')
  
     # get the date and time, current user
@@ -394,11 +398,11 @@ def run_epitome():
 
     # generate the unique filenames for this run
     f_id = time.strftime("%d%m%y_%H%M%S")
-    cmd_master = 'master_' + f_id + '.sh'
-    cmd_file = 'cmd_' + f_id + '.sh'
+    master = 'master_' + f_id + '.sh'
+    cmd = 'cmd_' + f_id + '.sh'
 
     # open up the master script, write common variables
-    f = open(os.path.join(dir_data, expt, cmd_master), 'wb')
+    f = open(os.path.join(dir_data, expt, master), 'wb')
 
     f.write('#!/bin/bash\n')
     f.write('\n')
@@ -429,7 +433,7 @@ def run_epitome():
     f.write('\n')
     
     # export all variables to each subject's individual script
-    f.write('cat > ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd_file + ' << EOF\n')
+    f.write('cat > ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd + ' << EOF\n')
     f.write('export DIR_PIPE=${DIR_PIPE}\n')
     f.write('export DIR_DATA=${DIR_DATA}\n')
     f.write('export DIR_AFNI=${DIR_AFNI}\n')
@@ -439,28 +443,22 @@ def run_epitome():
     f.write('EOF\n')
     f.write('\n')
 
-    # now query the user to construct the pipeline
-    print('')
-    print('              *** Stage 2: Pipeline Construction ***             ')
-    print('')
-    
-    # we use this to keep track of our command-list
-    pipe_list = []
-
-    # we always start with init_EPI
-    flag = 0 # breaks us out of the loop
+    # we always start the pipeline with init_EPI
+    print('Beginning pipeline construction!')
+    pipe_list = [] # keeps track of our command-list
+    flag = 0
     while flag == 0:    
-        line, output = epi.commands.init_EPI()
         
-        # checks if user entered a strange thing for command
+        # add init_EPI, check for mistakes, break the loop if flawless
+        line, output = epi.commands.init_EPI()
+        pipe_list, output = writer(pipe_list, line, cmd, f, output, None)
         if output != None:
-            f.write(line)
-            pipe_list.append(line)
-            flag = 1
+            flag = 1 # breaks us out of the loop
  
     # now loop through the modules until the user aborts
     flag = 0 # breaks us out of the loop
     while flag == 0:
+        
         print('')
         print('Please select the next pipeline module:')
         print('')
@@ -469,33 +467,25 @@ def run_epitome():
             print('')
         else:
             # save the old output
-            output_bkup = copy.copy(output)
+            bkup = copy.copy(output)
 
-            # executes the chosen module
-            cmd = 'epi.commands.' + str(module) + '(output)'
-            line, output = eval(cmd)
-                
-            # checks if user entered a strange thing for command
-            if output != None:
-                f.write(line)
-                pipe_list.append(line)
-
-            # if we did, restore the old output
-            else:
-                output = copy.copy(output_bkup)
+            # executes the chosen module, write pipeline commands
+            command = 'epi.commands.' + str(module) + '(output)'
+            line, output = eval(command)
+            pipe_list, output = writer(pipe_list, line, cmd, f, output, bkup)
 
         # print the current pipeline configuration, ask to continue
         print('')
-        print('The current pipeline looks like this:')
+        print('The pipeline currently looks like this:')
         print('')
         for pipe in pipe_list:
             print pipe
         print('')
-        # give the user the option to break
-        response = raw_input("""Type 'N/n' to stop, else continue: """)
-        if response == 'N' or 'n':
-            flag == 1
+        response = raw_input("""Type 'stop' to stop, else continue: """)
+        if response == 'stop':
+            flag = 1 # breaks us out of the loop
 
+    # close the for sub in subjects loop
     f.write('done\n')
     f.write('\n')
 
@@ -503,7 +493,7 @@ def run_epitome():
 
     # close the file, and make executable by owner + group
     f.close()
-    os.chmod(os.path.join(dir_data, expt, cmd_master), 0750)
+    os.chmod(os.path.join(dir_data, expt, master), 0750)
 
 # this is the command-line usage bit
 if __name__ == "__main__":

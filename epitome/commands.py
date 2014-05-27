@@ -14,6 +14,8 @@ def selector_int(output):
     option = raw_input('#: ')
 
     # ensure response is non-negative
+    if option == '':
+        option = -1
     if int(option) >= 0:
         response = int(option)
     else:
@@ -37,6 +39,8 @@ def selector_list(item_list, output):
     option = raw_input('option #: ')
 
     # test the response, response & output = Null if the user makes an error
+    if option == '':
+        option = 0
     try:
         response = item_list[int(option)-1]
     except:
@@ -67,6 +71,8 @@ def selector_dict(item_dict, output):
     option = raw_input('option #: ')
 
     # test the response, response & output = Null if the user makes an error
+    if option == '':
+        option = 0
     try:
         response = item_list[int(option)-1]
     except:
