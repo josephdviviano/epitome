@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-import subprocess
-import os
+import os, sys
 import fnmatch
-import utilities
+import subprocess
+
+import epitome as epi
 
 def FS_recon(root, expt, mode, core):
 
     # get subject numbers
-    subjects = ypp_utilities.get_subj(os.path.join(root, expt))
+    subjects = epi.utilities.get_subj(os.path.join(root, expt))
     
     # init commandstack and multiprocessing capability
     stack = []

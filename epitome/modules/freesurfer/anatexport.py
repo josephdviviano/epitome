@@ -6,10 +6,10 @@
 # this also allows us to take advantage of the high-quality freesurfer
 # segmentations for nuisance time series regression, if desired
 
-import os
-import sys
+import os, sys
 import fnmatch
-import utilities
+
+import epitome as epi
 
 def run_commands(path, directory, expt, subj, session):
     
@@ -74,7 +74,7 @@ def run_commands(path, directory, expt, subj, session):
 def T1_export(path, expt):
     
     # get subject numbers
-    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
+    subjects = epi.utilities.get_subj(os.path.join(path, expt))
  
     # get directory of sessions
     for subj in subjects:
@@ -88,4 +88,3 @@ def T1_export(path, expt):
 
 if __name__ == "__main__":
     T1_export(sys.argv[1], sys.argv[2])
-

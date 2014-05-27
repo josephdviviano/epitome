@@ -1,27 +1,101 @@
 {
 
-    "cleanup_everything" :
+    "anatexport.py" :
         ["Usage:",
-         "    cleanup_everything",
+         "    FS_anatexport.py <data_directory> <experiment>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "",
+         "Imports processed T1s from freesurfer to the experiment directory."
+        ],
+
+    "check_EPI2T1.py" :
+        ["Usage:",
+         "    check_EPI2T1.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "Prints the central slice of the T1 and co-registered, deskulled",
+         "EPI, including an edge-detected version of the T1."
+        ],
+
+    "check_T12MNI.py" :
+        ["Usage:",
+         "    check_T12MNI.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "Prints the central slice of the MNI T1 and co-registered, deskulled",
+         "T1, including an edge-detected version of the MNI T1."
+        ],
+    
+    "check_masks.py" :
+        ["Usage:",
+         "    check_masks.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "Prints the central slice of the T1 and co-registered regressor",
+         "masks, including an edge-detected version of the T1, to a PDF."
+        ],
+
+    "check_motionind.py" :
+        ["Usage:",
+         "    check_motionind.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "This plots a trace of the framewise displacement measure and DVARS",
+         "measure for each participant (Power et al. 2012). Participants are",
+         "sorted in the plot from best to worst behaved, and thresholds are",
+         "printed to facilitate qualitative participant rejection, if that's",
+         "how you roll."
+        ],
+
+    "check_runs" :
+        ["Usage:",
+         "    check_runs",
+         "Generates a .csv containing the 4 dimensions of each raw NIFTI",
+         "within an experiment modality, for identifying truncated data."
+        ],
+
+    "check_spectra.py" :
+        ["Usage:",
+         "    check_spectra.py <data_directory> <experiment> <modality>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- registered image modality to import.",
+         "",
+         "This plots the loglog spectra of each tissue regressor per",
+         "participant."
+        ],
+
+    "del_everything" :
+        ["Usage:",
+         "    del_everything",
          "Deletes every processed bit of data for a given experiment."
         ],
 
-    "cleanup_MNI" :
+    "del_MNI" :
         ["Usage:",
-         "    cleanup_MNI",
+         "    del_MNI",
          "Deletes MNI-space transformed data for a given experiment."
         ],
 
-    "cleanup_postmc" :
+    "del_postmc" :
         ["Usage:",
-         "    cleanup_postmotioncorrect",
+         "    del_postmc",
          "Deletes all functional data pre-processing beyond those computed",
          "during 'init_EPI'."
         ],
 
-    "cleanup_registration" :
+    "del_reg" :
         ["Usage:",
-         "    cleanup_registration",
+         "    del_reg",
          "Deletes all registration-related files."
         ],
 
@@ -34,30 +108,6 @@
          "",
          "This computes detrended nuisance time series, fits each run with a",
          "computed noise model, and subtracts the fit. Computes temporal SNR."
-        ],
-
-    "FS_anatexport.py" :
-        ["Usage:",
-         "    FS_anatexport.py <data_directory> <experiment>",
-         "data_directory -- full path to your MRI/WORKING directory.",
-         "experiment -- name of the experiment being analyzed.",
-         "",
-         "Imports processed T1s from freesurfer to the experiment directory."
-        ],
-
-    "FS_recon.py" :
-        ["Usage:",
-         "    FS_recon.py <data_directory> <experiment> <modality> <cores>",
-         "data_directory -- full path to your MRI/WORKING directory.",
-         "experiment -- name of the experiment being analyzed.",
-         "modality -- image modality to import (normally T1).",
-         "cores -- number of cores to dedicate (one core per run).",
-         "",
-         "This sends each subject's T1s through the freesurfer pipeline. It ",
-         "uses multiple T1s per imaging session, but does not combine them",
-         "between sessions. Data is output to the dedicated FREESURFER",
-         "directory, and should be exported to the MRI analysis folders using",
-         "FS_anatexport.py."
         ],
 
     "gen_gcor" :
@@ -201,69 +251,19 @@
          "Brings Freesurfer atlases in register with MNI standard space."
         ],
 
-    "qc_checkmask.py" :
+    "recon.py" :
         ["Usage:",
-         "    qc_checkmask.py <data_directory> <experiment> <modality>",
+         "    recon.py <data_directory> <experiment> <modality> <cores>",
          "data_directory -- full path to your MRI/WORKING directory.",
          "experiment -- name of the experiment being analyzed.",
-         "modality -- registered image modality to import.",
+         "modality -- image modality to import (normally T1).",
+         "cores -- number of cores to dedicate (one core per run).",
          "",
-         "Prints the central slice of the T1 and co-registered regressor",
-         "masks, including an edge-detected version of the T1, to a PDF."
-        ],
-
-    "qc_checkreg_EPI2T1.py" :
-        ["Usage:",
-         "    qc_checkreg_EPI2T1.py <data_directory> <experiment> <modality>",
-         "data_directory -- full path to your MRI/WORKING directory.",
-         "experiment -- name of the experiment being analyzed.",
-         "modality -- registered image modality to import.",
-         "",
-         "Prints the central slice of the T1 and co-registered, deskulled",
-         "EPI, including an edge-detected version of the T1."
-        ],
-
-    "qc_checkreg_T12MNI.py" :
-        ["Usage:",
-         "    qc_checkreg_T12MNI.py <data_directory> <experiment> <modality>",
-         "data_directory -- full path to your MRI/WORKING directory.",
-         "experiment -- name of the experiment being analyzed.",
-         "modality -- registered image modality to import.",
-         "",
-         "Prints the central slice of the MNI T1 and co-registered, deskulled",
-         "T1, including an edge-detected version of the MNI T1."
-        ],
-
-    "qc_checkruns" :
-        ["Usage:",
-         "    qc_checkruns",
-         "Generates a .csv containing the 4 dimensions of each raw NIFTI",
-         "within an experiment modality, for identifying truncated data."
-        ],
-    
-    "qc_motionind.py" :
-        ["Usage:",
-         "    qc_motionind.py <data_directory> <experiment> <modality>",
-         "data_directory -- full path to your MRI/WORKING directory.",
-         "experiment -- name of the experiment being analyzed.",
-         "modality -- registered image modality to import.",
-         "",
-         "This plots a trace of the framewise displacement measure and DVARS",
-         "measure for each participant (Power et al. 2012). Participants are",
-         "sorted in the plot from best to worst behaved, and thresholds are",
-         "printed to facilitate qualitative participant rejection, if that's",
-         "how you roll."
-        ],
-
-    "qc_tissuespectra.py" :
-        ["Usage:",
-         "    qc_tissuespectra.py <data_directory> <experiment> <modality>",
-         "data_directory -- full path to your MRI/WORKING directory.",
-         "experiment -- name of the experiment being analyzed.",
-         "modality -- registered image modality to import.",
-         "",
-         "This plots the loglog spectra of each tissue regressor per",
-         "participant."
+         "This sends each subject's T1s through the freesurfer pipeline. It ",
+         "uses multiple T1s per imaging session, but does not combine them",
+         "between sessions. Data is output to the dedicated FREESURFER",
+         "directory, and should be exported to the MRI analysis folders using",
+         "anatexport.py."
         ],
 
     "surf2vol" : 

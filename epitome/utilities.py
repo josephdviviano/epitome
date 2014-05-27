@@ -1,10 +1,15 @@
 #!/usr/bin/env python
+"""
+A collection of utilities for the EPItome-xl pipeline. Mostly for getting 
+subject numbers/names.
+"""
 
 import os, sys
+import epitome as epi
 
 def get_subj(dir):
     """
-    Gets all folder names in a directory.
+    Gets all folder names (i.e., subjects) in a directory (of subjects).
     """
     subjects = []
     for subj in os.walk(dir).next()[1]:
@@ -15,9 +20,9 @@ def get_subj(dir):
 
 def init_shell(path, expt):
     """
-    Defines paths, subjects, etc.
+    Gets all of the subjects and prints them as a BASH friendly variable.
     """
-    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
+    subjects = epi.utilities.get_subj(os.path.join(path, expt))
     output = '"'
 
     for subj in subjects:
