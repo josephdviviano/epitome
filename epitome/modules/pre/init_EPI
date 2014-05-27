@@ -1,38 +1,31 @@
 #!/bin/bash
 
-## Motion Correct Module: General pre-processing for all fMRI data
-#  Orients data to RAI
-#  Deletes initial time points
-#  Despikes
-#  Slice time correction (assumes good headers)
-#  Deobliques data
-#  Motion correction (outputs motion files for TR censoring a la Power 2012)
-#  Creates session mean deskulled EPIs and masks
-#  Scales each run to have mode = 1000, removing obviously non-brain data
-#  Calculates various statistics + time series
-
-cd /tmp
+cat <<EOF
 DATA_QUALITY=`echo ${1}`
 DELTR=`echo ${2}`
 TPATTERN=`echo ${3}`
 
-# echo '************************************************************************'
-# echo '                  General pre-processing for all fMRI data'
-# echo ''
-# echo '    Running with the following options:'
-# echo '        EXPERIMENT           :' ${DIR_EXPT}
-# echo '        DATA TYPE            :' ${DATA_TYPE}
-# echo '        # OF TRs TO REMOVE   :' ${DELTR}
-# echo '        FINAL DIMENSIONS (mm):' ${DIMS}
-# echo '        DETREND ORDER        :' ${POLORT}
-# echo '        BLUR FWHM            :' ${BLUR_FWHM}
-# echo '        SLICE TIMING         :' ${TPATTERN}
-# echo '        DATA QUALITY         :' ${DATA_QUALITY}
-# echo '        REGISTRATION COST FXN:' ${COST}
-# echo '        REGISTRATION DOF     :' ${REG_DOF}
-# echo ''
-# echo '************************************************************************'
+echo '************************************************************************'
+echo '                  General pre-processing for all fMRI data'
+echo ''
+echo '   Running on experiment ' ${DIR_EXPT} ', image modality ' ${DATA_TYPE}
+echo '   - Using data quality: ' ${DATA_QUALITY} ','
+echo '   - Orients data to RAI,'
+echo '   - Deletes ' ${DELTR} ' TRs from the beginning of each run,'
+echo '   - Removes time-series outliers, or "despikes", the data,'
+echo '   - Corrects for slice timing using the pattern ' ${TPATTERN}','
+echo '   - Deobliques the data,'
+echo '   - Motion correction (also outputs motion parameters),'
+echo '   - Creates deskulled template EPI and whole-brain mask,'
+echo '   - Scales data to mode value = 1000, removing voxels with mode < 200,'
+echo '   - Calculates global mean & DVARS (Power 2012).'
+echo ''
+echo '************************************************************************'
 
+EOF
+
+cat <<"EOF"
+cd /tmp
 
 # loop through sessions
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -285,3 +278,4 @@ for SESS in ${DIR_SESS}; do
 done
 cd ${DIR_PIPE}
 
+EOF

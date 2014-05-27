@@ -19,6 +19,6 @@ def return_paths():
     # get the number of CPU cores available 
     # (this will have to change when we improve this code to work in a cluster 
     # environment).
-    cores = mp.cpu_count - 1
+    cores = mp.cpu_count() - 1
 
     return dir_data, dir_pipe, dir_afni, cores

@@ -368,7 +368,7 @@ def run_epitome():
             flag = 1
     
     print('')
-    print('                   Experiment: ' + str(expt)'.                    ')
+    print('                  Experiment: ' + str(expt) + '.                  ')
     print('')
     print('             Which image modality should I analyze?               ')
     print('')
@@ -383,7 +383,7 @@ def run_epitome():
             flag = 1
 
     print('')
-    print('               Image Modality: ' + str(mode)'.                    ')
+    print('              Image Modality: ' + str(mode) + '.                  ')
     print('')
     print('                 *** Stage 1: Freesurfer ***                      ')
     print('')
@@ -450,7 +450,7 @@ def run_epitome():
     # we always start with init_EPI
     flag = 0 # breaks us out of the loop
     while flag == 0:    
-        line, output = epi.commands.init_EPI(f)
+        line, output = epi.commands.init_EPI()
         
         # checks if user entered a strange thing for command
         if output != None:
@@ -469,10 +469,10 @@ def run_epitome():
             print('')
         else:
             # save the old output
-            output_bkup = copy(output)
+            output_bkup = copy.copy(output)
 
             # executes the chosen module
-            cmd = 'epi.commands.' + str(module) + '(f, output)'
+            cmd = 'epi.commands.' + str(module) + '(output)'
             line, output = eval(cmd)
                 
             # checks if user entered a strange thing for command
@@ -482,7 +482,7 @@ def run_epitome():
 
             # if we did, restore the old output
             else:
-                output = copy(output_bkup)
+                output = copy.copy(output_bkup)
 
         # print the current pipeline configuration, ask to continue
         print('')
