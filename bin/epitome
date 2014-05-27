@@ -69,11 +69,11 @@ def get_modules(interactive=False, moduletype='pre'):
         print """Access help for each using 'epitome <module> --help'."""
     else:
         print('Indicate next module.')
-        response = input('module #: ')
+        response = raw_input('module #: ')
         
         # attempt to retrieve the selected module
         try:
-            selection = module_list[int(response-1)]
+            selection = module_list[int(response)-1]
         except:
             print """Didn't give me a valid module number! Try again."""
             selection = None 
@@ -116,11 +116,11 @@ def get_mode(expt, interactive=False):
         print("""Wasn't that fun?""")
     else:
         print('Indicate image modality.')
-        response = input('modality #:')
+        response = raw_input('modality #:')
 
         # attempt to retrieve the selected experiment
         try:
-            selection = mode_list[int(response-1)]
+            selection = mode_list[int(response)-1]
         except:
             print("""Didn't give me a valid image mode number! Try again.""")
             selection = None
@@ -162,11 +162,11 @@ def get_experiments(interactive=False):
         print("""'epitome check <experiment>'.""")
     else:
         print('Indicate experiment.')
-        response = input('experiment #:')
+        response = raw_input('experiment #:')
 
         # attempt to retrieve the selected experiment
         try:
-            selection = selection_list[int(response-1)]
+            selection = selection_list[int(response)-1]
         except:
             print("""Didn't give me a valid experiment number! Try again.""")
             selection = None
@@ -492,7 +492,7 @@ def run_epitome():
             print pipe
         print('')
         # give the user the option to break
-        response = input("""Type 'N/n' to stop, anything else to continue.""")
+        response = raw_input("""Type 'N/n' to stop, else continue: """)
         if response == 'N' or 'n':
             flag == 1
 
