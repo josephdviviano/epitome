@@ -458,34 +458,31 @@ def run_epitome():
             pipe_list.append(line)
             flag = 1
  
-    # now loop through the modules
+    # now loop through the modules until the user aborts
     flag = 0 # breaks us out of the loop
     while flag == 0:
-        # if we have already added init_EPI
-        if i > 0:
+        print('')
+        print('Please select the next pipeline module:')
+        print('')
+        module = get_modules(interactive=True, moduletype='pre')
+        if module == None:
             print('')
-            print('Please select the next pipeline module:')
-            print('')
-            module = get_modules(interactive=True, moduletype='pre')
-            if module == None:
-                print('')
-            else:
-                # save the old output
-                output_bkup = copy(output)
+        else:
+            # save the old output
+            output_bkup = copy(output)
 
-                # executes the chosen module
-                cmd = 'epi.commands.' + str(module) + '(f, output)'
-                line, output = eval(cmd)
+            # executes the chosen module
+            cmd = 'epi.commands.' + str(module) + '(f, output)'
+            line, output = eval(cmd)
                 
-                # checks if user entered a strange thing for command
-                if output != None:
-                    f.write(line)
-                    pipe_list.append(line)
+            # checks if user entered a strange thing for command
+            if output != None:
+                f.write(line)
+                pipe_list.append(line)
 
-                # if we did, restore the old output
-                else:
-                    output = copy(output_bkup)
-
+            # if we did, restore the old output
+            else:
+                output = copy(output_bkup)
 
         # print the current pipeline configuration, ask to continue
         print('')
@@ -494,6 +491,7 @@ def run_epitome():
         for pipe in pipe_list:
             print pipe
         print('')
+        # give the user the option to break
         response = input("""Type 'N/n' to stop, anything else to continue.""")
         if response == 'N' or 'n':
             flag == 1
