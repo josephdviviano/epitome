@@ -9,6 +9,10 @@ def invalid_selection():
     print('Invalid selection.')
     return None
 
+def selector_list():
+
+def selector_dict():
+
 def filter(input_name):
     print('')
     print('Adding filter module')
@@ -108,7 +112,7 @@ def linreg_calc_AFNI(input_name):
 
     # init our output variable, which will be returned unharmed if we don't 
     # make any mistakes
-    output = input_name
+    output = copy.copy(input_name)
 
     # give us some feedback
     print('')
@@ -119,7 +123,7 @@ def linreg_calc_AFNI(input_name):
     print('Select data quality:')
     data_quality = ['low', 'high']
     for i, qual in enumerate(data_quality):
-        print(str(i+1) + ': ' + str(qual)
+        print(str(i+1) + ': ' + str(qual))
     response = input('option #: ')
 
     # test the response
