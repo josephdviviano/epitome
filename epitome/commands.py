@@ -85,9 +85,43 @@ def selector_dict(item_dict, output):
 def filter(input_name):
     print('')
     print('Adding filter module')
+    print('')
 
+    # get the detrend order
+    print('Set detrend order:')
+    polort, output = selector_int(output)
+
+    # get the global signal flag
+    print('Set global signal regression:')
+    gs_list = ['off', 'on']
+    gs_flag, output = selector_list(gs_list, output)
+
+    # if we messed any of these up, we return None
+    if output == None:
+        print('Please try again')
+        line = ''
+    # otherwise we print the command and return it
+    else:
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/filter ' +
+                                      str(input_name) + ' ' +
+                                      str(polort) + ' ' +
+                                      str(gs_flag))
+        output = 'filtered'
     return line, output
+
 def gen_gcor(input_name):
+
+    import copy
+
+    # init our output variable, which will be returned unharmed
+    output = copy.copy(input_name)
+
+    print('')
+    print('Adding global correlation calculation')
+    print('')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/gen_gcor ' + str(input_name)
+
     return line, output
 
 def init_EPI():
@@ -146,6 +180,7 @@ def linreg_FS2MNI_FSL(input_name):
     return line, output
 def linreg_FS2MNI_FSL(input_name):
     return line, output
+
 def linreg_calc_AFNI(input_name):
 
     import copy
@@ -156,7 +191,7 @@ def linreg_calc_AFNI(input_name):
 
     # give us some feedback
     print('')
-    print('Calculating linear registration pathways.')
+    print('Calculating linear registration pathways using AFNI.')
     print('')
 
     # get the data-quality option
@@ -166,7 +201,7 @@ def linreg_calc_AFNI(input_name):
 
     # set the cost function option
     print('')
-    print('Registration cost function: (see AFNI align_EPI_anat.py for help)')
+    print('Cost function: (see AFNI align_EPI_anat.py for help)')
     cost_fxns = {'ls' : '= Least Squares [Pearson Correlation]', 
                  'mi' : '= Mutual Information [H(b)+H(s)-H(b,s)]', 
                  'crM' : '= Correlation Ratio (Symmetrized*)', 
@@ -186,7 +221,7 @@ def linreg_calc_AFNI(input_name):
 
     # get registration degrees of freedom
     print('')
-    print('Registration degrees of freedom: (see AFNI 3dTshift for help)')
+    print('Degrees of freedom: (see AFNI align_EPI_anat.py for help)')
     degrees_of_freedom = ['big_move', 'giant_move']
     reg_dof, output = selector_list(degrees_of_freedom, output)
 
@@ -205,6 +240,55 @@ def linreg_calc_AFNI(input_name):
     return line, output
 
 def linreg_calc_FSL(input_name):
+
+    import copy
+
+    # init our output variable, which will be returned unharmed if we don't 
+    # make any mistakes
+    output = copy.copy(input_name)
+
+    # give us some feedback
+    print('')
+    print('Calculating linear registration pathways.')
+    print('')
+
+    # get the data-quality option
+    print('Select data quality:')
+    data_quality = ['low', 'high']
+    quality, output = selector_list(data_quality, output)
+
+    # set the cost function option
+    print('')
+    print('Registration cost function: (see FSL FLIRT for help)')
+    cost_fxns = {'mutualinfo' : '= Mutual Information [H(b)+H(s)-H(b,s)]', 
+                 'leastsq' : '=  Least Squares [Pearson Correlation]',
+                 'corratio' : '= Correlation Ratio', 
+                 'normcorr' : '= Normalized Correlation', 
+                 'labeldiff' : '= FSL magic!',
+                 'bbr' : '= FSL magic!'}
+
+    cost, output = selector_dict(cost_fxns, output)
+
+    # get registration degrees of freedom
+    print('')
+    print('Registration degrees of freedom: (see FSL FLIRT for help)')
+    degrees_of_freedom = [6, 7, 9, 12]
+    reg_dof, output = selector_list(degrees_of_freedom, output)
+
+    # if we messed any of these up, we return None
+    if output == None:
+        print('Please try again')
+        line = ''
+    # otherwise we print the command and return it
+    else:
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_calc_FSL ' +
+                                                   str(quality) + ' ' +
+                                                   str(cost) + ' ' +
+                                                   str(reg_dof))
+
+    # did not operate directly on the functional data, so return orig. output
+    return line, output
+
     return line, output
 def surf2vol(input_name):
     return line, output

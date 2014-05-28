@@ -1,23 +1,34 @@
 #!/bin/bash
 
-# set variables
+cat <<EOF
 INPUT=`echo 'func_'${1}`
-MASK=`echo 'anat_${2}'`
 
-## calculate global correlation for each concatenated run
+echo '************************************************************************'
+echo '                    Global correlation calculator'
+echo ''
+echo '   - Calculates global correlation value of each run in single-subject'
+echo '     space. NB: Does not work on MNI data!'
+echo ''
+echo '************************************************************************'
+
+EOF
+
+cat <<"EOF"
 cd /tmp
-for SUB in ${SUBJECTS}; do
-    for SESS in `ls -d ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`; do
-        for FILE in `ls ${SESS}/${INPUT}.*.nii.gz`; do
-            FNAME=`basename ${FILE}`
-            if [ ! -f ${SESS}/${PARAMS}/${FNAME}.gcorr ]; then
-                @compute_gcor \
-                    -input ${FILE} \
-                    -verb 0 \
-                    -mask ${SESS}/${MASK}.nii.gz \
-                    > ${SESS}/${PARAMS}/${FNAME}.gcorr
-            fi
-        done # file
-    done # session
-done # subject
+
+## calculate global correlation for each run
+for SESS in `ls -d ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`; do
+    for FILE in `ls ${SESS}/${INPUT}.*.nii.gz`; do
+        FNAME=`basename ${FILE}`
+        if [ ! -f ${SESS}/${PARAMS}/${FNAME}.gcorr ]; then
+            @compute_gcor \
+                -input ${FILE} \
+                -verb 0 \
+                -mask ${SESS}/anat_EPI_mask.nii.gz \
+                > ${SESS}/${PARAMS}/${FNAME}.gcorr
+        fi
+    done # file
+done # session
 cd ${DIR_PIPE}
+
+EOF

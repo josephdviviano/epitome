@@ -458,7 +458,7 @@ def run_epitome():
     # now loop through the modules until the user aborts
     flag = 0 # breaks us out of the loop
     while flag == 0:
-        
+
         print('')
         print('Please select the next pipeline module:')
         print('')
@@ -482,14 +482,17 @@ def run_epitome():
             print pipe
         print('')
         response = raw_input("""Type 'stop' to stop, else continue: """)
+        # breaks us out of the pipeline constructor loop
         if response == 'stop':
-            flag = 1 # breaks us out of the loop
+            flag = 1
 
-    # close the for sub in subjects loop
+    # add each subject to a queue file, close the subject loop
+    f.write('# append this subject to the process queue\n')
+    f.write('echo bash ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd +
+                               ' >> ${DIR_DATA}/proclist.sh\n')
     f.write('done\n')
-    f.write('\n')
+    f.write('')
 
-    # until the user aborts this stage, add 
 
     # close the file, and make executable by owner + group
     f.close()

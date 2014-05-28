@@ -5,15 +5,13 @@ DATA_QUALITY=`echo ${1}`
 COST=`echo ${2}`
 REG_DOF=`echo ${3}`
 
-
 echo '************************************************************************'
-echo '                  Linear registration pathway calculator'
+echo '               AFNI: Linear registration pathway calculator'
 echo ''
-echo '   Calculates EPI <--> T1 <--> MNI152 (included in AFNI distribution)
+echo '   Calculates EPI <--> T1 <--> MNI152 (included in AFNI distribution)'
 echo '   - Using data quality: ' ${DATA_QUALITY} ','
 echo '   - Cost function: ' ${COST} ','
 echo '   - Degrees of freedom preset ' ${REG_DOF} ','
-echo '   - Data quality ' ,'
 echo '   - Generates EPI template registered to T1 & vice-versa (sessionwise),'
 echo ''
 echo '************************************************************************'
