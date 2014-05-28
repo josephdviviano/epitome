@@ -9,6 +9,20 @@ def invalid_selection():
     print('Invalid selection.')
     return None, None
 
+def selector_float(output):
+    # have the user enter a number
+    option = raw_input('#: ')
+
+    # ensure response is non-negative
+    if option == '':
+        option = -1
+    if float(option) >= float(0):
+        response = float(option)
+    else:
+        response, output = invalid_selection()
+
+    return response, output    
+
 def selector_int(output):
     # have the user enter a number
     option = raw_input('#: ')
@@ -83,15 +97,16 @@ def selector_dict(item_dict, output):
     return response, output
 
 def filter(input_name):
-    print('')
-    print('Adding filter module')
-    print('')
 
-    # get the detrend order
+    output = 'filtered'
+
+    print('')
+    print('Adding filter module.')
+
+    print('')
     print('Set detrend order:')
     polort, output = selector_int(output)
 
-    # get the global signal flag
     print('Set global signal regression:')
     gs_list = ['off', 'on']
     gs_flag, output = selector_list(gs_list, output)
@@ -106,19 +121,16 @@ def filter(input_name):
                                       str(input_name) + ' ' +
                                       str(polort) + ' ' +
                                       str(gs_flag))
-        output = 'filtered'
     return line, output
 
 def gen_gcor(input_name):
 
     import copy
 
-    # init our output variable, which will be returned unharmed
-    output = copy.copy(input_name)
-
+    output = copy.copy(input_name) # return output unharmed
+    
     print('')
     print('Adding global correlation calculation')
-    print('')
 
     line = ('. ${DIR_PIPE}/epitome/modules/pre/gen_gcor ' + str(input_name)
 
@@ -126,15 +138,14 @@ def gen_gcor(input_name):
 
 def init_EPI():
     
-    # init our output variable
-    output = ''
+    output = 'scaled'
 
-    # give us some feedback
     print('')
     print('Initializing functional MRI pre-processing.')
-    print('')
+
 
     # get the data-quality option
+    print('')
     print('Select data quality:')
     data_quality = ['low', 'high']
     quality, output = selector_list(data_quality, output)
@@ -165,36 +176,77 @@ def init_EPI():
                                           str(quality) + ' ' +
                                           str(deltr) + ' ' +
                                           str(slice_timing))
-        output = 'scaled'
     return line, output
 
 def linreg_EPI2MNI_AFNI(input_name):
+    
+    output = 'MNI'
+
+    # give us some feedback
+    print('')
+    print('Resampling input EPI data to MNI space using AFNI.')
+
+    # get the reslice dimensions
+    print('')
+    print('Select target dimensions (isotropic mm):')
+    dims, output = selector_float(output)
+
+    # if we messed any of these up, we return None
+    if output == None:
+        print('Please try again')
+        line = ''
+    # otherwise we print the command and return it
+    else:
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_EPI2MNI_AFNI ' +
+                                                   str(input_name) + ' ' +
+                                                   str(dims))
     return line, output
+
 def linreg_EPI2MNI_FSL(input_name):
+
+    output = 'MNI'
+
+    # give us some feedback
+    print('')
+    print('Resampling input EPI data to MNI space using FSL.')
+
+    # get the reslice dimensions
+    print('')
+    print('Select target dimensions (isotropic mm):')
+    dims, output = selector_float(output)
+
+    # if we messed any of these up, we return None
+    if output == None:
+        print('Please try again')
+        line = ''
+    # otherwise we print the command and return it
+    else:
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_EPI2MNI_FSL ' +
+                                                  str(input_name) + ' ' +
+                                                  str(dims))
     return line, output
+
 def linreg_FS2EPI_AFNI(input_name):
     return line, output
+
 def linreg_FS2EPI_FSL(input_name):
     return line, output
+
 def linreg_FS2MNI_FSL(input_name):
     return line, output
-def linreg_FS2MNI_FSL(input_name):
-    return line, output
+
 
 def linreg_calc_AFNI(input_name):
 
     import copy
 
-    # init our output variable, which will be returned unharmed if we don't 
-    # make any mistakes
-    output = copy.copy(input_name)
+    output = copy.copy(input_name) # return output unharmed
 
-    # give us some feedback
     print('')
     print('Calculating linear registration pathways using AFNI.')
-    print('')
 
     # get the data-quality option
+    print('')
     print('Select data quality:')
     data_quality = ['low', 'high']
     quality, output = selector_list(data_quality, output)
@@ -243,16 +295,14 @@ def linreg_calc_FSL(input_name):
 
     import copy
 
-    # init our output variable, which will be returned unharmed if we don't 
-    # make any mistakes
-    output = copy.copy(input_name)
+    output = copy.copy(input_name) # return output unharmed
 
     # give us some feedback
     print('')
     print('Calculating linear registration pathways.')
-    print('')
 
     # get the data-quality option
+    print('')
     print('Select data quality:')
     data_quality = ['low', 'high']
     quality, output = selector_list(data_quality, output)
@@ -285,9 +335,6 @@ def linreg_calc_FSL(input_name):
                                                    str(quality) + ' ' +
                                                    str(cost) + ' ' +
                                                    str(reg_dof))
-
-    # did not operate directly on the functional data, so return orig. output
-    return line, output
 
     return line, output
 def surf2vol(input_name):
