@@ -1,15 +1,21 @@
 #!/bin/bash
-## projects volume cortical data onto a freesurfer-surface
 
-# set variables
 cat <<EOF
-cd /tmp
 INPUT=`echo 'func_'${1}`
 FWHM=`echo ${2}`
 FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
+
+echo '************************************************************************'
+echo '               Smooths functional data on a cortical surface'
+echo '    - Uses a gaussian kernel with FWHM of ' ${FWHM} ' mm.'
+echo ''
+echo '************************************************************************'
+
 EOF
 
 cat<<"EOF"
+cd /tmp
+
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     SESS=`basename ${SESS}`        
@@ -40,3 +46,4 @@ for SESS in ${DIR_SESS}; do
 done
 cd ${DIR_PIPE}
 
+EOF

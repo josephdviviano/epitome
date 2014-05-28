@@ -227,12 +227,42 @@ def linreg_EPI2MNI_FSL(input_name):
     return line, output
 
 def linreg_FS2EPI_AFNI(input_name):
+
+    import copy
+
+    output = copy.copy(input_name) # return output unharmed
+
+    print('')
+    print('Moving Freesurfer atlases to single-subject space using AFNI.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_FS2EPI_AFNI')
+
     return line, output
 
 def linreg_FS2EPI_FSL(input_name):
+
+    import copy
+
+    output = copy.copy(input_name) # return output unharmed
+
+    print('')
+    print('Moving Freesurfer atlases to single-subject space using FSL.')
+    
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_FS2EPI_FSL')
+
     return line, output
 
 def linreg_FS2MNI_FSL(input_name):
+    
+    import copy
+
+    output = copy.copy(input_name) # return output unharmed
+
+    print('')
+    print('Moving Freesurfer atlases to MNI space using FSL.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_FS2MNI_FSL')
+
     return line, output
 
 
@@ -287,8 +317,6 @@ def linreg_calc_AFNI(input_name):
                                                    str(quality) + ' ' +
                                                    str(cost) + ' ' +
                                                    str(reg_dof))
-
-    # did not operate directly on the functional data, so return orig. output
     return line, output
 
 def linreg_calc_FSL(input_name):
@@ -297,7 +325,6 @@ def linreg_calc_FSL(input_name):
 
     output = copy.copy(input_name) # return output unharmed
 
-    # give us some feedback
     print('')
     print('Calculating linear registration pathways.')
 
@@ -335,16 +362,55 @@ def linreg_calc_FSL(input_name):
                                                    str(quality) + ' ' +
                                                    str(cost) + ' ' +
                                                    str(reg_dof))
+    return line, output
+
+def surf2vol(input_name):
+    
+    output = 'ctx'
+
+    print('')
+    print('Projecting surface data to volume space.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/surf2vol ' + str(input_name))
 
     return line, output
-def surf2vol(input_name):
-    return line, output
+
 def surfsmooth(input_name):
+    
+    output = 'smooth'
+
+    print('')
+    print('Smoothing functional data on a cortical surface.')
+
+    print('')
+    print('Input smoothing kernel FWHM (mm):')
+    fwhm, output = selector_float(output)
+
+    # if we messed any of these up, we return None
+    if output == None:
+        print('Please try again')
+        line = ''
+    # otherwise we print the command and return it
+    else:
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/surfsmooth ' +
+                                          str(input_name) + ' ' +
+                                          str(fwhm))
     return line, output
+
+def vol2surf(input_name):
+
+    output = 'surface'
+
+    print('')
+    print('Projecting data to cortical surface.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/vol2surf ' + str(input_name))
+
+    return line, output
+
 def TRdrop(input_name):
     return line, output
-def vol2surf(input_name):
-    return line, output
+
 
 def del_everything():
     return line, output

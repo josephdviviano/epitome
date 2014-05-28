@@ -1,64 +1,73 @@
 #!/bin/bash
 
-## projects volume cortical data onto a freesurfer-surface
-cd /tmp
+cat <<EOF
 INPUT=`echo 'func_'${1}`
 FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
 
-for SUB in ${SUBJECTS}; do
-    DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
-    for SESS in ${DIR_SESS}; do
-        SESS=`basename ${SESS}`        
-        DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
-        DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
-        DIR_FS=`echo ${FS}/${DIR_EXPT}_${SUB}_${SESS}`
-        
-        # create SUMA folder
-        if [ ! -f ${DIR_FS}/SUMA ]; then
-        @SUMA_Make_Spec_FS \
-            -fspath ${DIR_FS} \
-            -sid ${DIR_EXPT}_${SUB}_${SESS} \
-            -use_mgz
-        fi
+echo '************************************************************************'
+echo '             Projects functional data onto a cortical surface'
+echo ''
+echo '************************************************************************'
 
-        # Align experimental T1 to FS-exported T1 (might not be required)
-        # Must be run where the experimental anatomy resides!
-        cd ${DIR_T1}
-        @SUMA_AlignToExperiment \
-            -exp_anat anat_T1_brain.nii.gz \
-            -surf_anat ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_SurfVol+orig.
-        cd /tmp
+EOF
 
-        # project volume data --> surface for right and left separately
-        if [ ! -f ${DIR}/func_surface.R.${NUM}.niml.dset ]; then
-            3dVol2Surf \
-              -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
-              -surf_A ${DIR_FS}/SUMA/rh.white.asc \
-              -surf_B ${DIR_FS}/SUMA/rh.pial.asc \
-              -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
-              -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
-              -map_func median \
-              -f_steps 15 \
-              -f_index nodes \
-              -outcols_NSD_format \
-              -out_niml ${DIR}/func_surface.R.${NUM}.niml.dset
-        fi
+cat <<"EOF"
+cd /tmp
 
-        # project volume data --> surface for right and left separately
-        if [ ! -f ${DIR}/func_surface.R.${NUM}.niml.dset ]; then
-            3dVol2Surf \
-              -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
-              -surf_A ${DIR_FS}/SUMA/lh.white.asc \
-              -surf_B ${DIR_FS}/SUMA/lh.pial.asc \
-              -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
-              -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
-              -map_func median \
-              -f_steps 15 \
-              -f_index nodes \
-              -outcols_NSD_format \
-              -out_niml ${DIR}/func_surface.L.${NUM}.niml.dset
-        fi
-    done
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    SESS=`basename ${SESS}`        
+    DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
+    DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
+    DIR_FS=`echo ${FS}/${DIR_EXPT}_${SUB}_${SESS}`
+    
+    # create SUMA folder
+    if [ ! -f ${DIR_FS}/SUMA ]; then
+    @SUMA_Make_Spec_FS \
+        -fspath ${DIR_FS} \
+        -sid ${DIR_EXPT}_${SUB}_${SESS} \
+        -use_mgz
+    fi
+
+    # Align experimental T1 to FS-exported T1 (might not be required)
+    # Must be run where the experimental anatomy resides!
+    cd ${DIR_T1}
+    @SUMA_AlignToExperiment \
+        -exp_anat anat_T1_brain.nii.gz \
+        -surf_anat ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_SurfVol+orig.
+    cd /tmp
+
+    # project volume data --> surface for right and left separately
+    if [ ! -f ${DIR}/func_surface.R.${NUM}.niml.dset ]; then
+        3dVol2Surf \
+          -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
+          -surf_A ${DIR_FS}/SUMA/rh.white.asc \
+          -surf_B ${DIR_FS}/SUMA/rh.pial.asc \
+          -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
+          -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
+          -map_func median \
+          -f_steps 15 \
+          -f_index nodes \
+          -outcols_NSD_format \
+          -out_niml ${DIR}/func_surface.R.${NUM}.niml.dset
+    fi
+
+    # project volume data --> surface for right and left separately
+    if [ ! -f ${DIR}/func_surface.R.${NUM}.niml.dset ]; then
+        3dVol2Surf \
+          -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
+          -surf_A ${DIR_FS}/SUMA/lh.white.asc \
+          -surf_B ${DIR_FS}/SUMA/lh.pial.asc \
+          -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
+          -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
+          -map_func median \
+          -f_steps 15 \
+          -f_index nodes \
+          -outcols_NSD_format \
+          -out_niml ${DIR}/func_surface.L.${NUM}.niml.dset
+    fi
 done
+
 cd ${DIR_PIPE}
 
+EOF
