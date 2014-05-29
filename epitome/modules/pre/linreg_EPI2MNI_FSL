@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cat <<EOF
-
 INPUT=`echo 'func_${1}'`
 DIMS=`echo ${2}`
 

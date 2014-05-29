@@ -123,7 +123,9 @@
 
     "gen_regressors" :
         ["Usage:",
-         "    gen_regressors",
+         "    gen_regressors <func_prefix>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "",
          "Creates a series of regressors from fMRI data and a freesurfer",
          "segmentation:", 
          "    white matter + eroded mask,",

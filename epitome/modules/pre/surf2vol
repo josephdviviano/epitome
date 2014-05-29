@@ -1,6 +1,5 @@
 #!/bin/bash
 
-## projects volume cortical data onto a freesurfer-surface
 cat <<EOF
 INPUT=`echo 'func_'${1}`
 FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`

@@ -136,6 +136,20 @@ def gen_gcor(input_name):
 
     return line, output
 
+def gen_regressors(input_name):
+
+    import copy
+
+    output = copy.copy(input_name) # return output unharmed
+
+    print('')
+    print('Generating regressors from' + str(input_name))
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/gen_regressors ' +
+                                                  str(input_name)
+
+    return line, output
+
 def init_EPI():
     
     output = 'scaled'
