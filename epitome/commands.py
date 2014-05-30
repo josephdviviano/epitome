@@ -132,7 +132,7 @@ def gen_gcor(input_name):
     print('')
     print('Adding global correlation calculation')
 
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/gen_gcor ' + str(input_name)
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/gen_gcor ' + str(input_name))
 
     return line, output
 
@@ -146,7 +146,7 @@ def gen_regressors(input_name):
     print('Generating regressors from' + str(input_name))
 
     line = ('. ${DIR_PIPE}/epitome/modules/pre/gen_regressors ' +
-                                                  str(input_name)
+                                                  str(input_name))
 
     return line, output
 
@@ -459,9 +459,9 @@ def TRdrop(input_name):
         FD = 0.3
         DV = 0.3
 
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + str(input_name) +
-                                                          str(head_size) +
-                                                          str(FD) +
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + str(input_name) + ' ' +
+                                                          str(head_size) + ' ' +
+                                                          str(FD) + ' ' +
                                                           str(DV))
 
     return line, output
