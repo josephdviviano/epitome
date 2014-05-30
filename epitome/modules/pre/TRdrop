@@ -1,0 +1,46 @@
+#!/bin/bash
+
+cat <<EOF
+INPUT=`echo 'func_'${1}`
+HEAD=`echo ${2}`
+FD=`echo ${3}`
+DV=`echo ${4}`
+
+echo '************************************************************************'
+echo '                        Motion Scrubbing Module'
+echo ''
+echo '   - Computes framewise displacement and DVARS measure (Power 2012),'
+echo '   - Removes TRs from each run corrupted by instantaneous displacement,'
+echo '     over ' ${FD}' mm / TR, and/or ' ${DV} '% signal change / TR.'
+echo '   - Calculations are preformed assuming a head size of ' ${HEAD} ' mm.'
+echo '   - We also remove TRs 1 back and 2 forward from the disturbance to'
+echo '     control for spin-echo effects (appropriate according to Dr. Power).'
+echo ''
+echo '************************************************************************'
+
+EOF
+
+cat <<"EOF"
+cd /tmp
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        if [ ! -f ${SESS}/func_scrubbed.${NUM}.nii.gz ]; then
+            python ${DIR_PIPE}/epitome/TRdrop.py \
+                ${SESS} \
+                ${INPUT} \
+                ${NUM} \
+                ${HEAD} \
+                ${FD} \
+                ${DV}
+        fi
+    done
+done
+
+cd ${DIR_PIPE}
+
+EOF
