@@ -423,6 +423,47 @@ def vol2surf(input_name):
     return line, output
 
 def TRdrop(input_name):
+
+    output = 'scrubbed'
+
+    print('')
+    print('Removing motion-corrupted TRs.')
+    
+    print('')
+    print('Would you like to use the defaults?')
+    print('                           Head Size = 50 mm')
+    print('    Framewise Displacement Threshold = 0.3 mm / TR')
+    print('                     DVARS Threshold = 3 pct signal change / TR')
+    defaults = ['yes', 'no']
+    decision, garbage = selector_list(defaults, output)
+
+    # if the user rejects the defaults or makes a mistake
+    if decision == 'no' or None:
+
+        print('')
+        print('Input head size (default 50)')
+        head_size, output = selector_float(output)
+
+        print('')
+        print('Input FD threshold (default 0.3)')
+        FD, output = selector_float(output)
+
+        print('')
+        print('Input head size (default 0.3)')
+        DV, output = selector_float(output)
+
+    else:
+        print('')
+        print('OK, using the defaults.')
+        head_size = 50
+        FD = 0.3
+        DV = 0.3
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + str(input_name) +
+                                                          str(head_size) +
+                                                          str(FD) +
+                                                          str(DV))
+
     return line, output
 
 

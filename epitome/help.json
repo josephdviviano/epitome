@@ -289,14 +289,10 @@
          "estimated by freesurfer."
         ],
 
-    "TRdrop.py" : 
+    "TRdrop" : 
         ["Usage:",
-        "    TRdrop.py <data_directory> <experiment> <func_prefix>",
-        "              <mask_prefix>, <head_size>, <FD_thresh>, <DV_thresh>",
-        "data_directory -- full path to your MRI/WORKING directory.",
-        "experiment -- name of the experiment being analyzed.",
+        "    TRdrop <func_prefix> <head_size>, <FD_thresh>, <DV_thresh>",
         "func_prefix -- functional data prefix (e.g., 'func_filtered')",
-        "mask_name -- mask file name (e.g., 'anat_EPI_mask')",
         "head_size -- head radius in mm (def. 50 mm)",
         "thresh_FD -- censor TRs with delta motion > x mm (def. 0.3 mm)",
         "thresh_DV -- censor TRs with delta GS change > x % (def. 0.3 %)",
