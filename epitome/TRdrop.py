@@ -1,18 +1,4 @@
 #!/usr/bin/env python
-"""
-Removes motion-corrupted TRs from data, without interpolation. If called from
-the command line, this will batch process all runs in all sessions for a given
-subject.
-
-func__pre = functional data prefix (e.g., 'func_filtered')
-mask_name = mask file name (e.g., 'anat_EPI_mask')
-head_mm = head radius in mm (default 50 mm)
-FD = censor TRs with instantaneous motion > x mm (default 0.3 mm)
-DV = censor TRs with instantaneous GS fluctuation > x % (def. 0.3 %)
-
-Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to change.
-
-"""
 
 import os, sys
 import csv
@@ -23,6 +9,22 @@ import scipy as sp
 import nibabel as nib
 
 def TR_drop(directory, func_name, num, head_mm=50, FD=0.3, DV=0.3):
+    """
+    Removes motion-corrupted TRs from data, without interpolation. If called
+    from the command line, this will batch process all runs in all sessions 
+    for a given subject.
+
+    func__pre = functional data prefix (e.g., 'func_filtered')
+    mask_name = mask file name (e.g., 'anat_EPI_mask')
+    num       = run number
+    head_mm   = head radius in mm (default 50 mm)
+    FD        = censor TRs with instantaneous motion > x mm (default 0.3 mm)
+    DV        = censor TRs with instantaneous GS fluctuation > x % (def. 0.3 %)
+
+    Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to
+    change.
+
+    """
 
     print('')
     print(' TR_drop ... run ' + str(num) + ' ... input ' + str(func_name))
