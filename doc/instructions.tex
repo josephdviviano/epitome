@@ -18,6 +18,13 @@
 \setlength\epigraphwidth{0.7\textwidth} % 
 \definecolor{titlepagecolor}{cmyk}{1,.60,0,.40} % custom color
 
+\newenvironment{blockquote}{%
+  \par%
+  \medskip
+  \leftskip=4em\rightskip=2em%
+  \noindent\ignorespaces}{%
+  \par\medskip}
+
 %% Title Page
 \makeatletter                       
 \def\printauthor{%                  
@@ -364,7 +371,227 @@ The server, and EPItome-xl, rely on Oracle's Sun-Grid engine to schedule jobs. A
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Pipeline}
 
-For the pipeline to work, your RAW data must be converted to the appropriate format in the WORKING directory.
+For the pipeline to work, your RAW data must be converted to the appropriate format in the WORKING directory. EPItome-xl should be installed and configured properly on your server (code \& up-to-date installation instructions are available from \href{https://github.com/josephdviviano/EPItome-xl}{GitHub}).
+
+What follows is a description of what each module in EPItome-xl does. These modules can be easily chained together manually, or by using the command-line interface included with the pipeline. New modules are simply bash scripts which call various programs, including FSL, Freesurfer, AFNI, and custom python programs. Therefore, functionality of EPItome is easily extended without perturbing the function of older modules.
+
+The types of modules included can be roughly split into 4 categories: freesurfer, pre-processing, quality-control, and cleanup.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Freesurfer}
+
+Right now, the default freesurfer recon-all is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{recon.py}
+Usage: \texttt{recon.py <data\_directory> <experiment> <modality> <cores>} \
+
+\begin{blockquote}
+data\_directory -- full path to your MRI/WORKING directory. \\
+experiment -- name of the experiment being analyzed. \\
+modality -- image modality to import (normally T1). \\
+cores -- number of cores to dedicate (one core per run). \
+\end{blockquote}
+
+\noindent This sends each subject's T1s through the Freesurfer pipeline. It uses multiple T1s per imaging session, but does not combine them between sessions. Data is output to the dedicated FREESURFER directory, and should be exported to the MRI analysis folders using \texttt{anatexport.py}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{anatexport.py}
+Usage: \texttt{FS\_anatexport.py <data\_directory> <experiment>}
+
+\begin{blockquote}
+data\_directory -- full path to your MRI/WORKING directory. \\
+experiment -- name of the experiment being analyzed. \
+\end{blockquote}
+
+\noindent Imports processed T1s from Freesurfer to the experiment directory.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Pre-Processing}
+
+This contains the lion's share of the pipeline. Every run of EPItome begins with \texttt{init\_EPI}, which contains a non-contentious set of pre-processing steps for EPI images. THe following stages can be chained together at will to preform de-noising, spatial transformations, projections to surface-space, and spatial smoothing.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{init\_EPI}
+Usage: \texttt{init\_EPI <data\_quality> <del\_tr> <t\_pattern>}
+
+\begin{blockquote}
+data\_quality -- `low' for poor internal contrast, otherwise `high'. \\
+del\_tr -- number of TRs to remove from the beginning of the run. \\
+t\_pattern -- slice-timing at acquisition (from AFNI's 3dTshift). \
+\end{blockquote}
+
+\noindent Works from the raw data in each RUN folder. It performs general pre-processing for all fMRI data:
+
+\begin{itemize} \itemsep-2pt
+    \item{Orients data to RAI}
+    \item{Deletes initial time points (optionally)}
+    \item{Removes data outliers}
+    \item{Slice time correction}
+    \item{Deobliques \& motion corrects data}
+    \item{Creates session mean deskulled EPIs and whole-brain masks}
+    \item{Scales each run to have mode = 1000, removing small values}
+    \item{Calculates various statistics + time series}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{linreg\_calc\_AFNI}
+Usage: \texttt{linreg\_calc\_AFNI <cost> <reg\_dof> <data\_quality>}
+
+\begin{blockquote}
+cost -- cost function minimized during registration. \\
+reg\_dof -- `big\_move' or `giant\_move' (from align\_EPI\_anat.py). \\
+data\_quality -- `low' for poor internal contrast, otherwise `high'. \
+\end{blockquote}
+
+\noindent Uses AFNI's align\_EPI\_anat.py to calculate linear registration between EPI <--> T1 <--> MNI152, and generate an EPI template registered to T1 \& T1 registered to EPI (sessionwise). Specific options can be found in the command-line interface's help function.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{linreg\_calc\_FSL}
+Usage: \texttt{linreg\_calc\_FSL <cost> <reg\_dof> <data\_quality>}
+
+\begin{blockquote}
+cost -- cost function minimized during registration (see FSL FLIRT). \\
+reg\_dof -- 6, 7, 9, or 12 degrees of freedom (see FSL FLIRT), \\
+data\_quality -- `low' for poor internal contrast, otherwise `high'. \
+\end{blockquote}
+
+\noindent Uses FSL's FLIRT to calculate linear registration between EPI <--> T1 <--> MNI152, and generate an EPI template registered to T1 \& T1 registered to EPI (sessionwise). Specific options can be found in the command-line interface's help function.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{linreg\_EPI2MNI\_AFNI}
+Usage: \texttt{linreg\_EPI2MNI\_AFNI <func\_prefix> <voxel\_dims>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
+voxel\_dims -- target voxel dimensions (isotropic). \
+\end{blockquote}
+
+\noindent Prepares data for analysis in MNI standard space.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{linreg\_EPI2MNI\_FSL}
+Usage: \texttt{linreg\_EPI2MNI\_FSL <func\_prefix> <voxel\_dims>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg., smooth in func\_smooth). \\
+voxel\_dims -- target voxel dimensions (isotropic). \
+\end{blockquote}
+
+\noindent Prepares data for analysis in MNI standard space.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{linreg\_FS2EPI\_AFNI}
+Usage: \texttt{linreg\_FS2EPI\_AFNI}
+
+\noindent Brings Freesurfer atlases in register with single-subject EPIs.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{linreg\_FS2EPI\_FSL}
+Usage: \texttt{linreg\_FS2EPI\_FSL}
+
+\noindent Brings Freesurfer atlases in register with single-subject EPIs.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{linreg\_FS2MNI\_FSL}
+Usage: \texttt{linreg\_FS2MNI\_FSL}
+
+\noindent Brings Freesurfer atlases in register with MNI standard space.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{gen\_regressors}
+Usage: \texttt{gen\_regressors <func\_prefix>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
+\end{blockquote}
+
+\noindent Creates a series of regressors from fMRI data and a freesurfer segmentation: 
+
+\begin{itemize} \itemsep-2pt
+	\item{white matter + eroded mask}
+	\item{ventricles + eroded mask}
+	\item{grey matter mask}
+	\item{brain stem mask}
+	\item{dialated whole-brain mask}
+	\item{draining vessels mask}
+	\item{local white matter regressors + 1 temporal lag}
+	\item{ventricle regressors + 1 temporal lag}
+	\item{draining vessel regressors + 1 temporal lag}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{gen\_gcor}
+Usage: \texttt{gen\_gcor <func\_prefix>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
+\end{blockquote}
+
+\noindent Calls an AFNI script to calculate the global correlation for each concatenated set of runs (across all sessions). Useful for resting state functional connectivity experiments.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{filter}
+Usage: \texttt{filter <func\_prefix> <detrend\_order> <gs\_regress\_flag>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
+detrend\_order -- polynomial order to detrend each voxel against. \\
+gs\_regress\_flag -- if 1, regress global signal. \
+\end{blockquote}
+
+\noindent This computes detrended nuisance time series, fits each run with a, computed noise model, and subtracts the fit. Computes temporal SNR.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{TRdrop}
+Usage: \texttt{TRdrop <func\_prefix> <head\_size> <FD\_thresh> <DV\_thresh>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
+head\_size -- head radius in mm (def. 50 mm). \\
+thresh\_FD -- censor TRs with $\Delta$ motion > $x$ mm (def. 0.3 mm). \\
+thresh\_DV -- censor TRs with $\Delta$ GS change > $x$ \% (def. 0.3 \%). \
+\end{blockquote}
+
+\noindent This removes motion-corrupted TRs from fMRI scans and outputs shortened versions for connectivity analysis (mostly).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{surfsmooth}
+Usage: \texttt{surfsmooth <func\_prefix> <FWHM>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
+FWHM -- full-width half-maximum of the gaussian kernel convolved with the surface data. \
+\end{blockquote}
+
+\noindent This spatially-smooths cortical data along the surface mesh, estimated by Freesurfer.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{surf2vol}
+Usage: \texttt{surf2vol <func\_prefix> <target\_prefix>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
+target\_prefix -- target data prefix (eg.,smooth in func\_smooth). \
+\end{blockquote}
+
+\noindent This projects surface data back into a functional volume with the same properties as <target\_prefix>.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{vol2surf}
+Usage: \texttt{vol2surf <func\_prefix>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
+\end{blockquote}
+
+\noindent Projects functional data from volume space to a Freesurfer generated cortical mesh.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Quality Control}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % References, both on server building and MRI analysis

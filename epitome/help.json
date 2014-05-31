@@ -104,7 +104,7 @@
          "    filter <func_prefix> <detrend_order> <gs_regress_flag>",
          "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
          "detrend_order -- polynomial order to detrend each voxel against.",
-         "gs_regress_flag -- if 1, regress global signal (like a chump)",
+         "gs_regress_flag -- if 1, regress global signal.",
          "",
          "This computes detrended nuisance time series, fits each run with a",
          "computed noise model, and subtracts the fit. Computes temporal SNR."
@@ -112,9 +112,8 @@
 
     "gen_gcor" :
         ["Usage:",
-         "    gen_gcor <func_prefix> <mask_prefix>",
+         "    gen_gcor <func_prefix>",
          "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
-         "mask_prefix -- mask prefix (eg., EPI_brain in anat_EPI_brain).",
          "",
          "Calls an AFNI script to calculate the global correlation for each",
          "concatenated set of runs (across all sessions). Useful for resting",
@@ -141,7 +140,11 @@
 
     "init_EPI" : 
         ["Usage:",
-         "    init_EPI",
+         "    init_EPI <data_quality> <del_tr> <t_pattern>",
+         "data_quality -- 'low' for poor internal contrast, otherwise 'high'",
+         "del_tr -- number of TRs to remove from the beginning of the run",
+         "t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift)",
+         ""
          "General pre-processing for all fMRI data:",
          "    Orients data to RAI,",
          "    Deletes initial time points (optionally),",
@@ -217,9 +220,8 @@
 
     "linreg_EPI2MNI_AFNI" :
         ["Usage:",
-         "    linreg_EPI2MNI_AFNI <func_prefix> <mask_prefix> <voxel_dims>",
+         "    linreg_EPI2MNI_AFNI <func_prefix> <voxel_dims>",
          "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
-         "mask_prefix -- mask prefix (eg., EPI_brain in anat_EPI_brain).",
          "voxel_dims -- target voxel dimensions (isotropic).",
          "",
          "Prepares data for analysis in MNI standard space."
@@ -227,9 +229,8 @@
 
     "linreg_EPI2MNI_FSL" :
         ["Usage:",
-         "    linreg_EPI2MNI_FSL <func_prefix> <mask_prefix> <voxel_dims>",
+         "    linreg_EPI2MNI_FSL <func_prefix> <voxel_dims>",
          "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
-         "mask_prefix -- mask prefix (eg., EPI_brain in anat_EPI_brain).",
          "voxel_dims -- target voxel dimensions (isotropic).",
          "",
          "Prepares data for analysis in MNI standard space."
@@ -291,7 +292,7 @@
 
     "TRdrop" : 
         ["Usage:",
-        "    TRdrop <func_prefix> <head_size>, <FD_thresh>, <DV_thresh>",
+        "    TRdrop <func_prefix> <head_size> <FD_thresh> <DV_thresh>",
         "func_prefix -- functional data prefix (e.g., 'func_filtered')",
         "head_size -- head radius in mm (def. 50 mm)",
         "thresh_FD -- censor TRs with delta motion > x mm (def. 0.3 mm)",
