@@ -461,7 +461,7 @@ def check_masks(dir_data, expt, mode):
 
     return line, output
 
-def check_EPI2T1():
+def check_EPI2T1(dir_data, expt, mode):
     output = ''
 
     print('')
@@ -474,7 +474,7 @@ def check_EPI2T1():
 
     return line, output
 
-def check_T12MNI():
+def check_T12MNI(dir_data, expt, mode):
     output = ''
 
     print('')
@@ -487,7 +487,7 @@ def check_T12MNI():
 
     return line, output
 
-def check_runs():
+def check_runs(dir_data, expt, mode):
     output = ''
 
     print('')
@@ -500,7 +500,7 @@ def check_runs():
 
     return line, output
 
-def check_motionind():
+def check_motionind(dir_data, expt, mode):
     output = ''
 
     print('')
@@ -513,16 +513,15 @@ def check_motionind():
 
     return line, output
 
-def check_spectra():
+def check_spectra(dir_data, expt, mode):
     output = ''
 
     print('')
     print('Adding subject-wise regressor spectra QC to the outputs.')
 
-    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_spectra ' + 
-                                          str(dir_data) + ' ' +
-                                          str(expt) + ' ' +
-                                          str(mode)
+    line = ('echo `python ${DIR_PIPE}/epitome/modules/qc/check_spectra ' + 
+            str(dir_data) + ' ' + str(expt) + ' ' +  str(mode) + 
+            '` >> ${DIR_DATA}/${DIR_EXPT}/proclist' + f_id + '.sh\n')
 
     return line, output
 
