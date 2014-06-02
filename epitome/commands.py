@@ -10,8 +10,7 @@ def invalid_selection():
     return None, None
 
 def selector_float(output):
-    # have the user enter a number
-    option = raw_input('#: ')
+    option = raw_input('#: ') # have the user enter a number
 
     # ensure response is non-negative
     if option == '':
@@ -24,8 +23,7 @@ def selector_float(output):
     return response, output    
 
 def selector_int(output):
-    # have the user enter a number
-    option = raw_input('#: ')
+    option = raw_input('#: ') # have the user enter a number
 
     # ensure response is non-negative
     if option == '':
@@ -38,7 +36,6 @@ def selector_int(output):
     return response, output
 
 def selector_list(item_list, output):
-
     if type(item_list) != list:
         raise TypeError('Input must be a list!')
 
@@ -64,8 +61,7 @@ def selector_list(item_list, output):
 
     return response, output
 
-def selector_dict(item_dict, output):
-    
+def selector_dict(item_dict, output):    
     if type(item_dict) != dict:
         raise TypeError('Input must be a dict!')
 
@@ -97,7 +93,6 @@ def selector_dict(item_dict, output):
     return response, output
 
 def filter(input_name):
-
     output = 'filtered'
 
     print('')
@@ -124,7 +119,6 @@ def filter(input_name):
     return line, output
 
 def gen_gcor(input_name):
-
     import copy
 
     output = copy.copy(input_name) # return output unharmed
@@ -137,7 +131,6 @@ def gen_gcor(input_name):
     return line, output
 
 def gen_regressors(input_name):
-
     import copy
 
     output = copy.copy(input_name) # return output unharmed
@@ -150,8 +143,7 @@ def gen_regressors(input_name):
 
     return line, output
 
-def init_EPI():
-    
+def init_EPI():    
     output = 'scaled'
 
     print('')
@@ -193,7 +185,6 @@ def init_EPI():
     return line, output
 
 def linreg_EPI2MNI_AFNI(input_name):
-    
     output = 'MNI'
 
     # give us some feedback
@@ -217,7 +208,6 @@ def linreg_EPI2MNI_AFNI(input_name):
     return line, output
 
 def linreg_EPI2MNI_FSL(input_name):
-
     output = 'MNI'
 
     # give us some feedback
@@ -241,7 +231,6 @@ def linreg_EPI2MNI_FSL(input_name):
     return line, output
 
 def linreg_FS2EPI_AFNI(input_name):
-
     import copy
 
     output = copy.copy(input_name) # return output unharmed
@@ -254,7 +243,6 @@ def linreg_FS2EPI_AFNI(input_name):
     return line, output
 
 def linreg_FS2EPI_FSL(input_name):
-
     import copy
 
     output = copy.copy(input_name) # return output unharmed
@@ -266,8 +254,7 @@ def linreg_FS2EPI_FSL(input_name):
 
     return line, output
 
-def linreg_FS2MNI_FSL(input_name):
-    
+def linreg_FS2MNI_FSL(input_name):   
     import copy
 
     output = copy.copy(input_name) # return output unharmed
@@ -281,7 +268,6 @@ def linreg_FS2MNI_FSL(input_name):
 
 
 def linreg_calc_AFNI(input_name):
-
     import copy
 
     output = copy.copy(input_name) # return output unharmed
@@ -334,7 +320,6 @@ def linreg_calc_AFNI(input_name):
     return line, output
 
 def linreg_calc_FSL(input_name):
-
     import copy
 
     output = copy.copy(input_name) # return output unharmed
@@ -378,8 +363,7 @@ def linreg_calc_FSL(input_name):
                                                    str(reg_dof))
     return line, output
 
-def surf2vol(input_name):
-    
+def surf2vol(input_name):   
     output = 'ctx'
 
     print('')
@@ -389,8 +373,7 @@ def surf2vol(input_name):
 
     return line, output
 
-def surfsmooth(input_name):
-    
+def surfsmooth(input_name):    
     output = 'smooth'
 
     print('')
@@ -412,7 +395,6 @@ def surfsmooth(input_name):
     return line, output
 
 def vol2surf(input_name):
-
     output = 'surface'
 
     print('')
@@ -423,7 +405,6 @@ def vol2surf(input_name):
     return line, output
 
 def TRdrop(input_name):
-
     output = 'scrubbed'
 
     print('')
@@ -459,13 +440,91 @@ def TRdrop(input_name):
         FD = 0.3
         DV = 0.3
 
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + str(input_name) + ' ' +
-                                                          str(head_size) + ' ' +
-                                                          str(FD) + ' ' +
-                                                          str(DV))
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + 
+                                  str(input_name) + ' ' +
+                                  str(head_size) + ' ' +
+                                  str(FD) + ' ' +
+                                  str(DV))
 
     return line, output
 
+def check_masks(dir_data, expt, mode):
+    output = ''
+
+    print('')
+    print('Adding mask-checking QC to the outputs.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_masks ' + 
+                                        str(dir_data) + ' ' +
+                                        str(expt) + ' ' +
+                                        str(mode)
+
+    return line, output
+
+def check_EPI2T1():
+    output = ''
+
+    print('')
+    print('Adding EPI-to-T1 registration checking QC to the outputs.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_EPI2T1 ' + 
+                                         str(dir_data) + ' ' +
+                                         str(expt) + ' ' +
+                                         str(mode)
+
+    return line, output
+
+def check_T12MNI():
+    output = ''
+
+    print('')
+    print('Adding T1-to-MNI registration checking QC to the outputs.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_T12MNI ' + 
+                                         str(dir_data) + ' ' +
+                                         str(expt) + ' ' +
+                                         str(mode)
+
+    return line, output
+
+def check_runs():
+    output = ''
+
+    print('')
+    print('Adding NIFTI dimension-checking QC to the outputs.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_runs ' + 
+                                       str(dir_data) + ' ' +
+                                       str(expt) + ' ' +
+                                       str(mode)
+
+    return line, output
+
+def check_motionind():
+    output = ''
+
+    print('')
+    print('Adding subject-wise motion QC to the outputs.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_motionind ' + 
+                                            str(dir_data) + ' ' +
+                                            str(expt) + ' ' +
+                                            str(mode)
+
+    return line, output
+
+def check_spectra():
+    output = ''
+
+    print('')
+    print('Adding subject-wise regressor spectra QC to the outputs.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_spectra ' + 
+                                          str(dir_data) + ' ' +
+                                          str(expt) + ' ' +
+                                          str(mode)
+
+    return line, output
 
 def del_everything():
     return line, output
@@ -474,17 +533,4 @@ def del_postmc():
 def del_registration():
     return line, output
 def del_MNI():
-    return line, output
-
-def check_masks():
-    return line, output
-def check_EPI2T1():
-    return line, output
-def check_T12MNI():
-    return line, output
-def check_runs():
-    return line, output
-def check_motionind():
-    return line, output
-def check_spectra():
     return line, output
