@@ -446,7 +446,7 @@ def run_epitome():
     # we always start the pipeline with init_EPI
     print('Beginning pipeline construction!')
     pipe_list = [] # keeps track of our command-list
-    flag = 0
+    flag = 0 # breaks us out of the loop
     while flag == 0:    
         
         # add init_EPI, check for mistakes, break the loop if flawless
@@ -476,7 +476,7 @@ def run_epitome():
 
         # print the current pipeline configuration, ask to continue
         print('')
-        print('The pipeline currently looks like this:')
+        print('The pre-processing pipeline currently looks like this:')
         print('')
         for pipe in pipe_list:
             print pipe
@@ -489,11 +489,42 @@ def run_epitome():
     # add each subject to a queue file, close the subject loop
     f.write('# append this subject to the process queue\n')
     f.write('echo bash ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd +
-                               ' >> ${DIR_DATA}/proclist.sh\n')
+                  ' >> ${DIR_DATA}/${DIR_EXPT}/proclist' + f_id + '.sh\n')
     f.write('done\n')
+ 
+    # add user-defined qc runs
     f.write('')
+    f.write('# calls to QC programs')
+    
+    pipe_list = [] # keeps track of our command-list
+    flag = 0 # breaks us out of the loop
+    while flag == 0:
 
+        print('')
+        print('Please select the next QC module:')
+        print('')
+        module = get_modules(interactive=True, moduletype='qc')
+        if module == None:
+            print('')
+        else:
+            # executes the chosen module, write pipeline commands
+            command = 'epi.commands.' + str(module) + '(dir_data, expt, mode)'
+            pipe_list, output = writer(pipe_list, line, cmd, f, output, bkup)
 
+        # print the current pipeline configuration, ask to continue
+        print('')
+        print('The QC pipeline currently looks like this:')
+        print('')
+        for pipe in pipe_list:
+            print pipe
+        print('')
+        response = raw_input("""Type 'stop' to stop, else continue: """)
+        # breaks us out of the pipeline constructor loop
+        if response == 'stop':
+            flag = 1
+
+    print('')
+    print('OK, generating subject 
     # close the file, and make executable by owner + group
     f.close()
     os.chmod(os.path.join(dir_data, expt, master), 0750)

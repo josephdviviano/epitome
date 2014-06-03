@@ -99,12 +99,26 @@ This server was built by a complete stranger to server-building, and I undoubted
 
 To facilitate easy access to the server from your personal computer, on or off campus, we have configured three standard access methods.
 
-\subsection{Samba: Finder access in OS X}
-First, click on your desktop. In your menu bar, select \texttt{go}, \texttt{connect to server}, and type \texttt{smb://130.63.40.171}, after which you need only to enter your username and password for the server. All non-MRI data will now be accessible and editable through the finder window, assuming you have permission to do so. Contact an administrator to change permissions.
+\subsection{Samba: Access to Shared Files On Your Desktop}
 
-Note to administrators: samba is annoying and maintains its own set of passwords and permissions. This is particularly annoying because you will need to find an elegant way for users to set this password up. I haven't.
+All non-MRI data is accessible and editable through the finder/explorer window right on your desktop through a file-sharing service called Samba, assuming you have permission to do so. Contact an administrator to change permissions.
 
-First, you need to add an existing user to samba using \texttt{smbpasswd -a [username]}. Next we add \texttt{[username]}  to the \texttt{/etc/samba/smbusers} file in the form \texttt{[username] = "[username]"}. I've configured samba to mount \texttt{/srv/CNNLAB} as a writable directory structure in \texttt{/etc/samba/smb.conf} under the \texttt{[CNNLAB]} section. More directories could be added in this way. 
+This is a good system for accessing behavioural data stored on the server. Some of this data is protected, and may not be accessible unless you are a member of the \texttt{cnnlabdata} group. An administrator can add you to this group if you need access.
+
+\subsubsection{Mac OSX}
+
+First, click on your desktop. In your menu bar, select \texttt{go}, \texttt{connect to server}, and type \texttt{smb://130.63.40.171}, after which you need only to enter your username and password for the server.
+
+\subsubsection{Windows}
+
+First, click on your start menu, and open \texttt{run}. Type \texttt{\\130.63.40.171}, hit enter, and enter your username / password for the server. You should now have access to the CNNLAB folders in your Windows Explorer program.
+ 
+\subsubsection{Administering Samba}
+
+Samba is annoying and maintains its own set of passwords and permissions. This is particularly annoying because you will need to find an elegant way for users to set this password up. I haven't.
+
+First, you need to add an existing user to samba using \texttt{smbpasswd -a [
+username]}. Next we add \texttt{[username]}  to the \texttt{/etc/samba/smbusers} file in the form \texttt{[username] = "[username]"}. I've configured samba to mount \texttt{/srv/CNNLAB} as a writable directory structure in \texttt{/etc/samba/smb.conf} under the \texttt{[CNNLAB]} section. More directories could be added in this way. 
 
 \subsection{SSH}
 
