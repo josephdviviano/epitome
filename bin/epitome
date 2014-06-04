@@ -11,14 +11,18 @@ Usage:
 
     epitome modules            -- prints a list of all available modules, and
                                   associated help.
+    epitome experiments        -- returns a list of all available experiments.
 
     epitome check              -- returns installation paths.
-    epitome experiments        -- returns a list of all available experiments.
     epitome check <experiment> -- checks directory structure for a given 
                                   experiment.
 
-    epitome run                -- boots up the user interface (which prints
-                                  out a set of processing scripts).
+    epitome run                -- boots up the user interface for producing
+                                  pre-processing and QC scripts.
+
+    epitome clean              -- boots up the user interface for producing
+                                  clean-up scripts (for resetting subjects or
+                                  removing intermediate files).
 
 #######################################################################jdv2014#
 
@@ -185,8 +189,9 @@ def print_help(module):
     helpfile = json.load(fname)
 
     # print the contents of the JSON line by line
-    for line in helpfile[module]:
-        print line
+    if module != None:
+        for line in helpfile[module]:
+            print line
 
 def help_query():
 
@@ -371,6 +376,157 @@ def writer_exp(pipe_list, line, proc, f, output, bkup):
         output = copy.copy(bkup)
 
     return pipe_list, output
+
+def run_cleanup():
+    print('')
+    print('*** RUNNING EPItome-XL CLEANUP. THIS DELETES DATA ***')
+    print('')
+
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
+
+    # get the experiment
+    flag = 0
+    while flag == 0:
+        expt = get_experiments(interactive=True)
+        if expt == None:
+            print('')
+        else:
+            flag = 1
+    
+    print('')
+    print('Experiment: ' + str(expt) + '. Select image modality.')
+    print('')
+
+    # get the mode
+    flag = 0
+    while flag == 0:
+        mode = get_mode(expt, interactive=True)
+        if mode == None:
+            print('')
+        else:
+            flag = 1
+
+    # get the date and time, current user
+    datetime = time.strftime("%d/%m/%Y -- %H:%M:%S")
+    user = getpass.getuser()
+
+    # generate the unique filenames for this run
+    f_id = time.strftime("%d%m%y_%H%M%S")
+    clean = 'clean_' + f_id + '.sh'
+
+    # open up the master script, write common variables
+    f = open(os.path.join(dir_data, expt, clean), 'wb')
+
+    f.write('#!/bin/bash\n')
+    f.write('\n')
+    f.write('# Cleanup script for ' + str(expt) + ': ' + str(mode) + '.\n')
+    f.write('# Generated: ' + str(datetime) + ' by ' + str(user) + '.\n')
+    f.write('\n')
+    f.write('## Setup\n')
+    f.write("""export DIR_PIPE='""" + str(dir_pipe) + """'\n""")
+    f.write("""export DIR_DATA='""" + str(dir_data) + """'\n""")
+    f.write("""export DIR_AFNI='""" + str(dir_afni) + """'\n""")
+    f.write("""export DIR_EXPT='""" + str(expt) + """'\n""")
+    f.write("""export DATA_TYPE='""" + str(mode) + """'\n""")
+    f.write('\n')
+    f.write("""export CORES=""" + str(cores) + """\n""")
+    f.write('export AFNI_DECONFLICT=OVERWRITE\n')
+
+    # get the subjects
+    print('')
+    print('Would you like to cleanup all subjects, or just some?')
+    flag = 0
+    while flag == 0:
+        output = ''
+        choice = ['all', 'some']
+        decision, output = epi.commands.selector_list(choice, output)
+
+        if output == None:
+            print ('Invalid selection, please try again.')
+
+        else:
+            flag = 1
+
+    # optionally allow me to only clean up some subjects
+    if decision == 'some':
+        flag = 0
+        while flag == 0:
+            print('Please select a subject.')
+            subjects = []
+            output = ''
+            subj_list = epi.utilities.get_subj(os.path.join(dir_data, expt))
+            subj, output = epi.commands.selector_list(subj_list, output)
+
+            if output == None:
+                print('Invalid subject, please try again.')
+
+            else:
+                subjects.append(subj)
+
+        # print the current subject list, ask to continue
+        print('')
+        print('The following subjects are slated for cleanup:')
+        print('')
+        for subj in subjects:
+            print subj
+        print('')
+        response = raw_input("""Type 'stop' to stop, else continue: """)
+        # breaks us out of the subject-list constructor loop
+        if response == 'stop':
+            flag = 1
+
+    # otherwise just get the whole list
+    elif decision == 'all':
+        subjects = epi.utilities.get_subj(os.path.join(dir_data, expt))
+        print('')
+        print('The following subjects are slated for cleanup:')
+        print('')
+        for subj in subjects:
+            print subj
+        print('')
+
+    # print these subjects to the script
+    f.write('export SUBJECTS=')
+    for subj in subjects:
+        f.write(str(subj) + ' ')
+    f.write('\n')
+
+    # begin adding cleanup commands
+    f.write('## Cleanup Commands \n')
+    f.write('\n')
+
+    # now loop through the modules until the user aborts
+    flag = 0 # breaks us out of the loop
+    while flag == 0:
+
+        print('')
+        print('Please select the next cleanup module:')
+        print('')
+        module = get_modules(interactive=True, moduletype='pre')
+        if module == None:
+            print('')
+        else:
+            # save the old output
+            bkup = copy.copy(output)
+
+            # executes the chosen module, write cleanup commands
+            command = 'epi.commands.' + str(module) + '(dir_data, expt, clean)'
+            line, output = eval(command)
+            pipe_list, output = writer_sub(pipe_list, 
+                                           line, cmd, f, output, bkup)
+
+        # print the current pipeline configuration, ask to continue
+        print('')
+        print('The pre-processing pipeline currently looks like this:')
+        print('')
+        for pipe in pipe_list:
+            print pipe
+        print('')
+        response = raw_input("""Type 'stop' to stop, else continue: """)
+        # breaks us out of the pipeline constructor loop
+        if response == 'stop':
+            flag = 1
 
 def run_epitome():
     print('')
@@ -573,6 +729,9 @@ if __name__ == "__main__":
     
     elif len(sys.argv) > 3 and sys.argv[1] == 'check':
         print 'epitome check only works with 1 experiment at a time!'
+
+    elif len(sys.argv) == 2 and sys.argv[1] == 'clean':
+        run_cleanup()
 
     # for running the command-line interface
     elif len(sys.argv) == 2 and sys.argv[1] == 'run':

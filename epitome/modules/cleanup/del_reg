@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cat <<"EOF"
+
 ## Warn the user and ask to continue
 read -p "About to delete your registered data! Press Y/y to continue." \
         -n 1 -r
@@ -32,4 +34,5 @@ for SUB in ${SUBJECTS}; do
     done
 done
 fi
-# JDV Jan 30 2014
+
+EOF

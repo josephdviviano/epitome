@@ -454,10 +454,8 @@ def check_masks(dir_data, expt, mode):
     print('')
     print('Adding mask-checking QC to the outputs.')
 
-    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_masks ' + 
-                                        str(dir_data) + ' ' +
-                                        str(expt) + ' ' +
-                                        str(mode))
+    line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_masks ' + 
+             str(dir_data) + ' ' + str(expt) + ' ' + str(mode))
 
     return line, output
 
@@ -467,10 +465,8 @@ def check_EPI2T1(dir_data, expt, mode):
     print('')
     print('Adding EPI-to-T1 registration checking QC to the outputs.')
 
-    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_EPI2T1 ' + 
-                                         str(dir_data) + ' ' +
-                                         str(expt) + ' ' +
-                                         str(mode))
+    line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_EPI2T1 ' + 
+             str(dir_data) + ' ' + str(expt) + ' ' +  str(mode))
 
     return line, output
 
@@ -480,10 +476,8 @@ def check_T12MNI(dir_data, expt, mode):
     print('')
     print('Adding T1-to-MNI registration checking QC to the outputs.')
 
-    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_T12MNI ' + 
-                                         str(dir_data) + ' ' +
-                                         str(expt) + ' ' +
-                                         str(mode))
+    line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_T12MNI ' + 
+             str(dir_data) + ' ' + str(expt) + ' ' + str(mode))
 
     return line, output
 
@@ -493,10 +487,8 @@ def check_runs(dir_data, expt, mode):
     print('')
     print('Adding NIFTI dimension-checking QC to the outputs.')
 
-    line = ('. ${DIR_PIPE}/epitome/modules/qc/check_runs ' + 
-                                       str(dir_data) + ' ' +
-                                       str(expt) + ' ' +
-                                       str(mode))
+    line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_runs ' + 
+             str(dir_data) + ' ' + str(expt) + ' ' + str(mode))
 
     return line, output
 
@@ -522,11 +514,35 @@ def check_spectra(dir_data, expt, mode):
 
     return line, output
 
-def del_everything():
-    return line, output
+def del_everything(dir_data, expt, clean):
+    print('')
+    print(' *** Adding DELETE EVERYTHING to the cleanup Queue! ***')
+
+    fname = os.path.join(dir_data, expt, clean)
+    line = ('. ${DIR_PIPE}/epitome/modules/cleanup/del_everything >> ' + fname)
+    os.system(line)
+
 def del_postmc():
-    return line, output
+    print('')
+    print(' *** Adding DELETE POST MOTION CORRECT to the cleanup Queue! ***')
+
+    fname = os.path.join(dir_data, expt, clean)
+    line = ('. ${DIR_PIPE}/epitome/modules/cleanup/del_postmc >> ' + fname)
+    os.system(line)
+
 def del_registration():
-    return line, output
+    print('')
+    print(' *** Adding DELETE REGISTRATIONS to the cleanup Queue! ***')
+
+    fname = os.path.join(dir_data, expt, clean)
+    line = ('. ${DIR_PIPE}/epitome/modules/cleanup/del_registration >> ' +
+            fname)
+    os.system(line)
+
 def del_MNI():
-    return line, output
+    print('')
+    print(' *** Adding DELETE MNI to the cleanup Queue! ***')
+
+    fname = os.path.join(dir_data, expt, clean)
+    line = ('. ${DIR_PIPE}/epitome/modules/cleanup/del_MNI >> ' + fname)
+    os.system(line)

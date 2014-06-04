@@ -9,7 +9,7 @@
          "Imports processed T1s from freesurfer to the experiment directory."
         ],
 
-    "check_EPI2T1.py" :
+    "check_EPI2T1" :
         ["Usage:",
          "    check_EPI2T1.py <data_directory> <experiment> <modality>",
          "data_directory -- full path to your MRI/WORKING directory.",
@@ -20,7 +20,7 @@
          "EPI, including an edge-detected version of the T1."
         ],
 
-    "check_T12MNI.py" :
+    "check_T12MNI" :
         ["Usage:",
          "    check_T12MNI.py <data_directory> <experiment> <modality>",
          "data_directory -- full path to your MRI/WORKING directory.",
@@ -31,7 +31,7 @@
          "T1, including an edge-detected version of the MNI T1."
         ],
     
-    "check_masks.py" :
+    "check_masks" :
         ["Usage:",
          "    check_masks.py <data_directory> <experiment> <modality>",
          "data_directory -- full path to your MRI/WORKING directory.",
@@ -42,7 +42,7 @@
          "masks, including an edge-detected version of the T1, to a PDF."
         ],
 
-    "check_motionind.py" :
+    "check_motionind" :
         ["Usage:",
          "    check_motionind.py <data_directory> <experiment> <modality>",
          "data_directory -- full path to your MRI/WORKING directory.",
@@ -63,7 +63,7 @@
          "within an experiment modality, for identifying truncated data."
         ],
 
-    "check_spectra.py" :
+    "check_spectra" :
         ["Usage:",
          "    check_spectra.py <data_directory> <experiment> <modality>",
          "data_directory -- full path to your MRI/WORKING directory.",
@@ -138,13 +138,21 @@
          "    draining vessel regressors + 1 temporal lag."
         ],
 
+    "group_mask" :
+        ["Usage:",
+         "    group_mask",
+         "",
+         "Creates a group-level intersection mask in MNI space.",
+         "Requires volumes data in standard space to be computed."
+        ],
+
     "init_EPI" : 
         ["Usage:",
          "    init_EPI <data_quality> <del_tr> <t_pattern>",
          "data_quality -- 'low' for poor internal contrast, otherwise 'high'",
          "del_tr -- number of TRs to remove from the beginning of the run",
          "t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift)",
-         ""
+         "",
          "General pre-processing for all fMRI data:",
          "    Orients data to RAI,",
          "    Deletes initial time points (optionally),",

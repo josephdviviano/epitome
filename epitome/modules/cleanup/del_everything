@@ -1,4 +1,5 @@
 #!/bin/bash
+cat <<"EOF"
 
 ## Warn the user and ask to continue
 read -p "About to delete processed functional data! Press Y/y to continue." \
@@ -34,4 +35,5 @@ for SUB in ${SUBJECTS}; do
     done
 done
 fi
-# JDV
+
+EOF

@@ -1,7 +1,9 @@
 #!/bin/bash
 
+cat <<"EOF"
+
 ## Warn the user and ask to continue
-read -p "About to delete processed functional data! Press Y/y to continue." \
+read -p "About to delete post motion correct data! Press Y/y to continue." \
         -n 1 -r
 echo # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
@@ -28,4 +30,5 @@ for SUB in ${SUBJECTS}; do
     done
 done
 fi
-# JDV
+
+EOF
