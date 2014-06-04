@@ -451,9 +451,9 @@ def run_cleanup():
     # optionally allow me to only clean up some subjects
     if decision == 'some':
         flag = 0
+        subjects = []
         while flag == 0:
             print('Please select a subject.')
-            subjects = []
             output = ''
             subj_list = epi.utilities.get_subj(os.path.join(dir_data, expt))
             subj, output = epi.commands.selector_list(subj_list, output)
@@ -464,17 +464,17 @@ def run_cleanup():
             else:
                 subjects.append(subj)
 
-        # print the current subject list, ask to continue
-        print('')
-        print('The following subjects are slated for cleanup:')
-        print('')
-        for subj in subjects:
-            print subj
-        print('')
-        response = raw_input("""Type 'stop' to stop, else continue: """)
-        # breaks us out of the subject-list constructor loop
-        if response == 'stop':
-            flag = 1
+            # print the current subject list, ask to continue
+            print('')
+            print('The following subjects are slated for cleanup:')
+            print('')
+            for subj in subjects:
+                print subj
+            print('')
+            response = raw_input("""Type 'stop' to stop, else continue: """)
+            # breaks us out of the subject-list constructor loop
+            if response == 'stop':
+                flag = 1
 
     # otherwise just get the whole list
     elif decision == 'all':
@@ -487,10 +487,10 @@ def run_cleanup():
         print('')
 
     # print these subjects to the script
-    f.write('export SUBJECTS=')
+    f.write('export SUBJECTS="')
     for subj in subjects:
         f.write(str(subj) + ' ')
-    f.write('\n')
+    f.write('"\n')
 
     # close down the file (cleanup commands added via cleanup.py)
     f.write('## Cleanup Commands \n')
@@ -509,7 +509,7 @@ def run_cleanup():
             print('')
         else:
             # executes the chosen module, write cleanup commands
-            command = 'epi.commands.' + str(module) + '(dir_data, expt, clean)'
+            command = 'epi.commands.' + str(module) + '(expt, clean)'
             eval(command)
         
         # ask if we should continue

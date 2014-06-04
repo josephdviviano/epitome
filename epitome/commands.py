@@ -514,35 +514,58 @@ def check_spectra(dir_data, expt, mode):
 
     return line, output
 
-def del_everything(dir_data, expt, clean):
+def del_everything(expt, clean):
+    import os
+    import epitome as epi
+
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
+
     print('')
     print(' *** Adding DELETE EVERYTHING to the cleanup Queue! ***')
 
     fname = os.path.join(dir_data, expt, clean)
-    line = ('. ${DIR_PIPE}/epitome/modules/cleanup/del_everything >> ' + fname)
+    line = ('. ' + str(dir_pipe) + 
+            '/epitome/modules/cleanup/del_everything >> ' + fname)
     os.system(line)
 
-def del_postmc():
+def del_postmc(expt, clean):
+    import os
+    import epitome as epi
+
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
+
     print('')
     print(' *** Adding DELETE POST MOTION CORRECT to the cleanup Queue! ***')
 
     fname = os.path.join(dir_data, expt, clean)
-    line = ('. ${DIR_PIPE}/epitome/modules/cleanup/del_postmc >> ' + fname)
+    line = ('. ' + str(dir_pipe) + 
+            '/epitome/modules/cleanup/del_postmc >> ' + fname)
     os.system(line)
 
-def del_registration():
+def del_reg(expt, clean):
+    import os
+    import epitome as epi
+
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
+
     print('')
     print(' *** Adding DELETE REGISTRATIONS to the cleanup Queue! ***')
 
     fname = os.path.join(dir_data, expt, clean)
-    line = ('. ${DIR_PIPE}/epitome/modules/cleanup/del_registration >> ' +
-            fname)
+    line = ('. ' + str(dir_pipe) + 
+            '/epitome/modules/cleanup/del_registration >> ' + fname)
     os.system(line)
 
-def del_MNI():
+def del_MNI(expt, clean):
+    import os
+    import epitome as epi
+
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
+
     print('')
     print(' *** Adding DELETE MNI to the cleanup Queue! ***')
 
     fname = os.path.join(dir_data, expt, clean)
-    line = ('. ${DIR_PIPE}/epitome/modules/cleanup/del_MNI >> ' + fname)
+    line = ('. ' + str(dir_pipe) +
+            '/epitome/modules/cleanup/del_MNI >> ' + fname)
     os.system(line)
