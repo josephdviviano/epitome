@@ -344,11 +344,25 @@ def check_paths():
         print '     pipeline directory: ' + str(dir_pipe)
         print '     AFNI directory: ' + str(dir_afni)
 
-def writer(pipe_list, line, cmd, f, output, bkup):
+def writer_sub(pipe_list, line, cmd, f, output, bkup):
     
     # output will == None if we made a mistake
     if output != None:
         out_line = line + ' >> ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd + '\n'
+        f.write(out_line)
+        pipe_list.append(line)
+
+    # if we did make a mistake, restore the old output
+    else:
+        output = copy.copy(bkup)
+
+    return pipe_list, output
+
+def writer_exp(pipe_list, line, proc, f, output, bkup):
+    
+    # output will == None if we made a mistake
+    if output != None:
+        out_line = line + ' >> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n'
         f.write(out_line)
         pipe_list.append(line)
 
@@ -400,6 +414,7 @@ def run_epitome():
     f_id = time.strftime("%d%m%y_%H%M%S")
     master = 'master_' + f_id + '.sh'
     cmd = 'cmd_' + f_id + '.sh'
+    proc = 'proclist_' + f_id + '.sh'
 
     # open up the master script, write common variables
     f = open(os.path.join(dir_data, expt, master), 'wb')
@@ -451,7 +466,8 @@ def run_epitome():
         
         # add init_EPI, check for mistakes, break the loop if flawless
         line, output = epi.commands.init_EPI()
-        pipe_list, output = writer(pipe_list, line, cmd, f, output, None)
+        pipe_list, output = writer_sub(pipe_list, 
+                                       line, cmd, f, output, None)
         if output != None:
             flag = 1 # breaks us out of the loop
  
@@ -472,7 +488,8 @@ def run_epitome():
             # executes the chosen module, write pipeline commands
             command = 'epi.commands.' + str(module) + '(output)'
             line, output = eval(command)
-            pipe_list, output = writer(pipe_list, line, cmd, f, output, bkup)
+            pipe_list, output = writer_sub(pipe_list, 
+                                           line, cmd, f, output, bkup)
 
         # print the current pipeline configuration, ask to continue
         print('')
@@ -487,14 +504,15 @@ def run_epitome():
             flag = 1
 
     # add each subject to a queue file, close the subject loop
+    p.write('\n')
     f.write('# append this subject to the process queue\n')
     f.write('echo bash ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd +
-                  ' >> ${DIR_DATA}/${DIR_EXPT}/proclist' + f_id + '.sh\n')
+                  ' >> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
     f.write('done\n')
  
     # add user-defined qc runs
-    f.write('')
-    f.write('# calls to QC programs')
+    f.write('\n')
+    f.write('# calls to QC programs\n')
     
     pipe_list = [] # keeps track of our command-list
     flag = 0 # breaks us out of the loop
@@ -507,9 +525,14 @@ def run_epitome():
         if module == None:
             print('')
         else:
+            # save the old output
+            bkup = copy.copy(output)
+             
             # executes the chosen module, write pipeline commands
             command = 'epi.commands.' + str(module) + '(dir_data, expt, mode)'
-            pipe_list, output = writer(pipe_list, line, cmd, f, output, bkup)
+            line, output = eval(command)
+            pipe_list, output = writer_exp(pipe_list, 
+                                           line, proc, f, output, bkup)
 
         # print the current pipeline configuration, ask to continue
         print('')
@@ -524,10 +547,12 @@ def run_epitome():
             flag = 1
 
     print('')
-    print('OK, generating subject 
-    # close the file, and make executable by owner + group
+    print('OK, saving master script, and generating subject-specific scripts')
+    # close the file, make executable by owner + group, and execute
+    f.write('\n')
     f.close()
     os.chmod(os.path.join(dir_data, expt, master), 0750)
+    os.system('bash ' + os.path.join(dir_data, expt, master))
 
 # this is the command-line usage bit
 if __name__ == "__main__":
