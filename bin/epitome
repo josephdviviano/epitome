@@ -397,7 +397,7 @@ def run_cleanup():
     print('')
     print('Experiment: ' + str(expt) + '. Select image modality.')
     print('')
-
+ 
     # get the mode
     flag = 0
     while flag == 0:
@@ -661,7 +661,7 @@ def run_epitome():
             flag = 1
 
     # add each subject to a queue file, close the subject loop
-    p.write('\n')
+    f.write('\n')
     f.write('# append this subject to the process queue\n')
     f.write('echo bash ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd +
                   ' >> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')

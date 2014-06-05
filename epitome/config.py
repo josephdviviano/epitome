@@ -22,3 +22,5 @@ def return_paths():
     cores = mp.cpu_count() - 1
 
     return dir_data, dir_pipe, dir_afni, cores
+
+
