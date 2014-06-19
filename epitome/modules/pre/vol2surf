@@ -45,7 +45,7 @@ for SESS in ${DIR_SESS}; do
           -surf_B ${DIR_FS}/SUMA/rh.pial.asc \
           -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
           -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
-          -map_func median \
+          -map_func midpoint \
           -f_steps 15 \
           -f_index nodes \
           -outcols_NSD_format \
@@ -60,7 +60,7 @@ for SESS in ${DIR_SESS}; do
           -surf_B ${DIR_FS}/SUMA/lh.pial.asc \
           -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
           -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
-          -map_func median \
+          -map_func midpoint \
           -f_steps 15 \
           -f_index nodes \
           -outcols_NSD_format \
