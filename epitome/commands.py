@@ -5,6 +5,9 @@ interface. Each produces a single line of text printed to the master
 shell script reference passed in each call.
 """
 
+###############################################################################
+# Helper Functions - Used Internally
+
 def invalid_selection():
     print('Invalid selection.')
     return None, None
@@ -91,6 +94,9 @@ def selector_dict(item_dict, output):
         response, output = invalid_selection()
 
     return response, output
+
+###############################################################################
+# Pre-Processing Scripts
 
 def filter(input_name):
     output = 'filtered'
@@ -430,7 +436,7 @@ def TRdrop(input_name):
         FD, output = selector_float(output)
 
         print('')
-        print('Input head size (default 0.3)')
+        print('Input head size (default 1000000)')
         DV, output = selector_float(output)
 
     else:
@@ -438,7 +444,7 @@ def TRdrop(input_name):
         print('OK, using the defaults.')
         head_size = 50
         FD = 0.3
-        DV = 0.3
+        DV = 1000000 # this turns DVARS off, effectively
 
     line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + 
                                   str(input_name) + ' ' +
@@ -447,6 +453,33 @@ def TRdrop(input_name):
                                   str(DV))
 
     return line, output
+
+def volsmooth(input_name):
+    output = 'volsmooth'
+
+    print('')
+    print('Volumetric smoothing within a defined mask.')
+
+    print('')
+    print('Input mask prefix (default = EPI_mask):')
+    mask_prefix = raw_input('Mask Prefix: ')
+    if mask_prefix == '':
+        mask_prefix = 'EPI_mask'
+    
+    print('')
+    print('Input smoothing kernel FWHM (mm):')
+    fwhm, output = selector_float(output)
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/volsmooth ' + 
+                                     str(input_name) + ' ' +
+                                     str(mask_prefix) + ' ' +
+                                     str(fwhm))
+
+    return line, output
+
+
+###############################################################################
+# QC Scripts
 
 def check_masks(dir_data, expt, mode):
     output = ''
@@ -513,6 +546,9 @@ def check_spectra(dir_data, expt, mode):
             str(dir_data) + ' ' + str(expt) + ' ' +  str(mode))
 
     return line, output
+
+###############################################################################
+# Cleanup Scripts
 
 def del_everything(expt, clean):
     import os

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# set variables
+cat <<EOF
+INPUT=`echo 'func_'${1}`
+MASK=`echo 'anat_'${2}`
+FWHM=`echo ${3}`
+EOF
+
+cat<<"EOF"
+echo '************************************************************************'
+echo '     Smooths data in volumetric space, obeying mask label boundaries'
+echo '   Anything labeled zero in the mask will become zeroed in the output.'
+echo ''
+echo '************************************************************************'
+
+cd /tmp
+
+# Loop through sessions, runs
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    SESS=`basename ${SESS}`        
+    DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
+    
+    if [ ! -f ${DIR}/func_volsmooth.${NUM}.nii.gz ]; then
+
+        3dresample \
+            -prefix ${DIR}/func_volsmooth.${NUM}.nii.gz \
+            -master ${DIR}/${INPUT}.${NUM}.nii.gz \
+            -rmode NN \
+            -inset ${DIR}/${MASK}.nii.gz
+
+        3dBlurInMask \
+            -prefix ${DIR}/proc/func_volsmooth.${NUM}.nii.gz \
+            -Mmask ${DIR}/anat_tmp_smoothmask.${NUM}.nii.gz \
+            -FWHM ${FWHM} \
+            -input ${DIR}/${INPUT}.${NUM}.nii.gz
+
+    fi
+done
+
+cd ${DIR_PIPE}
+
+EOF
