@@ -57,19 +57,7 @@ for SESS in ${DIR_SESS}; do
                 fi
             fi
 
-            # delete initial time points
-            3dcalc \
-                -prefix ${SESS}/func_tmp_del.${NUM}.nii.gz \
-                -a ${SESS}/func_tmp_RAI.${NUM}.nii.gz[${DELTR}..$] \
-                -expr 'a'
-
-            # despike
-            3dDespike \
-                -prefix ${SESS}/func_tmp_despike.${NUM}.nii.gz \
-                -ssave ${SESS}/PARAMS/spikes.${NUM}.nii.gz \
-                 ${SESS}/func_tmp_del.${NUM}.nii.gz
-
-            # RetroICORR correction for physiological noise, if exists
+            # Generate physiological noise regressors
             if [ -f ${RUN}/*.phys ]; then
                 # get the relevant variables
                 X=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
@@ -105,6 +93,18 @@ for SESS in ${DIR_SESS}; do
                 mv ${SESS}/func_tmp_despike.${NUM}.nii.gz \
                    ${SESS}/func_tmp_retroic.${NUM}.nii.gz
             fi
+
+            # delete initial time points
+            3dcalc \
+                -prefix ${SESS}/func_tmp_del.${NUM}.nii.gz \
+                -a ${SESS}/func_tmp_RAI.${NUM}.nii.gz[${DELTR}..$] \
+                -expr 'a'
+
+            # despike
+            3dDespike \
+                -prefix ${SESS}/func_tmp_despike.${NUM}.nii.gz \
+                -ssave ${SESS}/PARAMS/spikes.${NUM}.nii.gz \
+                 ${SESS}/func_tmp_del.${NUM}.nii.gz
 
             # slice time correction (can include specified timings)
             if [ -f ${RUN}/slice_timing.1D ]; then

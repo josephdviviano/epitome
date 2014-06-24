@@ -451,6 +451,17 @@ t\_pattern -- slice-timing at acquisition (from AFNI's 3dTshift). \
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{combine\_volumes}
+Usage: \texttt{combine\_volumes <func1\_prefix> <func2\_prefix>}
+
+\begin{blockquote}
+func1\_prefix -- functional data prefix (eg., smooth in func\_smooth).
+func2\_prefix -- functional data prefix (eg., smooth in func\_smooth).
+\end{blockquote}
+
+\noindent Combines two functional files via addition. Intended to combine the outputs of \texttt{surfsmooth} \& \texttt{surf2vol} with \texttt{volsmooth}, but could be used to combine other things as well. The functional files should not have non-zeroed regions that overlap, or the output won't make much sense.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{linreg\_calc\_AFNI}
 Usage: \texttt{linreg\_calc\_AFNI <cost> <reg\_dof> <data\_quality>}
 
@@ -613,8 +624,7 @@ mask\_prefix -- mask data prefix (eg., EPI\_mask in anat\_EPI\_mask).
 func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
 \end{blockquote}
 
-\noindent Re-samples a mask containing one or more labels to the functional data and smooths within unique values. All zero values in the mask are zeroed out in the output. The output of this can be combined with the outputs of surfsmooth \& surf2vol using \texttt{combine\_volumes}.
-
+\noindent Re-samples a mask containing one or more labels to the functional data and smooths within unique values. All zero values in the mask are zeroed out in the output. The output of this can be combined with the outputs of \texttt{surfsmooth} \& \texttt{surf2vol} using \texttt{combine\_volumes}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

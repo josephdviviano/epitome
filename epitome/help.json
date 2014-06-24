@@ -330,7 +330,7 @@
          "Re-samples a mask containing one or more labels to the functional",
          "data and smooths within unique values. All zero values in the mask",
          "are zeroed out in the output. The output of this can be combined",
-         "with "
+         "with the outputs of surfsmooth & surf2vol using combine_volumes."
         ]
-        
+
 }
