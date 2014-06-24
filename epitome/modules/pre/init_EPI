@@ -46,49 +46,55 @@ for SESS in ${DIR_SESS}; do
                 -axial \
                 ${FILE} 
             
-            # retain 1st TR
-            if [ ${DATA_QUALITY} = 'low' ]; then
-                if [ ${NUM} = 01 ]; then
-                    # strip off the pre-stabilization TR
-                    3dcalc \
-                        -prefix ${SESS}/anat_EPI_tmp_initTR.nii.gz \
-                        -a ${SESS}/func_tmp_RAI.${NUM}.nii.gz[0] \
-                        -expr 'a'
-                fi
+            # retain 1st TR from 1st run
+            if [ ${DATA_QUALITY} = 'low' ] && [ ${NUM} = 01 ]; then
+                # strip off the pre-stabilization TR
+                3dcalc \
+                    -prefix ${SESS}/anat_EPI_tmp_initTR.nii.gz \
+                    -a ${SESS}/func_tmp_RAI.${NUM}.nii.gz[0] \
+                    -expr 'a'
             fi
 
-            # Generate physiological noise regressors
-            if [ -f ${RUN}/*.phys ]; then
-                # get the relevant variables
-                X=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
-                         | sed -n 6p | cut -c 5-`
-                Y=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
-                         | sed -n 7p | cut -c 5-`
-                Z=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
-                         | sed -n 8p | cut -c 5-`
+            # Generate physiological noise regressors if they exist
+            if [ -f ${RUN}/resp.*.phys ] && [ -f ${RUN}/phys.*.card ]; then
+                
+                # get x, y, z, t dims, and TR length
+                X=`fslhd ${RUN}/*.nii.gz | sed -n 6p | cut -c 5-`
+
+                Y=`fslhd ${RUN}/*.nii.gz | sed -n 7p | cut -c 5-`
+
+                Z=`fslhd ${RUN}/*.nii.gz | sed -n 8p | cut -c 5-`
+
+                NTRS=`fslhd ${RUN}/*.nii.gz | sed -n 9p | cut -c 5-`
+
+                TR=`fslhd ${RUN}/*.nii.gz | sed -n 22p | cut -c 9-`
+                
+                # find the smallest dimension in x, y, z 
                 SLICE=`perl -e "@xyz=(${X},${Y},${Z}); \
                                 @slice=(sort{$a<=>$b}@xyz)[0]; \
                                 print @slice"`
-                SAMP=`cat 130013_3T_rfMRI_REST1_LR_Physio_log.txt | wc -l`
-                NTRS=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
-                         | sed -n 9p | cut -c 5-`
-                TR=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
-                         | sed -n 22p | cut -c 9-`
-                
+
+                # get the number of samples in physio logs
+                SAMP=`cat ${RUN}/resp.*.phys | wc -w`
+
                 # compute sampling rate of physio recording
-                UNITS=`fslhd 130013_3T_rfMRI_REST1_LR.nii.gz \
-                             | sed -n 14p | cut -c 11- | xargs`
+                UNITS=`${RUN}/*.nii.gz | sed -n 14p | cut -c 11- | xargs`
+                
                 # convert ms to seconds, if necessary
                 if [ ${UNITS} = 's' ]; then
                     TIME=`perl -e "print ${NTRS} \* ${TR}"`
                 elif [ ${UNITS} = 'ms' ]; then
                     TIME=`perl -e "print ${NTRS} * ${TR} / 1000"`
                 fi 
+
+                # get the sampling rate in Hz
                 FS=`perl -e "print ${SAMP} / ${TIME}"`
-                # McRetroTS Respfile Cardfile VolTR Nslices PhysFS Graph
+                
+                # Run McRetroTS -- Respfile Cardfile VolTR Nslices PhysFS Graph
                 McRetroTS resp.phys card.phys ${TR} ${SLICE} ${FS} 0
 
             else
+                
                 # just skip this stage & match ouput file names
                 mv ${SESS}/func_tmp_despike.${NUM}.nii.gz \
                    ${SESS}/func_tmp_retroic.${NUM}.nii.gz
