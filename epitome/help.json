@@ -164,6 +164,13 @@
          "    Calculates various statistics + time series."
         ],
 
+    "combine_volumes" : 
+        ["Usage:",
+         "    combine_volumes <func1_prefix> <func2_prefix> ",
+         "func1_prefix -- 'low' for poor internal contrast, otherwise 'high'",
+         "",
+        ],
+
     "linreg_calc_AFNI" :
         ["Usage:",
          "linreg_calc_AFNI <cost> <reg_dof> <data_quality>",
