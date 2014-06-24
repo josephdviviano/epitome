@@ -604,6 +604,19 @@ func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
 \noindent Projects functional data from volume space to a Freesurfer generated cortical mesh.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{volsmooth}
+Usage: \texttt{volsmooth <func\_prefix> <mask\_prefix> <FWHM>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg., smooth in func\_smooth).
+mask\_prefix -- mask data prefix (eg., EPI\_mask in anat\_EPI\_mask).
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
+\end{blockquote}
+
+\noindent Re-samples a mask containing one or more labels to the functional data and smooths within unique values. All zero values in the mask are zeroed out in the output. The output of this can be combined with the outputs of surfsmooth \& surf2vol using \texttt{combine\_volumes}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Quality Control}
 
