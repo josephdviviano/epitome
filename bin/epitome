@@ -377,6 +377,17 @@ def writer_exp(pipe_list, line, proc, f, output, bkup):
 
     return pipe_list, output
 
+def get_date_user():
+    """
+    Returns a eyeball-friendly timestamp, the current user's name, 
+    and a filename-friendly timestamp.
+    """
+    datetime = time.strftime("%Y/%m/%d -- %H:%M:%S")
+    user = getpass.getuser()
+    f_id = time.strftime("%y%m%d_%H%M%S")
+
+    return datetime, user, f_id
+
 def run_cleanup():
     print('')
     print('*** RUNNING EPItome-XL CLEANUP. THIS DELETES DATA ***')
@@ -407,12 +418,10 @@ def run_cleanup():
         else:
             flag = 1
 
-    # get the date and time, current user
-    datetime = time.strftime("%d/%m/%Y -- %H:%M:%S")
-    user = getpass.getuser()
+    # get the date and time, current user, f_id
+    datetime, user, f_id = get_date_user()
 
     # generate the unique filenames for this run
-    f_id = time.strftime("%d%m%y_%H%M%S")
     clean = 'clean_' + f_id + '.sh'
 
     # open up the master script, write common variables
@@ -558,12 +567,9 @@ def run_epitome():
     print('Image Modality: ' + str(mode) + '. Adding Freesurfer stages.')
     print('******************************************************************')
  
-    # get the date and time, current user
-    datetime = time.strftime("%d/%m/%Y -- %H:%M:%S")
-    user = getpass.getuser()
+    # get the date and time, current user, f_id
+    datetime, user, f_id = get_date_user()
 
-    # generate the unique filenames for this run
-    f_id = time.strftime("%d%m%y_%H%M%S")
     master = 'master_' + f_id + '.sh'
     cmd = 'cmd_' + f_id + '.sh'
     proc = 'proclist_' + f_id + '.sh'
