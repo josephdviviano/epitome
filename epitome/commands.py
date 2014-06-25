@@ -112,16 +112,33 @@ def filter(input_name):
     gs_list = ['off', 'on']
     gs_flag, output = selector_list(gs_list, output)
 
+    print('Set ventricle signal regression:')
+    gs_list = ['off', 'on']
+    vent_flag, output = selector_list(gs_list, output)
+
+    print('Set draining vessel signal regression:')
+    gs_list = ['off', 'on']
+    dv_flag, output = selector_list(gs_list, output)
+
+    print('Set local white matter regression regression:')
+    gs_list = ['off', 'on']
+    wm_flag, output = selector_list(gs_list, output)
+
+
     # if we messed any of these up, we return None
     if output == None:
         print('Please try again')
         line = ''
+
     # otherwise we print the command and return it
     else:
         line = ('. ${DIR_PIPE}/epitome/modules/pre/filter ' +
                                       str(input_name) + ' ' +
                                       str(polort) + ' ' +
-                                      str(gs_flag))
+                                      str(gs_flag) + ' ' +
+                                      str(vent_flag) + ' ' +
+                                      str(dv_flag) + ' ' +
+                                      str(wm_flag))
     return line, output
 
 def gen_gcor(input_name):

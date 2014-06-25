@@ -198,6 +198,17 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
+        # create lagged motion regressors
+        if [ ! -f ${DIR}/PARAMS/lag.motion.${NUM}.1D ]; then
+            1dcat \
+                ${DIR}/PARAMS/motion.${NUM}.1D'{0}' > \
+                ${DIR}/PARAMS/lag.motion.${NUM}.1D
+            
+            1dcat \
+                ${DIR}/PARAMS/motion.${NUM}.1D'{0..$}' >> \
+                ${DIR}/PARAMS/lag.motion.${NUM}.1D
+        fi
+
         # create local white matter regressors (+ lagged)
         if [ ! -f ${DIR}/PARAMS/lag.wm_local15.${NUM}.nii.gz ]; then
             3dLocalstat \

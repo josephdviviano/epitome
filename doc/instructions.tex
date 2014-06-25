@@ -564,10 +564,14 @@ Usage: \texttt{filter <func\_prefix> <detrend\_order> <gs\_regress\_flag>}
 \begin{blockquote}
 func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
 detrend\_order -- polynomial order to detrend each voxel against. \\
-gs\_regress\_flag -- if 1, regress global signal. \
+gs\_regress\_flag -- if == on, regress global signal. \\
+ventricle\_regress\_flag -- if == on, regress mean ventricle. \\
+draining\_vessel\_regress\_flag -- if == on, regress draining vessels. \\
+local\_white\_matter\_regress\_flag -- if == on, regress local WM. \
+
 \end{blockquote}
 
-\noindent This computes detrended nuisance time series, fits each run with a, computed noise model, and subtracts the fit. Computes temporal SNR.
+\noindent This computes detrended nuisance time series, fits each run with a, computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional, and generally advisable save global mean regression.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{TRdrop}

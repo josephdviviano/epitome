@@ -102,9 +102,14 @@
     "filter" :
         ["Usage:",
          "    filter <func_prefix> <detrend_order> <gs_regress_flag>",
+         "           <ventricle_regress_flag> <draining_vessel_regress_flag>",
+         "           <local_white_matter_regress_flag>",
          "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
          "detrend_order -- polynomial order to detrend each voxel against.",
-         "gs_regress_flag -- if 1, regress global signal.",
+         "gs_regress_flag -- if == on, regress global signal.",
+         "ventricle_regress_flag -- if == on, regress mean ventricle.",
+         "draining_vessel_regress_flag -- if == on, regress draining vessels",
+         "local_white_matter_regress_flag -- if == on, regress local WM.",
          "",
          "This computes detrended nuisance time series, fits each run with a",
          "computed noise model, and subtracts the fit. Computes temporal SNR."
