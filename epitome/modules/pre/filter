@@ -4,12 +4,18 @@ cat <<EOF
 INPUT=`echo 'func_'${1}`
 POLORT=`echo ${2}`
 GS_FLAG=`echo ${3}`
+VENT_FLAG=`echo ${4}`
+DV_FLAG=`echo ${5}`
+WM_FLAG=`echo ${6}`
 
 echo '************************************************************************'
 echo '                  Time series filtering of fMRI data'
 echo ''
 echo '   - Computes nusiance time series from tissues, motion paramaters,'
 echo '   - Optionally uses the global mean: ' ${GS_FLAG} ','
+echo '   - Optionally uses the ventricles: ' ${VENT_FLAG} ','
+echo '   - Optionally uses the draining vessels: ' ${DV_FLAG} ','
+echo '   - Optionally uses the local white matter: ' ${WM_FLAG} ','
 echo '   - Detrends each with legrende polynomials up to order ' ${POLORT}','
 echo '   - Computes fit of run with all nusiances via linear regression,'
 echo '   - Computes temporal signal to noise ratio,'
@@ -28,11 +34,17 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        # detrend datasets and .1D files
-        #3dDetrend -prefix - \
-        #          -DAFNI_1D_TRANOUT=YES \
-        #          -polort ${POLORT} \
-        #         # RVT REGRESSOR GOES HERE IN CONDITIONAL LOOP
+        # detrend physiological regressors, if they exist
+        if [ -f ${SESS}/PARAMS/phys.${NUM}.1D ] && \
+           [ ! -f ${SESS}/PARAMS/det.phys.${NUM}.1D ]; then
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort ${POLORT} \
+                ${SESS}/PARAMS/phys.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.phys.${NUM}.1D
+        fi
+
         if [ ! -f ${SESS}/PARAMS/det.motion.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
@@ -101,37 +113,45 @@ for SESS in ${DIR_SESS}; do
                 ${SESS}/PARAMS/det.global_mean.${NUM}.1D
         fi
         
-        # fits each run with all nusiance variables
-        # need if confitional for RVT...
+        # fit each run with all nusiance regressors
         if [ ! -f ${SESS}/func_noise.${NUM}.nii.gz ]; then
+
+            # start with the standard motion-paramater regressors
+            CMD=`echo 3dTfitter \
+                          -prefix ${SESS}/func_noise_betas.${NUM}.nii.gz \
+                          -fitts ${SESS}/func_noise.${NUM}.nii.gz \
+                          -polort ${POLORT} \
+                          -RHS ${SESS}/${INPUT}.${NUM}.nii.gz \
+                          -LHS ${SESS}/PARAMS/det.motion.${NUM}.1D `
+
+            # optionally add the global mean
             if [ `echo ${GS_FLAG}` = 'on' ]; then
-                3dTfitter \
-                    -prefix ${SESS}/func_noise_betas.${NUM}.nii.gz \
-                    -fitts ${SESS}/func_noise.${NUM}.nii.gz \
-                    -polort ${POLORT} \
-                    -RHS ${SESS}/${INPUT}.${NUM}.nii.gz \
-                    -LHS ${SESS}/PARAMS/det.motion.${NUM}.1D \
-                         ${SESS}/PARAMS/det.vent.${NUM}.1D \
-                         ${SESS}/PARAMS/det.lag.vent.${NUM}.1D \
-                         ${SESS}/PARAMS/det.dv.${NUM}.1D \
-                         ${SESS}/PARAMS/det.lag.dv.${NUM}.1D \
-                         ${SESS}/PARAMS/det.wm_local15.${NUM}.nii.gz \
-                         ${SESS}/PARAMS/det.lag.wm_local15.${NUM}.nii.gz \
-                         ${SESS}/PARAMS/det.global_mean.${NUM}.1D
-            else
-                3dTfitter \
-                    -prefix ${SESS}/func_noise_betas.${NUM}.nii.gz \
-                    -fitts ${SESS}/func_noise.${NUM}.nii.gz \
-                    -polort ${POLORT} \
-                    -RHS ${SESS}/${INPUT}.${NUM}.nii.gz \
-                    -LHS ${SESS}/PARAMS/det.motion.${NUM}.1D \
-                         ${SESS}/PARAMS/det.vent.${NUM}.1D \
-                         ${SESS}/PARAMS/det.lag.vent.${NUM}.1D \
-                         ${SESS}/PARAMS/det.dv.${NUM}.1D \
-                         ${SESS}/PARAMS/det.lag.dv.${NUM}.1D \
-                         ${SESS}/PARAMS/det.wm_local15.${NUM}.nii.gz \
-                         ${SESS}/PARAMS/det.lag.wm_local15.${NUM}.nii.gz
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.global_mean.${NUM}.1D`
             fi
+
+            # optionally add the ventricles 
+            if [ `echo ${VENT_FLAG}` = 'on' ]; then
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.vent.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.vent.${NUM}.1D`
+            fi
+
+            # optionally add the draining vessles
+            if [ `echo ${DV_FLAG}` = 'on' ]; then
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.dv.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.dv.${NUM}.1D`
+            fi
+
+            # optionally add the local white matter regressors
+            if [ `echo ${WM_FLAG}` = 'on' ]; then
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm_local15.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm_local15.${NUM}.nii.gz`
+            fi
+
+            # and add the physio regressors if they exist
+            if [ -f ${SESS}/PARAMS/det.phys.${NUM}.1D ]; then
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.phys.${NUM}.1D`
+            fi
+
         fi
 
         # compute mean, standard deviation

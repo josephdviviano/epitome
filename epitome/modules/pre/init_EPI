@@ -30,6 +30,8 @@ cd /tmp
 # loop through sessions
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
+    
+    # make the output folder for the paramaters
     mkdir ${SESS}/PARAMS
 
     # loop through runs
@@ -70,19 +72,20 @@ for SESS in ${DIR_SESS}; do
                 TR=`fslhd ${RUN}/*.nii.gz | sed -n 22p | cut -c 9-`
                 
                 # find the smallest dimension in x, y, z 
-                SLICE=`perl -e "@xyz=(${X},${Y},${Z}); \
-                                @slice=(sort{$a<=>$b}@xyz)[0]; \
-                                print @slice"`
+                XYZ=($X $Y $Z)
+                SLICE=`echo ${XYZ[*]} | python -c \
+                      "print sorted(map(int,raw_input().split(' ')))[0]"`
+
 
                 # get the number of samples in physio logs
                 SAMP=`cat ${RUN}/resp.*.phys | wc -w`
 
                 # compute sampling rate of physio recording
-                UNITS=`${RUN}/*.nii.gz | sed -n 14p | cut -c 11- | xargs`
+                UNITS=`fslhd ${RUN}/*.nii.gz | sed -n 14p | cut -c 11- | xargs`
                 
                 # convert ms to seconds, if necessary
                 if [ ${UNITS} = 's' ]; then
-                    TIME=`perl -e "print ${NTRS} \* ${TR}"`
+                    TIME=`perl -e "print ${NTRS} * ${TR}"`
                 elif [ ${UNITS} = 'ms' ]; then
                     TIME=`perl -e "print ${NTRS} * ${TR} / 1000"`
                 fi 
@@ -91,13 +94,21 @@ for SESS in ${DIR_SESS}; do
                 FS=`perl -e "print ${SAMP} / ${TIME}"`
                 
                 # Run McRetroTS -- Respfile Cardfile VolTR Nslices PhysFS Graph
-                McRetroTS resp.phys card.phys ${TR} ${SLICE} ${FS} 0
+                # NB! Right now we are NOT using the slice-wise information,
+                # as the slice-wise information assumes alternating+Z! Jeesh!
+                McRetroTS \
+                    ${RUN}/resp.*.phys ${RUN}/card.*.phys \
+                          ${TR} ${SLICE} ${FS} 0
 
-            else
-                
-                # just skip this stage & match ouput file names
-                mv ${SESS}/func_tmp_despike.${NUM}.nii.gz \
-                   ${SESS}/func_tmp_retroic.${NUM}.nii.gz
+                # Output both the single-slice and multi-slice data
+                1dcat \
+                    oba.slibase.1D'[0..12]{${DELTR}..$}' \
+                    > ${SESS}/PARAMS/phys.${NUM}.1D
+
+                1dcat \
+                    oba.slibase.1D'[0..$]{${DELTR}..$}' \
+                    > ${SESS}/PARAMS/phys_slicewise.${NUM}.1D
+
             fi
 
             # delete initial time points
@@ -113,13 +124,16 @@ for SESS in ${DIR_SESS}; do
                  ${SESS}/func_tmp_del.${NUM}.nii.gz
 
             # slice time correction (can include specified timings)
+            #NB -- Physio regression must happen BEFORE NOW if we want to
+            # include slice-wise regressors!
+            # But it isn't clear to me how important this is.
             if [ -f ${RUN}/slice_timing.1D ]; then
                 3dTshift \
                     -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
                     -verbose \
                     -Fourier \
                     -tpattern @ ${RUN}/slice_timing.1D \
-                    ${SESS}/func_tmp_retroic.${NUM}.nii.gz
+                    ${SESS}/func_tmp_despike.${NUM}.nii.gz
             else
                 3dTshift \
                     -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
