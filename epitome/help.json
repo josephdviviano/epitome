@@ -1,14 +1,5 @@
 {
 
-    "anatexport.py" :
-        ["Usage:",
-         "    FS_anatexport.py <data_directory> <experiment>",
-         "data_directory -- full path to your MRI/WORKING directory.",
-         "experiment -- name of the experiment being analyzed.",
-         "",
-         "Imports processed T1s from freesurfer to the experiment directory."
-        ],
-
     "check_EPI2T1" :
         ["Usage:",
          "    check_EPI2T1.py <data_directory> <experiment> <modality>",
@@ -113,6 +104,30 @@
          "",
          "This computes detrended nuisance time series, fits each run with a",
          "computed noise model, and subtracts the fit. Computes temporal SNR."
+        ],
+
+    "fsexport.py" :
+        ["Usage:",
+         "    fsexport.py <data_directory> <experiment>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "",
+         "Imports processed T1s from freesurfer to the experiment directory."
+        ],
+
+    "fsrecon.py" :
+        ["Usage:",
+         "    fsrecon.py <data_directory> <experiment> <modality> <cores>",
+         "data_directory -- full path to your MRI/WORKING directory.",
+         "experiment -- name of the experiment being analyzed.",
+         "modality -- image modality to import (normally T1).",
+         "cores -- number of cores to dedicate (one core per run).",
+         "",
+         "This sends each subject's T1s through the freesurfer pipeline. It ",
+         "uses multiple T1s per imaging session, but does not combine them",
+         "between sessions. Data is output to the dedicated FREESURFER",
+         "directory, and should be exported to the MRI analysis folders using",
+         "anatexport.py."
         ],
 
     "gen_gcor" :
@@ -272,21 +287,6 @@
         ["Usage:",
          "    linreg_FS2MNI_FSL",
          "Brings Freesurfer atlases in register with MNI standard space."
-        ],
-
-    "recon.py" :
-        ["Usage:",
-         "    recon.py <data_directory> <experiment> <modality> <cores>",
-         "data_directory -- full path to your MRI/WORKING directory.",
-         "experiment -- name of the experiment being analyzed.",
-         "modality -- image modality to import (normally T1).",
-         "cores -- number of cores to dedicate (one core per run).",
-         "",
-         "This sends each subject's T1s through the freesurfer pipeline. It ",
-         "uses multiple T1s per imaging session, but does not combine them",
-         "between sessions. Data is output to the dedicated FREESURFER",
-         "directory, and should be exported to the MRI analysis folders using",
-         "anatexport.py."
         ],
 
     "surf2vol" : 

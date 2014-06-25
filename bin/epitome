@@ -597,10 +597,12 @@ def run_epitome():
 
     # add in the freesurfer calls (recon + export -- currently mandatory)
     f.write('## Freesurfer\n')
-    f.write('python ${DIR_PIPE}/epitome/modules/freesurfer/recon.py ' +
-            '${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} ${CORES}\n')
-    f.write('python ${DIR_PIPE}/epitome/modules/freesurfer/anatexport.py ' +
-            '${DIR_DATA} ${DIR_EXPT}\n')
+    f.write('echo python ${DIR_PIPE}/epitome/modules/freesurfer/fsrecon.py ' +
+            '${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} ${CORES} ' +
+            '>> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
+    f.write('echo python ${DIR_PIPE}/epitome/modules/freesurfer/fsexport.py ' +
+            '${DIR_DATA} ${DIR_EXPT} ' + 
+            '>> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
     f.write('\n')
 
     # begin looping through subjects
