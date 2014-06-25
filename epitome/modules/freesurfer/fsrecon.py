@@ -52,11 +52,11 @@ def FS_recon(root, expt, mode, core):
 
 if __name__ == "__main__":
     # check input types
-    sys.argv[1] = str(sys.argv[1])
-    sys.argv[2] = str(sys.argv[2])
-    sys.argv[3] = str(sys.argv[3])
-    sys.argv[4] = int(sys.argv[4])
+    root = str(sys.argv[1])
+    expt = str(sys.argv[2])
+    mode = str(sys.argv[3])
+    core = int(sys.argv[4])
     
     # submit arguments to the program
-    FS_recon(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    FS_recon(root, expt, mode, core)
 
