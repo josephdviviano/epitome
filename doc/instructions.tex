@@ -398,8 +398,8 @@ The types of modules included can be roughly split into 4 categories: freesurfer
 Right now, the default freesurfer recon-all is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{recon.py}
-Usage: \texttt{recon.py <data\_directory> <experiment> <modality> <cores>} \
+\subsubsection{fsrecon.py}
+Usage: \texttt{fsrecon.py <data\_directory> <experiment> <modality> <cores>} \
 
 \begin{blockquote}
 data\_directory -- full path to your MRI/WORKING directory. \\
@@ -408,11 +408,11 @@ modality -- image modality to import (normally T1). \\
 cores -- number of cores to dedicate (one core per run). \
 \end{blockquote}
 
-\noindent This sends each subject's T1s through the Freesurfer pipeline. It uses multiple T1s per imaging session, but does not combine them between sessions. Data is output to the dedicated FREESURFER directory, and should be exported to the MRI analysis folders using \texttt{anatexport.py}.
+\noindent This sends each subject's T1s through the Freesurfer pipeline. It uses multiple T1s per imaging session, but does not combine them between sessions. Data is output to the dedicated FREESURFER directory, and should be exported to the MRI analysis folders using \texttt{fsexport.py}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{anatexport.py}
-Usage: \texttt{FS\_anatexport.py <data\_directory> <experiment>}
+\subsubsection{fsexport.py}
+Usage: \texttt{fsexport.py <data\_directory> <experiment>}
 
 \begin{blockquote}
 data\_directory -- full path to your MRI/WORKING directory. \\
