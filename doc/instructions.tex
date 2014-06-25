@@ -581,10 +581,10 @@ Usage: \texttt{TRdrop <func\_prefix> <head\_size> <FD\_thresh> <DV\_thresh>}
 func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
 head\_size -- head radius in mm (def. 50 mm). \\
 thresh\_FD -- censor TRs with $\Delta$ motion > $x$ mm (def. 0.3 mm). \\
-thresh\_DV -- censor TRs with $\Delta$ GS change > $x$ \% (def. 0.3 \%). \
+thresh\_DV -- censor TRs with $\Delta$ GS change > $x$ \% (def. \href{http://upload.wikimedia.org/wikipedia/en/1/16/Drevil_million_dollars.jpg}{1000000} \%). \
 \end{blockquote}
 
-\noindent This removes motion-corrupted TRs from fMRI scans and outputs shortened versions for connectivity analysis (mostly).
+\noindent This removes motion-corrupted TRs from fMRI scans and outputs shortened versions for connectivity analysis (mostly). By default, DVARS regression is set of OFF by using a very, very high threshold.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{surfsmooth}

@@ -108,22 +108,25 @@ def filter(input_name):
     print('Set detrend order:')
     polort, output = selector_int(output)
 
+    print('')
     print('Set global signal regression:')
     gs_list = ['off', 'on']
     gs_flag, output = selector_list(gs_list, output)
 
+    print('')
     print('Set ventricle signal regression:')
     gs_list = ['off', 'on']
     vent_flag, output = selector_list(gs_list, output)
 
+    print('')
     print('Set draining vessel signal regression:')
     gs_list = ['off', 'on']
     dv_flag, output = selector_list(gs_list, output)
 
+    print('')
     print('Set local white matter regression regression:')
     gs_list = ['off', 'on']
     wm_flag, output = selector_list(gs_list, output)
-
 
     # if we messed any of these up, we return None
     if output == None:

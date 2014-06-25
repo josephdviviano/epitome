@@ -316,10 +316,11 @@
         "func_prefix -- functional data prefix (e.g., 'func_filtered')",
         "head_size -- head radius in mm (def. 50 mm)",
         "thresh_FD -- censor TRs with delta motion > x mm (def. 0.3 mm)",
-        "thresh_DV -- censor TRs with delta GS change > x % (def. 0.3 %)",
+        "thresh_DV -- censor TRs with delta GS change > x % (def. 1000000 %)",
         "",
         "This removes motion-corrupted TRs from fMRI scans and outputs",
-        "shortened versions for connectivity analysis (mostly)."
+        "shortened versions for connectivity analysis (mostly). This ",
+        "defaults DVARS to OFF by setting a very, very high default."
         ],
 
     "vol2surf" : 
