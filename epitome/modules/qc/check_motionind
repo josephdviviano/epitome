@@ -112,7 +112,8 @@ def individual_motion_plot(path, expt, mode):
             d = os.path.join(path, expt, subj, mode, session)
             for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
                 f = compute_FD(os.path.join(d, 'PARAMS/motion.' +
-                                               '%02d' % run +'.1D'), head_r)      
+                                               '%02d' % run + 
+                                               '.1D'), head_r)      
                 # per subject
                 FD = np.append(FD, f)
             

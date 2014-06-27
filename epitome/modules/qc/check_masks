@@ -37,12 +37,20 @@ def mask_check(path, expt, mode):
     pdf = PdfPages(os.path.join(path, expt, 'qc_masks.pdf'))
     for subj in subjects:
 
-        EPI = os.path.join(path, expt, subj, mode, 'SESS01/anat_EPI_brain.nii.gz')
-        T1 = os.path.join(path, expt, subj, mode, 'SESS01/reg_T1_to_EPI.nii.gz')
-        wm = os.path.join(path, expt, subj, mode, 'SESS01/anat_wm_ero.nii.gz')
-        dv = os.path.join(path, expt, subj, mode, 'SESS01/anat_dv_ero.nii.gz')
-        gm = os.path.join(path, expt, subj, mode, 'SESS01/anat_gm.nii.gz')
-        vent = os.path.join(path, expt, subj, mode, 'SESS01/anat_vent_ero.nii.gz')
+        # resample T1 image to has EPI dimensions
+
+        EPI = os.path.join(path, expt, subj, mode, 
+                          'SESS01/anat_EPI_brain.nii.gz')
+        T1 = os.path.join(path, expt, subj, mode, 
+                          'SESS01/reg_T1_to_EPI.nii.gz')
+        wm = os.path.join(path, expt, subj, mode, 
+                          'SESS01/anat_wm_ero.nii.gz')
+        dv = os.path.join(path, expt, subj, mode, 
+                          'SESS01/anat_dv_ero.nii.gz')
+        gm = os.path.join(path, expt, subj, mode, 
+                          'SESS01/anat_gm.nii.gz')
+        vent = os.path.join(path, expt, subj, mode, 
+                          'SESS01/anat_vent_ero.nii.gz')
 
         # load in data
         EPI = nib.load(EPI).get_data()
