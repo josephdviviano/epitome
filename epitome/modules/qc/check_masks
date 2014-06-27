@@ -26,8 +26,8 @@ def reorient_to_radiological(image):
 
 def mask_check(path, expt, mode):
     """
-    Prints the central slice of the T1 and co-registered + deskulled EPI, 
-    including an edge-detected version of the T1 (requires AFNI).
+    Prints the tissue classifications from Freesurfer on a T1 and EPI
+    underlay from the first session only. 
     """
 
     # get subject numbers
@@ -38,7 +38,7 @@ def mask_check(path, expt, mode):
     for subj in subjects:
 
         EPI = os.path.join(path, expt, subj, mode, 'SESS01/anat_EPI_brain.nii.gz')
-        T1 = os.path.join(path, expt, subj, mode, 'SESS01/anat_T1_brain.nii.gz')
+        T1 = os.path.join(path, expt, subj, mode, 'SESS01/reg_T1_to_EPI.nii.gz')
         wm = os.path.join(path, expt, subj, mode, 'SESS01/anat_wm_ero.nii.gz')
         dv = os.path.join(path, expt, subj, mode, 'SESS01/anat_dv_ero.nii.gz')
         gm = os.path.join(path, expt, subj, mode, 'SESS01/anat_gm.nii.gz')
