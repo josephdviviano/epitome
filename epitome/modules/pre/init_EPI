@@ -58,7 +58,7 @@ for SESS in ${DIR_SESS}; do
             fi
 
             # Generate physiological noise regressors if they exist
-            if [ -f ${RUN}/resp.*.phys ] && [ -f ${RUN}/phys.*.card ]; then
+            if [ -f ${RUN}/resp.*.phys ] && [ -f ${RUN}/card.*.phys ]; then
                 
                 # get x, y, z, t dims, and TR length
                 X=`fslhd ${RUN}/*.nii.gz | sed -n 6p | cut -c 5-`
@@ -75,7 +75,6 @@ for SESS in ${DIR_SESS}; do
                 XYZ=($X $Y $Z)
                 SLICE=`echo ${XYZ[*]} | python -c \
                       "print sorted(map(int,raw_input().split(' ')))[0]"`
-
 
                 # get the number of samples in physio logs
                 SAMP=`cat ${RUN}/resp.*.phys | wc -w`
@@ -139,7 +138,7 @@ for SESS in ${DIR_SESS}; do
                     -prefix ${SESS}/func_tshift.${NUM}.nii.gz \
                     -verbose -Fourier \
                     -tpattern ${TPATTERN} \
-                    ${SESS}/func_tmp_retroic.${NUM}.nii.gz
+                    ${SESS}/func_tmp_despike.${NUM}.nii.gz
             fi
         fi
 
