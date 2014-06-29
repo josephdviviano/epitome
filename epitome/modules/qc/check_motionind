@@ -14,7 +14,7 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import utilities
+import epitome as epi
 
 ## Options: will eventually be set at command line
 head_r = 50   # head diameter in mm
@@ -100,7 +100,7 @@ def individual_motion_plot(path, expt, mode):
     dict_FD = {}
 
     # get subject numbers
-    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
+    subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
     # get number of subjects
     n_subj = len(subjects)

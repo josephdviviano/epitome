@@ -10,7 +10,7 @@ from scipy import ndimage as nd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-import utilities
+import epitome as epi
 
 def reg_check_T12MNI(path, expt, mode):
     """
@@ -19,7 +19,7 @@ def reg_check_T12MNI(path, expt, mode):
     """
 
     # get subject numbers
-    subjects = ypp_utilities.get_subj(os.path.join(path, expt))
+    subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 'qc_reg_EPI_to_T1.pdf'))
