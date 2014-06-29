@@ -23,7 +23,7 @@ for SESS in ${DIR_SESS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
         
         # resample input mask to match dimensions of first run
-        if [ -f ${SESS}/anat_smoothmask.nii.gz ]; then 
+        if [ ! -f ${SESS}/anat_smoothmask.nii.gz ]; then 
             3dresample \
                 -prefix ${SESS}/anat_smoothmask.nii.gz \
                 -master ${SESS}/${INPUT}.01.nii.gz \
