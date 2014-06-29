@@ -95,17 +95,17 @@ for SESS in ${DIR_SESS}; do
                 # Run McRetroTS -- Respfile Cardfile VolTR Nslices PhysFS Graph
                 # NB! Right now we are NOT using the slice-wise information,
                 # as the slice-wise information assumes alternating+Z! Jeesh!
-                McRetroTS \
+                ${McRetroTS} \
                     ${RUN}/resp.*.phys ${RUN}/card.*.phys \
                           ${TR} ${SLICE} ${FS} 0
 
                 # Output both the single-slice and multi-slice data
                 1dcat \
-                    oba.slibase.1D'[0..12]{${DELTR}..$}' \
+                    oba.slibase.1D[0..12]{${DELTR}..$} \
                     > ${SESS}/PARAMS/phys.${NUM}.1D
 
                 1dcat \
-                    oba.slibase.1D'[0..$]{${DELTR}..$}' \
+                    oba.slibase.1D[0..$]{${DELTR}..$} \
                     > ${SESS}/PARAMS/phys_slicewise.${NUM}.1D
 
             fi

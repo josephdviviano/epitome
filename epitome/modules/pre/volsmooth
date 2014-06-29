@@ -14,31 +14,36 @@ echo '   Anything labeled zero in the mask will become zeroed in the output.'
 echo ''
 echo '************************************************************************'
 
-cd /tmp
 
-# Loop through sessions, runs
+#Loop through sessions, runs
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
-    SESS=`basename ${SESS}`        
-    DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
-    
-    if [ ! -f ${DIR}/func_volsmooth.${NUM}.nii.gz ]; then
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+        
+        # resample input mask to match dimensions of first run
+        if [ -f ${SESS}/anat_smoothmask.nii.gz ]; then 
+            3dresample \
+                -prefix ${SESS}/anat_smoothmask.nii.gz \
+                -master ${SESS}/${INPUT}.01.nii.gz \
+                -rmode NN \
+                -inset ${SESS}/${MASK}.nii.gz
+        fi
 
-        3dresample \
-            -prefix ${DIR}/func_volsmooth.${NUM}.nii.gz \
-            -master ${DIR}/${INPUT}.${NUM}.nii.gz \
-            -rmode NN \
-            -inset ${DIR}/${MASK}.nii.gz
+        # resample mask to single-run space, then smooth
+        if [ ! -f ${SESS}/func_volsmooth.${NUM}.nii.gz ]; then
+            3dBlurInMask \
+                -prefix ${SESS}/func_volsmooth.${NUM}.nii.gz \
+                -Mmask ${SESS}/anat_smoothmask.nii.gz \
+                -FWHM ${FWHM} \
+                -input ${SESS}/${INPUT}.${NUM}.nii.gz
 
-        3dBlurInMask \
-            -prefix ${DIR}/proc/func_volsmooth.${NUM}.nii.gz \
-            -Mmask ${DIR}/anat_tmp_smoothmask.${NUM}.nii.gz \
-            -FWHM ${FWHM} \
-            -input ${DIR}/${INPUT}.${NUM}.nii.gz
-
-    fi
+        fi
+    done
 done
 
 cd ${DIR_PIPE}
 
 EOF
+

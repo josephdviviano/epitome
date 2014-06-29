@@ -167,6 +167,8 @@ for SESS in ${DIR_SESS}; do
                 CMD=`echo ${CMD} ${SESS}/PARAMS/det.phys.${NUM}.1D`
             fi
 
+            ${CMD}
+
         fi
 
         # compute mean, standard deviation

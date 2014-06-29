@@ -618,6 +618,7 @@ def run_epitome():
     f.write('export DIR_EXPT=${DIR_EXPT}\n')
     f.write('export DATA_TYPE=${DATA_TYPE}\n')
     f.write('export SUB=${SUB}\n')
+    f.write("""McRetroTS='/opt/mcretro/run_McRetroTS.sh /opt/MATLAB/MATLAB_Compiler_Runtime/v715'\n""")
     f.write('EOF\n')
     f.write('\n')
 
