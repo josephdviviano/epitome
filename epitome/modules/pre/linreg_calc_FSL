@@ -57,17 +57,18 @@ for SESS in `basename ${DIR_SESS}`; do
         fi
     fi
     
+    # Set EPI data file (for low vs high quality data).
+    if [ ${DATA_QUALITY} = 'low' ]; then
+        EPI_BRAIN=`echo ${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz`
+    else
+        EPI_BRAIN=`echo ${DIR}/${SESS}/anat_EPI_brain.nii.gz`
+    fi
+
+    # calculate registration of EPI to T1
     if [ ! -f ${DIR_T1}/${SESS}/reg_EPI_to_T1.nii.gz ]; then
         
-        # get the correct EPI target image
-        if [ ${DATA_QUALITY} = 'low' ]; then
-            INPUT=`echo ${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz`
-        else
-            INPUT=`echo ${DIR}/${SESS}/anat_EPI_brain.nii.gz`
-        fi
 
-        # EPI to T1 -- FSL
-        flirt -in ${INPUT} \
+        flirt -in ${EPI_BRAIN} \
               -ref ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
               -out ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz \
               -omat ${DIR}/${SESS}/mat_EPI_to_T1.mat \
@@ -78,11 +79,22 @@ for SESS in `basename ${DIR_SESS}`; do
               -v
     fi
 
+    # invert flirt transform
     if [ ! -f ${DIR}/${SESS}/mat_T1_to_EPI.mat ]; then
-        # invert flirt transform
         convert_xfm -omat ${DIR}/${SESS}/mat_T1_to_EPI.mat \
                     -inverse \
                     ${DIR}/${SESS}/mat_EPI_to_T1.mat
+    fi
+
+    # produce T1 registered to EPI
+    if [ ! -f ${DIR_T1}/${SESS}/reg_T1_to_EPI.nii.gz ]; then
+        # T1 to EPI -- FSL
+        flirt -in ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
+              -ref ${EPI_BRAIN} \
+              -out ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz \
+              -applyxfm \
+              -init ${DIR}/${SESS}/mat_EPI_to_T1.mat \
+              -v
     fi
 
     # Clean up leftovers in /tmp
