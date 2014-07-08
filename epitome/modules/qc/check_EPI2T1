@@ -12,6 +12,17 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 import epitome as epi
 
+def reorient_to_radiological(image):
+    """
+    Reorients input 3D numpy matrix to be the proper orientation for plotting.
+    """
+    
+    image = np.transpose(image, (2,0,1))
+    image = np.rot90(image, 2)
+
+    return image
+
+
 def reg_check(path, expt, mode):
     """
     Prints the central slice of the T1 and co-registered + deskulled EPI, 
@@ -40,17 +51,16 @@ def reg_check(path, expt, mode):
         reg = nib.load(reg).get_data()
 
         # reorient the data to radiological
-        edge = np.transpose(edge, (2,0,1))
-        edge = np.rot90(edge, 2)
-        anat = np.transpose(anat, (2,0,1))
-        anat = np.rot90(anat, 2)
-        reg = np.transpose(reg, (2,0,1))
-        reg = np.rot90(reg, 2)
+        edge = reorient_to_radiological(edge)
+        anat = reorient_to_radiological(anat)
+        reg = reorient_to_radiological(reg)
 
         # get size ratio between over + underlay
         dsfactor = [a/float(r) for a,r in zip(anat.shape, reg.shape)]
+
         # match over + underlay dimensions
         reg_to_anat = nd.interpolation.zoom(reg, zoom=dsfactor)
+        
         # set small values in overlay to be transparent
         reg_to_anat = np.ma.masked_where(reg_to_anat < 50, reg_to_anat)
         cmap = plt.cm.Reds
