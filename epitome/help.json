@@ -65,6 +65,13 @@
          "participant."
         ],
 
+    "combine_volumes" : 
+        ["Usage:",
+         "    combine_volumes <func1_prefix> <func2_prefix> ",
+         "func1_prefix -- 'low' for poor internal contrast, otherwise 'high'",
+         "",
+        ],
+
     "del_everything" :
         ["Usage:",
          "    del_everything",
@@ -184,11 +191,20 @@
          "    Calculates various statistics + time series."
         ],
 
-    "combine_volumes" : 
+    "lowpass" : 
         ["Usage:",
-         "    combine_volumes <func1_prefix> <func2_prefix> ",
-         "func1_prefix -- 'low' for poor internal contrast, otherwise 'high'",
+         "    lowpass <func_prefix> <mask_prefix> <filter_type> <cutoff>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "mask_prefix -- mask data prefix (eg.,EPI_mask in anat_EPI_mask).",
+         "filter_type -- low-pass filter type (median, average, kaiser,",
+         "               butterworth. See documentation for details.",
+         "cutoff -- lowpass filter cuttoff: window length for median/average,",
+         "          cutoff in Hz for kaiser/butterworth. Default = 3 / 0.1,",
+         "          respectively. See documentation for details."
          "",
+         "This low-passes each voxel time series within the supplied mask to",
+         "remove high-frequency information from the data that is hopefully",
+         "uninteresting. Options exist to meet various standards that exist.",
         ],
 
     "linreg_calc_AFNI" :

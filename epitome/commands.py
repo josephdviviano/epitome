@@ -389,45 +389,57 @@ def linreg_calc_FSL(input_name):
                                                    str(reg_dof))
     return line, output
 
-def surf2vol(input_name):   
-    output = 'ctx'
+def lowpass(input_name):
+
+    import numpy.remainder as rem
+
+    output = 'lowpass'
 
     print('')
-    print('Projecting surface data to volume space.')
-
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/surf2vol ' + str(input_name))
-
-    return line, output
-
-def surfsmooth(input_name):    
-    output = 'smooth'
+    print('Low-passing each voxel time series.')
 
     print('')
-    print('Smoothing functional data on a cortical surface.')
+    print('Input mask prefix (default = EPI_mask):')
+    mask_prefix = raw_input('Mask Prefix: ')
+    if mask_prefix == '':
+        mask_prefix = 'EPI_mask'
 
     print('')
-    print('Input smoothing kernel FWHM (mm):')
-    fwhm, output = selector_float(output)
+    print('Which filter type would you like to use?')
+    print('See documentation for an explanation of each.')
+    filter_list = ['median', 'average', 'kaiser', 'butterworth']
+    filter_type, output = selector_list(filter_list, output)
+
+    if filter_type in ['median', 'average']:
+        flag = 0
+
+        # ensures input length is odd
+        while flag == 0:
+            print('')
+            print('Select window length (must be odd, default = 3):')
+            lowpass_param, output = selector_int(output)
+
+            if rem(window_length, 2) != 0:
+                flag = 1
+            else:
+                print('Window length must be odd!')
+    
+    elif filter_type in ['kaiser', 'butterworth']:
+        
+        print('')
+        print('Input cutoff frequency in Hz (default = 0.1 Hz):')
+        lowpass_param, output = selector_float(output)
 
     # if we messed any of these up, we return None
     if output == None:
         print('Please try again')
-        line = ''
     # otherwise we print the command and return it
     else:
-        line = ('. ${DIR_PIPE}/epitome/modules/pre/surfsmooth ' +
-                                          str(input_name) + ' ' +
-                                          str(fwhm))
-    return line, output
-
-def vol2surf(input_name):
-    output = 'surface'
-
-    print('')
-    print('Projecting data to cortical surface.')
-
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/vol2surf ' + str(input_name))
-
+        line = '. ${DIR_PIPE}/epitome/modules/pre/lowpass ' +
+                                               str(input_name) + ' ' + 
+                                               str(mask_prefix) + ' ' +
+                                               str(filter_type) + ' ' +
+                                               str(lowpass_param)
     return line, output
 
 def TRdrop(input_name):
@@ -474,6 +486,47 @@ def TRdrop(input_name):
 
     return line, output
 
+def surf2vol(input_name):   
+    output = 'ctx'
+
+    print('')
+    print('Projecting surface data to volume space.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/surf2vol ' + str(input_name))
+
+    return line, output
+
+def surfsmooth(input_name):    
+    output = 'smooth'
+
+    print('')
+    print('Smoothing functional data on a cortical surface.')
+
+    print('')
+    print('Input smoothing kernel FWHM (mm):')
+    fwhm, output = selector_float(output)
+
+    # if we messed any of these up, we return None
+    if output == None:
+        print('Please try again')
+        line = ''
+    # otherwise we print the command and return it
+    else:
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/surfsmooth ' +
+                                          str(input_name) + ' ' +
+                                          str(fwhm))
+    return line, output
+
+def vol2surf(input_name):
+    output = 'surface'
+
+    print('')
+    print('Projecting data to cortical surface.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/vol2surf ' + str(input_name))
+
+    return line, output
+
 def volsmooth(input_name):
     output = 'volsmooth'
 
@@ -496,7 +549,6 @@ def volsmooth(input_name):
                                      str(fwhm))
 
     return line, output
-
 
 ###############################################################################
 # QC Scripts
