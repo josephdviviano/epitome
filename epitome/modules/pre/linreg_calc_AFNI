@@ -9,9 +9,9 @@ echo '************************************************************************'
 echo '               AFNI: Linear registration pathway calculator'
 echo ''
 echo '   Calculates EPI <--> T1 <--> MNI152 (included in AFNI distribution)'
-echo '   - Using data quality: ' ${DATA_QUALITY} ','
-echo '   - Cost function: ' ${COST} ','
-echo '   - Degrees of freedom preset ' ${REG_DOF} ','
+echo '   - Using data quality: ${DATA_QUALITY},'
+echo '   - Cost function: ${COST},'
+echo '   - Degrees of freedom preset ${REG_DOF},'
 echo '   - Generates EPI template registered to T1 & vice-versa (sessionwise),'
 echo ''
 echo '************************************************************************'
@@ -26,16 +26,19 @@ for SESS in ${DIR_SESS}; do
     SESS=`basename ${SESS}`
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
+
+    # Set EPI data file (for low vs high quality data).
+    if [ ${DATA_QUALITY} = 'low' ]; then
+        EPI_BRAIN=`echo ${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz`
+    else
+        EPI_BRAIN=`echo ${DIR}/${SESS}/anat_EPI_brain.nii.gz`
+    fi
+
     if [ ! -f ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz ]; then
         
         # Copy EPI and MNI brain into /tmp.
-        if [ ${DATA_QUALITY} = 'low' ]; then
-            3dcopy \
-                ${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz anat_EPI_brain
-        else
-            3dcopy \
-                ${DIR}/${SESS}/anat_EPI_brain.nii.gz anat_EPI_brain
-        fi
+        3dcopy \
+            ${EPI_BRAIN} anat_EPI_brain
         3dcopy \
             ${DIR_AFNI}/MNI_avg152T1+tlrc template
 
@@ -113,6 +116,7 @@ for SESS in ${DIR_SESS}; do
                 -prefix ${DIR}/${SESS}/reg_T1_to_EPI.nii.gz \
                 -input ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
                 -1Dmatrix_apply ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D \
+                -master ${EPI_BRAIN} \
                 -float \
                 -final quintic
         else
@@ -120,6 +124,7 @@ for SESS in ${DIR_SESS}; do
                 -prefix ${DIR}/${SESS}/reg_T1_to_EPI.nii.gz \
                 -input ${DIR_T1}/SESS01/anat_T1_brain.nii.gz \
                 -1Dmatrix_apply ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D \
+                -master ${EPI_BRAIN} \
                 -float \
                 -final quintic
         fi                

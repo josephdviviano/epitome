@@ -68,22 +68,14 @@ def mask_check(path, expt, mode):
         gm = reorient_to_radiological(gm)
         vent = reorient_to_radiological(vent)
 
-        # get size ratio between over + underlay
-        dsfactor_EPI = [a/float(r) for a,r in zip(EPI.shape, wm.shape)]
-        dsfactor_T1 = [a/float(r) for a,r in zip(T1.shape, wm.shape)]
+        # get size ratio between over + underlay (EPI & T1 in same space)
+        dsfactor = [a/float(r) for a,r in zip(EPI.shape, wm.shape)]
         
         # match over + underlay dimensions
-        wm_to_EPI = nd.interpolation.zoom(wm, zoom=dsfactor_EPI)
-        wm_to_T1 = nd.interpolation.zoom(wm, zoom=dsfactor_T1)
-        
-        gm_to_EPI = nd.interpolation.zoom(gm, zoom=dsfactor_EPI)
-        gm_to_T1 = nd.interpolation.zoom(gm, zoom=dsfactor_T1)
-        
-        dv_to_EPI = nd.interpolation.zoom(dv, zoom=dsfactor_EPI)
-        dv_to_T1 = nd.interpolation.zoom(dv, zoom=dsfactor_T1)
-        
-        vn_to_EPI = nd.interpolation.zoom(vent, zoom=dsfactor_EPI)
-        vn_to_T1 = nd.interpolation.zoom(vent, zoom=dsfactor_T1)
+        wm_to_EPI = nd.interpolation.zoom(wm, zoom=dsfactor)
+        gm_to_EPI = nd.interpolation.zoom(gm, zoom=dsfactor)
+        dv_to_EPI = nd.interpolation.zoom(dv, zoom=dsfactor)
+        vn_to_EPI = nd.interpolation.zoom(vent, zoom=dsfactor)
         
         # set small values in overlays to be transparent
         wm_to_EPI = np.ma.masked_where(wm_to_EPI < 1, wm_to_EPI)
@@ -160,13 +152,13 @@ def mask_check(path, expt, mode):
         
         # plot bg, white matter, grey matter, draining vessels, ventricles
         plt.imshow(T1[mid, :, :], cmap=cmap_bg, interpolation='nearest')
-        plt.imshow(wm_to_T1[mid, :, :], cmap=cmap_wm, interpolation='nearest',
+        plt.imshow(wm_to_EPI[mid, :, :], cmap=cmap_wm, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(gm_to_T1[mid, :, :], cmap=cmap_gm, interpolation='nearest',
+        plt.imshow(gm_to_EPI[mid, :, :], cmap=cmap_gm, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(dv_to_T1[mid, :, :], cmap=cmap_dv, interpolation='nearest',
+        plt.imshow(dv_to_EPI[mid, :, :], cmap=cmap_dv, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(vn_to_T1[mid, :, :], cmap=cmap_vn, interpolation='nearest',
+        plt.imshow(vn_to_EPI[mid, :, :], cmap=cmap_vn, interpolation='nearest',
                                                                      alpha=0.5)
         plt.axis('off')
 
@@ -175,13 +167,13 @@ def mask_check(path, expt, mode):
 
         # plot bg, white matter, grey matter, draining vessels, ventricles
         plt.imshow(T1[:, mid, :], cmap=cmap_bg, interpolation='nearest')
-        plt.imshow(wm_to_T1[:, mid, :], cmap=cmap_wm, interpolation='nearest',
+        plt.imshow(wm_to_EPI[:, mid, :], cmap=cmap_wm, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(gm_to_T1[:, mid, :], cmap=cmap_gm, interpolation='nearest',
+        plt.imshow(gm_to_EPI[:, mid, :], cmap=cmap_gm, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(dv_to_T1[:, mid, :], cmap=cmap_dv, interpolation='nearest',
+        plt.imshow(dv_to_EPI[:, mid, :], cmap=cmap_dv, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(vn_to_T1[:, mid, :], cmap=cmap_vn, interpolation='nearest',
+        plt.imshow(vn_to_EPI[:, mid, :], cmap=cmap_vn, interpolation='nearest',
                                                                      alpha=0.5)
         plt.axis('off')
 
@@ -190,13 +182,13 @@ def mask_check(path, expt, mode):
 
         # plot bg, white matter, grey matter, draining vessels, ventricles
         plt.imshow(T1[:, :, mid], cmap=cmap_bg, interpolation='nearest')
-        plt.imshow(wm_to_T1[:, :, mid], cmap=cmap_wm, interpolation='nearest',
+        plt.imshow(wm_to_EPI[:, :, mid], cmap=cmap_wm, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(gm_to_T1[:, :, mid], cmap=cmap_gm, interpolation='nearest',
+        plt.imshow(gm_to_EPI[:, :, mid], cmap=cmap_gm, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(dv_to_T1[:, :, mid], cmap=cmap_dv, interpolation='nearest',
+        plt.imshow(dv_to_EPI[:, :, mid], cmap=cmap_dv, interpolation='nearest',
                                                                      alpha=0.5)
-        plt.imshow(vn_to_T1[:, :, mid], cmap=cmap_vn, interpolation='nearest',
+        plt.imshow(vn_to_EPI[:, :, mid], cmap=cmap_vn, interpolation='nearest',
                                                                      alpha=0.5)
         plt.axis('off')
 
