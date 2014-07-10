@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+
+import os, sys
+import epitome as epi
+
+def select_experiment():
+
+def select_run_number():
+
+def main():
+
+    path, something, something, cores = epi.config()
+
+    # make experiment directory
+    print('')
+    print('Please input experiment name:')
+
+    experiment_name = raw_input('Experiment: ')
+
+    if os.path.isdir(os.path.join(path, experiment_name)) == True:
+        print('Already exists! Adding to existing experiment.')
+    else
+        os.system('mkdir ' + os.path.join(path, experiment_name))
+
+    # subject generator
+    expt = os.path.join(path, experiment_name)
+    
+    # print a list of the subject, if they exist
+    if os.listdir(expt) == []:
+        pass
+    else
+        print('Current participants: ')
+        for s in [s for s in os.listdir(expt) if 
+                             os.path.isdir(os.path.join(expt, s)) == True]:
+            print(s)
+
+    # move on to a subject loop
+    flag = 0
+    while flag == 0:
+        
+        print('')
+        print('Input subject name:')
+
+        subject = raw_input('Subject: ')
+
+        # make the subject folder, if it does not exist
+        if os.path.isdir(os.path.join(expt, s)) == False:
+            os.system('mkdir ' + os.path.join(expt, subject))
+        else:
+            print('Editng existing subject ' + str(subject))
+
+        # edit subject, and check for the escape flag
+        flag = edit_subject(subject)
+
