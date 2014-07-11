@@ -274,7 +274,7 @@ for SESS in ${DIR_SESS}; do
                 -a ${SESS}/func_motion.${NUM}.nii.gz \
                 -b ${SESS}/func_tmp_mean.${NUM}.nii.gz \
                 -c ${SESS}/anat_EPI_mask.nii.gz \
-                -expr "a/b*100*c" \
+                -expr "(a-b)/b*100*c" \
                 -datum float
 
         fi
