@@ -3,9 +3,32 @@
 import os, sys
 import epitome as epi
 
+def print_directrories(in_dir):
+    """
+    Prints the directories found within the input directory.
+    """
+    
+    import os
+
+    dir_list = [d for d in os.listdir(in_dir) if
+                           os.path.isdir(os.path.join(in_dir, d)) == True]:
+    for d in dir_list:
+        print(d)
+    if len(d) == 0:
+        print('None found.')
+
 def select_experiment():
 
 def select_run_number():
+
+def edit_subject(subject):
+
+    print('')
+    print('Current image modalities:')
+
+    print_directories(subject)
+
+
 
 def main():
 
@@ -30,9 +53,7 @@ def main():
         pass
     else
         print('Current participants: ')
-        for s in [s for s in os.listdir(expt) if 
-                             os.path.isdir(os.path.join(expt, s)) == True]:
-            print(s)
+        print_directories(expt)
 
     # move on to a subject loop
     flag = 0
