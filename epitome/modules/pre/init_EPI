@@ -262,20 +262,31 @@ for SESS in ${DIR_SESS}; do
             # rm ${SESS}/tmp_median.1D
             
             # record the grand mean            
-            # MEAN=`3dmaskave \
-            #           -quiet \
-            #           -mask ${SESS}/anat_EPI_brain.nii.gz \
-            #           ${SESS}/func_tmp_mean.${NUM}.nii.gz`
+            MEAN=`3dmaskave \
+                      -quiet \
+                      -mask ${SESS}/anat_EPI_brain.nii.gz \
+                      ${SESS}/func_tmp_mean.${NUM}.nii.gz`
 
             # convert data to % signal change (units: 1 = 1%, mean = 100)
             # masking out non-brain regions
-            3dcalc \
+            # 3dcalc \
+            #    -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
+            #    -a ${SESS}/func_motion.${NUM}.nii.gz \
+            #    -b ${SESS}/func_tmp_mean.${NUM}.nii.gz \
+            #    -c ${SESS}/anat_EPI_mask.nii.gz \
+            #    -expr "(a-b)/b*100*astep(a, ${MEAN}*0.15)*c" \
+            #    -datum float
+ 
+            # scale by the mean (mean = 0), remove low instensity voxels,
+            # and mask non-brain regions.
+            # 3dcalc \
                 -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
                 -a ${SESS}/func_motion.${NUM}.nii.gz \
                 -b ${SESS}/func_tmp_mean.${NUM}.nii.gz \
                 -c ${SESS}/anat_EPI_mask.nii.gz \
-                -expr "(a-b)/b*100*c" \
+                -expr "a-b*astep(a, ${MEAN}*0.15)*c" \
                 -datum float
+
 
         fi
 
@@ -286,8 +297,7 @@ for SESS in ${DIR_SESS}; do
                 -b 'a[0,0,0,-1]' \
                 -expr '(a - b)^2' \
                 -prefix ${SESS}/func_tmp_backdif.${NUM}.nii.gz
-            
-            
+           
             3dmaskave \
                 -mask ${SESS}/anat_EPI_mask.nii.gz \
                 -quiet ${SESS}/func_tmp_backdif.${NUM}.nii.gz \
