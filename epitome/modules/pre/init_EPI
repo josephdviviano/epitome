@@ -17,7 +17,7 @@ echo '   - Corrects for slice timing using the pattern ' ${TPATTERN}','
 echo '   - Deobliques the data,'
 echo '   - Motion correction (also outputs motion parameters),'
 echo '   - Creates deskulled template EPI and whole-brain mask,'
-echo '   - Scales data to mode value = 1000, removing voxels with mode < 200,'
+echo '   - Scales data to mean value = 100,'
 echo '   - Calculates global mean & DVARS (Power 2012).'
 echo ''
 echo '************************************************************************'
@@ -214,8 +214,8 @@ for SESS in ${DIR_SESS}; do
         
         3dAutomask \
             -prefix ${SESS}/anat_EPI_mask.nii.gz \
-            -clfrac 0.3 \
-            -peels 1 \
+            -clfrac 0.5 \
+            -peels 3 \
             ${SESS}/anat_EPI_tmp_vol.nii.gz
         
         3dcalc \
@@ -279,12 +279,12 @@ for SESS in ${DIR_SESS}; do
  
             # scale by the mean (mean = 0), remove low instensity voxels,
             # and mask non-brain regions.
-            # 3dcalc \
+            3dcalc \
                 -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
                 -a ${SESS}/func_motion.${NUM}.nii.gz \
                 -b ${SESS}/func_tmp_mean.${NUM}.nii.gz \
                 -c ${SESS}/anat_EPI_mask.nii.gz \
-                -expr "a-b*astep(a, ${MEAN}*0.15)*c" \
+                -expr "(a-b)*c" \
                 -datum float
 
 
