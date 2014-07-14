@@ -175,10 +175,15 @@
 
     "init_EPI" : 
         ["Usage:",
-         "    init_EPI <data_quality> <del_tr> <t_pattern>",
+         "    init_EPI <data_quality> <del_tr> <t_pattern> <normalization>",
+         "             <masking>",
          "data_quality -- 'low' for poor internal contrast, otherwise 'high'",
          "del_tr -- number of TRs to remove from the beginning of the run",
          "t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift)",
+         "normalization -- voxel wise time series normalization.", 
+         "                 One of 'zscore', 'pct', 'demean'.",
+         "masking -- EPI brain masking tolerance.", 
+         "           One of 'loose', 'normal' 'tight'.",
          "",
          "General pre-processing for all fMRI data:",
          "    Orients data to RAI,",
@@ -187,7 +192,7 @@
          "    Slice time correction,",
          "    Deobliques & motion corrects data,",
          "    Creates session mean deskulled EPIs and whole-brain masks,",
-         "    Scales each run to have mode = 1000, removing small values,",
+         "    Scales each voxel,",
          "    Calculates various statistics + time series."
         ],
 

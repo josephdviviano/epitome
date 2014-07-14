@@ -198,6 +198,21 @@ def init_EPI():
                   'seq-z' : '= sequential in the minus direction'}
     slice_timing, output = selector_dict(t_patterns, output)
 
+    # normalize
+    print('')
+    print('Time series normalization: (analysis-dependent, see documentation)')
+    norm_dict = {'zscore' : ': mean = 0, 1 SD = 1, norm by standard deviation',
+                 'pct' : ': mean = 100, 1% = 1, norm by mean',
+                 'demean' : 'mean = 0, arbitrary units, no normalization'}
+    normalization, output = selector_dict(norm_dict, output)
+
+    # masking
+    print('')
+    print('EPI masking: acquisition dependent')
+    mask_list = ['loose', 'normal', 'tight']
+
+    masking, output = selector_list(mask_list, output)
+
     # if we messed any of these up, we return None
     if output == None:
         print('Please try again')
@@ -207,7 +222,9 @@ def init_EPI():
         line = ('. ${DIR_PIPE}/epitome/modules/pre/init_EPI ' +
                                           str(quality) + ' ' +
                                           str(deltr) + ' ' +
-                                          str(slice_timing))
+                                          str(slice_timing) + ' ' +
+                                          str(normalization) + ' ' +
+                                          str(masking))
     return line, output
 
 def linreg_EPI2MNI_AFNI(input_name):

@@ -63,8 +63,8 @@ Harford\par
 \end{Huge}
 \end{center}
 \vspace*{2cm}
-\epigraph{The perhaps most spectacular application of complex systems is the dynamics of the human brain. If the brain is regarded as a complex system of neural cells, then its dynamics can be modeled by the nonlinear dynamics of neural networks. The emergence of mental states (e.g., recognition, emotions, thoughts) is modeled by the dynamics of (macroscopic) order parameters of cerebral assemblies which are caused by nonlinear neurochemical interactions of neural cells in learning strategies. Cell assemblies with mental states are interpreted as attractors of phase transitions.}%
-{\textit{Complex Systems and Nonlinear Dynamics of Nature and Society}\\ \textsc{Klaus Mainzer}}
+\epigraph{As long as our brain is a mystery, the universe, the reflection of the structure of the brain will also be a mystery.}%
+{\textsc{Santiago Ramón y Cajal}}
 \null\vfill
 \vspace*{1cm}
 \noindent
@@ -429,12 +429,14 @@ This contains the lion's share of the pipeline. Every run of EPItome begins with
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{init\_EPI}
-Usage: \texttt{init\_EPI <data\_quality> <del\_tr> <t\_pattern>}
+Usage: \texttt{init\_EPI <data\_quality> <del\_tr> <t\_pattern> <normalization> <masking>}
 
 \begin{blockquote}
 data\_quality -- `low' for poor internal contrast, otherwise `high'. \\
 del\_tr -- number of TRs to remove from the beginning of the run. \\
 t\_pattern -- slice-timing at acquisition (from AFNI's 3dTshift). \
+normalization -- voxel wise time series normalization. One of `zscore', `pct', `demean'. \\
+masking -- EPI brain masking tolerance. One of `loose', `normal' `tight'. \
 \end{blockquote}
 
 \noindent Works from the raw data in each RUN folder. It performs general pre-processing for all fMRI data:
@@ -446,9 +448,13 @@ t\_pattern -- slice-timing at acquisition (from AFNI's 3dTshift). \
     \item{Slice time correction}
     \item{Deobliques \& motion corrects data}
     \item{Creates session mean deskulled EPIs and whole-brain masks}
-    \item{Scales each run to have mode = 1000, removing small values}
+    \item{Scales and optionally normalizes each time series}
     \item{Calculates various statistics + time series}
 \end{itemize}
+
+Times series normalization can be accomplished in one of three ways: zscores, percent signal change, and a simple demean. In all cases, the mean of each time series is set to a single number (either 0 or 100 for `pct'). This will help normalize baseline shifts across sessions, runs, and participants. Optionally, one can convert to percent signal change, which normalizes by time series mean and retains amplitude fluctuations across the image, and zscores, which normalizes by standard deviation and removes most amplitude differences across the image. Your selection here might be motivated by personal preference, or in rarer cases, analytic requirements. When in doubt, it is safe to select `demean'.
+
+Masking options are provided to improve masking performance across various acquisition types, but it is very hard to devise a simple one-size fits all solution for this option. Therefore the QC outputs will be very important for ensuring good masking, and these options may need to be tweaked on a site-by-site basis. Luckily, many analysis methods do not rely heavily on mask accuracy. In cases that do, such as partial least squares / ICA / PCA analysis, close attention should be paid to the output of this step. Hopefully the `loose', `normal', and `tight' nomenclature are self-explanatory. Generally, it is best to start with normal, and adjust if required. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{combine\_volumes}
@@ -559,7 +565,9 @@ func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{filter}
-Usage: \texttt{filter <func\_prefix> <detrend\_order> <gs\_regress\_flag>}
+Usage: \texttt{filter <func\_prefix> <detrend\_order> <gs\_regress\_flag> \\
+<ventricle\_regress\_flag> <draining\_vessel\_regress\_flag> \\
+<draining\_vessel\_regress\_flag> <local\_white\_matter\_regress\_flag>}
 
 \begin{blockquote}
 func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
@@ -571,7 +579,7 @@ local\_white\_matter\_regress\_flag -- if == on, regress local WM. \
 
 \end{blockquote}
 
-\noindent This computes detrended nuisance time series, fits each run with a, computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional, and generally advisable save global mean regression.
+\noindent This computes detrended nuisance time series, fits each run with a computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional, and generally advisable save global mean regression.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{TRdrop}
@@ -585,6 +593,23 @@ thresh\_DV -- censor TRs with $\Delta$ GS change > $x$ \% (def. \href{http://upl
 \end{blockquote}
 
 \noindent This removes motion-corrupted TRs from fMRI scans and outputs shortened versions for connectivity analysis (mostly). By default, DVARS regression is set of OFF by using a very, very high threshold.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{lowpass}
+Usage: \texttt{lowpass <func\_prefix> <mask\_prefix> <filter> <cutoff>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg.,smooth in func\_smooth). \\
+mask\_prefix -- mask data prefix (eg., EPI\_mask in anat\_EPI\_mask). \\
+filter -- filter type: `median', `average', `kaiser', or `butterworth'. \\
+cutoff -- filter cuttoff: either window length, or cutoff frequency. \
+\end{blockquote}
+
+\noindent This low-passes input data using the specified filter type and cutoff. 
+
+Both `median' and `average' filters operate in the time domain and therefore, the best cutoff values are odd (and must be larger than 1 to do anything). Time-domain filters are very good at removing high-frequency noise from the data without introducing any phase-shifts or ringing into the time series. When in doubt, a moving average filter with window length of 3 is a decent and conservative choice.
+
+Alternatively, the `kaiser' and `butterworth' filters work in the frequency domain and accept a cutoff in Hz (people tend to use a default of 0.1). Both are implemented as bi-directional FIR filters. The kaiser window is high order and permits reasonably sharp rolloff with minimal passband ringing for shorter fMRI time series. The butterworth filter is of low order and achieves minimal passband ringing at the expense of passband roll off (in layman's terms, butterworth filters will retain more high-frequency content than a kaiser filter with equivalent cutoff). The effect of the passband ringing is an empirical question that would be best tested by the User.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{surfsmooth}
