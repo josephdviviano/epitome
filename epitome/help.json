@@ -181,7 +181,7 @@
          "del_tr -- number of TRs to remove from the beginning of the run",
          "t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift)",
          "normalization -- voxel wise time series normalization.", 
-         "                 One of 'zscore', 'pct', 'demean'.",
+         "                 One of 'off', 'pct', 'scale'.",
          "masking -- EPI brain masking tolerance.", 
          "           One of 'loose', 'normal' 'tight'.",
          "",

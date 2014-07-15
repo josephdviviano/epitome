@@ -265,21 +265,15 @@ for SESS in ${DIR_SESS}; do
                 -mean \
                 ${SESS}/func_motion.${NUM}.nii.gz
 
-            # ZSCORE: mean = 0,  1 SD == 1, normalized by standard deviation
-            if [ ${NORMALIZE} == 'zscore' ]; then
-                3dTstat \
-                    -prefix ${SESS}/func_tmp_std.${NUM}.nii.gz \
-                    -stdev \
-                    ${SESS}/func_motion.${NUM}.nii.gz
-
-                3dcalc \
+            # OFF: Image multiplied by whole brain mask only
+            if [ ${NORMALIZE} == 'off' ]; then
+                3dCalc \    
                     -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
                     -a ${SESS}/func_motion.${NUM}.nii.gz \
-                    -b ${SESS}/func_tmp_mean.${NUM}.nii.gz \
-                    -c ${SESS}/func_tmp_std.${NUM}.nii.gz
-                    -d ${SESS}/anat_EPI_mask.nii.gz \
-                    -expr "(a-b)/c*d" \
+                    -b ${SESS}/anat_EPI_mask.nii.gz \
+                    -expr "a*b" \
                     -datum float
+            fi
 
             # % SIGNAL CHANGE: mean = 100, 1% == 1, normalized by mean
             if [ ${NORMALIZE} == 'pct' ]; then
@@ -288,18 +282,18 @@ for SESS in ${DIR_SESS}; do
                    -a ${SESS}/func_motion.${NUM}.nii.gz \
                    -b ${SESS}/func_tmp_mean.${NUM}.nii.gz \
                    -c ${SESS}/anat_EPI_mask.nii.gz \
-                   -expr "(a-b)/b*100**c" \
+                   -expr "(a-b)/b*c" \
                    -datum float
             fi
  
-            # DEMEAN: mean = 0, arbitrary units, no normalization
-            if [ ${NORMALIZE} == 'demean' ]; then
+            # SCALE: global mean = 1000, arbitrary units, no normalization
+            if [ ${NORMALIZE} == 'scale' ]; then
                 3dcalc \
                     -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
                     -a ${SESS}/func_motion.${NUM}.nii.gz \
                     -b ${SESS}/func_tmp_mean.${NUM}.nii.gz \
                     -c ${SESS}/anat_EPI_mask.nii.gz \
-                    -expr "(a-b)*c" \
+                    -expr "a*(1000/b)*c" \
                     -datum float
             fi
 

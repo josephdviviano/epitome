@@ -201,9 +201,9 @@ def init_EPI():
     # normalize
     print('')
     print('Time series normalization: (analysis-dependent, see documentation)')
-    norm_dict = {'zscore' : ': mean = 0, 1 SD = 1, norm by standard deviation',
-                 'pct' : ': mean = 100, 1% = 1, norm by mean',
-                 'demean' : 'mean = 0, arbitrary units, no normalization'}
+    norm_dict = {'off' : ': simple deskulling, no shifting or normalization',
+                 'pct' : ': mean = 100, 1% = 1, normalize by mean',
+                 'scale' : 'mean = 1000, arbitrary units, no normalization'}
     normalization, output = selector_dict(norm_dict, output)
 
     # masking

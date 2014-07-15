@@ -5,7 +5,7 @@ INPUT=`echo 'func_${1}'`
 DIMS=`echo ${2}`
 
 echo '************************************************************************'
-echo '                       FSL MNI-transform data'
+echo '                     FSL MNI-to-EPI transform data'
 echo ''
 echo '   - Resamples ' ${INPUT} ' data to MNI space at ' ${DIMS} '^3mm,'
 echo '   - Transforms whole-brain masks to MNI space,'

@@ -8,5 +8,5 @@ setup(name='EPItome-xl',
       author_email='joseph.d.viviano@gmail.com',
       license='MIT',
       packages=['epitome'],
-      scripts=['bin/epitome', 'bin/physio_read'],
+      scripts=['bin/EPItome', 'bin/EPIphysio', 'bin/EPIfolder'],
       zip_safe=False)
