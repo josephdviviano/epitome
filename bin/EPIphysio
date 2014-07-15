@@ -50,7 +50,10 @@ def main(input_file):
     ttl_dat = data.named_channels['TTL pulse'].data
     ttl_out = find_transitions(ttl_dat)
     ttl_idx = np.where(ttl_out == 1)[0]
-
+    
+    # data import message
+    print('File ' + str(input_file) + ' imported successfully!')
+    
     # split data into start and end points
     starts = []
     stops = []
@@ -65,10 +68,14 @@ def main(input_file):
         else:
             stops.append(ttl_idx[iteration])
 
+    # print number of runs for zee user
+    print('Found ' + str(len(starts)) + 'runs.')
+
     # write out data
     for run in np.arange(len(starts)):
 
         num = run + 1 # file number start at 1
+        print('Parsing run ' + str(num))
 
         # heart rate data -- 1/2 sampling rate
         tmp = data.named_channels['Pulse Rate'].data
@@ -95,4 +102,9 @@ def main(input_file):
             csvfile.close()
 
 if __name__ == "__main__":
-    main(str(sys.argv[1]))
+    
+    # try to find the input file, if it exists, run EPIphysio
+    if os.path.isfile(str(sys.argv[1])) == True:
+        main(str(sys.argv[1]))
+    else:
+        print(str(sys.argv[1]) + ' is not a file!')
