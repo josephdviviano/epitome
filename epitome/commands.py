@@ -452,11 +452,11 @@ def lowpass(input_name):
         print('Please try again')
     # otherwise we print the command and return it
     else:
-        line = '. ${DIR_PIPE}/epitome/modules/pre/lowpass ' +
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/lowpass ' +
                                                str(input_name) + ' ' + 
                                                str(mask_prefix) + ' ' +
                                                str(filter_type) + ' ' +
-                                               str(lowpass_param)
+                                               str(lowpass_param))
     return line, output
 
 def TRdrop(input_name):
