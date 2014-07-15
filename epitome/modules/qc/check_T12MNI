@@ -110,7 +110,7 @@ def reg_check_T12MNI(path, expt, mode):
 
         # generate the edge image
         plt.subplot(2,3,4)
-        mid = np.round(edge.shape[0] / 2)
+        mid = np.round(reg_to_anat.shape[0] / 2)
         plt.imshow(reg_to_anat[mid, :, :], cmap=plt.cm.gray,
                                            interpolation='nearest')
         plt.imshow(anat_masked[mid, :, :], cmap=cmap,
@@ -119,7 +119,7 @@ def reg_check_T12MNI(path, expt, mode):
         plt.axis('off')
 
         plt.subplot(2,3,5)
-        mid = np.round(edge.shape[1] / 2)
+        mid = np.round(reg_to_anat.shape[1] / 2)
         plt.imshow(reg_to_anat[:, mid, :], cmap=plt.cm.gray,
                                            interpolation='nearest')
         plt.imshow(anat_masked[:, mid, :], cmap=cmap,
@@ -128,7 +128,7 @@ def reg_check_T12MNI(path, expt, mode):
         plt.axis('off')
 
         plt.subplot(2,3,6)
-        mid = np.round(edge.shape[2] / 2)
+        mid = np.round(reg_to_anat.shape[2] / 2)
         plt.imshow(reg_to_anat[:, :, mid], cmap=plt.cm.gray,
                                            interpolation='nearest')
         plt.imshow(anat_masked[:, :, mid], cmap=cmap,
