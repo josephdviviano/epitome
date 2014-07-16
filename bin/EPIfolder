@@ -3,50 +3,53 @@
 import os, sys
 import epitome as epi
 
-def print_directrories(in_dir):
+def print_dirs(in_dir):
     """
     Prints the directories found within the input directory.
     """
 
     dir_list = [d for d in os.listdir(in_dir) if
-                           os.path.isdir(os.path.join(in_dir, d)) == True]:
+                           os.path.isdir(os.path.join(in_dir, d)) == True]
+    dir_list.sort()
     for d in dir_list:
         print(d)
-    if len(d) == 0:
+    if len(dir_list) == 0:
         print('None found.')
 
 def edit_mode(mode):
 
     print('')
-    print('Current modalities:')
+    print('Current sessions: ')
 
-    print_directories(mode)
+    print_dirs(mode)
 
     # move onto mode/run loop
 
     print('')
     print('How many sessions should there be?')
 
-    sessions = raw_input('Mode: ' )
+    sessions = raw_input('Sessions: ' )
 
     try:
         sessions = int(sessions)
         for sess in range(sessions):
-            sess_name = 'SESS' + str(sess+1) # needs zero paddings! 
+            s = sess+1
+            sess_name = 'SESS' + '%02d' % s
             os.system('mkdir ' + os.path.join(mode, sess_name))
 
-            print('How many runs in session' + str(sess+1) + '?')
+            print('How many runs in session ' + '%02d' % s + '?')
             runs = raw_input('Runs: ')
 
             try:
                 runs = int(runs)
                 for run in range(runs):
-                    run_name = 'RUN' + str(run+1) # needs zero paddings!
+                    r = run+1
+                    run_name = 'RUN' + '%02d' % r 
                     os.system('mkdir ' + os.path.join(mode, sess_name, 
                                                              run_name))
-            else:
+            except:
                 print('Number of runs should be integer!')
-    else:
+    except:
         print('Number of sessions should be integer!')
 
 def edit_subject(subject):
@@ -54,14 +57,15 @@ def edit_subject(subject):
     print('')
     print('Current image modalities:')
 
-    print_directories(subject)
+    print_dirs(subject)
 
     # move onto modality loop
     flag = 0
     while flag == 0:
         print('')
+        subj_name = os.path.basename(subject)
         print('What modality would you like to edit/add for ' + 
-                                             str(subject) + '?')
+                                             str(subj_name) + '?')
 
         mode = raw_input('Mode: ')
 
@@ -75,26 +79,33 @@ def edit_subject(subject):
         edit_mode(os.path.join(subject, mode))
 
         print('Would you like to continue adding modes? (y/N)')
-        response = raw_input('Continue?')
+        response = raw_input('Continue? ')
 
         if response in ['Y', 'y']:
             pass
         else:
+            print('Finished with ')
             flag = 1
 
 def main():
+    """
+    A CLI for adding experiments, subjects, run folders, and 
+    """
 
-    dir_path, dir_pipe, dir_afni, cores = epi.config()
+    dir_path, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
     # make experiment directory
     print('')
-    print('Please input experiment name:')
+    print('Current experiments:')
+    print_dirs(dir_path)
+
+    print('Which experiment would you like to edit? ')
 
     experiment_name = raw_input('Experiment: ')
 
     if os.path.isdir(os.path.join(dir_path, experiment_name)) == True:
         print('Already exists! Adding to existing experiment.')
-    else
+    else:
         os.system('mkdir ' + os.path.join(dir_path, experiment_name))
 
     # subject generator
@@ -105,7 +116,7 @@ def main():
         pass
     else:
         print('Current participants: ')
-        print_directories(expt)
+        print_dirs(expt)
 
     # move on to a subject loop
     flag = 0
@@ -117,7 +128,7 @@ def main():
         subject = raw_input('Subject: ')
 
         # make the subject folder, if it does not exist
-        if os.path.isdir(os.path.join(expt, s)) == False:
+        if os.path.isdir(os.path.join(expt, subject)) == False:
             os.system('mkdir ' + os.path.join(expt, subject))
         else:
             print('Editng existing subject ' + str(subject))
@@ -126,7 +137,7 @@ def main():
         edit_subject(os.path.join(expt, subject))
 
         print('Would you like to continue adding subjects? (y/N)')
-        response = raw_input('Continue?')
+        response = raw_input('Continue? ')
 
         if response in ['Y', 'y']:
             pass
