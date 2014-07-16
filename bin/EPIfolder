@@ -7,8 +7,6 @@ def print_directrories(in_dir):
     """
     Prints the directories found within the input directory.
     """
-    
-    import os
 
     dir_list = [d for d in os.listdir(in_dir) if
                            os.path.isdir(os.path.join(in_dir, d)) == True]:
@@ -17,9 +15,39 @@ def print_directrories(in_dir):
     if len(d) == 0:
         print('None found.')
 
-def select_experiment():
+def edit_mode(mode):
 
-def select_run_number():
+    print('')
+    print('Current modalities:')
+
+    print_directories(mode)
+
+    # move onto mode/run loop
+
+    print('')
+    print('How many sessions should there be?')
+
+    sessions = raw_input('Mode: ' )
+
+    try:
+        sessions = int(sessions)
+        for sess in range(sessions):
+            sess_name = 'SESS' + str(sess+1) # needs zero paddings! 
+            os.system('mkdir ' + os.path.join(mode, sess_name))
+
+            print('How many runs in session' + str(sess+1) + '?')
+            runs = raw_input('Runs: ')
+
+            try:
+                runs = int(runs)
+                for run in range(runs):
+                    run_name = 'RUN' + str(run+1) # needs zero paddings!
+                    os.system('mkdir ' + os.path.join(mode, sess_name, 
+                                                             run_name))
+            else:
+                print('Number of runs should be integer!')
+    else:
+        print('Number of sessions should be integer!')
 
 def edit_subject(subject):
 
@@ -28,11 +56,35 @@ def edit_subject(subject):
 
     print_directories(subject)
 
+    # move onto modality loop
+    flag = 0
+    while flag == 0:
+        print('')
+        print('What modality would you like to edit/add for ' + 
+                                             str(subject) + '?')
 
+        mode = raw_input('Mode: ')
+
+        # make the modality folder, if it does not exist
+        if os.path.isdir(os.path.join(subject, mode)) == False:
+            os.system('mkdir ' + os.path.join(subject, mode))
+        else:
+            print('Editng existing modality ' + str(mode))
+
+        # edit modality, and check for the escape flag
+        edit_mode(os.path.join(subject, mode))
+
+        print('Would you like to continue adding modes? (y/N)')
+        response = raw_input('Continue?')
+
+        if response in ['Y', 'y']:
+            pass
+        else:
+            flag = 1
 
 def main():
 
-    path, something, something, cores = epi.config()
+    dir_path, dir_pipe, dir_afni, cores = epi.config()
 
     # make experiment directory
     print('')
@@ -40,18 +92,18 @@ def main():
 
     experiment_name = raw_input('Experiment: ')
 
-    if os.path.isdir(os.path.join(path, experiment_name)) == True:
+    if os.path.isdir(os.path.join(dir_path, experiment_name)) == True:
         print('Already exists! Adding to existing experiment.')
     else
-        os.system('mkdir ' + os.path.join(path, experiment_name))
+        os.system('mkdir ' + os.path.join(dir_path, experiment_name))
 
     # subject generator
-    expt = os.path.join(path, experiment_name)
+    expt = os.path.join(dir_path, experiment_name)
     
     # print a list of the subject, if they exist
     if os.listdir(expt) == []:
         pass
-    else
+    else:
         print('Current participants: ')
         print_directories(expt)
 
@@ -71,5 +123,14 @@ def main():
             print('Editng existing subject ' + str(subject))
 
         # edit subject, and check for the escape flag
-        flag = edit_subject(subject)
+        edit_subject(os.path.join(expt, subject))
 
+        print('Would you like to continue adding subjects? (y/N)')
+        response = raw_input('Continue?')
+
+        if response in ['Y', 'y']:
+            pass
+        else:
+            flag = 1
+
+    print('Thanks for editing ' + str(experiment_name) + '!')
