@@ -137,32 +137,43 @@ Configuring x2go is fairly straightforward. First, click the `new session' butto
     \item{Host: 130.63.40.171}
     \item{Login: [your username]}
     \item{SSH port: 45100}
-    \item{Session type: KDE (or XFCE on Windows or Linux only!)}
+    \item{Session type: XFCE}
 \end{itemize}
 
 You might notice that this is almost identical to the information that we use to \texttt{ssh} into the server, because that is what we are actually doing! The only additional setting regards the \texttt{session type}, as we now need to specify the graphic user interface.
 
-A quick note on KDE \& XFCE. If you are on a Macintosh computing device, and you try to use XFCE, your keyboard will not work properly. Therefore, you must select KDE.  
-
-The rest of the items can remain blank. You do not need to configure anything specifically under the connection tab. However, here you can set performance values to your liking, especially to compensate for a slow connection. Try moving the slider to the left before changing the picture quality settings manually.
-
-Finally, you can customize session settings such as screen resolution (which will greatly affect your speed), sound, and other misc. settings. These values can be safely left at their defaults. Now you can click `OK' and log into the server by clicking on the newly created button on the right hand side. You will need to enter your password for the server here.
+The rest of the items can remain blank or at their defaults. You do not need to configure anything specifically under the connection or misc tab. However, here you can set performance values to your liking, especially to compensate for a slow connection. Try moving the slider to the left before changing the picture quality settings manually. Finally, click `OK' and log into the server by clicking on the newly created button on the right hand side. You will need to enter your password for the server here.
 
 \subsubsection{Troubleshooting x2go}
 
+\subsubsubsection{RSA Keys}
+
 In some cases, you will receive an error involving the RSA key, and will not be allowed to log into the server. Your RSA keys are stored in \texttt{\atilde/.ssh/known\_hosts}. You can inspect the contents of this file by typing \texttt{cat \atilde/.ssh/known\_hosts} into the terminal. If you find an entry that starts with \texttt{130.63.40.171}, remove it using either: \texttt{gedit \atilde/.ssh/known\_hosts} or \texttt{vi \atilde/.ssh/known\_hosts} (\href{http://glaciated.org/vi/}{here are some instructions for vi}). If you are having trouble doing this, you can simply reset the \texttt{known\_hosts} file by removing it with \texttt{rm \atilde/.ssh/known\_hosts} (this might affect other systems relying on RSA keys, but I will assume it won't if you are following these instructions). You should now be able to log into the server using x2go.
+
+\subsubsubsection{OSX and Keyboard Mappings}
+
+By default, XFCE via x2go does not play well with OSX, a common symptom being the \texttt{tab} and \texttt{p} keys not working properly. I have configured the server to play nicely with Macintosh computing devices, but in case this needs to be resolved again, you simply need to go to your \texttt{~/.config/xfce4/xfconf/xfce-perchannel-xml/} directory and delete the \texttt{keyboard-layouts.xml} and \texttt{xfce4-keyboard-shortcuts.xml} files, log out, and log back in again.
 
 \subsection{Passwords}
 
 Your default password can be changed to something more easily remembered by doing the following:
+
 \begin{enumerate} \itemsep-2pt
+
     \item{SSH into the server using port \href{http://en.wikipedia.org/wiki/Looking_Glass_Studios}{45100}.}
+
     \begin{itemize} \itemsep-2pt
+        
         \item{Harford uses a non-standard SSH port to prevent random attacks. This requires you to specify it at the command line with the following command: \texttt{ssh -p 45100 [your username]\@130.63.40.171}.}
+
     \end{itemize}
+    
     \item{Use the \texttt{passwd} command.}
+    
     \begin{itemize} \itemsep-2pt
+        
         \item{If you type passwd at the command line, you will be prompted for your old annoying password, and asked to enter a new one.Your new password must satisfy the following conditions:}
+        
         \begin{itemize} \itemsep-2pt
             \item{1 Uppercase letter}
             \item{1 lowercase letter}
@@ -170,10 +181,15 @@ Your default password can be changed to something more easily remembered by doin
             \item{1 symbol (i.e., *, \_\#\$\%)}
             \item{12 characters length minimum.}
         \end{itemize}
+        
         \item{This does not need to be hard to remember! Computer no think like human.}
+        
         \begin{itemize} \itemsep-2pt
+            
             \item{\texttt{\#sQ\_} is easy for a computer to guess.}
+
             \item{\texttt{Br4in-fun-4eva!} is much harder.}
+
         \end{itemize}
     \end{itemize}
 \end{enumerate}
@@ -196,8 +212,10 @@ Currently, Harford contains:
 \begin{enumerate} \itemsep-2pt
     \item{Thinkserver TS440 [70AQ000CUX].}
     \item{20 GB RAM [2$\times$8 GB added, 2$\times$2 GB stock].}
+    \item{16 TB of WD RED drives in RAID 1+0 for 8 TB of usable space.}
+    \item{NVIDIA GeForce 640 1GB RAM GPU.}
+    \item{Intel Xeon E3-1245V3 / 3.4 GHz $\times$ 8 cores.}
 \end{enumerate}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The way I set things up
