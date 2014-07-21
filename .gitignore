@@ -1,4 +1,4 @@
-led / optimized / DLL files
+# led / optimized / DLL files
 __pycache__/
 *.py[cod]
 
@@ -79,3 +79,8 @@ docs/_build/
 
 # Notes to myself
 *.txt
+
+# easy_install nonsense
+build/*
+EPItome_xl.egg-info/*
+temp/*
