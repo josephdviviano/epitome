@@ -69,7 +69,7 @@
         ["Usage:",
          "    combine_volumes <func1_prefix> <func2_prefix> ",
          "func1_prefix -- 'low' for poor internal contrast, otherwise 'high'",
-         "",
+         ""
         ],
 
     "del_everything" :
@@ -205,11 +205,11 @@
          "               butterworth. See documentation for details.",
          "cutoff -- lowpass filter cuttoff: window length for median/average,",
          "          cutoff in Hz for kaiser/butterworth. Default = 3 / 0.1,",
-         "          respectively. See documentation for details."
+         "          respectively. See documentation for details.",
          "",
          "This low-passes each voxel time series within the supplied mask to",
          "remove high-frequency information from the data that is hopefully",
-         "uninteresting. Options exist to meet various standards that exist.",
+         "uninteresting. Options exist to meet various standards that exist."
         ],
 
     "linreg_calc_AFNI" :
