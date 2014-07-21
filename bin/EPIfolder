@@ -53,6 +53,9 @@ def edit_mode(mode):
         print('Number of sessions should be integer!')
 
 def edit_subject(subject):
+    """
+    A function that generates subject directories, 
+    """
 
     print('')
     print('Current image modalities:')
@@ -73,7 +76,7 @@ def edit_subject(subject):
         if os.path.isdir(os.path.join(subject, mode)) == False:
             os.system('mkdir ' + os.path.join(subject, mode))
         else:
-            print('Editng existing modality ' + str(mode))
+            print('Editing existing modality ' + str(mode))
 
         # edit modality, and check for the escape flag
         edit_mode(os.path.join(subject, mode))
@@ -84,15 +87,20 @@ def edit_subject(subject):
         if response in ['Y', 'y']:
             pass
         else:
-            print('Finished with ')
+            print('Finished with ' + str(subject))
             flag = 1
 
 def main():
     """
-    A CLI for adding experiments, subjects, run folders, and 
+    A CLI for creating experiment directories for EPItome-XL.
     """
 
     dir_path, dir_pipe, dir_afni, cores = epi.config.return_paths()
+
+    # make sure we have the appropriate permissions
+    if epi.utilities.has_permissions(dir_path) == False:
+        raise Exception(
+             'You are not permitted to write to the experiment directory')
 
     # make experiment directory
     print('')

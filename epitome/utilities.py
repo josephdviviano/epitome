@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 A collection of utilities for the EPItome-xl pipeline. Mostly for getting 
-subject numbers/names.
+subject numbers/names, checking paths, etc.
 """
 
 import os, sys
@@ -17,6 +17,16 @@ def get_subj(dir):
             subjects.append(subj)
     subjects.sort()
     return subjects
+
+def has_permissions(directory):
+    if os.access(directory, 7) == True:
+        flag = True
+    else:
+        print('You do not have write access to directory ' + str(directory))
+        print('Please contact a system administrator and try again.')
+        flag = False
+
+    return flag
 
 def init_shell(path, expt):
     """

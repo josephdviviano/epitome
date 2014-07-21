@@ -541,6 +541,11 @@ def run_epitome():
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
+    # make sure we have permissions to access the experiment directory.
+    if epi.utilities.has_permissions(dir_path) == False:
+        raise Exception(
+             'You are not permitted to write to the experiments directory')
+
     # get the experiment
     flag = 0
     while flag == 0:
@@ -549,6 +554,11 @@ def run_epitome():
             print('')
         else:
             flag = 1
+
+    # now check to make sure we have experiment-specific permissions.
+    if epi.utilities.has_permissions(os.path.join(dir_path, expt)) == False:
+        raise Exception(
+             'You are not permitted to write to the experiment directory')
     
     print('******************************************************************')
     print('Experiment: ' + str(expt) + '. Select image modality.')
@@ -597,9 +607,10 @@ def run_epitome():
 
     # add in the freesurfer calls (recon + export -- currently mandatory)
     f.write('## Freesurfer\n')
+    # NB: We reset the proclist here
     f.write('echo python ${DIR_PIPE}/epitome/modules/freesurfer/fsrecon.py ' +
             '${DIR_DATA} ${DIR_EXPT} ${DATA_TYPE} ${CORES} ' +
-            '>> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
+            '> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
     f.write('echo python ${DIR_PIPE}/epitome/modules/freesurfer/fsexport.py ' +
             '${DIR_DATA} ${DIR_EXPT} ' + 
             '>> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
