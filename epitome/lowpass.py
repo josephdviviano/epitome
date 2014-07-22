@@ -166,15 +166,15 @@ def median_filter(func, mask, kernel_size=5):
     """
     # load in everything
     func, func_aff, func_head, func_dims  = loadnii(func)
-    anat, anat_aff, anat_head, anat_dims  = loadnii(anat)
-    tmp, idx = maskdata(func, anat)
+    mask, mask_aff, mask_head, mask_dims  = loadnii(mask)
+    tmp, idx = maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
 
     # filter data
     for x in np.arange(tmp.shape[0]):
-        filt[x, :] = sig.medfilt(tmp[x, :], kernel_size=kernel_size)
+        filt[x, :] = sig.medfilt(tmp[x, :], kernel_size=int(kernel_size))
 
     # create a 4D output array
     output = np.zeros(func.shape)
@@ -185,7 +185,7 @@ def median_filter(func, mask, kernel_size=5):
 
     return output, output_aff, output_head
 
-def mean_filer(func, mask, kernel_size=5):
+def mean_filter(func, mask, kernel_size=5):
     """
     Low-passes each time series using a 1d moving average filter. Useful in
     cases where one wants to suppress Gaussian noise.
@@ -194,8 +194,8 @@ def mean_filer(func, mask, kernel_size=5):
     """
     # load in everything
     func, func_aff, func_head, func_dims  = loadnii(func)
-    anat, anat_aff, anat_head, anat_dims  = loadnii(anat)
-    tmp, idx = maskdata(func, anat)
+    mask, mask_aff, mask_head, mask_dims  = loadnii(mask)
+    tmp, idx = maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
@@ -213,7 +213,7 @@ def mean_filer(func, mask, kernel_size=5):
 
     return output, output_aff, output_head
 
-def kaiser_filter(func, anat, cutoff=0.1):
+def kaiser_filter(func, mask, cutoff=0.1):
     """
     Low-passes each time series using a bi-directional FIR kaiser filter.
     Useful in cases where the preservation of phase information is more
@@ -223,8 +223,8 @@ def kaiser_filter(func, anat, cutoff=0.1):
     """
     # load in everything
     func, func_aff, func_head, func_dims  = loadnii(func)
-    anat, anat_aff, anat_head, anat_dims  = loadnii(anat)
-    tmp, idx = maskdata(func, anat)
+    mask, mask_aff, mask_head, mask_dims  = loadnii(mask)
+    tmp, idx = maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
@@ -261,7 +261,7 @@ def kaiser_filter(func, anat, cutoff=0.1):
 
     return output, output_aff, output_head
 
-def butterworth_filter(func, anat, cutoff=0.1):
+def butterworth_filter(func, mask, cutoff=0.1):
     """
     Low-passes each time series using a low order, bi-directional FIR
     butterworth filter. Useful in cases where you are particularly worried
@@ -272,8 +272,8 @@ def butterworth_filter(func, anat, cutoff=0.1):
     """
     # load in everything
     func, func_aff, func_head, func_dims  = loadnii(func)
-    anat, anat_aff, anat_head, anat_dims  = loadnii(anat)
-    tmp, idx = maskdata(func, anat)
+    mask, mask_aff, mask_head, mask_dims  = loadnii(mask)
+    tmp, idx = maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
@@ -306,7 +306,11 @@ def write_output(path, uid, num, out, aff, head):
     Writes a NIFTI file to the specified path with the specified run number.
     """
     out = nib.nifti1.Nifti1Image(out, aff, head)
-    out.to_filename(os.path.join(path, 'func_lowpass.' + str(num) + '.nii.gz'))
+    out.to_filename(os.path.join(path, 'func_lowpass.' + 
+                                              str(uid) + '.' + 
+                                              str(num) + '.nii.gz'))
+
+    print('Run ' + str(num) + ' low pass filtered successfully.')
 
 if __name__ == "__main__":
     
