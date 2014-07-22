@@ -44,7 +44,7 @@ def get_modules(interactive=False, moduletype='pre'):
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
     # get a sorted list of the modules
-    dir_modules = os.path.join(dir_pipe, 'epitome', 'modules', str(moduletype))
+    dir_modules = os.path.join(dir_pipe, 'epitome/modules', str(moduletype))
 
     # try to import a list of the module types
     try:
@@ -54,7 +54,7 @@ def get_modules(interactive=False, moduletype='pre'):
         # if the module type does not exist, throw an error
         module_types = os.listdir(os.path.join(dir_pipe, 'epitome', 'modules'))
         print("""You didn't give me an appropriate module type""")
-        print("""Available:""")
+        print("""Available:\n""")
         for m in module_types:
             print('    ' + str(m))
         return None
@@ -62,15 +62,14 @@ def get_modules(interactive=False, moduletype='pre'):
     module_list.sort()
 
     # print information to the screen
-    print('Modules found:')
-    print('')
+    print('Modules found:\n')
     for i, module in enumerate(module_list):
         print(str(i+1) + ': ' + module)
-    print ''
+    print('')
 
     # either print a helpful message, or prompt the user to select a module    
     if interactive == False:
-        print """Access help for each using 'epitome <module> --help'."""
+        print("""Access help for each using 'epitome <module> --help'.""")
     else:
         response = raw_input('module #: ')
         
@@ -108,12 +107,11 @@ def get_mode(expt, interactive=False):
 
     mode_list.sort()
 
-    # print information to the screen    
-    print 'Image modalities found:'
-    print('')
+    # print information to the screen
+    print('Image modalities found:\n')
     for i, mode in enumerate(mode_list):
         print(str(i+1) + ': ' + mode)
-    print ''
+    print('')
 
     if interactive == False:
         print("""Wasn't that fun?""")
@@ -148,8 +146,7 @@ def get_experiments(interactive=False):
                          if os.path.isdir(os.path.join(dir_data, d))]
     expt_list.sort()
     
-    print 'Experiments found:'
-    print ''
+    print('Experiments found:\n')
     i = 0
     selection_list = []
     for expt in expt_list:
@@ -157,7 +154,7 @@ def get_experiments(interactive=False):
             print(str(i+1) + ': ' + expt)
             selection_list.append(expt)
             i = i + 1
-    print ''
+    print('')
 
     if interactive == False:
         print("""You can inspect each experiment's folder structure using""")
@@ -199,28 +196,25 @@ def help_query():
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
     # ask which module type we want to look at
-    module_types = os.listdir(os.path.join(dir_pipe, 'epitome', 'modules'))
+    module_types = os.listdir(os.path.join(dir_pipe, 'epitome/modules'))
     module_types.sort()
-    print('Module types found:')
-    print('')
+    print('Module types found:\n')
     for i, module in enumerate(module_types):
         print(str(i+1) + ': ' + module)
-    print ''
 
     # prompt the user to select a module type 
-
-    print """Which kind of module?"""
+    print('\nWhich kind of module?')
     response = input('module #: ')
     
     # attempt to retrieve the selected module
     try:
         selection = module_types[int(response-1)]
     except:
-        print """Didn't give me a valid module type number! Default = 'pre'."""
+        print("""Didn't input a valid module type number! Default = 'pre'.""")
         selection = 'pre'
 
     # present the user with a list
-    print 'Which program do you need help with?'
+    print('Which program do you need help with?')
     module = get_modules(interactive=True, moduletype=str(selection))
 
     # print help for that module
@@ -543,8 +537,7 @@ def run_epitome():
 
     # make sure we have permissions to access the experiment directory.
     if epi.utilities.has_permissions(dir_path) == False:
-        raise Exception(
-             'You are not permitted to write to the experiments directory')
+        sys.exit()
 
     # get the experiment
     flag = 0
@@ -557,8 +550,7 @@ def run_epitome():
 
     # now check to make sure we have experiment-specific permissions.
     if epi.utilities.has_permissions(os.path.join(dir_path, expt)) == False:
-        raise Exception(
-             'You are not permitted to write to the experiment directory')
+        sys.exit()
     
     print('******************************************************************')
     print('Experiment: ' + str(expt) + '. Select image modality.')

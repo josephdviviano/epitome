@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+###############################################################################
+EPIfolder: Generating your EPItome folder directories since 2014.
+
+    Allows you to interactively generate an appropriate folder structure for
+    your EPItome experiments.
+
+###############################################################################
+"""
 
 import os, sys
 import epitome as epi
@@ -17,16 +26,16 @@ def print_dirs(in_dir):
         print('None found.')
 
 def edit_mode(mode):
-
-    print('')
-    print('Current sessions: ')
-
+    """
+    Edits single image modalities within a subject folder.
+    """
+    
+    # print options
+    print('\nCurrent sessions: ')
     print_dirs(mode)
 
     # move onto mode/run loop
-
-    print('')
-    print('How many sessions should there be?')
+    print('\nHow many sessions should there be?')
 
     sessions = raw_input('Sessions: ' )
 
@@ -37,7 +46,7 @@ def edit_mode(mode):
             sess_name = 'SESS' + '%02d' % s
             os.system('mkdir ' + os.path.join(mode, sess_name))
 
-            print('How many runs in session ' + '%02d' % s + '?')
+            print('\nHow many runs in session ' + '%02d' % s + '?')
             runs = raw_input('Runs: ')
 
             try:
@@ -54,20 +63,18 @@ def edit_mode(mode):
 
 def edit_subject(subject):
     """
-    A function that generates subject directories, 
+    A function that generates subject directories for use with EPItome. 
     """
-
-    print('')
-    print('Current image modalities:')
-
+    
+    # print options
+    print('\nCurrent image modalities:')
     print_dirs(subject)
 
     # move onto modality loop
     flag = 0
     while flag == 0:
-        print('')
         subj_name = os.path.basename(subject)
-        print('What modality would you like to edit/add for ' + 
+        print('\nWhat modality would you like to edit/add for ' + 
                                              str(subj_name) + '?')
 
         mode = raw_input('Mode: ')
@@ -81,7 +88,7 @@ def edit_subject(subject):
         # edit modality, and check for the escape flag
         edit_mode(os.path.join(subject, mode))
 
-        print('Would you like to continue adding modes? (y/N)')
+        print('\nWould you like to continue adding modes? (y/N)')
         response = raw_input('Continue? ')
 
         if response in ['Y', 'y']:
@@ -97,28 +104,36 @@ def main():
 
     dir_path, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
-    # make sure we have the appropriate permissions
+    # make sure we have the appropriate permissions for the top directory
     if epi.utilities.has_permissions(dir_path) == False:
-        raise Exception(
-             'You are not permitted to write to the experiment directory')
+        sys.exit()
+
+    # print a welcome message
+    print('##################################################################')
+    print('EPIfolder: Generating your EPItome folder directories since 2014.')
+    print('##################################################################')
 
     # make experiment directory
-    print('')
-    print('Current experiments:')
+    print('\nCurrent experiments:')
     print_dirs(dir_path)
 
-    print('Which experiment would you like to edit? ')
+    print('\nWhich experiment would you like to edit? ')
+    expt_name = raw_input('Experiment: ')
+    expt = os.path.join(dir_path, expt_name)
 
-    experiment_name = raw_input('Experiment: ')
-
-    if os.path.isdir(os.path.join(dir_path, experiment_name)) == True:
-        print('Already exists! Adding to existing experiment.')
+    if os.path.isdir(expt) == True:
+        print('\nAlready exists! Adding to existing experiment.')
     else:
-        os.system('mkdir ' + os.path.join(dir_path, experiment_name))
+        # try to make the new directory
+        try:
+            os.system('mkdir ' + os.path.join(expt))
+        except:
+            pass
 
-    # subject generator
-    expt = os.path.join(dir_path, experiment_name)
-    
+    # ensure we have the appropriate permissions for the experiment directory
+    if epi.utilities.has_permissions(expt) == False:
+        sys.exit()
+
     # print a list of the subject, if they exist
     if os.listdir(expt) == []:
         pass
@@ -130,8 +145,7 @@ def main():
     flag = 0
     while flag == 0:
         
-        print('')
-        print('Input subject name:')
+        print('\nInput subject name:')
 
         subject = raw_input('Subject: ')
 
@@ -139,12 +153,12 @@ def main():
         if os.path.isdir(os.path.join(expt, subject)) == False:
             os.system('mkdir ' + os.path.join(expt, subject))
         else:
-            print('Editng existing subject ' + str(subject))
+            print('Editing existing subject ' + str(subject))
 
         # edit subject, and check for the escape flag
         edit_subject(os.path.join(expt, subject))
 
-        print('Would you like to continue adding subjects? (y/N)')
+        print('\nWould you like to continue adding subjects? (y/N)')
         response = raw_input('Continue? ')
 
         if response in ['Y', 'y']:
@@ -152,4 +166,15 @@ def main():
         else:
             flag = 1
 
-    print('Thanks for editing ' + str(experiment_name) + '!')
+    print('Thanks for editing ' + str(expt_name) + '!')
+
+# this is the command-line usage bit
+if __name__ == "__main__":
+    
+    # listing available modules and associated help
+    if len(sys.argv) == 1:
+        main()
+
+    # return the usage if the user does a silly thing
+    else:
+        print __doc__

@@ -1,7 +1,28 @@
 #!/usr/bin/env python
+"""
+###############################################################################
+EPIphysio: Parses BIOPACK MP150 files from the York University, TO, MRI. 
 
-import sys
-import csv
+    This outputs one set of cardiac waveform data, respiratory waveform data,
+    and heart rate data from each contiguous blocks of TTL pulses from the
+    MRI. The corresponding files should be placed in the RUN folder for
+    functional EPI data that you would like to undergo physiological noise
+    regression, and EPItome will look for and use *.phys files in each
+    RUN directory automatically.
+
+    Usage:
+
+        EPIphysio <input_file>
+
+    Returns:
+
+        A set of {card.X.phys, resp.X.phys, card_rate.X.phys} in the current
+        directory.
+
+###############################################################################
+"""
+
+import os, sys, csv
 import numpy as np
 import scipy.signal as sig
 import bioread as bio
@@ -45,15 +66,35 @@ def main(input_file):
     physiological regressors in the current directory for use with 
     McRetroTS.
     """
-    # read in ttl data, return transitions, create transition index
-    data = bio.read_file(input_file)
-    ttl_dat = data.named_channels['TTL pulse'].data
-    ttl_out = find_transitions(ttl_dat)
-    ttl_idx = np.where(ttl_out == 1)[0]
-    
-    # data import message
-    print('File ' + str(input_file) + ' imported successfully!')
-    
+
+    # print a welcome message
+    print('##################################################################')
+    print('EPIphysio: Parses BIOPACK physiological data collected at the York')
+    print('           University, TO, MRI suite into their individual modal- ')
+    print('           ities and runs. Place these outputs into the correct   ')
+    print('           RUN directories!                                       ')
+    print('##################################################################')
+    print('\nWorking on ' + str(input_file))
+
+    # attempt to import data
+    if os.path.isfile(input_file) == True:
+        try:
+            # read in ttl data, return transitions, create transition index
+            data = bio.read_file(input_file)
+            ttl_dat = data.named_channels['TTL pulse'].data
+            ttl_out = find_transitions(ttl_dat)
+            ttl_idx = np.where(ttl_out == 1)[0]
+            print('File ' + str(input_file) + ' imported successfully!')
+        
+        except:
+            # print a warning & exit if the input file confuses bioread
+            print('Import failed. Is this the correct file type?')
+            sys.exit()
+    else:
+        # print a warning & exit if the input filename does not exist
+        print('Input files does not exist! Exiting.')
+        sys.exit()
+
     # split data into start and end points
     starts = []
     stops = []
@@ -100,6 +141,8 @@ def main(input_file):
             writer = csv.writer(csvfile, delimiter=' ')
             writer.writerow(tmp) # write the data
             csvfile.close()
+
+    print('Finished, exiting EPIphysio.')
 
 if __name__ == "__main__":
     
