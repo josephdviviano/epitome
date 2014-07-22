@@ -186,8 +186,8 @@ for SESS in ${DIR_SESS}; do
             
             # optionally add the global white matter regressors
             if [ `echo ${WM_GLO_FLAG}` = 'on' ]; then
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm.${ID}.${NUM}.nii.gz`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm.${ID}.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm.${ID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm.${ID}.${NUM}.1D`
             fi
             
             # and add the physio regressors if they exist

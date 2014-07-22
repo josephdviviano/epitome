@@ -1,0 +1,9 @@
+#!/bin/bash
+for f in *; do 
+    COUNT=`cat ${f} | wc -l` 
+
+    if [ ${COUNT} -eq 0 ]; then 
+        rm ${f}
+
+    fi
+done
