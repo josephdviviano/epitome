@@ -28,9 +28,11 @@ def selector_float():
             response = float(option)
             return response
         else:
-            raise ValueError('*** Input must be positive! ***')    
+            print('*** Input must be positive! ***')
+            raise ValueError    
     except:
-        raise ValueError('*** Input must be a float! ***')
+        print('*** Input must be a float! ***')
+        raise ValueError
         #response, output = invalid_selection()    
 
 def selector_int():
@@ -46,9 +48,11 @@ def selector_int():
             response = int(option)
             return response
         else:
-            raise ValueError('*** Input must be positive! ***')
+            print('*** Input must be positive! ***')
+            raise ValueError
     except:
-        raise ValueError('*** Input must be an integer! ***')
+        print('*** Input must be an integer! ***')
+        raise ValueError
         #response, output = invalid_selection()
 
 def selector_list(item_list):
@@ -71,14 +75,16 @@ def selector_list(item_list):
     try:
         response = item_list[int(option)-1]
     except:
-        raise ValueError('*** Option # invalid! ***')
+        print('*** Option # invalid! ***')
+        raise ValueError
         #response, output = invalid_selection()
     if int(option) == 0:
-        raise ValueError('*** Option # invalid! ***')
+        print('*** Option # invalid! ***')
+        raise ValueError
         #response, output = invalid_selection()
     return response
 
-def selector_dict(item_dict, output):    
+def selector_dict(item_dict):    
     if type(item_dict) != dict:
         raise TypeError('Input must be a dict!')
 
@@ -103,10 +109,12 @@ def selector_dict(item_dict, output):
     try:
         response = item_list[int(option)-1]
     except:
-        raise ValueError('*** Option # invalid! ***')
+        print('*** Option # invalid! ***')
+        raise ValueError
         #response, output = invalid_selection()
     if int(option) == 0:
-        raise ValueError('*** Option # invalid! ***')
+        print('*** Option # invalid! ***')
+        raise ValueError
         #response, output = invalid_selection()
     return response
 
@@ -207,7 +215,7 @@ def init_EPI():
         print('\nTime series normalization: (see documentation for help)')
         norm_dict = {'off' : ': deskulling, no normalization',
                      'pct' : ': 1% = 1, normalize to 100 mean voxelwise',
-                     'scale: ': 'scale run mean to = 1000, arbitrary units'}
+                     'scale':': scale run mean to = 1000, arbitrary units'}
         normalization = selector_dict(norm_dict)
 
         # masking

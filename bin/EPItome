@@ -699,6 +699,12 @@ def run_epitome():
             # executes the chosen module, write pipeline commands
             command = 'epi.commands.' + str(module) + '(output)'
             line, output = eval(command)
+
+            # if module call was unsuccessful, don't count as used.
+            if output == None:
+                used.pop()
+            
+            # write line in script if successful
             pipe_list, output = writer_sub(pipe_list, 
                                            line, cmd, f, output, bkup)
 
