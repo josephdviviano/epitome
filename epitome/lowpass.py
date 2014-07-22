@@ -328,7 +328,7 @@ if __name__ == "__main__":
     
     elif sys.argv[1] == 'kaiser':
         o, a, h = kaiser_filter(sys.argv[2], sys.argv[3], sys.argv[4])
-        write_output(sys.argv[5], sys.argv[6], sys.argv[7] o, a, h)
+        write_output(sys.argv[5], sys.argv[6], sys.argv[7], o, a, h)
     
     elif sys.argv[1] == 'butterworth':
         o, a, h = butterworth_filter(sys.argv[2], sys.argv[3], sys.argv[4])

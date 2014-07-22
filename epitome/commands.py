@@ -265,7 +265,7 @@ def linreg_EPI2MNI_FSL(input_name):
         return '', None
 
     # otherwise we print the command and return it
-   line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_EPI2MNI_FSL ' +
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_EPI2MNI_FSL ' +
                                               str(input_name) + ' ' +
                                               str(dims))
     return line, output

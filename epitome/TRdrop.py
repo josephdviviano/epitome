@@ -103,7 +103,7 @@ def TR_drop(directory, func_name, uid, num, head_mm=50, FD=0.3, DV=0.3):
     # write 4D output
     data = nib.nifti1.Nifti1Image(data, outA, outH)
     data.to_filename(os.path.join(directory, 'func_scrubbed.' +
-                                  str(uid) + '.' str(num) + '.nii.gz'))
+                                    str(uid) + '.' + str(num) + '.nii.gz'))
 
     # write out number of retained TRs
     f.write(str(dims[3]))
