@@ -1,32 +1,33 @@
 #!/bin/bash
 
 cat <<EOF
-DATA_QUALITY=`echo ${1}`
-DELTR=`echo ${2}`
-TPATTERN=`echo ${3}`
-NORMALIZE=`echo ${4}`
-MASKING=`echo ${5}`
-
-echo '************************************************************************'
-echo '                  General pre-processing for all fMRI data'
-echo ''
-echo '   Running on experiment ${DIR_EXPT} , image modality ${DATA_TYPE} '
-echo '   - Using data quality: ${DATA_QUALITY},'
-echo '   - Orients data to RAI,'
-echo '   - Deletes ${DELTR} TRs from the beginning of each run,'
-echo '   - Removes time-series outliers, or "despikes", the data,'
-echo '   - Corrects for slice timing using the pattern ${TPATTERN},'
-echo '   - Deobliques the data,'
-echo '   - Motion correction (also outputs motion parameters),'
-echo '   - Creates deskulled template EPI and ${MASKING} whole-brain mask,'
-echo '   - Scales each voxel ${NORMALIZE},'
-echo '   - Calculates global mean & DVARS (Power et al., 2012).'
-echo ''
-echo '************************************************************************'
+export DATA_QUALITY=`echo ${1}`
+export DELTR=`echo ${2}`
+export TPATTERN=`echo ${3}`
+export NORMALIZE=`echo ${4}`
+export MASKING=`echo ${5}`
 
 EOF
 
 cat <<"EOF"
+
+echo '************************************************************************'
+echo '                  General pre-processing for all fMRI data'
+echo ''
+echo '   Running on experiment '${DIR_EXPT}', image modality '${DATA_TYPE}'.'
+echo '   - Using data quality: '${DATA_QUALITY}','
+echo '   - Orients data to RAI,'
+echo '   - Deletes '${DELTR}' TRs from the beginning of each run,'
+echo '   - Removes time-series outliers, or "despikes", the data,'
+echo '   - Corrects for slice timing using the pattern '${TPATTERN}','
+echo '   - Deobliques the data,'
+echo '   - Motion correction (also outputs motion parameters),'
+echo '   - Creates deskulled template EPI and '${MASKING}' whole-brain mask,'
+echo '   - Scales each voxel using '${NORMALIZE}','
+echo '   - Calculates global mean & DVARS (Power et al., 2012).'
+echo ''
+echo '************************************************************************'
+
 cd /tmp
 
 # loop through sessions
@@ -152,13 +153,13 @@ for SESS in ${DIR_SESS}; do
                 -deoblique \
                 -quintic \
                 -verb \
-                -gridset ${SESS}/func_tshift.01.nii.gz \
+                -gridset ${SESS}/func_tshift.${ID}.01.nii.gz \
                 ${SESS}/func_tshift.${ID}.${NUM}.nii.gz
 
             # motion correct to 9th sub-brick of 1st run
             3dvolreg \
                 -prefix ${SESS}/func_motion.${ID}.${NUM}.nii.gz \
-                -base ${SESS}'/func_ob.01.nii.gz[8]' \
+                -base ${SESS}'/func_ob.'${ID}'.01.nii.gz[8]' \
                 -twopass \
                 -twoblur 3 \
                 -twodup \

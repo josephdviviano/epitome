@@ -2,12 +2,14 @@
 
 # set variables
 cat <<EOF
-INPUT=`echo 'func_'${1}`
-MASK=`echo 'anat_'${2}`
-FWHM=`echo ${3}`
+export INPUT=`echo 'func_${1}'`
+export MASK=`echo 'anat_${2}'`
+export FWHM=`echo ${3}`
+
 EOF
 
 cat<<"EOF"
+
 echo '************************************************************************'
 echo '     Smooths data in volumetric space, obeying mask label boundaries'
 echo '   Anything labeled zero in the mask will become zeroed in the output.'

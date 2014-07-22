@@ -1,21 +1,22 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_'${1}`
-MASK=`echo 'anat_'${2}`
-FILTER=`echo ${3}`
-CUTOFF=`echo ${4}`
-
-echo '************************************************************************'
-echo '                          Low-Pass Module'
-echo ''
-echo '   - Low-passes masked functional data using a ${FILTER} filter.'
-echo ''
-echo '************************************************************************'
+export INPUT=`echo 'func_'${1}`
+export MASK=`echo 'anat_'${2}`
+export FILTER=`echo ${3}`
+export CUTOFF=`echo ${4}`
 
 EOF
 
 cat <<"EOF"
+
+echo '************************************************************************'
+echo '                          Low-Pass Module'
+echo ''
+echo '   - Low-passes masked functional data using a '${FILTER}' filter.'
+echo ''
+echo '************************************************************************'
+
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

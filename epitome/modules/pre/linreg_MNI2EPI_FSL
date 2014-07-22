@@ -1,21 +1,22 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_${1}'`
-DIMS=`echo ${2}`
+export INPUT=`echo 'func_${1}'`
+export DIMS=`echo ${2}`
+
+EOF
+
+cat <<"EOF"
 
 echo '************************************************************************'
 echo '                     FSL MNI-to-EPI transform data'
 echo ''
-echo '   - Resamples ' ${INPUT} ' data to MNI space at ' ${DIMS} '^3mm,'
+echo '   - Resamples '${INPUT}' data to MNI space at '${DIMS}'^3mm,'
 echo '   - Transforms whole-brain masks to MNI space,'
 echo '   - Creates 1 concatenated run per participant in run order.'
 echo ''
 echo '************************************************************************'
 
-EOF
-
-cat <<"EOF"
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

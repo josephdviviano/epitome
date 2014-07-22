@@ -1,33 +1,34 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_'${1}`
-POLORT=`echo ${2}`
-GS_FLAG=`echo ${3}`
-VENT_FLAG=`echo ${4}`
-DV_FLAG=`echo ${5}`
-WM_LOC_FLAG=`echo ${6}`
-WM_GLO_FLAG=`echo ${7}`
+export INPUT=`echo 'func_'${1}`
+export POLORT=`echo ${2}`
+export GS_FLAG=`echo ${3}`
+export VENT_FLAG=`echo ${4}`
+export DV_FLAG=`echo ${5}`
+export WM_LOC_FLAG=`echo ${6}`
+export WM_GLO_FLAG=`echo ${7}`
+
+EOF
+
+cat <<"EOF"
 
 echo '************************************************************************'
 echo '                  Time series filtering of fMRI data'
 echo ''
 echo '   - Computes nusiance time series from tissues, motion paramaters,'
-echo '   - Optionally uses the global mean: ${GS_FLAG},'
-echo '   - Optionally uses the ventricles: ${VENT_FLAG},'
-echo '   - Optionally uses the draining vessels: ${DV_FLAG},'
-echo '   - Optionally uses the local white matter: ${WM_LOC_FLAG},'
-echo '   - Optionally uses the mean white matter: ${WM_GLO_FLAG},'
-echo '   - Detrends each with legrende polynomials up to order ${POLORT},'
-echo '   - Computes fit of run with all nusiances via linear regression,'
+echo '   - Optionally uses the global mean: '${GS_FLAG}','
+echo '   - Optionally uses the ventricles: '${VENT_FLAG}','
+echo '   - Optionally uses the draining vessels: '${DV_FLAG}','
+echo '   - Optionally uses the local white matter: '${WM_LOC_FLAG}','
+echo '   - Optionally uses the mean white matter: '${WM_GLO_FLAG}','
+echo '   - Detrends each with legrende polynomials up to order '${POLORT}','
+echo '   - Computes fit of run with nusiances via least squares regression,'
 echo '   - Computes temporal signal to noise ratio,'
 echo '   - Subtracts noise model from each voxel, retaining the mean.'
 echo ''
 echo '************************************************************************'
 
-EOF
-
-cat <<"EOF"
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

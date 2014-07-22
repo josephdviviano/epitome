@@ -1,20 +1,21 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_'${1}`
-DIMS=`echo ${2}`
-
-echo '************************************************************************'
-echo '                       AFNI T1-transform data'
-echo ''
-echo '   - Resamples ${INPUT} data to T1 space at ${DIMS}^3mm,'
-echo '   - Transforms whole-brain masks to T1 space.'
-echo ''
-echo '************************************************************************'
+export INPUT=`echo 'func_${1}'`
+export DIMS=`echo ${2}`
 
 EOF
 
 cat <<"EOF"
+
+echo '************************************************************************'
+echo '                       AFNI T1-transform data'
+echo ''
+echo '   - Resamples '${INPUT}'' data to T1 space at '${DIMS}'^3mm,'
+echo '   - Transforms whole-brain masks to T1 space.'
+echo ''
+echo '************************************************************************'
+
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

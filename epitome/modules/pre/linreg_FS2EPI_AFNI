@@ -1,15 +1,11 @@
 #!/bin/bash
 
-cat <<EOF
+cat <<"EOF"
 
 echo '************************************************************************'
 echo '         AFNI Brings Freesurfer atlases to single-subject space         '
 echo ''
 echo '************************************************************************'
-
-EOF
-
-cat <<"EOF"
 
 cd /tmp
 

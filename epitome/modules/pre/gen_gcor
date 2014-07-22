@@ -1,7 +1,11 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_'${1}`
+export INPUT=`echo 'func_'${1}`
+
+EOF
+
+cat <<"EOF"
 
 echo '************************************************************************'
 echo '                    Global correlation calculator'
@@ -11,9 +15,6 @@ echo '     space. NB: Does not work on MNI data!'
 echo ''
 echo '************************************************************************'
 
-EOF
-
-cat <<"EOF"
 cd /tmp
 
 ## calculate global correlation for each run

@@ -1,19 +1,20 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_'${1}`
-FWHM=`echo ${2}`
-FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
-
-echo '************************************************************************'
-echo '               Smooths functional data on a cortical surface'
-echo '    - Uses a gaussian kernel with FWHM of ' ${FWHM} ' mm.'
-echo ''
-echo '************************************************************************'
+export INPUT=`echo 'func_'${1}`
+export FWHM=`echo ${2}`
+export FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
 
 EOF
 
 cat<<"EOF"
+
+echo '************************************************************************'
+echo '               Smooths functional data on a cortical surface'
+echo '    - Uses a gaussian kernel with FWHM of '${FWHM}' mm.'
+echo ''
+echo '************************************************************************'
+
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

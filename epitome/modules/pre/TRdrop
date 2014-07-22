@@ -1,26 +1,27 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_'${1}`
-HEAD=`echo ${2}`
-FD=`echo ${3}`
-DV=`echo ${4}`
+export INPUT=`echo 'func_'${1}`
+export HEAD=`echo ${2}`
+export FD=`echo ${3}`
+export DV=`echo ${4}`
+
+EOF
+
+cat <<"EOF"
 
 echo '************************************************************************'
 echo '                        Motion Scrubbing Module'
 echo ''
 echo '   - Computes framewise displacement and DVARS measure (Power 2012),'
 echo '   - Removes TRs from each run corrupted by instantaneous displacement,'
-echo '     over ' ${FD}' mm / TR, and/or ' ${DV} '% signal change / TR.'
-echo '   - Calculations are preformed assuming a head size of ' ${HEAD} ' mm.'
+echo '     over '${FD}' mm / TR, and/or '${DV}' % signal change / TR.'
+echo '   - Calculations are preformed assuming a head size of '${HEAD}' mm.'
 echo '   - We also remove TRs 1 back and 2 forward from the disturbance to'
 echo '     control for spin-echo effects (appropriate according to Dr. Power).'
 echo ''
 echo '************************************************************************'
 
-EOF
-
-cat <<"EOF"
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

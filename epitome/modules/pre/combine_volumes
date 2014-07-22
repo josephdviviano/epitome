@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# set variables
 cat <<EOF
-INPUT1=`echo 'func_'${1}`
-INPUT2=`echo 'func_'${2}`
+export INPUT1=`echo 'func_'${1}`
+export INPUT2=`echo 'func_'${2}`
+
 EOF
 
 cat<<"EOF"
+
 echo '************************************************************************'
 echo '         Combines two functional files into one (via addition).'
 echo '   Generally used to combine volume-smoothed and surface-smoothed data 

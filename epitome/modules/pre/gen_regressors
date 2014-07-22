@@ -1,12 +1,16 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_'${1}`
+export INPUT=`echo 'func_'${1}`
+
+EOF
+
+cat<<"EOF"
 
 echo '************************************************************************'
 echo '                         Regressor generator'
 echo ''
-echo '   - Creates a set of regressors from ' ${INPUT} ' functional data and'
+echo '   - Creates a set of regressors from '${INPUT}' functional data and'
 echo '     a freesurfer segmentation. Outputs:'
 echo '         - white matter + eroded mask,'
 echo '         - ventricles + eroded mask,'
@@ -19,9 +23,6 @@ echo '         - draining vessel regressors + lagged.'
 echo ''
 echo '************************************************************************'
 
-EOF
-
-cat<<"EOF"
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

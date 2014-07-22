@@ -1,8 +1,12 @@
 #!/bin/bash
 
 cat <<EOF
-INPUT=`echo 'func_'${1}`
-FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
+export INPUT=`echo 'func_'${1}`
+export FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
+
+EOF
+
+cat<<"EOF"
 
 echo '************************************************************************'
 echo '           Projects surface data back into single subject space'
@@ -10,9 +14,6 @@ echo '    - Assumes we are in single subject space, will not work on MNI etc.'
 echo ''
 echo '************************************************************************'
 
-EOF
-
-cat<<"EOF"
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
