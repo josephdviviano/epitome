@@ -105,37 +105,33 @@ def filter(input_name):
     output = 'filtered'
 
     print('\nAdding filter module.')
-    while output != None:
 
-        print('\nSet detrend order:')
-        polort, output = selector_int(output)
+    print('\nSet detrend order:')
+    polort, output = selector_int(output)
 
-        print('\nSet mean global signal regression:')
-        gs_list = ['off', 'on']
-        gs_flag, output = selector_list(gs_list, output)
+    print('\nSet mean global signal regression:')
+    gs_list = ['off', 'on']
+    gs_flag, output = selector_list(gs_list, output)
 
-        print('\nSet mean ventricle signal regression:')
-        vent_list = ['off', 'on']
-        vent_flag, output = selector_list(vent_list, output)
+    print('\nSet mean ventricle signal regression:')
+    vent_list = ['off', 'on']
+    vent_flag, output = selector_list(vent_list, output)
 
-        print('\nSet mean draining vessel signal regression:')
-        dv_list = ['off', 'on']
-        dv_flag, output = selector_list(dv_list, output)
+    print('\nSet mean draining vessel signal regression:')
+    dv_list = ['off', 'on']
+    dv_flag, output = selector_list(dv_list, output)
 
-        print('\nSet local white matter regression regression:')
-        wm_loc_list = ['off', 'on']
-        wm_loc_flag, output = selector_list(wm_loc_list, output)
+    print('\nSet local white matter regression regression:')
+    wm_loc_list = ['off', 'on']
+    wm_loc_flag, output = selector_list(wm_loc_list, output)
 
-        print('\nSet mean white matter regression regression:')
-        wm_glo_list = ['off', 'on']
-        wm_glo_flag, output = selector_list(wm_glo_list, output)
-
-        if output != None:
-            break
+    print('\nSet mean white matter regression regression:')
+    wm_glo_list = ['off', 'on']
+    wm_glo_flag, output = selector_list(wm_glo_list, output)
 
     # if we messed any of these up, we return None
     if output == None:
-        print('Invalid response, please try again.')
+        print('You provided an invalid input, please try again.')
         line = ''
 
     # otherwise we print the command and return it
@@ -176,45 +172,40 @@ def init_EPI():
 
     print('\nInitializing functional MRI pre-processing.')
 
-    while output != None:
+    # get the data-quality option
+    print('\nSelect data quality:')
+    data_quality = ['low', 'high']
+    quality, output = selector_list(data_quality, output)
 
-        # get the data-quality option
-        print('\nSelect data quality:')
-        data_quality = ['low', 'high']
-        quality, output = selector_list(data_quality, output)
+    # get the number of TRs to delete
+    print('\nNumber of TRs to delete:')
+    deltr, output = selector_int(output)
 
-        # get the number of TRs to delete
-        print('\nNumber of TRs to delete:')
-        deltr, output = selector_int(output)
+    # get the slice timing
+    print('\nSlice-timing pattern: (see AFNI 3dTshift for more help)')
+    t_patterns = {'alt+z' : '= alternating in the plus direction', 
+                  'alt+z2' : '= alternating, starting at slice #1', 
+                  'alt-z' : '= alternating in the minus direction', 
+                  'alt-z2' : '= alternating, starting at slice #nz-2', 
+                  'seq+z' : '= sequential in the plus direction',
+                  'seq-z' : '= sequential in the minus direction'}
+    slice_timing, output = selector_dict(t_patterns, output)
 
-        # get the slice timing
-        print('\nSlice-timing pattern: (see AFNI 3dTshift for more help)')
-        t_patterns = {'alt+z' : '= alternating in the plus direction', 
-                      'alt+z2' : '= alternating, starting at slice #1', 
-                      'alt-z' : '= alternating in the minus direction', 
-                      'alt-z2' : '= alternating, starting at slice #nz-2', 
-                      'seq+z' : '= sequential in the plus direction',
-                      'seq-z' : '= sequential in the minus direction'}
-        slice_timing, output = selector_dict(t_patterns, output)
+    # normalize
+    print('\nTime series normalization: (see documentation for help)')
+    norm_dict = {'off' : ': deskulling, no normalization',
+                 'pct' : ': 1% = 1, normalize to 100 mean voxelwise',
+                 'scale: ': 'scale run mean to = 1000, arbitrary units'}
+    normalization, output = selector_dict(norm_dict, output)
 
-        # normalize
-        print('\nTime series normalization: (see documentation for help)')
-        norm_dict = {'off' : ': deskulling, no normalization',
-                     'pct' : ': 1% = 1, normalize to 100 mean voxelwise',
-                     'scale: ': 'scale run mean to = 1000, arbitrary units'}
-        normalization, output = selector_dict(norm_dict, output)
-
-        # masking
-        print('\nEPI masking: acquisition dependent')
-        mask_list = ['loose', 'normal', 'tight']
-        masking, output = selector_list(mask_list, output)
-
-        if output != None:
-            break
+    # masking
+    print('\nEPI masking: acquisition dependent')
+    mask_list = ['loose', 'normal', 'tight']
+    masking, output = selector_list(mask_list, output)
 
     # if we messed any of these up, we return None
     if output == None:
-        print('Invalid response, please try again.')
+        print('You provided an invalid input, please try again.')
         line = ''
     # otherwise we print the command and return it
     else:
@@ -301,43 +292,38 @@ def linreg_calc_AFNI(input_name):
 
     print('\nCalculating linear registration pathways using AFNI.')
 
-    while output != None:
+    # get the data-quality option
+    print('\nSelect data quality:')
+    data_quality = ['low', 'high']
+    quality, output = selector_list(data_quality, output)
 
-        # get the data-quality option
-        print('\nSelect data quality:')
-        data_quality = ['low', 'high']
-        quality, output = selector_list(data_quality, output)
+    # set the cost function option
+    print('\nCost function: (see AFNI align_EPI_anat.py for help)')
+    cost_fxns = {'ls' : '= Least Squares [Pearson Correlation]', 
+                 'mi' : '= Mutual Information [H(b)+H(s)-H(b,s)]', 
+                 'crM' : '= Correlation Ratio (Symmetrized*)', 
+                 'nmi' : '= Normalized MI [H(b,s)/(H(b)+H(s))]', 
+                 'hel' : '= Hellinger metric',
+                 'crA' : '= Correlation Ratio (Symmetrized+)',
+                 'crU' : '= Correlation Ratio (Unsym)',
+                 'sp' : '= Spearman [rank] Correlation',
+                 'je' : '= Joint Entropy [H(b,s)]',
+                 'lss' : '= Signed Pearson Correlation',
+                 'lpc' : '= Local Pearson Correlation Signed (Default)',
+                 'lpa' : '= Local Pearson Correlation Abs',
+                 'lpc+' : '= Local Pearson Signed + Others',
+                 'ncd' : '= Normalized Compression Distance',
+                 'lpc+zz' : '= Local Pearson Correlation Signed + Magic'}
+    cost, output = selector_dict(cost_fxns, output)
 
-        # set the cost function option
-        print('\nCost function: (see AFNI align_EPI_anat.py for help)')
-        cost_fxns = {'ls' : '= Least Squares [Pearson Correlation]', 
-                     'mi' : '= Mutual Information [H(b)+H(s)-H(b,s)]', 
-                     'crM' : '= Correlation Ratio (Symmetrized*)', 
-                     'nmi' : '= Normalized MI [H(b,s)/(H(b)+H(s))]', 
-                     'hel' : '= Hellinger metric',
-                     'crA' : '= Correlation Ratio (Symmetrized+)',
-                     'crU' : '= Correlation Ratio (Unsym)',
-                     'sp' : '= Spearman [rank] Correlation',
-                     'je' : '= Joint Entropy [H(b,s)]',
-                     'lss' : '= Signed Pearson Correlation',
-                     'lpc' : '= Local Pearson Correlation Signed (Default)',
-                     'lpa' : '= Local Pearson Correlation Abs',
-                     'lpc+' : '= Local Pearson Signed + Others',
-                     'ncd' : '= Normalized Compression Distance',
-                     'lpc+zz' : '= Local Pearson Correlation Signed + Magic'}
-        cost, output = selector_dict(cost_fxns, output)
-
-        # get registration degrees of freedom
-        print('\nDegrees of freedom: (see AFNI align_EPI_anat.py for help)')
-        degrees_of_freedom = ['big_move', 'giant_move']
-        reg_dof, output = selector_list(degrees_of_freedom, output)
-
-        if output != None:
-            break
+    # get registration degrees of freedom
+    print('\nDegrees of freedom: (see AFNI align_EPI_anat.py for help)')
+    degrees_of_freedom = ['big_move', 'giant_move']
+    reg_dof, output = selector_list(degrees_of_freedom, output)
 
     # if we messed any of these up, we return None
     if output == None:
-        print('Invalid response, please try again.')
+        print('You provided an invalid input, please try again.')
         line = ''
     # otherwise we print the command and return it
     else:
@@ -352,35 +338,30 @@ def linreg_calc_FSL(input_name):
 
     print('\nCalculating linear registration pathways.')
 
-    while output != None:
+    # get the data-quality option
+    print('\nSelect data quality:')
+    data_quality = ['low', 'high']
+    quality, output = selector_list(data_quality, output)
 
-        # get the data-quality option
-        print('\nSelect data quality:')
-        data_quality = ['low', 'high']
-        quality, output = selector_list(data_quality, output)
+    # set the cost function option
+    print('\nRegistration cost function: (see FSL FLIRT for help)')
+    cost_fxns = {'mutualinfo' : '= Mutual Information [H(b)+H(s)-H(b,s)]', 
+                 'leastsq' : '=  Least Squares [Pearson Correlation]',
+                 'corratio' : '= Correlation Ratio', 
+                 'normcorr' : '= Normalized Correlation', 
+                 'labeldiff' : '= FSL magic!',
+                 'bbr' : '= FSL magic!'}
 
-        # set the cost function option
-        print('\nRegistration cost function: (see FSL FLIRT for help)')
-        cost_fxns = {'mutualinfo' : '= Mutual Information [H(b)+H(s)-H(b,s)]', 
-                     'leastsq' : '=  Least Squares [Pearson Correlation]',
-                     'corratio' : '= Correlation Ratio', 
-                     'normcorr' : '= Normalized Correlation', 
-                     'labeldiff' : '= FSL magic!',
-                     'bbr' : '= FSL magic!'}
+    cost, output = selector_dict(cost_fxns, output)
 
-        cost, output = selector_dict(cost_fxns, output)
-
-        # get registration degrees of freedom
-        print('\nRegistration degrees of freedom: (see FSL FLIRT for help)')
-        degrees_of_freedom = [6, 7, 9, 12]
-        reg_dof, output = selector_list(degrees_of_freedom, output)
-
-        if output != None:
-            break
+    # get registration degrees of freedom
+    print('\nRegistration degrees of freedom: (see FSL FLIRT for help)')
+    degrees_of_freedom = [6, 7, 9, 12]
+    reg_dof, output = selector_list(degrees_of_freedom, output)
 
     # if we messed any of these up, we return None
     if output == None:
-        print('Invalid response, please try again.')
+        print('You provided an invalid input, please try again.')
         line = ''
     # otherwise we print the command and return it
     else:
@@ -395,44 +376,40 @@ def lowpass(input_name):
 
     output = 'lowpass'
 
-    while output != None:
+    print('\nLow-passing each voxel time series.')
 
-        print('\nLow-passing each voxel time series.')
+    print('\nInput mask prefix (default = EPI_mask):')
+    mask_prefix = raw_input('Mask Prefix: ')
+    if mask_prefix == '':
+        mask_prefix = 'EPI_mask'
 
-        print('\nInput mask prefix (default = EPI_mask):')
-        mask_prefix = raw_input('Mask Prefix: ')
-        if mask_prefix == '':
-            mask_prefix = 'EPI_mask'
+    print('\nWhich filter type would you like to use?')
+    print('See documentation for an explanation of each.')
+    filter_list = ['median', 'average', 'kaiser', 'butterworth']
+    filter_type, output = selector_list(filter_list, output)
 
-        print('\nWhich filter type would you like to use?')
-        print('See documentation for an explanation of each.')
-        filter_list = ['median', 'average', 'kaiser', 'butterworth']
-        filter_type, output = selector_list(filter_list, output)
+    if filter_type in ['median', 'average']:
+        flag = 0
 
-        if filter_type in ['median', 'average']:
-            flag = 0
+        # ensures input length is odd
+        while flag == 0:
+            print('\nSelect window length (must be odd, default = 3):')
+            lowpass_param, output = selector_int(output)
 
-            # ensures input length is odd
-            while flag == 0:
-                print('\nSelect window length (must be odd, default = 3):')
-                lowpass_param, output = selector_int(output)
-
-                if rem(window_length, 2) != 0:
-                    flag = 1
-                else:
-                    print('Window length must be odd!')
+            if rem(window_length, 2) != 0:
+                flag = 1
+            else:
+                print('Window length must be odd!')
+    
+    elif filter_type in ['kaiser', 'butterworth']:
         
-        elif filter_type in ['kaiser', 'butterworth']:
-            
-            print('\nInput cutoff frequency in Hz (default = 0.1 Hz):')
-            lowpass_param, output = selector_float(output)
-
-        if output != None:
-            break
+        print('\nInput cutoff frequency in Hz (default = 0.1 Hz):')
+        lowpass_param, output = selector_float(output)
 
     # if we messed any of these up, we return None
     if output == None:
-        print('Invalid response, please try again.')
+        print('You provided an invalid input, please try again.')
+        line = ''
     # otherwise we print the command and return it
     else:
         line = ('. ${DIR_PIPE}/epitome/modules/pre/lowpass ' +
@@ -457,19 +434,14 @@ def TRdrop(input_name):
     # if the user rejects the defaults or makes a mistake
     if decision == 'no' or None:
 
-        while output != None:
+        print('\nInput head size (default 50)')
+        head_size, output = selector_float(output)
 
-            print('\nInput head size (default 50)')
-            head_size, output = selector_float(output)
+        print('\nInput FD threshold (default 0.3)')
+        FD, output = selector_float(output)
 
-            print('\nInput FD threshold (default 0.3)')
-            FD, output = selector_float(output)
-
-            print('\nInput head size (default 1000000)')
-            DV, output = selector_float(output)
-
-            if output != None:
-                break
+        print('\nInput head size (default 1000000)')
+        DV, output = selector_float(output)
 
     else:
         print('\nOK, using the defaults.')
@@ -477,11 +449,17 @@ def TRdrop(input_name):
         FD = 0.3
         DV = 1000000 # this turns DVARS off, effectively
 
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + 
-                                  str(input_name) + ' ' +
-                                  str(head_size) + ' ' +
-                                  str(FD) + ' ' +
-                                  str(DV))
+    # if we messed any of these up, we return None
+    if output == None:
+        print('You provided an invalid input, please try again.')
+        line = ''
+    # otherwise we print the command and return it
+    else: 
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + 
+                                      str(input_name) + ' ' +
+                                      str(head_size) + ' ' +
+                                      str(FD) + ' ' +
+                                      str(DV))
 
     return line, output
 
@@ -504,7 +482,7 @@ def surfsmooth(input_name):
 
     # if we messed any of these up, we return None
     if output == None:
-        print('Invalid response, please try again.')
+        print('You provided an invalid input, please try again.')
         line = ''
     # otherwise we print the command and return it
     else:
@@ -535,10 +513,16 @@ def volsmooth(input_name):
     print('\nInput smoothing kernel FWHM (mm):')
     fwhm, output = selector_float(output)
 
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/volsmooth ' + 
-                                     str(input_name) + ' ' +
-                                     str(mask_prefix) + ' ' +
-                                     str(fwhm))
+    # if we messed any of these up, we return None
+    if output == None:
+        print('You provided an invalid input, please try again.')
+        line = ''
+    # otherwise we print the command and return it
+    else:
+        line = ('. ${DIR_PIPE}/epitome/modules/pre/volsmooth ' + 
+                                         str(input_name) + ' ' +
+                                         str(mask_prefix) + ' ' +
+                                         str(fwhm))
 
     return line, output
 
@@ -591,7 +575,7 @@ def check_motionind(dir_data, expt, mode):
     print('\nAdding subject-wise motion QC to the outputs.')
 
     line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_motionind ' + 
-             str(dir_data) + ' ' + str(expt) + ' ' + str(mode) + ' ${UID})
+             str(dir_data) + ' ' + str(expt) + ' ' + str(mode) + ' ${UID}')
 
     return line, output
 
