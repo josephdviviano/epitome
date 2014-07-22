@@ -38,33 +38,33 @@ for SESS in ${DIR_SESS}; do
     cd /tmp
 
     # project volume data --> surface for right and left separately
-    if [ ! -f ${DIR}/func_surface.R.${NUM}.niml.dset ]; then
+    if [ ! -f ${DIR}/func_surface.R.${UID}.${NUM}.niml.dset ]; then
         3dVol2Surf \
           -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
           -surf_A ${DIR_FS}/SUMA/rh.white.asc \
           -surf_B ${DIR_FS}/SUMA/rh.pial.asc \
           -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
-          -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
+          -grid_parent ${DIR}/${INPUT}.${UID}.${NUM}.nii.gz \
           -map_func midpoint \
           -f_steps 15 \
           -f_index nodes \
           -outcols_NSD_format \
-          -out_niml ${DIR}/func_surface.R.${NUM}.niml.dset
+          -out_niml ${DIR}/func_surface.R.${UID}.${NUM}.niml.dset
     fi
 
     # project volume data --> surface for right and left separately
-    if [ ! -f ${DIR}/func_surface.R.${NUM}.niml.dset ]; then
+    if [ ! -f ${DIR}/func_surface.R.${UID}.${NUM}.niml.dset ]; then
         3dVol2Surf \
           -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
           -surf_A ${DIR_FS}/SUMA/lh.white.asc \
           -surf_B ${DIR_FS}/SUMA/lh.pial.asc \
           -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
-          -grid_parent ${DIR}/${INPUT}.${NUM}.nii.gz \
+          -grid_parent ${DIR}/${INPUT}.${UID}.${NUM}.nii.gz \
           -map_func midpoint \
           -f_steps 15 \
           -f_index nodes \
           -outcols_NSD_format \
-          -out_niml ${DIR}/func_surface.L.${NUM}.niml.dset
+          -out_niml ${DIR}/func_surface.L.${UID}.${NUM}.niml.dset
     fi
 done
 

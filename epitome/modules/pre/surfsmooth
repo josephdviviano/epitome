@@ -24,24 +24,24 @@ for SESS in ${DIR_SESS}; do
     DIR_FS=`echo ${FS}/${DIR_EXPT}_${SUB}_${SESS}`
         
     # smooth data on the cortical surface to FWHM
-    if [ ! -f ${DIR}/func_smooth.L.${NUM}.niml.dset ]; then
+    if [ ! -f ${DIR}/func_smooth.L.${UID}.${NUM}.niml.dset ]; then
         SurfSmooth \
           -met HEAT_07 \
           -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
           -surf_A ${DIR_FS}/SUMA/rh.white.asc \
-          -input ${DIR}/${INPUT}.L.${NUM}.niml.dset \
+          -input ${DIR}/${INPUT}.L.${UID}.${NUM}.niml.dset \
           -target_fwhm ${FWHM} \
-          -output ${DIR}/func_smooth.L.${NUM}.niml.dset
+          -output ${DIR}/func_smooth.L.${UID}.${NUM}.niml.dset
     fi
 
-    if [ ! -f ${DIR}/func_smooth.R.${NUM}.niml.dset ]; then
+    if [ ! -f ${DIR}/func_smooth.R.${UID}.${NUM}.niml.dset ]; then
         SurfSmooth \
           -met HEAT_07 \
           -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
           -surf_A ${DIR_FS}/SUMA/rh.white.asc \
-          -input ${DIR}/${INPUT}.R.${NUM}.niml.dset \
+          -input ${DIR}/${INPUT}.R.${UID}.${NUM}.niml.dset \
           -target_fwhm ${FWHM} \
-          -output ${DIR}/func_smooth.R.${NUM}.niml.dset
+          -output ${DIR}/func_smooth.R.${UID}.${NUM}.niml.dset
     fi
 done
 cd ${DIR_PIPE}

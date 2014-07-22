@@ -300,7 +300,7 @@ def butterworth_filter(func, anat, cutoff=0.1):
 
     return output, output_aff, output_head
 
-def write_output(path, num, out, aff, head):
+def write_output(path, uid, num, out, aff, head):
     """
     Writes a NIFTI file to the specified path with the specified run number.
     """
@@ -316,22 +316,23 @@ if __name__ == "__main__":
     sys.argv[4] = float(sys.argv[4])
     sys.argv[5] = str(sys.argv[5])
     sys.argv[6] = str(sys.argv[6])
+    sys.argv[7] = str(sys.argv[7])
 
     if sys.argv[1] == 'median':
         o, a, h = median_filter(sys.argv[2], sys.argv[3], sys.argv[4])
-        write_output(sys.argv[5], sys.argv[6], o, a, h)
+        write_output(sys.argv[5], sys.argv[6], sys.argv[7], o, a, h)
     
     elif sys.argv[1] == 'average':
         o, a, h = mean_filter(sys.argv[2], sys.argv[3], sys.argv[4])
-        write_output(sys.argv[5], sys.argv[6], o, a, h)
+        write_output(sys.argv[5], sys.argv[6], sys.argv[7], o, a, h)
     
     elif sys.argv[1] == 'kaiser':
         o, a, h = kaiser_filter(sys.argv[2], sys.argv[3], sys.argv[4])
-        write_output(sys.argv[5], sys.argv[6], o, a, h)
+        write_output(sys.argv[5], sys.argv[6], sys.argv[7] o, a, h)
     
     elif sys.argv[1] == 'butterworth':
         o, a, h = butterworth_filter(sys.argv[2], sys.argv[3], sys.argv[4])
-        write_output(sys.argv[5], sys.argv[6], o, a, h)
+        write_output(sys.argv[5], sys.argv[6], sys.argv[7], o, a, h)
     
     else:
         print('*** INVALID FILTER SELECTION! ***')

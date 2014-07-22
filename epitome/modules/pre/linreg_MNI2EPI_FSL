@@ -34,20 +34,20 @@ for SESS in `basename ${DIR_SESS}`; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         # register runs with individual T1s
-        if [ ! -f ${DIR}/func_T1.${NUM}.nii.gz ]; then
-            flirt -in ${DIR}/${INPUT}.${NUM}.nii.gz \
+        if [ ! -f ${DIR}/func_T1.${UID}.${NUM}.nii.gz ]; then
+            flirt -in ${DIR}/${INPUT}.${UID}.${NUM}.nii.gz \
                   -ref ${DIR}/anat_EPI_reg_target.nii.gz \
                   -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
-                  -out ${DIR}/func_T1.${NUM}.nii.gz
+                  -out ${DIR}/func_T1.${UID}.${NUM}.nii.gz
                   -interp sinc \
                   -sincwidth 7 \
                   -sincwindow blackman
         fi
 
         # register runs with MNI
-        if [ ! -f ${DIR}/func_MNI.${NUM}.nii.gz ]; then
-            3dAllineate -prefix ${DIR}/func_MNI.${NUM}.nii.gz \
-                        -input ${DIR}/func_T1.${NUM}.nii.gz \
+        if [ ! -f ${DIR}/func_MNI.${UID}.${NUM}.nii.gz ]; then
+            3dAllineate -prefix ${DIR}/func_MNI.${UID}.${NUM}.nii.gz \
+                        -input ${DIR}/func_T1.${UID}.${NUM}.nii.gz \
                         -1Dmatrix_apply ${DIR_T1}/mat_T1_to_TAL.1D \
                         -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
                         -float -final wsinc5 \
@@ -71,20 +71,6 @@ for SESS in `basename ${DIR_SESS}`; do
                     -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
     fi
 done
-
-# create concatenated runs in order -- this needs to be fixed!!!
-if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz ]; then
-    LIST=``
-    DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
-    for SESS in ${DIR_SESS}; do
-        # this used to say `ls ${SESS}/func_smooth* | sort -n -t h -k 2` 
-        FILES=`ls ${SESS}/func_MNI*`
-        LIST="${LIST} ${FILES}"
-    done    
-    
-    3dTcat -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz \
-           `echo ${LIST}`
-fi
 
 cd ${DIR_PIPE}
 

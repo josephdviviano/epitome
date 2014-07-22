@@ -33,11 +33,11 @@ for SESS in `basename ${DIR_SESS}`; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         # register runs with individual T1s
-        if [ ! -f ${DIR}/func_T1.${NUM}.nii.gz ]; then
-            flirt -in ${DIR}/${INPUT}.${NUM}.nii.gz \
+        if [ ! -f ${DIR}/func_T1.${UID}.${NUM}.nii.gz ]; then
+            flirt -in ${DIR}/${INPUT}.${UID}.${NUM}.nii.gz \
                   -ref ${DIR}/anat_EPI_reg_target.nii.gz \
                   -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
-                  -out ${DIR}/func_T1.${NUM}.nii.gz
+                  -out ${DIR}/func_T1.${UID}.${NUM}.nii.gz
                   -interp sinc \
                   -sincwidth 7 \
                   -sincwindow blackman

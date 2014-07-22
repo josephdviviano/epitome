@@ -37,161 +37,161 @@ for SESS in ${DIR_SESS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         # detrend physiological regressors, if they exist
-        if [ -f ${SESS}/PARAMS/phys.${NUM}.1D ] && \
-           [ ! -f ${SESS}/PARAMS/det.phys.${NUM}.1D ]; then
+        if [ -f ${SESS}/PARAMS/phys.${UID}.${NUM}.1D ] && \
+           [ ! -f ${SESS}/PARAMS/det.phys.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/phys.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.phys.${NUM}.1D
+                ${SESS}/PARAMS/phys.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.phys.${UID}.${NUM}.1D
         fi
 
         # detrend motion regressors
-        if [ ! -f ${SESS}/PARAMS/det.motion.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.motion.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/motion.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.motion.${NUM}.1D
+                ${SESS}/PARAMS/motion.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.motion.${UID}.${NUM}.1D
         fi
 
-        if [ ! -f ${SESS}/PARAMS/det.lag.motion.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.lag.motion.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/lag.motion.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.lag.motion.${NUM}.1D
+                ${SESS}/PARAMS/lag.motion.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.lag.motion.${UID}.${NUM}.1D
         fi
         
         # detrend ventricle regressors 
-        if [ ! -f ${SESS}/PARAMS/det.vent.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.vent.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/vent.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.vent.${NUM}.1D
+                ${SESS}/PARAMS/vent.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.vent.${UID}.${NUM}.1D
         fi
         
-        if [ ! -f ${SESS}/PARAMS/det.lag.vent.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.lag.vent.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/lag.vent.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.lag.vent.${NUM}.1D
+                ${SESS}/PARAMS/lag.vent.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.lag.vent.${UID}.${NUM}.1D
         fi
 
         # detrend draining vessel regressors
-        if [ ! -f ${SESS}/PARAMS/det.dv.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.dv.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/dv.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.dv.${NUM}.1D
+                ${SESS}/PARAMS/dv.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.dv.${UID}.${NUM}.1D
         fi
         
-        if [ ! -f ${SESS}/PARAMS/det.lag.dv.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.lag.dv.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/lag.dv.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.lag.dv.${NUM}.1D
+                ${SESS}/PARAMS/lag.dv.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.lag.dv.${UID}.${NUM}.1D
         fi
         
         # detrend local white matter regressors
-        if [ ! -f ${SESS}/PARAMS/det.wm_local15.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/PARAMS/det.wm_local15.${UID}.${NUM}.nii.gz ]; then
             3dDetrend \
-                -prefix ${SESS}/PARAMS/det.wm_local15.${NUM}.nii.gz \
+                -prefix ${SESS}/PARAMS/det.wm_local15.${UID}.${NUM}.nii.gz \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/wm_local15.${NUM}.nii.gz
+                ${SESS}/PARAMS/wm_local15.${UID}.${NUM}.nii.gz
         fi
 
-        if [ ! -f ${SESS}/PARAMS/det.lag.wm_local15.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/PARAMS/det.lag.wm_local15.${UID}.${NUM}.nii.gz ]; then
             3dDetrend \
-                -prefix ${SESS}/PARAMS/det.lag.wm_local15.${NUM}.nii.gz \
+                -prefix ${SESS}/PARAMS/det.lag.wm_local15.${UID}.${NUM}.nii.gz \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/lag.wm_local15.${NUM}.nii.gz
+                ${SESS}/PARAMS/lag.wm_local15.${UID}.${NUM}.nii.gz
         fi
 
         # detrend mean white matter regressors
-        if [ ! -f ${SESS}/PARAMS/det.wm.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.wm.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/wm.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.wm.${NUM}.1D
+                ${SESS}/PARAMS/wm.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.wm.${UID}.${NUM}.1D
         fi
 
-        if [ ! -f ${SESS}/PARAMS/det.lag.wm.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.lag.wm.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/lag.wm.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.lag.wm.${NUM}.1D
+                ${SESS}/PARAMS/lag.wm.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.lag.wm.${UID}.${NUM}.1D
         fi
 
         # detrend global mean regressors
-        if [ ! -f ${SESS}/PARAMS/det.global_mean.${NUM}.1D ]; then
+        if [ ! -f ${SESS}/PARAMS/det.global_mean.${UID}.${NUM}.1D ]; then
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
                 -polort ${POLORT} \
-                ${SESS}/PARAMS/global_mean.${NUM}.1D\' > \
-                ${SESS}/PARAMS/det.global_mean.${NUM}.1D
+                ${SESS}/PARAMS/global_mean.${UID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.global_mean.${UID}.${NUM}.1D
         fi
         
         # fit each run with all nuisance regressors
-        if [ ! -f ${SESS}/func_noise.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_noise.${UID}.${NUM}.nii.gz ]; then
 
             # start with the standard motion-parameter regressors
             CMD=`echo 3dTfitter \
-                          -prefix ${SESS}/func_noise_betas.${NUM}.nii.gz \
-                          -fitts ${SESS}/func_noise.${NUM}.nii.gz \
+                          -prefix ${SESS}/func_noise_betas.${UID}.${NUM}.nii.gz \
+                          -fitts ${SESS}/func_noise.${UID}.${NUM}.nii.gz \
                           -polort ${POLORT} \
-                          -RHS ${SESS}/${INPUT}.${NUM}.nii.gz \
-                          -LHS ${SESS}/PARAMS/det.motion.${NUM}.1D \
-                               ${SESS}/PARAMS/det.lag.motion.${NUM}.1D `
+                          -RHS ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz \
+                          -LHS ${SESS}/PARAMS/det.motion.${UID}.${NUM}.1D \
+                               ${SESS}/PARAMS/det.lag.motion.${UID}.${NUM}.1D `
 
             # optionally add the global mean
             if [ `echo ${GS_FLAG}` = 'on' ]; then
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.global_mean.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.global_mean.${UID}.${NUM}.1D`
             fi
 
             # optionally add the ventricles 
             if [ `echo ${VENT_FLAG}` = 'on' ]; then
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.vent.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.vent.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.vent.${UID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.vent.${UID}.${NUM}.1D`
             fi
 
             # optionally add the draining vessles
             if [ `echo ${DV_FLAG}` = 'on' ]; then
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.dv.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.dv.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.dv.${UID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.dv.${UID}.${NUM}.1D`
             fi
 
             # optionally add the local white matter regressors
             if [ `echo ${WM_LOC_FLAG}` = 'on' ]; then
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm_local15.${NUM}.nii.gz`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm_local15.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm_local15.${UID}.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm_local15.${UID}.${NUM}.nii.gz`
             fi
             
             # optionally add the global white matter regressors
             if [ `echo ${WM_GLO_FLAG}` = 'on' ]; then
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm.${NUM}.nii.gz`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm.${UID}.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm.${UID}.${NUM}.nii.gz`
             fi
             
             # and add the physio regressors if they exist
-            if [ -f ${SESS}/PARAMS/det.phys.${NUM}.1D ]; then
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.phys.${NUM}.1D`
+            if [ -f ${SESS}/PARAMS/det.phys.${UID}.${NUM}.1D ]; then
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.phys.${UID}.${NUM}.1D`
             fi
 
             ${CMD}
@@ -199,30 +199,30 @@ for SESS in ${DIR_SESS}; do
         fi
 
         # compute mean, standard deviation
-        if [ ! -f ${SESS}/func_filtered.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_filtered.${UID}.${NUM}.nii.gz ]; then
             3dTstat \
-                -prefix ${SESS}/func_tmp_mean.${NUM}.nii.gz \
-                -mean ${SESS}/${INPUT}.${NUM}.nii.gz
+                -prefix ${SESS}/func_tmp_mean.${UID}.${NUM}.nii.gz \
+                -mean ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz
             
             3dTstat \
-                -prefix ${SESS}/func_tmp_stdev.${NUM}.nii.gz \
-                -stdev ${SESS}/${INPUT}.${NUM}.nii.gz
+                -prefix ${SESS}/func_tmp_stdev.${UID}.${NUM}.nii.gz \
+                -stdev ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz
             
             # compute temporal SNR
             3dcalc \
-                -a ${SESS}/func_tmp_mean.${NUM}.nii.gz \
-                -b ${SESS}/func_tmp_stdev.${NUM}.nii.gz \
+                -a ${SESS}/func_tmp_mean.${UID}.${NUM}.nii.gz \
+                -b ${SESS}/func_tmp_stdev.${UID}.${NUM}.nii.gz \
                 -expr 'a/b' \
-                -prefix ${SESS}/func_tSNR.${NUM}.nii.gz
+                -prefix ${SESS}/func_tSNR.${UID}.${NUM}.nii.gz
             
             # subtracts nuisances from inputs, retaining the mean
             3dcalc \
                 -float \
-                -a ${SESS}/${INPUT}.${NUM}.nii.gz \
-                -b ${SESS}/func_noise.${NUM}.nii.gz \
-                -c ${SESS}/func_tmp_mean.${NUM}.nii.gz \
+                -a ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz \
+                -b ${SESS}/func_noise.${UID}.${NUM}.nii.gz \
+                -c ${SESS}/func_tmp_mean.${UID}.${NUM}.nii.gz \
                 -expr 'a-b+c' \
-                -prefix ${SESS}/func_filtered.${NUM}.nii.gz
+                -prefix ${SESS}/func_filtered.${UID}.${NUM}.nii.gz
         fi
     done
     rm ${SESS}/func_tmp_*

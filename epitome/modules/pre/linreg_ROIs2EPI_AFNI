@@ -28,10 +28,10 @@ for SESS in ${DIR_SESS}; do
         cat_matvec mat_EPI_to_TAL.aff12.1D -I > mat_TAL_to_EPI.aff12.1D
 
         # register runs with MNI
-        if [ ! -f ${SESS}/func_MNI.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_MNI.${UID}.${NUM}.nii.gz ]; then
             3dAllineate \
-                -prefix ${SESS}/func_MNI2T1.${NUM}.nii.gz \
-                -input ${SESS}/${INPUT}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_MNI2T1.${UID}.${NUM}.nii.gz \
+                -input ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz \
                 -1Dmatrix_apply ${SESS}/mat_TAL_to_EPI.aff12.1D \
                 -master ${SESS}/anat_EPI_brain.nii.gz \
                 -float \
@@ -52,33 +52,6 @@ for SESS in ${DIR_SESS}; do
             -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
     fi
 done
-
-# create concatenated runs in order
-if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_concat.nii.gz ]; then
-    LIST=``
-    DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
-    for SESS in ${DIR_SESS}; do
-        FILES=`ls ${SESS}/func_MNI*`
-        LIST="${LIST} ${FILES}"
-    done    
-    
-    3dTcat \
-        -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_concat.nii.gz \
-        `echo ${LIST}` 
-fi
-
-# create group EPI mask in MNI space
-3dMean \
-    -datum short \
-    -prefix ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
-    ${DIR_DATA}/${DIR_EXPT}/*/${DATA_TYPE}/*/anat_EPI_mask_MNI.nii.gz
-
-3dcalc \
-    -a ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
-    -expr 'step(a-0.999)' \
-    -prefix ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI_group.nii.gz
-
-rm ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz
 
 cd ${DIR_PIPE}
 

@@ -591,7 +591,7 @@ def check_motionind(dir_data, expt, mode):
     print('\nAdding subject-wise motion QC to the outputs.')
 
     line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_motionind ' + 
-             str(dir_data) + ' ' + str(expt) + ' ' + str(mode))
+             str(dir_data) + ' ' + str(expt) + ' ' + str(mode) + ' ${UID})
 
     return line, output
 
@@ -601,7 +601,7 @@ def check_spectra(dir_data, expt, mode):
     print('\nAdding subject-wise regressor spectra QC to the outputs.')
 
     line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_spectra ' + 
-            str(dir_data) + ' ' + str(expt) + ' ' +  str(mode))
+            str(dir_data) + ' ' + str(expt) + ' ' +  str(mode) + ' ${UID}')
 
     return line, output
 

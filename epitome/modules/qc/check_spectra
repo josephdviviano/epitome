@@ -202,7 +202,7 @@ def plotter(raw, noise, signal, dv, vent, gm, n):
 
     return fig, ax
 
-def regressor_spectra(path, expt, mode):
+def regressor_spectra(path, expt, mode, uid):
     """
     """
 
@@ -210,7 +210,8 @@ def regressor_spectra(path, expt, mode):
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
     # loop through all subjects
-    pdf = PdfPages(os.path.join(path, expt, 'qc_regressor_spectra.pdf'))
+    pdf = PdfPages(os.path.join(path, expt, 
+                  'qc_' + str(mode) + '_' + str(uid) '_regressor_spectra.pdf'))
     for subj in subjects:
 
         # define some useful shortcuts
@@ -219,7 +220,8 @@ def regressor_spectra(path, expt, mode):
 
         # get relevant timing information
         TR, fs, ny = get_TR(os.path.join(
-                            modepath, 'SESS01/func_scaled.01.nii.gz'))
+                            modepath, 'SESS01/func_scaled.' + 
+                                                   str(uid) + '.01.nii.gz'))
 
         # get the number of sessions
         sessions = len([f for f in os.listdir(modepath) 
@@ -231,7 +233,7 @@ def regressor_spectra(path, expt, mode):
             # number and list of frequency bins
             tmp = np.genfromtxt(os.path.join(
                                 modepath, 'SESS' + '%02d'%(sess+1), 
-                                'PARAMS/global_mean.01.1D'))
+                                'PARAMS/global_mean.' + str(uid) + '.01.1D'))
 
             freq = load_PSD(tmp, fs)[0]
             n = len(freq) 
@@ -289,7 +291,8 @@ def regressor_spectra(path, expt, mode):
                 # load in unfiltered data spectra
                 ts = load_masked_func(os.path.join(path, expt, subj, mode, 
                                                   'SESS' + '%02d'%(sess+1), 
-                                                  'func_scaled.' + 
+                                                  'func_scaled.' +
+                                                  str(uid) + '.' +
                                                   '%02d'%(run+1) + 
                                                   '.nii.gz'), idx)
                 for i, t in enumerate(ts):
@@ -299,7 +302,8 @@ def regressor_spectra(path, expt, mode):
                 # load in full noise model spectra
                 ts = load_masked_func(os.path.join(path, expt, subj, mode,
                                                   'SESS' + '%02d'%(sess+1),
-                                                  'func_noise.' + 
+                                                  'func_noise.' +
+                                                  str(uid) + '.' +
                                                   '%02d'%(run+1) + 
                                                   '.nii.gz'), idx)
                 for i, t in enumerate(ts):
@@ -309,7 +313,8 @@ def regressor_spectra(path, expt, mode):
                 # load in residual signal
                 ts = load_masked_func(os.path.join(path, expt, subj, mode,
                                                   'SESS' + '%02d'%(sess+1),
-                                                  'func_filtered.' + 
+                                                  'func_filtered.' +
+                                                  str(uid) + '.' +
                                                   '%02d'%(run+1) + 
                                                   '.nii.gz'), idx)
                 for i, t in enumerate(ts):
@@ -344,4 +349,4 @@ def regressor_spectra(path, expt, mode):
     pdf.close()
 
 if __name__ == "__main__":
-    regressor_spectra(sys.argv[1], sys.argv[2], sys.argv[3])
+    regressor_spectra(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

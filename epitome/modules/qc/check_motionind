@@ -83,7 +83,7 @@ def figure_quality(q):
         dpi = 72
     return size, dpi 
 
-def individual_motion_plot(path, expt, mode):
+def individual_motion_plot(path, expt, mode, uid):
     """
     This plots a trace of the framewise displacement measure and DVARS measure 
     for each participant (Power et al. 2012). Participants are sorted in the 
@@ -112,6 +112,7 @@ def individual_motion_plot(path, expt, mode):
             d = os.path.join(path, expt, subj, mode, session)
             for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
                 f = compute_FD(os.path.join(d, 'PARAMS/motion.' +
+                                               str(uid) + '.' +
                                                '%02d' % run + 
                                                '.1D'), head_r)      
                 # per subject
@@ -166,6 +167,7 @@ def individual_motion_plot(path, expt, mode):
                 for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
                     # framewise displacement
                     f = compute_FD(os.path.join(d, 'PARAMS/motion.' +
+                                                   str(uid) + '.' +
                                                    '%02d' % run +'.1D'), head_r)         
                     FD = np.append(FD, f, axis=1) # per subject
                     FD_all= np.append(FD_all, f) # across all subjects
@@ -174,6 +176,7 @@ def individual_motion_plot(path, expt, mode):
 
                     # DVARS
                     f = np.genfromtxt(os.path.join(d, 'PARAMS/DVARS.' + 
+                                                      str(uid) + '.' +
                                                       '%02d' % run + '.1D'))
                     f = f[1:] / 10 # remove leading 0, conv. to % signal
                     DV = np.append(DV, f) # per subject 
@@ -268,7 +271,8 @@ def individual_motion_plot(path, expt, mode):
     fig_DV.subplots_adjust(hspace=0.7)
 
     # export PDF
-    pdf = PdfPages(os.path.join(path, expt, 'qc_motion_individual.pdf'))
+    pdf = PdfPages(os.path.join(path, expt, 
+                  'qc_' + str(mode) + '_' + str(uid) '_motion_individual.pdf'))
     fig_FD.savefig(pdf, format='pdf')
     fig_DV.savefig(pdf, format='pdf')
 
@@ -285,4 +289,4 @@ def individual_motion_plot(path, expt, mode):
     print('Printed plots to ' + str(os.path.join(path, expt)) + '.')
 
 if __name__ == "__main__":
-    individual_motion_plot(sys.argv[1], sys.argv[2], sys.argv[3])
+    individual_motion_plot(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

@@ -25,10 +25,10 @@ for SESS in ${DIR_SESS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         # register runs with MNI
-        if [ ! -f ${SESS}/func_MNI.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_MNI.${UID}.${NUM}.nii.gz ]; then
             3dAllineate \
-                -prefix ${SESS}/func_MNI.${NUM}.nii.gz \
-                -input ${SESS}/${INPUT}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_MNI.${UID}.${NUM}.nii.gz \
+                -input ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz \
                 -1Dmatrix_apply ${SESS}/mat_EPI_to_TAL.aff12.1D \
                 -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
                 -float \
@@ -55,7 +55,7 @@ if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_concat.nii.gz ]; then
     LIST=``
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
     for SESS in ${DIR_SESS}; do
-        FILES=`ls ${SESS}/func_MNI*`
+        FILES=`ls ${SESS}/func_MNI.${UID}.*`
         LIST="${LIST} ${FILES}"
     done    
     
