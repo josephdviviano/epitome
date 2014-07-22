@@ -17,6 +17,7 @@ Usage: <filter_type> <func_name> <mask_name> <cutoff> <path> <run_number>
     run_number: a string denoting the zero-padded run number.
 """
 
+import os, sys
 import numpy as np
 import scipy as sp
 import scipy.signal as sig
