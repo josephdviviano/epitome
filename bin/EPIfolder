@@ -102,10 +102,10 @@ def main():
     A CLI for creating experiment directories for EPItome-XL.
     """
 
-    dir_path, dir_pipe, dir_afni, cores = epi.config.return_paths()
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
     # make sure we have the appropriate permissions for the top directory
-    if epi.utilities.has_permissions(dir_path) == False:
+    if epi.utilities.has_permissions(dir_data) == False:
         sys.exit()
 
     # print a welcome message
@@ -115,11 +115,11 @@ def main():
 
     # make experiment directory
     print('\nCurrent experiments:')
-    print_dirs(dir_path)
+    print_dirs(dir_data)
 
     print('\nWhich experiment would you like to edit? ')
     expt_name = raw_input('Experiment: ')
-    expt = os.path.join(dir_path, expt_name)
+    expt = os.path.join(dir_data, expt_name)
 
     if os.path.isdir(expt) == True:
         print('\nAlready exists! Adding to existing experiment.')
