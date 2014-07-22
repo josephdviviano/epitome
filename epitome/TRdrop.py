@@ -8,7 +8,7 @@ import numpy as np
 import scipy as sp
 import nibabel as nib
 
-def TR_drop(directory, func_name, uid, num, head_mm=50, FD=0.3, DV=0.3):
+def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
     """
     Removes motion-corrupted TRs from data, without interpolation. If called
     from the command line, this will batch process all runs in all sessions 
@@ -16,7 +16,7 @@ def TR_drop(directory, func_name, uid, num, head_mm=50, FD=0.3, DV=0.3):
 
     func__pre = functional data prefix (e.g., 'func_filtered')
     mask_name = mask file name (e.g., 'anat_EPI_mask')
-    uid       = unique identifier
+    u_id      = unique identifier
     num       = run number
     head_mm   = head radius in mm (default 50 mm)
     FD        = censor TRs with instantaneous motion > x mm (default 0.3 mm)
@@ -28,7 +28,7 @@ def TR_drop(directory, func_name, uid, num, head_mm=50, FD=0.3, DV=0.3):
     """
 
     print('')
-    print(' TR_drop: ' + str(func_name) + '.' + str(uid) + '.' + str(num))
+    print(' TR_drop: ' + str(func_name) + '.' + str(u_id) + '.' + str(num))
     print('             FD = ' + str(thresh_FD) + ' mm,')
     print('          DVARS = ' + str(thresh_DV) + ' %,')
     print('    Head Radius = ' + str(head_size) + ' mm.')
@@ -43,7 +43,7 @@ def TR_drop(directory, func_name, uid, num, head_mm=50, FD=0.3, DV=0.3):
     DV = float(thresh_DV)
 
     # open up a csv
-    f = open(directory + '/PARAMS/retained_TRs.' + str(uid) + '.' + 
+    f = open(directory + '/PARAMS/retained_TRs.' + str(u_id) + '.' + 
                                                    str(num) + '.1D', 'wb')
 
     # load data, affine, header, get image dimensions
@@ -58,7 +58,7 @@ def TR_drop(directory, func_name, uid, num, head_mm=50, FD=0.3, DV=0.3):
 
     # load motion parameters
     for fname in os.listdir(os.path.join(directory, 'PARAMS')):
-        if fnmatch.fnmatch(fname, 'motion.' + str(uid) + '.' + str(num) + '*'):
+        if fnmatch.fnmatch(fname, 'motion.' + str(u_id) + '.' + str(num) + '*'):
             FD = np.genfromtxt(os.path.join(directory, 'PARAMS', fname))
 
             FD[:,0] = np.radians(FD[:,0])*head_size # roll
@@ -69,7 +69,7 @@ def TR_drop(directory, func_name, uid, num, head_mm=50, FD=0.3, DV=0.3):
             FD = np.sum(np.abs(np.diff(FD, n=1, axis=0)), axis=1)
             FD = np.insert(FD, 0, 0) # align FD & DVARS
 
-        if fnmatch.fnmatch(fname, 'DVARS.' + str(uid) + '.' + str(num) + '*'):
+        if fnmatch.fnmatch(fname, 'DVARS.' + str(u_id) + '.' + str(num) + '*'):
             DV = np.genfromtxt(os.path.join(directory, 'PARAMS', fname))
             DV = (DV) / 1000 # convert to % signal change
     
@@ -103,7 +103,7 @@ def TR_drop(directory, func_name, uid, num, head_mm=50, FD=0.3, DV=0.3):
     # write 4D output
     data = nib.nifti1.Nifti1Image(data, outA, outH)
     data.to_filename(os.path.join(directory, 'func_scrubbed.' +
-                                    str(uid) + '.' + str(num) + '.nii.gz'))
+                                    str(u_id) + '.' + str(num) + '.nii.gz'))
 
     # write out number of retained TRs
     f.write(str(dims[3]))

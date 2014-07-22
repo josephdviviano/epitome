@@ -28,10 +28,10 @@ for SESS in ${DIR_SESS}; do
         cat_matvec mat_EPI_to_TAL.aff12.1D -I > mat_TAL_to_EPI.aff12.1D
 
         # register runs with MNI
-        if [ ! -f ${SESS}/func_MNI.${UID}.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_MNI.${ID}.${NUM}.nii.gz ]; then
             3dAllineate \
-                -prefix ${SESS}/func_MNI2T1.${UID}.${NUM}.nii.gz \
-                -input ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_MNI2T1.${ID}.${NUM}.nii.gz \
+                -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
                 -1Dmatrix_apply ${SESS}/mat_TAL_to_EPI.aff12.1D \
                 -master ${SESS}/anat_EPI_brain.nii.gz \
                 -float \

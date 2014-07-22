@@ -27,7 +27,7 @@ for SESS in ${DIR_SESS}; do
         if [ ! -f ${SESS}/func_lowpass.${NUM}.nii.gz ]; then
             
             # set input paths
-            FUNC=`echo ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz`
+            FUNC=`echo ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz`
             ANAT=`echo ${SESS}/${MASK}.nii.gz`
 
             # lowpass data
@@ -37,7 +37,7 @@ for SESS in ${DIR_SESS}; do
                 ${ANAT} \
                 ${CUTOFF} \
                 ${SESS} \
-                ${UID} \
+                ${ID} \
                 ${NUM}
         fi
     done

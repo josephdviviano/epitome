@@ -199,77 +199,77 @@ for SESS in ${DIR_SESS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         # create lagged motion regressors
-        if [ ! -f ${DIR}/PARAMS/lag.motion.${UID}.${NUM}.1D ]; then
+        if [ ! -f ${DIR}/PARAMS/lag.motion.${ID}.${NUM}.1D ]; then
             1dcat \
-                ${DIR}/PARAMS/motion.${UID}.${NUM}.1D'{0}' > \
-                ${DIR}/PARAMS/lag.motion.${UID}.${NUM}.1D
+                ${DIR}/PARAMS/motion.${ID}.${NUM}.1D'{0}' > \
+                ${DIR}/PARAMS/lag.motion.${ID}.${NUM}.1D
             
             1dcat \
-                ${DIR}/PARAMS/motion.${UID}.${NUM}.1D'{0..$}' >> \
-                ${DIR}/PARAMS/lag.motion.${UID}.${NUM}.1D
+                ${DIR}/PARAMS/motion.${ID}.${NUM}.1D'{0..$}' >> \
+                ${DIR}/PARAMS/lag.motion.${ID}.${NUM}.1D
         fi
 
         # create local white matter regressors (+ lagged)
-        if [ ! -f ${DIR}/PARAMS/lag.wm_local15.${UID}.${NUM}.nii.gz ]; then
+        if [ ! -f ${DIR}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz ]; then
             3dLocalstat \
-                -prefix ${DIR}/PARAMS/wm_local15.${UID}.${NUM}.nii.gz \
+                -prefix ${DIR}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz \
                 -nbhd 'SPHERE(15)' \
                 -stat mean \
                 -mask ${DIR}/anat_wm_ero.nii.gz \
-                -use_nonmask ${DIR}/${INPUT}.${UID}.${NUM}.nii.gz
+                -use_nonmask ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz
 
             3dTcat \
-                -prefix ${DIR}/PARAMS/lag.wm_local15.${UID}.${NUM}.nii.gz \
-                ${DIR}/PARAMS/wm_local15.${UID}.${NUM}.nii.gz'[0]' \
-                ${DIR}/PARAMS/wm_local15.${UID}.${NUM}.nii.gz'[0..$]'
+                -prefix ${DIR}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz \
+                ${DIR}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz'[0]' \
+                ${DIR}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz'[0..$]'
         fi
 
         # create mean white matter regressors (+ lagged)
-        if [ ! -f ${DIR}/PARAMS/wm.${UID}.${NUM}.1D ]; then
+        if [ ! -f ${DIR}/PARAMS/wm.${ID}.${NUM}.1D ]; then
             3dmaskave \
                 -q -mask ${DIR}/anat_wm_ero.nii.gz \
-                ${DIR}/${INPUT}.${UID}.${NUM}.nii.gz > \
-                ${DIR}/PARAMS/wm.${UID}.${NUM}.1D
+                ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz > \
+                ${DIR}/PARAMS/wm.${ID}.${NUM}.1D
             
             1dcat \
-                ${DIR}/PARAMS/wm.${UID}.${NUM}.1D'{0}' > \
-                ${DIR}/PARAMS/lag.wm.${UID}.${NUM}.1D
+                ${DIR}/PARAMS/wm.${ID}.${NUM}.1D'{0}' > \
+                ${DIR}/PARAMS/lag.wm.${ID}.${NUM}.1D
             
             1dcat \
-                ${DIR}/PARAMS/wm.${UID}.${NUM}.1D'{0..$}' >> \
-                ${DIR}/PARAMS/lag.wm.${UID}.${NUM}.1D
+                ${DIR}/PARAMS/wm.${ID}.${NUM}.1D'{0..$}' >> \
+                ${DIR}/PARAMS/lag.wm.${ID}.${NUM}.1D
         fi
 
         # create mean ventricle time series (+ lagged)
-        if [ ! -f ${DIR}/PARAMS/lag.vent.${UID}.${NUM}.1D ]; then
+        if [ ! -f ${DIR}/PARAMS/lag.vent.${ID}.${NUM}.1D ]; then
             3dmaskave \
                 -q -mask ${DIR}/anat_vent_ero.nii.gz \
-                ${DIR}/${INPUT}.${UID}.${NUM}.nii.gz > \
-                ${DIR}/PARAMS/vent.${UID}.${NUM}.1D
+                ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz > \
+                ${DIR}/PARAMS/vent.${ID}.${NUM}.1D
             
             1dcat \
-                ${DIR}/PARAMS/vent.${UID}.${NUM}.1D'{0}' > \
-                ${DIR}/PARAMS/lag.vent.${UID}.${NUM}.1D
+                ${DIR}/PARAMS/vent.${ID}.${NUM}.1D'{0}' > \
+                ${DIR}/PARAMS/lag.vent.${ID}.${NUM}.1D
             
             1dcat \
-                ${DIR}/PARAMS/vent.${UID}.${NUM}.1D'{0..$}' >> \
-                ${DIR}/PARAMS/lag.vent.${UID}.${NUM}.1D
+                ${DIR}/PARAMS/vent.${ID}.${NUM}.1D'{0..$}' >> \
+                ${DIR}/PARAMS/lag.vent.${ID}.${NUM}.1D
         fi
 
         # create mean draining vessel time series (+ lagged)
-        if [ ! -f ${DIR}/PARAMS/lag.dv.${UID}.${NUM}.1D ]; then
+        if [ ! -f ${DIR}/PARAMS/lag.dv.${ID}.${NUM}.1D ]; then
             3dmaskave \
                 -q -mask ${DIR}/anat_dv_ero.nii.gz \
-                ${DIR}/${INPUT}.${UID}.${NUM}.nii.gz > \
-                ${DIR}/PARAMS/dv.${UID}.${NUM}.1D
+                ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz > \
+                ${DIR}/PARAMS/dv.${ID}.${NUM}.1D
             
             1dcat \
-                ${DIR}/PARAMS/dv.${UID}.${NUM}.1D'{0}' > \
-                ${DIR}/PARAMS/lag.dv.${UID}.${NUM}.1D
+                ${DIR}/PARAMS/dv.${ID}.${NUM}.1D'{0}' > \
+                ${DIR}/PARAMS/lag.dv.${ID}.${NUM}.1D
             
             1dcat \
-                ${DIR}/PARAMS/dv.${UID}.${NUM}.1D'{0..$}' >> \
-                ${DIR}/PARAMS/lag.dv.${UID}.${NUM}.1D
+                ${DIR}/PARAMS/dv.${ID}.${NUM}.1D'{0..$}' >> \
+                ${DIR}/PARAMS/lag.dv.${ID}.${NUM}.1D
         fi
     done
     rm ${DIR}/anat_tmp*

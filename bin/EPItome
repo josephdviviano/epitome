@@ -34,7 +34,7 @@ import getpass
 import os, sys, stat
 import epitome as epi
 
-def get_modules(interactive=False, moduletype='pre', used=None):
+def get_modules(interactive=False, moduletype='pre', used=[]):
     """
     Prints the available modules. Optionally prompts the user to select one.
     If provided with a list of 'used' modules, these are stripped from the
@@ -583,10 +583,16 @@ def run_epitome():
     if epi.utilities.has_permissions(os.path.join(dir_data, expt)) == False:
         sys.exit()
 
-    # input unique identifier, disallowing strings
-    print('\nInput unique identifier for this pipeline (no spaces):')
-    UID = raw_input('UID: ')
-    UID.replace(' ', '_')
+    # input unique identifier
+    print('\nInput unique identifier for this pipeline (alphanumeric):')
+    ID = raw_input('ID: ')
+
+    # replace spaces with underscores, and remove every other special char
+    ID = ID.replace(' ', '_')
+    ID = ID.strip(",./;'[]\|-=+<>?:{}!@#$%^&*()`~")
+    ID = ID.strip('"')
+
+    print('\nYour ID: ' + str(ID))
 
     print('******************************************************************')
     print('Experiment: ' + str(expt) + '. Select image modality.')
@@ -608,9 +614,9 @@ def run_epitome():
     # get the date and time, current user, f_id
     datetime, user, f_id = get_date_user()
 
-    master = 'master_' + f_id + '_' + UID + '.sh'
-    cmd = 'cmd_' + f_id + '_' + UID + '.sh'
-    proc = 'proclist_' + f_id + '_' + UID + '.sh'
+    master = 'master_' + f_id + '_' + ID + '.sh'
+    cmd = 'cmd_' + f_id + '_' + ID + '.sh'
+    proc = 'proclist_' + f_id + '_' + ID + '.sh'
 
     # open up the master script, write common variables
     f = open(os.path.join(dir_data, expt, master), 'wb')
@@ -626,7 +632,7 @@ def run_epitome():
     f.write("""export DIR_AFNI='""" + str(dir_afni) + """'\n""")
     f.write("""export DIR_EXPT='""" + str(expt) + """'\n""")
     f.write("""export DATA_TYPE='""" + str(mode) + """'\n""")
-    f.write("""export UID='""" + str(UID) + """'\n""")
+    f.write("""export ID='""" + str(ID) + """'\n""")
     f.write('\n')
     f.write("""export CORES=""" + str(cores) + """\n""")
     f.write('export AFNI_DECONFLICT=OVERWRITE\n')
@@ -657,7 +663,7 @@ def run_epitome():
     f.write('export DIR_AFNI=${DIR_AFNI}\n')
     f.write('export DIR_EXPT=${DIR_EXPT}\n')
     f.write('export DATA_TYPE=${DATA_TYPE}\n')
-    f.write('export UID=${UID}\n')
+    f.write('export ID=${ID}\n')
     f.write('export SUB=${SUB}\n')
     f.write("""McRetroTS='/opt/mcretro/run_McRetroTS.sh """ +
             """/opt/MATLAB/MATLAB_Compiler_Runtime/v715'\n""")
@@ -729,10 +735,12 @@ def run_epitome():
     
     pipe_list = [] # keeps track of our command-list
     flag = 0 # breaks us out of the loop
+    used = []
     while flag == 0:
 
         print('\nPlease select the next QC module:')
-        module = get_modules(interactive=True, moduletype='qc')
+        module, used = get_modules(interactive=True, moduletype='qc', 
+                                                           used=used)
         if module == None:
             print('')
         else:

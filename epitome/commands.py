@@ -390,7 +390,7 @@ def linreg_calc_FSL(input_name):
     return line, output
 
 def lowpass(input_name):
-    import numpy.remainder as rem
+    import numpy as np
 
     output = 'lowpass'
 
@@ -414,7 +414,7 @@ def lowpass(input_name):
                 print('\nSelect window length (must be odd, default = 3):')
                 lowpass_param = selector_int()
 
-                if rem(window_length, 2) != 0:
+                if np.remainder(lowpass_param, 2) != 0:
                     flag = 1
                 else:
                     print('Window length must be odd!')
@@ -594,7 +594,7 @@ def check_motionind(dir_data, expt, mode):
     print('\nAdding subject-wise motion QC to the outputs.')
 
     line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_motionind ' + 
-             str(dir_data) + ' ' + str(expt) + ' ' + str(mode) + ' ${UID}')
+             str(dir_data) + ' ' + str(expt) + ' ' + str(mode) + ' ${ID}')
 
     return line, output
 
@@ -604,7 +604,7 @@ def check_spectra(dir_data, expt, mode):
     print('\nAdding subject-wise regressor spectra QC to the outputs.')
 
     line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_spectra ' + 
-            str(dir_data) + ' ' + str(expt) + ' ' +  str(mode) + ' ${UID}')
+            str(dir_data) + ' ' + str(expt) + ' ' +  str(mode) + ' ${ID}')
 
     return line, output
 

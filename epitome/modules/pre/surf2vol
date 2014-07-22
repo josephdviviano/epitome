@@ -22,35 +22,35 @@ for SESS in ${DIR_SESS}; do
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
     DIR_FS=`echo ${FS}/${DIR_EXPT}_${SUB}_${SESS}`
     
-    if [ ! -f ${DIR}/func_ctx.${UID}.${NUM}.nii.gz ]; then
+    if [ ! -f ${DIR}/func_ctx.${ID}.${NUM}.nii.gz ]; then
         # project surface data --> volume
         3dSurf2Vol \
-          -prefix ${DIR}/func_tmp_ctx.R.${UID}.${NUM}.nii.gz \
+          -prefix ${DIR}/func_tmp_ctx.R.${ID}.${NUM}.nii.gz \
           -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
           -surf_A ${DIR_FS}/SUMA/rh.white.asc \
           -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
-          -grid_parent ${DIR}/func_scaled.${UID}.${NUM}.nii.gz \
+          -grid_parent ${DIR}/func_scaled.${ID}.${NUM}.nii.gz \
           -map_func median \
           -f_steps 15 \
           -f_index nodes \
-          -sdata ${DIR}/${INPUT}.R.${UID}.${NUM}.niml.dset
+          -sdata ${DIR}/${INPUT}.R.${ID}.${NUM}.niml.dset
 
         3dSurf2Vol \
-          -prefix ${DIR}/func_tmp_ctx.L.${UID}.${NUM}.nii.gz \
+          -prefix ${DIR}/func_tmp_ctx.L.${ID}.${NUM}.nii.gz \
           -spec ${DIR_FS}/SUMA/${DIR_EXPT}_${SUB}_${SESS}_both.spec \
           -surf_A ${DIR_FS}/SUMA/lh.white.asc \
           -sv ${DIR_T1}/${DIR_EXPT}_${SUB}_${SESS}_SurfVol_Alnd_Exp+orig. \
-          -grid_parent ${DIR}/func_scaled.${UID}.${NUM}.nii.gz \
+          -grid_parent ${DIR}/func_scaled.${ID}.${NUM}.nii.gz \
           -map_func median \
           -f_steps 15 \
           -f_index nodes \
-          -sdata ${DIR}/${INPUT}.L.${UID}.${NUM}.niml.dset
+          -sdata ${DIR}/${INPUT}.L.${ID}.${NUM}.niml.dset
 
         # add all volumes to create smoothed cortical dataset
         3dcalc \
-          -prefix ${DIR}/func_ctx.${UID}.${NUM}.nii.gz \
-          -a ${DIR}/tmp/func_tmp_ctx.R.${UID}.${NUM}.nii.gz \
-          -b ${DIR}/tmp/func_tmp_ctx.L.${UID}.${NUM}.nii.gz \
+          -prefix ${DIR}/func_ctx.${ID}.${NUM}.nii.gz \
+          -a ${DIR}/tmp/func_tmp_ctx.R.${ID}.${NUM}.nii.gz \
+          -b ${DIR}/tmp/func_tmp_ctx.L.${ID}.${NUM}.nii.gz \
           -expr 'a+b'
     fi
 done

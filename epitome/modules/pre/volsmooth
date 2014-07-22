@@ -26,18 +26,18 @@ for SESS in ${DIR_SESS}; do
         if [ ! -f ${SESS}/anat_smoothmask.nii.gz ]; then 
             3dresample \
                 -prefix ${SESS}/anat_smoothmask.nii.gz \
-                -master ${SESS}/${INPUT}.${UID}.01.nii.gz \
+                -master ${SESS}/${INPUT}.${ID}.01.nii.gz \
                 -rmode NN \
                 -inset ${SESS}/${MASK}.nii.gz
         fi
 
         # resample mask to single-run space, then smooth
-        if [ ! -f ${SESS}/func_volsmooth.${UID}.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz ]; then
             3dBlurInMask \
-                -prefix ${SESS}/func_volsmooth.${UID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
                 -Mmask ${SESS}/anat_smoothmask.nii.gz \
                 -FWHM ${FWHM} \
-                -input ${SESS}/${INPUT}.${UID}.${NUM}.nii.gz
+                -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
         fi
     done

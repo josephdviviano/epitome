@@ -29,11 +29,11 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        if [ ! -f ${SESS}/func_scrubbed.${UID}.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_scrubbed.${ID}.${NUM}.nii.gz ]; then
             python ${DIR_PIPE}/epitome/TRdrop.py \
                 ${SESS} \
                 ${INPUT} \
-                ${UID} \
+                ${ID} \
                 ${NUM} \
                 ${HEAD} \
                 ${FD} \
