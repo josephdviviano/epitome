@@ -146,11 +146,7 @@ The rest of the items can remain blank or at their defaults. You do not need to 
 
 \subsubsection{Troubleshooting x2go}
 
-\subsubsubsection{RSA Keys}
-
 In some cases, you will receive an error involving the RSA key, and will not be allowed to log into the server. Your RSA keys are stored in \texttt{\atilde/.ssh/known\_hosts}. You can inspect the contents of this file by typing \texttt{cat \atilde/.ssh/known\_hosts} into the terminal. If you find an entry that starts with \texttt{130.63.40.171}, remove it using either: \texttt{gedit \atilde/.ssh/known\_hosts} or \texttt{vi \atilde/.ssh/known\_hosts} (\href{http://glaciated.org/vi/}{here are some instructions for vi}). If you are having trouble doing this, you can simply reset the \texttt{known\_hosts} file by removing it with \texttt{rm \atilde/.ssh/known\_hosts} (this might affect other systems relying on RSA keys, but I will assume it won't if you are following these instructions). You should now be able to log into the server using x2go.
-
-\subsubsubsection{OSX and Keyboard Mappings}
 
 By default, XFCE via x2go does not play well with OSX, a common symptom being the \texttt{tab} and \texttt{p} keys not working properly. I have configured the server to play nicely with Macintosh computing devices, but in case this needs to be resolved again, you simply need to go to your \texttt{~/.config/xfce4/xfconf/xfce-perchannel-xml/} directory and delete the \texttt{keyboard-layouts.xml} and \texttt{xfce4-keyboard-shortcuts.xml} files, log out, and log back in again.
 
