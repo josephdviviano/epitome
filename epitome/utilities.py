@@ -22,8 +22,8 @@ def has_permissions(directory):
     if os.access(directory, 7) == True:
         flag = True
     else:
-        print('You do not have write access to directory ' + str(directory))
-        print('Please contact a system administrator and try again.')
+        print('\nYou do not have write access to directory ' + str(directory))
+        print('Please contact a system administrator and try again.\n')
         flag = False
 
     return flag

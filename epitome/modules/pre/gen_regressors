@@ -224,7 +224,23 @@ for SESS in ${DIR_SESS}; do
                 ${DIR}/PARAMS/wm_local15.${NUM}.nii.gz'[0..$]'
         fi
 
-        # make ventricle time series (+ lagged)
+        # create mean white matter regressors (+ lagged)
+        if [ ! -f ${DIR}/PARAMS/wm.${NUM}.1D ]; then
+            3dmaskave \
+                -q -mask ${DIR}/anat_wm_ero.nii.gz \
+                ${DIR}/${INPUT}.${NUM}.nii.gz > \
+                ${DIR}/PARAMS/wm.${NUM}.1D
+            
+            1dcat \
+                ${DIR}/PARAMS/wm.${NUM}.1D'{0}' > \
+                ${DIR}/PARAMS/lag.wm.${NUM}.1D
+            
+            1dcat \
+                ${DIR}/PARAMS/wm.${NUM}.1D'{0..$}' >> \
+                ${DIR}/PARAMS/lag.wm.${NUM}.1D
+        fi
+
+        # create mean ventricle time series (+ lagged)
         if [ ! -f ${DIR}/PARAMS/lag.vent.${NUM}.1D ]; then
             3dmaskave \
                 -q -mask ${DIR}/anat_vent_ero.nii.gz \
@@ -240,7 +256,7 @@ for SESS in ${DIR_SESS}; do
                 ${DIR}/PARAMS/lag.vent.${NUM}.1D
         fi
 
-        # make draining vessel time series (+ lagged)
+        # create mean draining vessel time series (+ lagged)
         if [ ! -f ${DIR}/PARAMS/lag.dv.${NUM}.1D ]; then
             3dmaskave \
                 -q -mask ${DIR}/anat_dv_ero.nii.gz \

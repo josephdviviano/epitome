@@ -6,17 +6,19 @@ POLORT=`echo ${2}`
 GS_FLAG=`echo ${3}`
 VENT_FLAG=`echo ${4}`
 DV_FLAG=`echo ${5}`
-WM_FLAG=`echo ${6}`
+WM_LOC_FLAG=`echo ${6}`
+WM_GLO_FLAG=`echo ${7}`
 
 echo '************************************************************************'
 echo '                  Time series filtering of fMRI data'
 echo ''
 echo '   - Computes nusiance time series from tissues, motion paramaters,'
-echo '   - Optionally uses the global mean: ' ${GS_FLAG} ','
-echo '   - Optionally uses the ventricles: ' ${VENT_FLAG} ','
-echo '   - Optionally uses the draining vessels: ' ${DV_FLAG} ','
-echo '   - Optionally uses the local white matter: ' ${WM_FLAG} ','
-echo '   - Detrends each with legrende polynomials up to order ' ${POLORT}','
+echo '   - Optionally uses the global mean: ${GS_FLAG},'
+echo '   - Optionally uses the ventricles: ${VENT_FLAG},'
+echo '   - Optionally uses the draining vessels: ${DV_FLAG},'
+echo '   - Optionally uses the local white matter: ${WM_LOC_FLAG},'
+echo '   - Optionally uses the mean white matter: ${WM_GLO_FLAG},'
+echo '   - Detrends each with legrende polynomials up to order ${POLORT},'
 echo '   - Computes fit of run with all nusiances via linear regression,'
 echo '   - Computes temporal signal to noise ratio,'
 echo '   - Subtracts noise model from each voxel, retaining the mean.'
@@ -117,6 +119,25 @@ for SESS in ${DIR_SESS}; do
                 ${SESS}/PARAMS/lag.wm_local15.${NUM}.nii.gz
         fi
 
+        # detrend mean white matter regressors
+        if [ ! -f ${SESS}/PARAMS/det.wm.${NUM}.1D ]; then
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort ${POLORT} \
+                ${SESS}/PARAMS/wm.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.wm.${NUM}.1D
+        fi
+
+        if [ ! -f ${SESS}/PARAMS/det.lag.wm.${NUM}.1D ]; then
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort ${POLORT} \
+                ${SESS}/PARAMS/lag.wm.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.lag.wm.${NUM}.1D
+        fi
+
         # detrend global mean regressors
         if [ ! -f ${SESS}/PARAMS/det.global_mean.${NUM}.1D ]; then
             3dDetrend \
@@ -157,11 +178,17 @@ for SESS in ${DIR_SESS}; do
             fi
 
             # optionally add the local white matter regressors
-            if [ `echo ${WM_FLAG}` = 'on' ]; then
+            if [ `echo ${WM_LOC_FLAG}` = 'on' ]; then
                 CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm_local15.${NUM}.nii.gz`
                 CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm_local15.${NUM}.nii.gz`
             fi
-
+            
+            # optionally add the global white matter regressors
+            if [ `echo ${WM_GLO_FLAG}` = 'on' ]; then
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm.${NUM}.nii.gz`
+            fi
+            
             # and add the physio regressors if they exist
             if [ -f ${SESS}/PARAMS/det.phys.${NUM}.1D ]; then
                 CMD=`echo ${CMD} ${SESS}/PARAMS/det.phys.${NUM}.1D`

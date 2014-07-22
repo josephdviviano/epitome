@@ -286,15 +286,19 @@ for SESS in ${DIR_SESS}; do
                    -expr "(a-b)/b*c"
             fi
  
-            # SCALE: global mean = 1000, arbitrary units, no normalization
+            # SCALE: set global mean = 1000, arbitrary units, no normalization
             if [ ${NORMALIZE} == 'scale' ]; then
+                MEAN=`3dmaskave \
+                    -quiet \
+                    -mask ${SESS}/anat_EPI_brain.nii.gz \
+                    ${SESS}/func_tmp_mean.${NUM}.nii.gz`
+
                 3dcalc \
                     -prefix ${SESS}/func_scaled.${NUM}.nii.gz \
                     -datum float \
                     -a ${SESS}/func_motion.${NUM}.nii.gz \
-                    -b ${SESS}/func_tmp_mean.${NUM}.nii.gz \
-                    -c ${SESS}/anat_EPI_mask.nii.gz \
-                    -expr "a*(1000/b)*c"
+                    -b ${SESS}/anat_EPI_mask.nii.gz \
+                    -expr "a*(1000/${MEAN})*b"
             fi
 
         fi

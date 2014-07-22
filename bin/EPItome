@@ -35,9 +35,11 @@ import getpass
 import os, sys, stat
 import epitome as epi
 
-def get_modules(interactive=False, moduletype='pre'):
+def get_modules(interactive=False, moduletype='pre', used=None):
     """
     Prints the available modules. Optionally prompts the user to select one.
+    If provided with a list of 'used' modules, these are stripped from the
+    output.
     """
 
     # retrieve settings from config.py
@@ -59,6 +61,14 @@ def get_modules(interactive=False, moduletype='pre'):
             print('    ' + str(m))
         return None
 
+    # if we get a used list, remove them from the module list
+    if used != None:
+        for u in used:
+            try:
+                module_list.remove(u)
+            except:
+                pass
+    
     module_list.sort()
 
     # print information to the screen
@@ -77,7 +87,7 @@ def get_modules(interactive=False, moduletype='pre'):
         try:
             selection = module_list[int(response)-1]
         except:
-            print """Didn't give me a valid module number! Try again."""
+            print("""Didn't give me a valid module number! Try again.""")
             selection = None 
 
         # maybe there is a better way of doing this...
@@ -85,8 +95,11 @@ def get_modules(interactive=False, moduletype='pre'):
             print("""Didn't give me a valid module number! Try again.""")
             selection = None
 
-        return selection
+        # if we get a valid response, append it to the used list
+        if selection != None:
+            used.append(selection)
 
+        return selection, used
 
 def get_mode(expt, interactive=False):
     """
@@ -141,6 +154,10 @@ def get_experiments(interactive=False):
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
+    # check permissions
+    if epi.utilities.has_permissions(dir_data) == False:
+        sys.exit()
+
     # get a sorted list of the experiments
     expt_list = [d for d in os.listdir(dir_data)
                          if os.path.isdir(os.path.join(dir_data, d))]
@@ -158,7 +175,7 @@ def get_experiments(interactive=False):
 
     if interactive == False:
         print("""You can inspect each experiment's folder structure using""")
-        print("""'epitome check <experiment>'.""")
+        print("""'epitome check <experiment>'.\n""")
     else:
         response = raw_input('experiment #:')
 
@@ -186,14 +203,21 @@ def print_help(module):
     helpfile = json.load(fname)
 
     # print the contents of the JSON line by line
+    print('')
     if module != None:
         for line in helpfile[module]:
             print line
+    print('')
 
 def help_query():
 
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+
+    # # check permissions
+    # if epi.utilities.has_permissions(
+    #                      os.path.join(dir_pipe, 'epitome/modules')) == False:
+    #     sys.exit()
 
     # ask which module type we want to look at
     module_types = os.listdir(os.path.join(dir_pipe, 'epitome/modules'))
@@ -204,17 +228,17 @@ def help_query():
 
     # prompt the user to select a module type 
     print('\nWhich kind of module?')
-    response = input('module #: ')
+    response = raw_input('module #: ')
     
     # attempt to retrieve the selected module
     try:
-        selection = module_types[int(response-1)]
+        selection = module_types[int(response)-1]
     except:
-        print("""Didn't input a valid module type number! Default = 'pre'.""")
+        print("""\nYou didn't input a valid number! Default = 'pre'.""")
         selection = 'pre'
 
     # present the user with a list
-    print('Which program do you need help with?')
+    print('Which module do you need help with?')
     module = get_modules(interactive=True, moduletype=str(selection))
 
     # print help for that module
@@ -288,6 +312,10 @@ def check_directories(expt):
 
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+
+    # check permissions
+    if epi.utilities.has_permissions(os.path.join(dir_data, expt)) == False:
+        sys.exit()
     
     # attempt to access the subjects for a given experiment
     try:
@@ -317,8 +345,10 @@ def check_directories(expt):
                 mode_dict[str(mode)] = n_runs
 
     # print out the file counts per image modality
+    print('\n****************************************************************')
     for mode_key in mode_dict:
         print str(mode_dict[mode_key]) + ' NIFTIs found in ' + str(mode_key)
+    print('****************************************************************\n')
 
 def check_paths():
     """
@@ -329,19 +359,21 @@ def check_paths():
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
     
     if os.path.isdir(dir_data) == False:
-        print 'Data directory does not exist:' + str(dir_data)
+        print('Data directory does not exist:' + str(dir_data))
 
     elif os.path.isdir(dir_pipe) == False:
-        print 'EPItome-XL directory does not exist:' + str(dir_pipe)
+        print('EPItome-XL directory does not exist:' + str(dir_pipe))
 
     elif os.path.isdir(dir_afni) == False:
-        print 'AFNI directory does not exist:' + str(dir_afni)
+        print('AFNI directory does not exist:' + str(dir_afni))
 
     else:
-        print 'config.py appears to be properly configured! '
-        print '     data directory: ' + str(dir_data)
-        print '     pipeline directory: ' + str(dir_pipe)
-        print '     AFNI directory: ' + str(dir_afni)
+        print('\n*********************************************')
+        print('config.py appears to be properly configured!\n')
+        print('     data directory: ' + str(dir_data))
+        print('     pipeline directory: ' + str(dir_pipe))
+        print('     AFNI directory: ' + str(dir_afni))
+        print('*********************************************\n')
 
 def writer_sub(pipe_list, line, cmd, f, output, bkup):
     
@@ -383,9 +415,9 @@ def get_date_user():
     return datetime, user, f_id
 
 def run_cleanup():
-    print('')
-    print('*** RUNNING EPItome-XL CLEANUP. THIS DELETES DATA ***')
-    print('')
+    print('******************************************************************')
+    print('***       RUNNING EPItome-XL CLEANUP. THIS DELETES DATA        ***')
+    print('******************************************************************')
 
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
@@ -536,7 +568,7 @@ def run_epitome():
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
     # make sure we have permissions to access the experiment directory.
-    if epi.utilities.has_permissions(dir_path) == False:
+    if epi.utilities.has_permissions(dir_data) == False:
         sys.exit()
 
     # get the experiment
@@ -549,7 +581,7 @@ def run_epitome():
             flag = 1
 
     # now check to make sure we have experiment-specific permissions.
-    if epi.utilities.has_permissions(os.path.join(dir_path, expt)) == False:
+    if epi.utilities.has_permissions(os.path.join(dir_data, expt)) == False:
         sys.exit()
     
     print('******************************************************************')
@@ -621,7 +653,8 @@ def run_epitome():
     f.write('export DIR_EXPT=${DIR_EXPT}\n')
     f.write('export DATA_TYPE=${DATA_TYPE}\n')
     f.write('export SUB=${SUB}\n')
-    f.write("""McRetroTS='/opt/mcretro/run_McRetroTS.sh /opt/MATLAB/MATLAB_Compiler_Runtime/v715'\n""")
+    f.write("""McRetroTS='/opt/mcretro/run_McRetroTS.sh """ +
+            """/opt/MATLAB/MATLAB_Compiler_Runtime/v715'\n""")
     f.write('EOF\n')
     f.write('\n')
 
@@ -639,16 +672,18 @@ def run_epitome():
         pipe_list, output = writer_sub(pipe_list, 
                                        line, cmd, f, output, None)
         if output != None:
+            used = ['init_EPI'] # start the 'used module' list
             flag = 1 # breaks us out of the loop
  
     # now loop through the modules until the user aborts
     flag = 0 # breaks us out of the loop
     while flag == 0:
 
-        print('')
-        print('Please select the next pipeline module:')
-        print('')
-        module = get_modules(interactive=True, moduletype='pre')
+        print('\nPlease select the next pipeline module:\n')
+        module, used = get_modules(interactive=True, 
+                                    moduletype='pre',
+                                          used=used)
+
         if module == None:
             print('')
         else:
@@ -662,8 +697,7 @@ def run_epitome():
                                            line, cmd, f, output, bkup)
 
         # print the current pipeline configuration, ask to continue
-        print('')
-        print('Current pre-processing pipeline:')
+        print('\nCurrent pre-processing pipeline:')
         for pipe in pipe_list:
             print('    ' + str(pipe))
         print('')
@@ -673,23 +707,19 @@ def run_epitome():
             flag = 1
 
     # add each subject to a queue file, close the subject loop
-    f.write('\n')
-    f.write('# append this subject to the process queue\n')
-    f.write('echo bash ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd +
-                  ' >> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
-    f.write('done\n')
+    f.write('\n# append this subject to the process queue')
+    f.write('\necho bash ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd +
+                           ' >> ${DIR_DATA}/${DIR_EXPT}/' + proc)
+    f.write('\ndone')
  
     # add user-defined qc runs
-    f.write('\n')
-    f.write('# calls to QC programs\n')
+    f.write('\n# calls to QC programs\n')
     
     pipe_list = [] # keeps track of our command-list
     flag = 0 # breaks us out of the loop
     while flag == 0:
 
-        print('')
-        print('Please select the next QC module:')
-        print('')
+        print('\nPlease select the next QC module:')
         module = get_modules(interactive=True, moduletype='qc')
         if module == None:
             print('')
@@ -704,9 +734,7 @@ def run_epitome():
                                            line, proc, f, output, bkup)
 
         # print the current pipeline configuration, ask to continue
-        print('')
-        print('The QC pipeline currently looks like this:')
-        print('')
+        print('\nThe QC pipeline currently looks like this:')
         for pipe in pipe_list:
             print pipe
         print('')
@@ -715,8 +743,7 @@ def run_epitome():
         if response == 'stop':
             flag = 1
 
-    print('')
-    print('OK, saving master script, and generating subject-specific scripts')
+    print('\nSaving master script & generating subject-specific scripts')
     # close the file, make executable by owner + group, and execute
     f.write('\n')
     f.close()
