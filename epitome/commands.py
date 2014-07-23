@@ -583,7 +583,7 @@ def check_runs(dir_data, expt, mode):
 
     print('\nAdding NIFTI dimension-checking QC to the outputs.')
 
-    line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_runs ' + 
+    line = ('echo bash ${DIR_PIPE}/epitome/modules/qc/check_runs ' + 
              str(dir_data) + ' ' + str(expt) + ' ' + str(mode))
 
     return line, output

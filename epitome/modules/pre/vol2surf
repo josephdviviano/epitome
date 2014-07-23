@@ -9,7 +9,7 @@ EOF
 cat <<"EOF"
 
 echo '************************************************************************'
-echo '             Projects functional data onto a cortical surface'
+echo '            Projects functional data onto a cortical surface'
 echo ''
 echo '************************************************************************'
 

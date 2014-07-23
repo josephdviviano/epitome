@@ -211,7 +211,8 @@ def regressor_spectra(path, expt, mode, uid):
 
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 
-                  'qc_' + str(mode) + '_' + str(uid) '_regressor_spectra.pdf'))
+                  'qc_' + str(mode) + '_' + str(uid) + 
+                                           '_regressor_spectra.pdf'))
     for subj in subjects:
 
         # define some useful shortcuts
