@@ -272,7 +272,8 @@ def individual_motion_plot(path, expt, mode, uid):
 
     # export PDF
     pdf = PdfPages(os.path.join(path, expt, 
-                  'qc_' + str(mode) + '_' + str(uid) '_motion_individual.pdf'))
+                  'qc_' + str(mode) + '_' + str(uid) + 
+                                           '_motion_individual.pdf'))
     fig_FD.savefig(pdf, format='pdf')
     fig_DV.savefig(pdf, format='pdf')
 

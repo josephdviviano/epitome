@@ -1,8 +1,11 @@
 #!/bin/bash
+DIR_DATA=`echo ${1}`
+DIR_EXPT=`echo ${2}`
 
 # report raw data's file dimensions (4D)
 echo 'Generating 4D file dimensions for '${DIR_EXPT}
 echo Subj_ID,Session,Run,X,Y,Z,TR > ${DIR_DATA}/${DIR_EXPT}/EPI_overview.csv
+SUBJECTS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/*/`
 for SUB in ${SUBJECTS}; do
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
     for SESS in ${DIR_SESS}; do

@@ -36,9 +36,12 @@ def reg_check(path, expt, mode):
     pdf = PdfPages(os.path.join(path, expt, 'qc_reg_EPI_to_T1.pdf'))
     for subj in subjects:
 
-        edge = os.path.join(path, expt, subj, 'T1/SESS01/anat_T1_edge.nii.gz')
-        anat = os.path.join(path, expt, subj, 'T1/SESS01/anat_T1_brain.nii.gz')
-        reg = os.path.join(path, expt, subj, mode, 'SESS01/reg_EPI_to_T1.nii.gz')
+        edge = os.path.join(path, expt, subj, 
+                                       'T1/SESS01/anat_T1_edge.nii.gz')
+        anat = os.path.join(path, expt, subj, 
+                                       'T1/SESS01/anat_T1_brain.nii.gz')
+        reg = os.path.join(path, expt, subj, mode, 
+                                            'SESS01/reg_EPI_to_T1.nii.gz')
 
         # create edge dataset if it doesn't exist
         print 'working on subject ' + str(subj)
