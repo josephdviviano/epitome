@@ -1,4 +1,4 @@
-%% Harford User Manual, Viviano, Joseph David Apr. 2014
+%% EPItome-xl User Manual, Viviano, Joseph David Apr. 2014
 \documentclass[final,titlepage,letterpaper,oneside,12pt]{article}
 \usepackage[usenames,dvipsnames]{xcolor} % colors
 \usepackage{tikz}                       % graphs
@@ -7,6 +7,7 @@
 \usepackage{fourier}                    % fonts
 \usepackage[T1]{fontenc}                % fonts
 \usepackage{natbib}                     % bibliography
+\usepackage{dirtree}
 \usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=MidnightBlue, citecolor=MidnightBlue,urlcolor=MidnightBlue]{hyperref}                % custom colors
 \usetikzlibrary{arrows}                 % arrows
 \usepackage{amsmath}                    % equations
@@ -56,10 +57,6 @@
 \begin{center}
 \begin{Huge}
 EPItome-xl\par
-\begin{small}
-on\par
-\end{small}
-Harford\par
 \end{Huge}
 \end{center}
 \vspace*{2cm}
@@ -85,314 +82,65 @@ Harford\par
 \tableofcontents
 \newpage
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Introduction
+% Overview of the Pipeline
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-This server was built by a complete stranger to server-building, and I undoubtedly made some silly mistakes along the way. This document is my effort to crystallize these decisions for those who paid for it (henceforth \textit{the money}) and whoever takes over responsibility from me (henceforth \textit{the unlucky}). Hopefully this isn't my last job ever, and I still walk this earth. If that is true, feel free to contact me at any time \texttt{joseph.d.viviano@gmail.com} 
+EPItome-xl is a program designed for the flexible construction of MRI pre-processing pipelines, with a focus on functional MRI images and their associated problems. Its primary function is to take BASH modules and chain them together in any way the user desires to create a set of batch-processing scripts for an MRI experiment. These modules are not necessarily dependent on one another, allowing users of this package to easily extend the functionality of EPItome-xl by simply depositing a shell script into the appropriate module folder and writing the associated python wrapper command (and documentation!)
+
+The goal of this design is to allow multiple levels of control for users of different skills with the same interface. EPItome facilitates the construction of very robust pre-processing scripts that can be run on your computer or in a distributed computing environment by only answering a few high-level questions, hopefully making it easy for beginners to get started. The scripts that are output by these commands are otherwise fully tweak-able and well commented -- they encourage experimentation. These modified modules could eventually evolve into new features altogether, which are easily added to the existing pool.
+
+This system is also designed to facilitate easy-to-reproduce research, as these scripts can be easily re-purposed for new experiments that follow the EPItome folder structure. In this way, the outputs of EPItome act as your lab notebook, and can be shared with collaborators or reviewers.
+
+This manual will progress to more advanced topics in the end. First, I will explain the basic use of EPItome-xl. Next, I'll walk the user through a few common pre-processing tasks. I'll then explain the modules one-by-one, and finish with an explanation on how to add new modules.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% How to Connect to the Server Remotely
+% Requirements
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Connecting}
+\section{Requirements \& Dependencies}
 
-To facilitate easy access to the server from your personal computer, on or off campus, we have configured three standard access methods.
+EPItome contains a small number of programs that actually analyze data, but also makes heavy use of widely-used MRI analysis tools and a number of python distributions. The user is assumed to have properly installed and configured FSL, AFNI, Freesurfer, and the python packages numpy, scipy, and matplotlib.
 
-\subsection{Samba: Access to Shared Files On Your Desktop}
+The program itself was built and tested on a Ubuntu 12.04 server. I imagine it will work well in any linux environment. It should run on Mac OS X as well, but this remains unverified. There will be no official support for Windows.
 
-All non-MRI data is accessible and editable through the finder/explorer window right on your desktop through a file-sharing service called Samba, assuming you have permission to do so. Contact an administrator to change permissions.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The functionality of the pipeline
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Using EPItome-xl}
 
-This is a good system for accessing behavioural data stored on the server. Some of this data is protected, and may not be accessible unless you are a member of the \texttt{cnnlabdata} group. An administrator can add you to this group if you need access.
+After installation, EPItome requires you to specify a few paths. These settings can be found in the /epitome/config.py file.
 
-\subsubsection{Mac OSX}
-
-First, click on your desktop. In your menu bar, select \texttt{go}, \texttt{connect to server}, and type \texttt{smb://130.63.40.171}, after which you need only to enter your username and password for the server.
-
-\subsubsection{Windows}
-
-First, click on your start menu, and open \texttt{run}. Type \texttt{\\130.63.40.171}, hit enter, and enter your username / password for the server. You should now have access to the CNNLAB folders in your Windows Explorer program.
- 
-\subsubsection{Administering Samba}
-
-Samba is annoying and maintains its own set of passwords and permissions. This is particularly annoying because you will need to find an elegant way for users to set this password up. I haven't.
-
-First, you need to add an existing user to samba using \texttt{smbpasswd -a [
-username]}. Next we add \texttt{[username]}  to the \texttt{/etc/samba/smbusers} file in the form \texttt{[username] = "[username]"}. I've configured samba to mount \texttt{/srv/CNNLAB} as a writable directory structure in \texttt{/etc/samba/smb.conf} under the \texttt{[CNNLAB]} section. More directories could be added in this way. 
-
-\subsection{SSH}
-
-If you are comfortable with terminal-only access, you can use the \texttt{ssh} command on all Mac or Linux systems (normally, this is already installed). Windows users should install \href{http://www.chiark.greenend.org.uk/~sgtatham/putty/}{PuTTY} to gain access to the \texttt{ssh} command in the Windows terminal.
-
-The major advantage of terminal-only access is lag-free operation on very slow network connections, and the ability to log in to the server from any computer with zero configuration. To access the server, enter the command \texttt{ssh -p 45100 [your username]@130.63.40.171}, where \texttt{[your username]} is the login name registered on Harford. If you require a username, please contact one of the administrators. You will next need to enter your case-sensitive password associated with your user account and should have access to the server.
-
-\subsection{x2go}
-
-Normally, you will want to view a full graphic-user interface while you interact with the server. This will allow you to easily view the data remotely, and make use of various programs not available with terminal-only access. To do this, we use x2go (\href{http://wiki.x2go.org/doku.php}{download x2go client here}). On Windows and Mac, you should be able to open x2go by clicking on the installed icon. On Linux, you may need to type \texttt{x2goclient} into the terminal.
-
-Configuring x2go is fairly straightforward. First, click the `new session' button, and set these values:
-
-\begin{itemize} \itemsep-2pt
-    \item{Session name: [whatever you want ... I chose Harford]}
-    \item{Host: 130.63.40.171}
-    \item{Login: [your username]}
-    \item{SSH port: 45100}
-    \item{Session type: XFCE}
+\begin{itemize}
+    \item{dir\_data: should point to your MRI experiment folder.}
+    \item{dir\_pipe: should point to your installation of EPItome-xl.}
+    \item{dir\_afni: should point to your installation of AFNI.}
+    \item{cores: could be set to the maximum number of cores you wish EPItome to use (defaults to the maximum possible -1).}
 \end{itemize}
 
-You might notice that this is almost identical to the information that we use to \texttt{ssh} into the server, because that is what we are actually doing! The only additional setting regards the \texttt{session type}, as we now need to specify the graphic user interface.
+EPItome-xl comes with a few command-line interfaces. EPItome is used to inspect data in the MRI directory, returns information on the currently-available modules, can be used to construct new pipelines, and to remove unwanted data from the MRI directory cleanly. EPIphysio is a tool built to parse physiological data from the BIOPAK 150 unit we have installed at York University (Toronto), and might need to be adapted / extended to work with other units. EPIfolder is used to generate an appropriate folder structure in the MRI directory for the EPItome pipeline to work on.
 
-The rest of the items can remain blank or at their defaults. You do not need to configure anything specifically under the connection or misc tab. However, here you can set performance values to your liking, especially to compensate for a slow connection. Try moving the slider to the left before changing the picture quality settings manually. Finally, click `OK' and log into the server by clicking on the newly created button on the right hand side. You will need to enter your password for the server here.
+The MRI directory itself must be organized as follows:
 
-\subsubsection{Troubleshooting x2go}
+\dirtree{%
+    .1 /.
+    .2 EXPERIMENTS.
+    .3 SUBJECTS.
+    .4 MODE.
+    .5 SESS.
+    .6 RUN.
+    .2 FREESURFER.
+    .3 SUBJECTS.
+}
 
-In some cases, you will receive an error involving the RSA key, and will not be allowed to log into the server. Your RSA keys are stored in \texttt{\atilde/.ssh/known\_hosts}. You can inspect the contents of this file by typing \texttt{cat \atilde/.ssh/known\_hosts} into the terminal. If you find an entry that starts with \texttt{130.63.40.171}, remove it using either: \texttt{gedit \atilde/.ssh/known\_hosts} or \texttt{vi \atilde/.ssh/known\_hosts} (\href{http://glaciated.org/vi/}{here are some instructions for vi}). If you are having trouble doing this, you can simply reset the \texttt{known\_hosts} file by removing it with \texttt{rm \atilde/.ssh/known\_hosts} (this might affect other systems relying on RSA keys, but I will assume it won't if you are following these instructions). You should now be able to log into the server using x2go.
+\noindent The Freesurfer subject directory should point to the Freesurfer directory in your MRI folder -- this can easily be accomplished using a link. The remaining folder structure is perhaps best generated by using the included EPIfolder tool (or via a home-brew script).
 
-By default, XFCE via x2go does not play well with OSX, a common symptom being the \texttt{tab} and \texttt{p} keys not working properly. I have configured the server to play nicely with Macintosh computing devices, but in case this needs to be resolved again, you simply need to go to your \texttt{~/.config/xfce4/xfconf/xfce-perchannel-xml/} directory and delete the \texttt{keyboard-layouts.xml} and \texttt{xfce4-keyboard-shortcuts.xml} files, log out, and log back in again.
-
-\subsection{Passwords}
-
-Your default password can be changed to something more easily remembered by doing the following:
-
-\begin{enumerate} \itemsep-2pt
-
-    \item{SSH into the server using port \href{http://en.wikipedia.org/wiki/Looking_Glass_Studios}{45100}.}
-
-    \begin{itemize} \itemsep-2pt
-        
-        \item{Harford uses a non-standard SSH port to prevent random attacks. This requires you to specify it at the command line with the following command: \texttt{ssh -p 45100 [your username]\@130.63.40.171}.}
-
-    \end{itemize}
-    
-    \item{Use the \texttt{passwd} command.}
-    
-    \begin{itemize} \itemsep-2pt
-        
-        \item{If you type passwd at the command line, you will be prompted for your old annoying password, and asked to enter a new one.Your new password must satisfy the following conditions:}
-        
-        \begin{itemize} \itemsep-2pt
-            \item{1 Uppercase letter}
-            \item{1 lowercase letter}
-            \item{1 number}
-            \item{1 symbol (i.e., *, \_\#\$\%)}
-            \item{12 characters length minimum.}
-        \end{itemize}
-        
-        \item{This does not need to be hard to remember! Computer no think like human.}
-        
-        \begin{itemize} \itemsep-2pt
-            
-            \item{\texttt{\#sQ\_} is easy for a computer to guess.}
-
-            \item{\texttt{Br4in-fun-4eva!} is much harder.}
-
-        \end{itemize}
-    \end{itemize}
-\end{enumerate}
-
-Be sure to write your password down. If you forget your password, an administrator can reset it for you. If you \textit{are} an administrator, you should know you can change \texttt{username}'s password by dropping to \texttt{root} and typing \texttt{passwd [username]}.
-
-Also, recall that samba and unix passwords are \textit{not} automatically synchronized. [This really should be fixed.]
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The Hardware we have here
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Hardware}
-
-Harford is a \texttt{Thinkserver TS440 ($8 \times 3.5"$) HDD Hot-Swappable} server loaded with 4 HHD at the moment. Hard drive caddy part \texttt{\# 03X3969, FRU HS 3.5” HDD Tray V3.0}. It is loaded with 4 $\times$ Western Digital RED 4.0 TB 5400 HDD, configured in RAID 1+0. This currently leaves us with 8 TB of usable hard drive space, striped arrays, and on-site redundancy. It can easily be expanded to 2$\times$ that with an additional 4 drives.
-
-\subsection{Hardware List}
-
-Currently, Harford contains:
-
-\begin{enumerate} \itemsep-2pt
-    \item{Thinkserver TS440 [70AQ000CUX].}
-    \item{20 GB RAM [2$\times$8 GB added, 2$\times$2 GB stock].}
-    \item{16 TB of WD RED drives in RAID 1+0 for 8 TB of usable space.}
-    \item{NVIDIA GeForce 640 1GB RAM GPU.}
-    \item{Intel Xeon E3-1245V3 / 3.4 GHz $\times$ 8 cores.}
-\end{enumerate}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The way I set things up
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Server Architecture}
-\subsection{Partitions}
-
-At the moment, Harford consists of three partitions: 
-
-\begin{enumerate}
-    \item{\texttt{/boot}: a 200 MB partition that is integral to the life of the server. This contains the \textit{Linux kernels} of the system -- the server's brainstem. Do not mess with this partition.}
-    
-    \item{\texttt{/}: a 75 GB partition containing all user \texttt{/home} folders, software, and the operating system. This \textit{should} be large enough for indefinite expansion, if people don't store data in their home folders.}
-    
-    \item{\texttt{/srv}: a 6.59 TB partition containing all of our data.}
-\end{enumerate}
-
-
-\begin{center}
-\textbf{NB: this means that the lion's share of the disk space is found under \texttt{/srv} and therefore large files should \textit{always} be kept there!}
-\end{center}
-
-\subsection{Operating System}
-
-I chose Ubuntu Server 12.04 LTS for its excellent support, modern features, and compatibility with the NeuroDebian project (\url{neuro.debian.net}). I named the server Harford after the Kubrickian hero. When I first installed the server, I was left only with a basic terminal. To get things normal-looking, I had to \texttt{sudo apt-get install} the following:
-
-\noindent
-\begin{small}
-\begin{itemize} \itemsep-2pt
-    \item{openssh-server}
-    \item{xfce4}
-    \item{kde-plasma-desktop}
-    \item{synaptic}
-    \item{lightdm-gtk-greeter}
-    \item{jockey-gtk}
-    \item{dmz-cursor-theme} 
-    \item{xubuntu-icon-theme}
-    \item{elementary-icon-theme}
-\end{itemize}
-\end{small}
-
-
-This will produce a basic desktop environment for you to work in. I include both the \texttt{xfce4} and \texttt{kde} desktop environments, which each have their own merits and utility. They essentially control the graphic user interface of the server but do not differ substantially in actual usability.
-
-A note on what these basic programs do. \texttt{openssh-server} enables SSH access through the terminal and is how people can control the server remotely. \texttt{xfce4} and \texttt{kde-plasma-desktop} are two alternative graphic user interfaces for the computer. \texttt{synaptic} allows one to probe the Internet for possible software installations and largely automates that process. Most of the software on the server can be installed and/or uninstalled using this simple program. \texttt{lightdm-gtk-greeter} presents the user with a login screen. The remaining installs are all graphic user interface niceties.
-
-\subsection{Directories}
-
-The Unix file system is hierarchical: the top of this tree is at \texttt{/}. As mentioned previously, the bulk of the data is mounted on a separate partition under \texttt{/srv/}. Some optional software that wasn't installed by using \texttt{apt-get} / \texttt{synaptic} resides in \texttt{/opt/}. Under\texttt{/home/} resides each user's personal folder containing their desktop, personal files, and personal settings (such as the \texttt{\atilde/.bashrc} file). Everything else is pretty much standard.
-
-Under \texttt{/srv/} reside the following major directories:
-\begin{itemize} \itemsep-2pt
-    \item{CNNLAB: Contains shared documents and behavioural data.}
-    \item{CODE: Contains the pipeline \& analysis code.}
-    \item{FTP: A web-accessible FTP for data-sharing across the globe. Currently not password protected.}
-    \item{LOGS: Log files generated by \texttt{CRON} jobs.}
-    \item{MOVER: Files that only exist to be sorted through after import. I hope this folder isn't permanent.}
-    \item{MRI: All the MRI (and possibly MEG) data.}
-\end{itemize}
-
-In \texttt{MRI}, four directories exist: \texttt{ANALYSIS}, \texttt{QUARANTINE}, \texttt{RAW}, and \texttt{WORKING}. Under each of these folders is a mirrored set of experimental name directories. Each experiment is given a short name (e.g., `TRSE', `BEBASD', `COP'). \texttt{ANALYSIS} is a convenience folder for those who would like to use the server's resources to analyze their experimental data. \texttt{QUARANTINE} is a safe place for data one would like to remove from the \texttt{WORKING} directory, but not delete. Generally `bad runs' should be moved here instead of being deleted. \texttt{WORKING} is where the NIFTI-converted data resides and is accessed by the pipeline. \texttt{RAW} contains exact copies of the raw DICOM data, however it was found.
-
-Under each experiment directory, the following structure is found:
-
-\begin{itemize} \itemsep-2pt
-    \item{Subject IDs. Experiment-wide files are placed here.}
-    \item{Subject file types (e.g., REST, T1, TASK). Names are arbitrary but must be consistent across subjects.}
-    \item{File type session folders. Any across-session data also ends up here.}
-    \item{Run folders. Each run folder should contain exactly one NIFTI file. In some cases it is appropriate to place run-specific data here (e.g., physiological recordings). Intermediate stages of pre-processing are also stored here.}
-\end{itemize}
-
-\subsection{Permissions}
-
-The MRI data is separated into 4 main branches: RAW, WORKING, QUARANTINE, and ANALYSIS. These different tiers are more or less editable by various users of the server to strike a balance between data-security and usability. As a general rule, we also don't let unauthorized people look at data they aren't supposed to for both privacy and competitive reasons. These permissions are maintained by a \texttt{root}-owned nightly \texttt{CRON} job {\color{red}\texttt{maintain\_permissions.sh}}.
-
-The \texttt{grandvizier} user should be used by the system administrators to preform various tasks without the need of dropping to \texttt{root}, which I am trying to discourage as it can be dangerous to spend too much time with so much power. If you can see a file owned by the \texttt{grandvizier}, that typically means it is being protected.  
-
-\subsubsection{RAW}
-
-These are DICOM files. Mostly used for archival purposes. Shouldn't be edited.
-
-\begin{flushleft}
-\texttt{owner = grandvizier, rwx \\
-        group = staff      , r-x \\
-        else  = ---} \\
-\end{flushleft}
-
-\subsubsection{WORKING}
-
-These are the files manipulated by the pipeline code. Generally, these files should only be accessed by the pipeline and not manually. Right now, experiment specific group-wise permissions allow for you to go in and delete everything \textit{except} the input RAW data at the bottom of the WORKING tree. This allows you to `reset' problem subjects or whole users using the {\color{red}\texttt{cleanup\_X.sh}} programs, or manually remove problem files.
-
-\begin{flushleft}
-
-\texttt{owner = grandvizier, rwx \\
-        group = [experiment], rwx (except inputs which are r-x) \\
-        else  =            , ---} \\
-\end{flushleft}
-
-\subsubsection{ANALYSIS}
-
-These folders are where people \textit{are} allowed to mess around. Generally, outputs from the pipeline can be copied into the ANALYSIS tree for manipulation. This is zero-risk as there is always an identical copy of the pre-processed files in the WORKING directory.
-
-\begin{flushleft}
-\texttt{owner = grandvizier, rwx \\
-        group = [exrperiment], rwx \\
-        else  =            , ---} \\
-\end{flushleft}
-
-\subsubsection{Privacy Notes}
-
-The \texttt{grandvizier} user is special, and shared among \textit{the money} and \textit{the unlucky}. The \texttt{grandvizier} is also capable of  destroying millions of tax-payer dollars in a one-line command, so it shouldn't be used by anyone unless required.
-
-All pipeline code will be run by the individuals within an experiment group -- and the code will work so long as the individual is permitted to interact with a given data set. This is safe because the pipeline code isn't editable by the users in the first place, so we can't do undue harm to our data by mistake.
-
-\subsection{Security}
-\subsection{Backup}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The stuff I installed
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Software \& Configuration}
-
-The following is a list of the software installed on the server, and if you are lucky, it is even up-to-date.
-
-\noindent
-\begin{small}
-\begin{itemize} \itemsep-2pt
-    
-    \item{\href{http://neuro.debian.net/}{NeuroDebian}:}
-    \begin{itemize} \itemsep-2pt
-        \item{\href{http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/}{FSL 5.0.6}}
-        \item{\href{http://www.mccauslandcenter.sc.edu/mricro/mricron/dcm2nii.html}{DICOM2NIFTI}}
-        \item{\href{http://afni.nimh.nih.gov/afni/}{AFNI}}
-        \item{\href{https://surfer.nmr.mgh.harvard.edu/}{FreeSurfer}}
-        \item{\href{http://brainvis.wustl.edu/wiki/index.php/Caret:About}{Caret}}
-        \item{\href{http://nipy.org/nibabel/}{Python: NiBabel}}
-    \end{itemize}
-    
-    \item{General Computing:}
-    \begin{itemize} \itemsep-2pt
-        \item{\href{http://cran.r-project.org/}{R}}
-        \item{\href{https://wiki.gnome.org/Apps/Gedit}{gedit}}
-        \item{\href{https://launchpad.net/terminator}{Terminator}}
-        \item{\href{https://www.libreoffice.org/}{LibreOffice}}
-        \item{\href{https://wiki.gnome.org/Apps/Evince}{Evince}}
-        \item{\href{https://wiki.gnome.org/Apps/Evince}{Firefox}}
-        \item{\href{http://www.inkscape.org/en/}{Inkscape}}
-        \item{\href{http://www.gimp.org/}{Gimp}}
-        \item{\href{https://wiki.gnome.org/Apps/Dia}{Dia}}
-        \item{\href{http://www.videolan.org/vlc/index.html}{VLC}}
-        \item{\href{https://www.samba.org/}{Samba}}
-        \item{\href{http://www.socher.org/index.php/Main/HowToInstallSunGridEngineOnUbuntu}{Oracle Sun-Grid Engine}}
-    \end{itemize}
-    
-    \item{Python Packages:}
-    \begin{itemize} \itemsep-2pt
-        \item{\href{http://www.numpy.org/}{NumPy}}
-        \item{\href{http://www.scipy.org/}{SciPy}} 
-        \item{\href{http://pandas.pydata.org/}{Pandas}}
-        \item{\href{http://matplotlib.org/}{matplotlib}}
-        \item{\href{http://scikit-learn.org/stable/}{scikit-learn}}
-        \item{\href{http://scikit-image.org/}{scikit-image}}
-        \item{\href{http://networkx.github.io/}{NetworkX}}
-        \item{\href{http://www.pymvpa.org/}{PyMVPA}}
-        \item{\href{http://ipython.org/}{iPython}}
-    \end{itemize}
-
-    \item{Misc -- Installed Manually in \texttt{/opt}:}
-    \begin{itemize} \itemsep-2pt
-        \item{\href{https://gephi.org/}{Gephi}}
-        \item{\href{http://www.mathworks.com/products/compiler/mcr/}{MATLAB Compiler Runtime}}
-        \item{\href{http://afni.nimh.nih.gov/sscc/dglen/McRetroTS}{McRetro}}
-    \end{itemize}
-
-\end{itemize}
-\end{small}
-
-\subsection{Oracle Sun-Grid Engine}
-The server, and EPItome-xl, rely on Oracle's Sun-Grid engine to schedule jobs. At the moment this feature is merely cosmetic, but it will help immensely when multiple users are attemping to run their experiments through the pipeline at the same time (such as 4 days before SfN abstracts are due). The EPItome-xl pipeline actually handles most of the nitty-gritty here, which I will document later (i.e., {\color{red}never}). In order to install and configure the scheduler, I followed \href{http://www.socher.org/index.php/Main/HowToInstallSunGridEngineOnUbuntu}{these instructions}.  
-\subsection{MRI Tools}
-\subsection{Programming Languages}
+\subsubsection{EXPERIMENTS}
+\subsubsection{SUBJECTS}
+\subsubsection{MODE}
+\subsubsection{SESS}
+\subsubsection{RUN}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The functionality of the pipeline
