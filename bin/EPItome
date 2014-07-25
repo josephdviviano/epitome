@@ -31,8 +31,12 @@ import copy
 import json
 import time
 import getpass
+import platform
 import os, sys, stat
 import epitome as epi
+
+# Shared Functions -- Called Internally
+###############################################################################
 
 def get_modules(interactive=False, moduletype='pre', used=[]):
     """
@@ -192,6 +196,53 @@ def get_experiments(interactive=False):
 
         return selection
 
+# def export_modules():
+#     """
+#     Copies a set of the current modules to the user's home directory. This
+#     allows the user to modify their private version of the pipeline as they
+#     see fit.
+#     """
+
+def writer_sub(pipe_list, line, cmd, f, output, bkup):
+    # output will == None if we made a mistake
+    if output != None:
+        out_line = line + ' >> ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd + '\n'
+        f.write(out_line)
+        pipe_list.append(line)
+
+    # if we did make a mistake, restore the old output
+    else:
+        output = copy.copy(bkup)
+
+    return pipe_list, output
+
+def writer_exp(pipe_list, line, proc, f, output, bkup):
+    # output will == None if we made a mistake
+    if output != None:
+        out_line = line + ' >> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n'
+        f.write(out_line)
+        pipe_list.append(line)
+
+    # if we did make a mistake, restore the old output
+    else:
+        output = copy.copy(bkup)
+
+    return pipe_list, output
+
+def get_date_user():
+    """
+    Returns a eyeball-friendly timestamp, the current user's name, 
+    and a filename-friendly timestamp.
+    """
+
+    datetime = time.strftime("%Y/%m/%d -- %H:%M:%S")
+    user = getpass.getuser()
+    f_id = time.strftime("%y%m%d_%H%M%S")
+
+    return datetime, user, f_id
+
+# Command-Line helper functions
+###############################################################################
 def print_help(module):
     
     # retrieve settings from config.py
@@ -242,7 +293,32 @@ def help_query():
 
     # print help for that module
     print_help(module)
+
+def check_paths():
+    """
+    This ensures paths defined in config.py are actual directories.
+    """
+
+    # retrieve settings from config.py
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
     
+    if os.path.isdir(dir_data) == False:
+        print('Data directory does not exist:' + str(dir_data))
+
+    elif os.path.isdir(dir_pipe) == False:
+        print('EPItome-XL directory does not exist:' + str(dir_pipe))
+
+    elif os.path.isdir(dir_afni) == False:
+        print('AFNI directory does not exist:' + str(dir_afni))
+
+    else:
+        print('\n*********************************************')
+        print('config.py appears to be properly configured!\n')
+        print('     data directory: ' + str(dir_data))
+        print('     pipeline directory: ' + str(dir_pipe))
+        print('     AFNI directory: ' + str(dir_afni))
+        print('*********************************************\n')
+
 def check_run(expt, subj, mode, sess, run):
     """
     Returns True if RUN folder contains a NIFTI file, False otherwise.
@@ -349,70 +425,9 @@ def check_directories(expt):
         print str(mode_dict[mode_key]) + ' NIFTIs found in ' + str(mode_key)
     print('****************************************************************\n')
 
-def check_paths():
-    """
-    This ensures paths defined in config.py are actual directories.
-    """
 
-    # retrieve settings from config.py
-    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
-    
-    if os.path.isdir(dir_data) == False:
-        print('Data directory does not exist:' + str(dir_data))
-
-    elif os.path.isdir(dir_pipe) == False:
-        print('EPItome-XL directory does not exist:' + str(dir_pipe))
-
-    elif os.path.isdir(dir_afni) == False:
-        print('AFNI directory does not exist:' + str(dir_afni))
-
-    else:
-        print('\n*********************************************')
-        print('config.py appears to be properly configured!\n')
-        print('     data directory: ' + str(dir_data))
-        print('     pipeline directory: ' + str(dir_pipe))
-        print('     AFNI directory: ' + str(dir_afni))
-        print('*********************************************\n')
-
-def writer_sub(pipe_list, line, cmd, f, output, bkup):
-    
-    # output will == None if we made a mistake
-    if output != None:
-        out_line = line + ' >> ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd + '\n'
-        f.write(out_line)
-        pipe_list.append(line)
-
-    # if we did make a mistake, restore the old output
-    else:
-        output = copy.copy(bkup)
-
-    return pipe_list, output
-
-def writer_exp(pipe_list, line, proc, f, output, bkup):
-    
-    # output will == None if we made a mistake
-    if output != None:
-        out_line = line + ' >> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n'
-        f.write(out_line)
-        pipe_list.append(line)
-
-    # if we did make a mistake, restore the old output
-    else:
-        output = copy.copy(bkup)
-
-    return pipe_list, output
-
-def get_date_user():
-    """
-    Returns a eyeball-friendly timestamp, the current user's name, 
-    and a filename-friendly timestamp.
-    """
-    datetime = time.strftime("%Y/%m/%d -- %H:%M:%S")
-    user = getpass.getuser()
-    f_id = time.strftime("%y%m%d_%H%M%S")
-
-    return datetime, user, f_id
-
+# The Cleanup Pipeline
+###############################################################################
 def run_cleanup():
     print('******************************************************************')
     print('***       RUNNING EPItome-XL CLEANUP. THIS DELETES DATA        ***')
@@ -558,6 +573,8 @@ def run_cleanup():
            'and the user must manually OK each clean-up step.')
     print('******************************************************************')
 
+# The Actual Pipeline 
+###############################################################################
 def run_epitome():
     print('******************************************************************')
     print('             Running EPItome-XL. Select experiment.')
@@ -594,6 +611,48 @@ def run_epitome():
 
     print('\nYour ID: ' + str(ID))
 
+    # get the date and time, current user, f_id
+    datetime, user, f_id = get_date_user()
+    master = 'master_' + f_id + '_' + ID + '.sh'
+    cmd = 'cmd_' + f_id + '_' + ID + '.sh'
+    proc = 'proclist_' + f_id + '_' + ID + '.sh'
+
+    # create a copy of the pipeline in the user's home directory
+    print('******************************************************************')
+    print('Replicating the current pipeline in ~/EPItome-xl/' +str(ID) + '.')
+    print('******************************************************************')
+
+    # check the OS -- for paths
+    operating_system = platform.system()
+    if operating_system == 'Linux':
+        
+        # make the EPItome-xl directory if required
+        if os.path.isdur('/home/' + str(user) + '/EPItome-xl') == False:
+            os.system('mkdir /home/' + str(user) + '/EPItome-xl')
+
+        # make the unique ID folder for this module set
+        if os.path.isdir('/home/' + str(user) + '/EPItome-xl/' + 
+                                                       str(ID)) == True:
+            print('This UID already exists! Skipping replication ...')
+            pass
+        
+        # replicate the pipeline into the home folder
+        else:
+            os.system('mkdir /home/' + str(user) + '/EPItome-xl/' + str(ID))
+            os.system('cp -r ' str(dir_pipe) + '/*'
+                      ' /home/' + str(user) + '/EPItome-xl/' + str(ID) +'/')
+            dir_pipe = '/home/' + str(user) + '/EPItome-xl/' + str(ID) +'/'
+
+    else:
+        print("""
+              *****************************************************************
+              Sorry, your operating system isn't supported yet. At the moment,
+              EPItome-xl only work with Linux operating systems. Bug the author
+              about OSX support!
+              *****************************************************************
+              """)
+        sys.exit()
+
     print('******************************************************************')
     print('Experiment: ' + str(expt) + '. Select image modality.')
     print('******************************************************************')
@@ -610,13 +669,6 @@ def run_epitome():
     print('******************************************************************')
     print('Image Modality: ' + str(mode) + '. Adding Freesurfer stages.')
     print('******************************************************************')
- 
-    # get the date and time, current user, f_id
-    datetime, user, f_id = get_date_user()
-
-    master = 'master_' + f_id + '_' + ID + '.sh'
-    cmd = 'cmd_' + f_id + '_' + ID + '.sh'
-    proc = 'proclist_' + f_id + '_' + ID + '.sh'
 
     # open up the master script, write common variables
     f = open(os.path.join(dir_data, expt, master), 'wb')
