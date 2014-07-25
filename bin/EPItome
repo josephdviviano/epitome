@@ -627,7 +627,7 @@ def run_epitome():
     if operating_system == 'Linux':
         
         # make the EPItome-xl directory if required
-        if os.path.isdur('/home/' + str(user) + '/EPItome-xl') == False:
+        if os.path.isdir('/home/' + str(user) + '/EPItome-xl') == False:
             os.system('mkdir /home/' + str(user) + '/EPItome-xl')
 
         # make the unique ID folder for this module set
@@ -639,7 +639,7 @@ def run_epitome():
         # replicate the pipeline into the home folder
         else:
             os.system('mkdir /home/' + str(user) + '/EPItome-xl/' + str(ID))
-            os.system('cp -r ' str(dir_pipe) + '/*'
+            os.system('cp -r ' + str(dir_pipe) + '/*' +
                       ' /home/' + str(user) + '/EPItome-xl/' + str(ID) +'/')
             dir_pipe = '/home/' + str(user) + '/EPItome-xl/' + str(ID) +'/'
 
