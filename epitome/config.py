@@ -15,7 +15,7 @@ def return_paths():
     dir_data = '/srv/MRI/WORKING'
     
     # the pipeline directory absolute path
-    dir_pipe = '/srv/CODE/epitome'
+    dir_pipe = '/srv/CODE/EPItome-xl'
     
     # AFNI directory absolute path
     dir_afni = '/usr/local/abin'
