@@ -516,6 +516,107 @@ Prerequisites: \texttt{init\_EPI}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Quality Control}
 
+These programs run experiment-wide, and therefore are run after all \texttt{/pre} modules have completed for every subject. They produce reports that give a broad overview of the data quality at different stages of pre-processing, encouraging visual inspection of the data and hopefully reducing the amount of time spent hunting for the source of bugs when they do arise.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{check\_EPI2T1}
+Usage: \texttt{check\_EPI2T1 <path> <expt> <mode>}
+
+\begin{blockquote}
+path -- full path to EPItome data folder.
+expt -- experiment name.
+mode -- image modality (eg., TASK, REST).
+\end{blockquote}
+
+\noindent Prints out a PDF showing the quality of the linear registration between the functional and anatomical data for all subjects. On the top row, the EPI image is translucent and overlaid on the anatomical in red. On the bottom row, an edge-detected version of the anatomical is overlain on the EPI image in blues.
+
+Prerequisites: \texttt{linreg\_calc\_AFNI/FSL}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{check\_T12MNI}
+Usage: \texttt{check\_T12MNI <path> <expt> <mode>}
+
+\begin{blockquote}
+path -- full path to EPItome data folder.
+expt -- experiment name.
+mode -- image modality (eg., TASK, REST).
+\end{blockquote}
+
+\noindent Prints out a PDF showing the quality of the linear registration between the subject-specific anatomical data and the group-level MNI brain. On the top row, the T1 image is translucent and overlaid on the MNI brain in red. On the bottom row, the MNI brain is translucent and is overlaid on the T1 brain in red.
+
+Prerequisites: \texttt{linreg\_calc\_AFNI/FSL}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{check\_masks}
+Usage: \texttt{check\_masks <path> <expt> <mode>}
+
+\begin{blockquote}
+path -- full path to EPItome data folder.
+expt -- experiment name.
+mode -- image modality (eg., TASK, REST).
+\end{blockquote}
+
+\noindent Prints out a PDF showing the Freesurfer-derived masks overlain on each subject's T1 brain -- these masks are those used for regressor estimation. White matter is labeled in dark blue, gray matter is labeled in light blue, draining vessels are labeled in light blue?, and ventricles are labeled in ???.  
+
+Prerequisites: \texttt{linreg\_FS2EPI\_AFNI/FSL}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{check\_MC\_TRs}
+Usage: \texttt{check\_MC\_TRs <path> <expt> <mode>}
+
+\begin{blockquote}
+path -- full path to EPItome data folder.
+expt -- experiment name.
+mode -- image modality (eg., TASK, REST).
+\end{blockquote}
+
+\noindent Prints TRs 6-10 from the first run of each session. The default motion-correction TR 8 is marked in red. This will allow the user to identify whether the motion-correction TR is somehow corrupted for any given subject, which can be manually changed and re-run.
+
+Prerequisites: \texttt{init\_EPI}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{check\_motionind}
+Usage: \texttt{check\_motionind <path> <expt> <mode> <uid>}
+
+\begin{blockquote}
+path -- full path to EPItome data folder.
+expt -- experiment name.
+mode -- image modality (eg., TASK, REST).
+uid -- unique identifier for run of EPItome.
+\end{blockquote}
+
+\noindent This prints the estimated framewise displacement and DVARS measurement for all subjects and runs in an experiment to one grid, ranking subjects by the sum of their framewise displacement (top left shows least motion, bottom right shows most motion). Vertical lines denote runs, and the horizontal line denotes a respectable threshold of 0.5 mm/TR for the framewise displacement plot, and 10\% signal change for the DVARS plot. This can be used to hopefully facilitate subject-wise or run-wise rejection due to excessive head motion.
+
+Prerequisites: \texttt{init\_EPI}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{check\_runs}
+Usage: \texttt{check\_runs <path> <expt>}
+
+\begin{blockquote}
+path -- full path to EPItome data folder.
+expt -- experiment name.
+\end{blockquote}
+
+\noindent This prints out a CSV containing the NIFTI dimensions of each file contained in a RUN folder. This works across all modalities simultaneously, and records subject, image modality, session, and run number. This should give the user a broad overview of the input data, hopefully assisting in identifying corrupted files or aborted runs in the MRI.
+
+Prerequisites: None.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{check\_spectra}
+Usage: \texttt{check\_spectra <path> <expt> <mode> <uid>}
+
+\begin{blockquote}
+path -- full path to EPItome data folder.
+expt -- experiment name.
+mode -- image modality (eg., TASK, REST).
+uid -- unique identifier for run of EPItome.
+\end{blockquote}
+
+\noindent This gives an overview of the frequency content of the MRI data in multiple ways for each subject. First, it plots the log-log spectra of the regressors used for time-series filtering, as typically done in resting-state experiments. It also compares the mean raw data with the mean filtered output, and mean noise model, to show whether the modeled noise is qualitatively different from the input raw data. Finally, it compares the spectra of the mean time series with the mean of all computed spectra, which should be equivalent.
+
+Prerequisites: \texttt{linreg\_FS2EPI\_AFNI/FSL, gen\_regressors}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % References, both on server building and MRI analysis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
