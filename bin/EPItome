@@ -489,11 +489,10 @@ def run_cleanup():
     while flag == 0:
         output = ''
         choice = ['all', 'some']
-        decision, output = epi.commands.selector_list(choice, output)
+        decision = epi.commands.selector_list(choice)
 
-        if output == None:
+        if decision == None:
             print ('Invalid selection, please try again.')
-
         else:
             flag = 1
 
@@ -505,15 +504,13 @@ def run_cleanup():
             print('Please select a subject.')
             output = ''
             subj_list = epi.utilities.get_subj(os.path.join(dir_data, expt))
-            subj, output = epi.commands.selector_list(subj_list, output)
+            subj = epi.commands.selector_list(subj_list)
 
             if output == None:
                 print('Invalid subject, please try again.')
-
             else:
                 subjects.append(subj)
 
-            # print the current subject list, ask to continue
             print('')
             print('The following subjects are slated for cleanup:')
             print('')
@@ -521,7 +518,7 @@ def run_cleanup():
                 print subj
             print('')
             response = raw_input("""Type 'stop' to stop, else continue: """)
-            # breaks us out of the subject-list constructor loop
+
             if response == 'stop':
                 flag = 1
 
@@ -553,7 +550,7 @@ def run_cleanup():
         print('')
         print('Please select the next cleanup module:')
         print('')
-        module = get_modules(interactive=True, moduletype='cleanup')
+        module, used = get_modules(interactive=True, moduletype='cleanup')
         if module == None:
             print('')
         else:
