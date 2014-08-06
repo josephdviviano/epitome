@@ -6,6 +6,7 @@
 \usepackage[utf8]{inputenc}             % utf8 encoding compatibility
 \usepackage{fourier}                    % fonts
 \usepackage[T1]{fontenc}                % fonts
+\DeclareFontFamily{OT1}{cmtt}{\hyphenchar \font=-1}
 \usepackage{natbib}                     % bibliography
 \usepackage{dirtree}                    % folder structures
 \usepackage{listings}                   % code blocks
@@ -13,7 +14,11 @@
 \usetikzlibrary{arrows}                 % arrows
 \usepackage{amsmath}                    % equations
 \usepackage{epigraph}                   % quotation
+
+% some code highlighing stuff
+\DeclareFontFamily{\encodingdefault}{\ttdefault}{\hyphenchar\font=\ }
 \renewcommand{\texttt}[2][BrickRed]{\textcolor{#1}{\ttfamily #2}}% \texttt[<color>]{<stuff>}
+
 \newcommand{\atilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
 \renewcommand\epigraphflush{flushright} % 
 \renewcommand\epigraphsize{\normalsize} % 
@@ -34,10 +39,9 @@
 \makeatother
 \author{%
     Joseph D. Viviano \\
-    Department of Biology \\
-    York University \\
-    Toronto, ON, CA \\
-    joseph.d.viviano@gmail.com
+    joseph.d.viviano@gmail.com \\
+    York University, TO, CA. \\
+    \today
 }
 
 \newcommand\titlepagedecoration{%
@@ -74,7 +78,7 @@ EPItome-xl\par
 \end{minipage}
 %
 \begin{minipage}{0.02\linewidth}
-    \rule{1pt}{72pt}
+    \rule{1pt}{60pt}
 \end{minipage}
 \titlepagedecoration
 \end{titlepage}
@@ -95,14 +99,14 @@ The goal of this design is to allow multiple levels of control for users of diff
 
 This system is also designed to facilitate easy-to-reproduce research, as these scripts can be easily re-purposed for new experiments that follow the EPItome folder structure. In this way, the outputs of EPItome act as your lab notebook, and can be shared with collaborators or reviewers.
 
-This manual will progress to more advanced topics in the end. First, I will explain the basic use of EPItome-xl. Next, I'll walk the user through a few common pre-processing tasks. I'll then explain the modules one-by-one, and finish with an explanation on how to add new modules.
+This manual will progress to more advanced topics in the end. First, I will explain the basic use of EPItome-xl. Next, I'll explain the modules one-by-one, follow with a description of a few common pre-processing tasks. I'll then  and finish with an explanation on how to add new modules.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Requirements
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Requirements \& Dependencies}
 
-EPItome contains a small number of programs that actually manipulate data, but also makes heavy use of widely-used MRI analysis tools and a number of python distributions. The user is assumed to have properly installed and configured FSL, AFNI, Freesurfer, and the python packages numpy, scipy, and matplotlib.
+EPItome contains a small number of programs that actually manipulate data, but also makes heavy use of widely-used MRI analysis tools and a number of python distributions. The user is assumed to have properly installed and configured FSL, AFNI, Freesurfer, and the python packages numpy, scipy, and matplotlib. For physiological noise regression, you must have the MATLAB compiler runtime installed, along with AFNI's \href{http://afni.nimh.nih.gov/sscc/dglen/McRetroTS}{McRetroTS} scripts installed in \texttt{/opt/MATLAB/MATLAB\_Compiler\_Runtime/} and \texttt{/opt/mcretro/}, respectively.
 
 The program itself was built and tested on a Ubuntu 12.04 server. I imagine it will work well in any Linux environment. It should run on Mac OS X as well, but this remains unverified. There will be no support for Windows.
 
@@ -129,7 +133,7 @@ After installation, EPItome requires you to specify a few paths. These settings 
     \item{\texttt{cores}: could be set to the maximum number of cores you wish EPItome to use (defaults to the maximum possible -1).}
 \end{itemize}
 
-EPItome-xl comes with a few command-line interfaces. EPItome is used to inspect data in the MRI directory, returns information on the currently-available modules, can be used to construct new pipelines, and to remove unwanted data from the MRI directory cleanly. EPIphysio is a tool built to parse physiological data from the BIOPAK 150 unit we have installed at York University (Toronto), and might need to be adapted / extended to work with other units. EPIfolder is used to generate an appropriate folder structure in the MRI directory for the EPItome pipeline to work on.
+EPItome-xl comes with a few command-line interfaces. \texttt{EPItome} is used to inspect data in the MRI directory, returns information on the currently-available modules, can be used to construct new pipelines, and to remove unwanted data from the MRI directory cleanly. \texttt{EPIphysio} is a tool built to parse physiological data from the BIOPAK 150 unit we have installed at York University (Toronto), and might need to be adapted / extended to work with other units. \texttt{EPIfolder} is used to generate an appropriate folder structure in the MRI directory for the EPItome pipeline to work on.
 
 The MRI directory itself must be organized as follows: \\
 
@@ -618,9 +622,107 @@ uid -- unique identifier for run of EPItome.
 Prerequisites: \texttt{linreg\_FS2EPI\_AFNI/FSL, gen\_regressors}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Workflows, a collection of presets
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Workflows}
+
+EPItome give you the ability to chain modular BASH scripts together to generate a great number of MRI pre-processing pathways, and in doing so, gives you the power to create very bad pipelines. Here, I detail a few reasonable workflows.
+
+\subsection{Basic MRI: GLM, PLS, etc.}
+
+Here, we are interested in doing a set of basic tasks before running a GLM analysis on some task-based MRI design. We've already placed the anatomical and functional NIFTI (and .phys files, if appropriate) into their RUN folders and have run \texttt{EPItome run}. Every run begins with \texttt{init\_EPI} \\
+
+\noindent
+\texttt{init\_EPI high 0 alt+z off normal} \\
+
+Here, we are telling EPItome that we are working with high contrast data, want to remove 0 TRs from the beginning of each run, have acquired our data in the alternating plus direction, we are turning off time series normalization, and would like a brain mask of normal tightness, which is a reasonable default. \\
+
+\noindent
+\texttt{linreg\_calc\_AFNI high lpc giant\_move} \\
+
+Here we are calculating all of our registration pathways, from EPI space, to single-subject T1 space (and therefore, Freesurfer space), and finally group-level MNI space, using linear registrations. Some reference images and transformation pathways are output, but we haven't actually moved the data yet. \\
+
+\noindent
+\texttt{linreg\_FS2EPI\_AFNI} \\
+
+This will put all of our Freesurfer-derived segmentations in single-subject EPI space, which we can use to generate regressors. \\
+
+\noindent
+\texttt{gen\_regressors scaled} \\
+
+This will generate a set of regressors from the aforementioned Freesurfer atlases and the input data \texttt{scaled}, which was generated by \texttt{init\_EPI}. In this case, these regressors will be applied during the GLM as baselines. Note that it will always generate all regressors, but they need not all be used. \\
+
+\noindent
+\texttt{volsmooth scaled EPI\_mask 6.0} \\
+
+This will smooth the EPI data within the defined mask (\texttt{anat\_EPI\_mask.nii.gz} in this case) using a full-width half-maximum (FWHM) of 6 mm. The input data is still scaled, since this is the first actual manipulation of the outputs from \texttt{init\_EPI}. \\
+
+\noindent
+\texttt{linreg\_EPI2MNI\_AFNI volsmooth 3.0} \\
+
+Finally, this will transform each smoothed run up into MNI space with a isotropic voxel resolution of 3 mm$^2$. \\
+
+
+\subsection{Connectivity Analysis}
+
+Functional connectivity analysis benefits from the application of tissue-based regressors pre-analysis, unlike in a GLM where one can inset these regressors at the same time. For this reason, connectivity analysis will require a slightly modified pipeline: \\
+
+\noindent
+\texttt{init\_EPI high 0 alt+z off normal} \\
+\texttt{linreg\_calc\_AFNI high lpc giant\_move} \\
+\texttt{linreg\_FS2EPI\_AFNI} \\
+\texttt{gen\_regressors scaled} \\
+
+\noindent
+\texttt{filter scaled 4 off on on on on} \\
+
+Here, we are detrending the scaled data against the head motion parameters, Legendre polynomials up to the 4th order, the mean white matter signal, the local white matter signal, the mean cerebral spinal fluid signal, and the mean draining vessel signal. For all of these signals, we also regress against the 1st temporal lag. \\
+
+\noindent
+\texttt{lowpass filtered EPI\_mask average 3} \\
+
+Next, we low-pass the data using a moving-average filter of span 3. Most of the information in BOLD data is of fairly low frequency, so the hope is that low-passing the data will remove some high-frequency noise from the signals. There are multiple options that could be used here, but no one ever got fired for using a moving average filter, so I suggest it here as a fair default.\\
+
+\noindent
+\texttt{volsmooth lowpass EPI\_mask 6.0} \\
+\texttt{linreg\_EPI2MNI\_AFNI volsmooth 3.0} \\
+
+\subsection{Surface Analysis}
+
+When studying the cortex, it is often best to look at the data on a surface. This prevents the blurring of signals between sulci and gyri, allows for finer localization of function, and permits some interesting co-registration methods. For simplicity, we will do this to data intended for a simple GLM analysis.
+
+\noindent
+\texttt{init\_EPI high 0 alt+z off normal} \\
+\texttt{linreg\_calc\_AFNI high lpc giant\_move} \\
+\texttt{linreg\_FS2EPI\_AFNI} \\
+\texttt{gen\_regressors scaled} \\
+
+\noindent
+\texttt{vol2surf scaled} \\
+
+This will projects the EPI data contained within the white-matter boundaries of the Freesurfer segmentation to a AFNI-based surface space.  
+
+\noindent
+\texttt{surfsmooth surface 10.0} \\
+
+This will smooth along the cortical surface with a FWHM of 10mm. Generally, surface-smoothed data can be subjected to larger smoothing kernels, as they do not mix signals coming from cortically-distant regions as readily in this format. \\
+
+\noindent
+\texttt{surf2vol smooth scaled} \\
+
+This will project the surface data in smooth back into volume format in the same space as the scaled data, from whence it came.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % References, both on server building and MRI analysis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Further Reading}
+\section{The Structure of Modules, Module Creation}
+
+EPItome, as it stands, has very few novel features over traditional pipelining programs. However, its strength lies with ease of extensibility. Here, I will detail how one would create a new module to be included in the EPItome pipeline.
+
+\subsection{Writing a Module}
+\subsection{Python Wrapper}
+\subsection{Style Conventions}
+\subsection{Documentation}
 
 %% End of document. Go to reference list.
 \newpage 
