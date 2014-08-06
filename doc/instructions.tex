@@ -15,8 +15,10 @@
 \usepackage{amsmath}                    % equations
 \usepackage{epigraph}                   % quotation
 
+\usepackage{listings}
+
 % some code highlighing stuff
-\DeclareFontFamily{\encodingdefault}{\ttdefault}{\hyphenchar\font=\ }
+\DeclareFontFamily{\encodingdefault}{\ttdefault}{\hyphenchar\font=`\- }
 \renewcommand{\texttt}[2][BrickRed]{\textcolor{#1}{\ttfamily #2}}% \texttt[<color>]{<stuff>}
 
 \newcommand{\atilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
@@ -687,9 +689,9 @@ Next, we low-pass the data using a moving-average filter of span 3. Most of the 
 \texttt{volsmooth lowpass EPI\_mask 6.0} \\
 \texttt{linreg\_EPI2MNI\_AFNI volsmooth 3.0} \\
 
-\subsection{Surface Analysis}
+\subsection{Surface Analysis \& Surface Smoothing for Volume Analysis}
 
-When studying the cortex, it is often best to look at the data on a surface. This prevents the blurring of signals between sulci and gyri, allows for finer localization of function, and permits some interesting co-registration methods. For simplicity, we will do this to data intended for a simple GLM analysis.
+When studying the cortex, it is often best to look at the data on a surface. This prevents the blurring of signals between sulci and gyri, allows for finer localization of function, and permits some interesting co-registration methods. For simplicity, we will do this to data intended for a simple GLM analysis. \\
 
 \noindent
 \texttt{init\_EPI high 0 alt+z off normal} \\
@@ -700,7 +702,7 @@ When studying the cortex, it is often best to look at the data on a surface. Thi
 \noindent
 \texttt{vol2surf scaled} \\
 
-This will projects the EPI data contained within the white-matter boundaries of the Freesurfer segmentation to a AFNI-based surface space.  
+This will projects the EPI data contained within the white-matter boundaries of the Freesurfer segmentation to a AFNI-based surface space. \\
 
 \noindent
 \texttt{surfsmooth surface 10.0} \\
@@ -710,19 +712,81 @@ This will smooth along the cortical surface with a FWHM of 10mm. Generally, surf
 \noindent
 \texttt{surf2vol smooth scaled} \\
 
-This will project the surface data in smooth back into volume format in the same space as the scaled data, from whence it came.
+This will project the surface data in smooth back into volume format in the same space as the scaled data, from whence it came. Many of the spatial-specificity advantages of surface-based analysis are now available in volume space, ensuring compatibility with many traditional analysis programs.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % References, both on server building and MRI analysis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{The Structure of Modules, Module Creation}
+\section{Module Creation}
 
 EPItome, as it stands, has very few novel features over traditional pipelining programs. However, its strength lies with ease of extensibility. Here, I will detail how one would create a new module to be included in the EPItome pipeline.
 
 \subsection{Writing a Module}
+
+Modules take the form of either BASH scripts, or stand alone programs (such is the case with most QC modules at the moment) with a few stylistic conventions. They are `active' so long as they are kept in a \texttt{.../epitome/modules/XXX} directory, and will be accessed by the pipeline according to their type. `freesurfer' and `pre' modules are accessed first by \texttt{EPItome run}, followed by those in `qc'. At the moment, the two freesurfer modules are not optional.
+
+The modules themselves use a \href{http://tldp.org/LDP/abs/html/here-docs.html}{here-doc trick} to set variables defined on the command line first, and then \texttt{cat} the remaining script to \texttt{STDOUT}. Therefore, running a properly formatted module should not run anything, but should simply print it's contents out to the command line. There are a few reserved variables used in most, if not all, modules. 
+
+\begin{itemize}
+    \item{DIR\_SESS: A listing of all the sessions within a image modality.}
+    \item{SESS: A variable denoting the current session.}
+    \item{DIR\_RUNS: A listing of all the runs within a session.}
+    \item{RUN: A variable denoting the current run.}
+    \item{NUM: The run number.}
+    \item{ID: The unique identifier of a EPItome run, defined globally.}
+\end{itemize}
+
+A module will typically loop through sessions, and then runs, taking an input file prefix (such as \texttt{func\_scaled}), performing a number of operations on that file (producing intermediate files worth keeping, or in other cases, temporary files that will be removed by the module's end), and sometimes outputting a single functional file with a new prefix (such as \texttt{func\_lowpass}). The anatomy of a call to an output file follows the convention \\
+
+\texttt{filename.ID.NUM.extension}. \\
+
+For NIFTI files, \texttt{filename} is typically \texttt{func\_prefix} or \texttt{anat\_prefix}, for 4D and 3D files, respectively. Regressors, QC metrics, and other parameter files are typically stored in a special \texttt{PARAMS} folder. Registrations are stored with the \texttt{reg\_X\_to\_Y} convention, and the extension appropriate to the program that generated them (be it AFNI or FSL).
+
+A well-written module will never try to do anything that has already been done. Therefore, blocks of code are wrapped in an \\
+
+\texttt{if [ -f filename.ID.NUM.extension ]; then; commands; fi} \\
+
+\noindent 
+loop. This is not mandatory, but highly recommended. It allows one to re-run the pipeline with a few tweaks, and the code will only act on files missing from the output structure. 
+
+Finally, variables can be defined within the module to allow the user to set them before running the module via the command line. Each command-line argument should correspond to a variable at the top of the module, which is then referenced in the appropriate locations throughout the script. Since the variables are defined before each module, the name-space between modules does not need to be maintained. However, for consistency, it is best to select variable names that are specific and unlikely to have shared meanings in other areas of the pipeline. 
+
 \subsection{Python Wrapper}
-\subsection{Style Conventions}
+
+With modules written, an advanced user could write a master BASH script by hand to make use of it. However, most users will want to make use of the python-based command line interface, which will require you to write a small wrapper function in \texttt{.../epitome/commands.py}.
+
+Each function should have the same name as the associated module, and accept a single variable \texttt{input\_name}. This denotes the filename prefix that the module will operate on.
+
+Next, you should define the output prefix (e.g., \texttt{lowpass}). This will be passed on to the next module, assuming the user does not make any errors inputing the various module options.
+
+Finally, the function should ask the user a single question for each command-line argument. I have built 4 `selector' functions for integers, floats, lists, and dictionaries. These final two allow the user to select from a set of options, with or without an accompanying description. The first two allow the use to input a numerical value for appropriate settings, for example, smoothing kernel size in millimeters.
+
+This set of questions should be wrapped in a try-except loop, checking for ValueErrors. If the user inputs an inappropriate option, the function will throw an error and return the special type `None', which will prompt EPItome to ignore the current call to the function and ask the user to try again. If all is well, the collected variables should be passed to the \texttt{line} variable, which contains a BASH formatted string that will be printed to the master script.
+
+The following is a code block demonstrating this structure (from the function \texttt{surfsmooth}).
+
+\begin{lstlisting}
+def surfsmooth(input_name):    
+    output = 'smooth'
+
+    print('\nSmoothing functional data on a cortical surface.')
+
+    try:
+        print('\nInput smoothing kernel FWHM (mm):')
+        fwhm, output = selector_float(output)
+
+    except ValueError as ve:
+        return '', None
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/surfsmooth ' +
+                                      str(input_name) + ' ' +
+                                      str(fwhm))
+    return line, output
+\end{lstlisting}
+
 \subsection{Documentation}
+
+This is a very important part of module-building, and currently takes two forms: the \LaTeX document that produced this PDF, and the .JSON-formatted file \texttt{.../epitome/help.json} which should contain a similar, set of information, around the command-line usage of your module. Remember -- EPItome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
 
 %% End of document. Go to reference list.
 \newpage 
