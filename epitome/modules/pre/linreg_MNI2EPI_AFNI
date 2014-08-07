@@ -17,8 +17,6 @@ echo '   - Creates 1 concatenated run per participant in run order.'
 echo ''
 echo '************************************************************************'
 
-
-
 cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

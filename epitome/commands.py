@@ -117,6 +117,15 @@ def selector_dict(item_dict):
 ###############################################################################
 # Pre-Processing Scripts
 
+def concatenate(input_name):
+    output = copy.copy(input_name) # return output unharmed
+
+    print('\nConcatenating input runs.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/concatenate ' + str(input_name))
+
+    return line, output    
+
 def filter(input_name):
     output = 'filtered'
 
@@ -171,8 +180,6 @@ def gen_gcor(input_name):
     return line, output
 
 def gen_regressors(input_name):
-    
-
     output = copy.copy(input_name) # return output unharmed
 
     print('\nGenerating regressors from ' + str(input_name))
@@ -646,6 +653,17 @@ def check_spectra(dir_data, expt, mode):
 
 ###############################################################################
 # Cleanup Scripts
+
+def clean_params(expt, clean):
+
+    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
+
+    print('\n *** Adding PARAMS PURGE to the cleanup Queue! ***')
+
+    fname = os.path.join(dir_data, expt, clean)
+    line = ('. ' + str(dir_pipe) + 
+            '/epitome/modules/cleanup/clean_params >> ' + fname)
+    os.system(line)
 
 def del_everything(expt, clean):
 

@@ -73,20 +73,6 @@ for SESS in `basename ${DIR_SESS}`; do
     fi
 done
 
-# create concatenated runs in order -- this needs to be fixed!!!
-if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz ]; then
-    LIST=``
-    DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
-    for SESS in ${DIR_SESS}; do
-        # this used to say `ls ${SESS}/func_smooth* | sort -n -t h -k 2` 
-        FILES=`ls ${SESS}/func_MNI.${ID}.*`
-        LIST="${LIST} ${FILES}"
-    done    
-    
-    3dTcat -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_MNI_concat.nii.gz \
-           `echo ${LIST}`
-fi
-
 cd ${DIR_PIPE}
 
 EOF

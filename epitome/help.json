@@ -68,8 +68,21 @@
     "combine_volumes" : 
         ["Usage:",
          "    combine_volumes <func1_prefix> <func2_prefix> ",
-         "func1_prefix -- 'low' for poor internal contrast, otherwise 'high'",
-         ""
+         "func1_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "func2_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "",
+         "Combines two volumes via addition. Therefore, they should not have",
+         "overlapping voxels."
+        ],
+
+    "concatenate" : 
+        ["Usage:",
+         "    concatenate <func_prefix>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "",
+         "Concatenates all runs in order of a particular type from a ",
+         "particular run of the pipeline (i.e., they will only be drawn from",
+         "those with the same unique identifier)."
         ],
 
     "del_everything" :

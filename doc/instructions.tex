@@ -41,7 +41,7 @@
 \makeatother
 \author{%
     Joseph D. Viviano \\
-    joseph.d.viviano@gmail.com \\
+    josephdviviano@gmail.com \\
     York University, TO, CA. \\
     \today
 }
@@ -298,6 +298,18 @@ func2\_prefix -- functional data prefix (eg., smooth in func\_smooth).
 \noindent Combines two functional files via addition. Intended to combine the outputs of \texttt{surfsmooth} \& \texttt{surf2vol} with \texttt{volsmooth}, but could be used to combine other things as well. The functional files should not have non-zeroed regions that overlap, or the output won't make much sense.
 
 Prerequisites: Two EPI modules with unique output prefixes. Intended to be used to combine the outputs of \texttt{volsmooth} and \texttt{surfsmooth} in a single volume. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{concatenate}
+Usage: \texttt{concatenate <func\_prefix>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg., smooth in func\_smooth).
+\end{blockquote}
+
+\noindent Concatenates all runs in order of a particular type from a particular run of the pipeline (i.e., they will only be drawn from those with the same unique identifier).
+
+Prerequisites: \texttt{init\_EPI}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{linreg\_calc\_AFNI}
@@ -644,6 +656,37 @@ uid -- unique identifier for run of EPItome.
 \noindent This gives an overview of the frequency content of the MRI data in multiple ways for each subject. First, it plots the log-log spectra of the regressors used for time-series filtering, as typically done in resting-state experiments. It also compares the mean raw data with the mean filtered output, and mean noise model, to show whether the modeled noise is qualitatively different from the input raw data. Finally, it compares the spectra of the mean time series with the mean of all computed spectra, which should be equivalent.
 
 Prerequisites: \texttt{linreg\_FS2EPI\_AFNI/FSL, gen\_regressors}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Cleanup}
+
+These programs are run separately using \texttt{EPItome clean}. They generally provide the ability to eliminate faulty outputs or intermediate files from experiments. Due to their destructive nature, these scripts must be executed by hand and each step must be manually confirmed. They are therefore not amiable to unattended scripting, although one could easily write their own with some know-how. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{clean\_params}
+Usage: \texttt{clean\_params}
+
+\noindent If any error occurs while running the pipeline, faulty PARAMS file will be output (typically in 1D format). The presence of these files will confuse future runs of the pipeline, or downstream modules, resulting in cryptic errors. This module ONLY deletes PARAM files with no content, allowing you to flush your experiment of faulty outputs to permit a re-run of the pipeline.
+
+Prerequisites: \texttt{clean\_params}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{del\_MNI}
+Usage: \texttt{del\_MNI}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{del\_everything}
+Usage: \texttt{del\_everything}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{del\_postmc}
+Usage: \texttt{del\_postmc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{del\_reg}
+Usage: \texttt{del\_reg}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Workflows, a collection of presets

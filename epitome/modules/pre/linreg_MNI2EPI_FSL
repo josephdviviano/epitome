@@ -55,22 +55,6 @@ for SESS in `basename ${DIR_SESS}`; do
                         -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
         fi
     done
-    
-    # register session masks with MNI
-    if [ ! -f ${DIR}/anat_EPI_mask_MNI.nii.gz ]; then
-        flirt -in ${DIR}/anat_EPI_mask.nii.gz \
-              -ref ${DIR}/anat_EPI_reg_target.nii.gz \
-              -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
-              -interp nearestneighbour \
-              -out ${DIR}/anat_EPI_mask_T1.nii.gz
-
-        3dAllineate -prefix ${DIR}/anat_EPI_mask_MNI.nii.gz \
-                    -input ${DIR}/anat_EPI_mask_T1.nii.gz \
-                    -1Dmatrix_apply ${DIR_T1}/mat_T1_to_TAL.1D \
-                    -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
-                    -float -final NN \
-                    -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
-    fi
 done
 
 cd ${DIR_PIPE}
