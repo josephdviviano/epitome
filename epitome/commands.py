@@ -11,10 +11,6 @@ import epitome as epi
 ###############################################################################
 # Helper Functions - Used Internally
 
-# def invalid_selection():
-#     print('Invalid selection.')
-#     return None, None
-
 def selector_float():
     option = raw_input('#: ') # have the user enter a number
 
@@ -434,6 +430,36 @@ def lowpass(input_name):
                                            str(mask_prefix) + ' ' +
                                            str(filter_type) + ' ' +
                                            str(lowpass_param))
+    return line, output
+
+def nonlinreg_calc_AFNI(input_name):
+    output = copy.copy(input_name) # return output unharmed
+
+    print('\nCalculating nonlinear registration pathways.')
+
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/nonlinreg_calc_AFNI')
+
+    return line, output
+
+def nonlinreg_EPI2MNI_AFNI(input_name):
+    output = 'MNI'
+
+    # give us some feedback
+    print('\nNonlinearly re-sampling input EPI data to MNI space using AFNI.')
+
+    try:
+        # get the reslice dimensions
+        print('\nSelect target dimensions (isotropic mm):')
+        dims = selector_float()
+
+    # if we messed any of these up, we return None
+    except ValueError as ve:
+        return '', None
+
+    # otherwise we print the command and return it
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_EPI2MNI_FSL ' +
+                                              str(input_name) + ' ' +
+                                              str(dims))
     return line, output
 
 def TRdrop(input_name):

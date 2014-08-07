@@ -1,8 +1,9 @@
 #!/bin/bash
 
-## This will run ICA on your raw data, which is useful when looking for bad runs /
-## scanner artifacts. This won't actually do anything to you data, but you could
-## regress "bad" components after identifing them (by eye... yuck) using fsl_regfilt
+# This will run ICA on your raw data, which is useful when looking 
+# for bad runs / scanner artifacts. This won't actually do anything 
+# to your data, but you could regress "bad" components after identifying 
+# them (by eye... yuck) using fsl_regfilt.
 
 for SUB in ${SUBJECTS}; do
     
@@ -23,5 +24,3 @@ for SUB in ${SUBJECTS}; do
         done
     done
 done
-
-## JDV Jan 9 2014

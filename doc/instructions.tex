@@ -377,6 +377,28 @@ Usage: \texttt{linreg\_FS2MNI\_FSL}
 
 Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_FSL}.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{nonlinreg\_calc\_AFNI}
+Usage: \texttt{nonlinreg\_calc\_AFNI}
+
+\noindent Computes a nonlinear warp from linear-registered individual T1 to MNI space. This can be concatenated onto the end of a set of linear warps to push EPI data into a more homogeneous space than by simply nonlinearly-warping the data, but beware the findings one can obtain by forcing a square peg into a round hole! Requires these linear registrations to be completed first.
+
+Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_AFNI}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{nonlinreg\_EPI2MNI\_AFNI}
+Usage: \texttt{nonlinreg\_EPI2MNI\_AFNI <func\_prefix> <voxel\_dims>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg., smooth in func\_smooth). \\
+voxel\_dims -- target voxel dimensions (isotropic). \
+\end{blockquote}
+
+\noindent Prepares data for analysis in MNI standard-space, including a nonlinear warp.
+
+Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_AFNI}, \texttt{nonlinreg\_calc\_AFNI}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{gen\_regressors}
 Usage: \texttt{gen\_regressors <func\_prefix>}

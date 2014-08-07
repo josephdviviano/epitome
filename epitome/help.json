@@ -309,6 +309,24 @@
          "Brings Freesurfer atlases in register with MNI standard space."
         ],
 
+    "nonlinreg_calc_AFNI" :
+        ["Usage:",
+         "    nonlinreg_calc_AFNI",
+         "Computes a nonlinear warp from linear-registered individual T1 to",
+         "MNI space. Requires these linear registrations to be completed ",
+         "first.",
+        ],
+
+    "nonlinreg_EPI2MNI_AFNI" :
+        ["Usage:",
+         "    nonlinreg_EPI2MNI_AFNI <func_prefix> <voxel_dims>",
+         "func_prefix -- functional data prefix (eg.,smooth in func_smooth).",
+         "voxel_dims -- target voxel dimensions (isotropic).",
+         "",
+         "Prepares data for analysis in MNI standard-space, including a",
+         "nonlinear warp.",
+        ],
+
     "surf2vol" : 
         ["Usage:",
          "    surf2vol <func_prefix> <target_prefix>",
