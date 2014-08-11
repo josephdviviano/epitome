@@ -209,6 +209,18 @@ EPItome scripts are written to never re-do done work. Therefore, to replace a ba
 
 This program works similarly to \texttt{run}, but produces scripts for deleting intermediate files. Generally, it is good practice to inspect the outputs of EPItome first, and if problems are identified, to work backwards through the pipeline until the problem arises to determine the origin of the issue. After the outputs have been vetted, these cleanup scripts will go a long way to keeping your hard drives and system administrators happy.
 
+\subsubsection{EPIfolder}
+
+This simple tool will help you generate folders properly-formatted for EPItome. It is run on a per-subject basis, but a clever user could manually duplicate a single folder structure for as many participants as needed. These folders will automatically be generated in the designated working directory.
+
+\subsubsection{EPIphysio}
+
+EPItome will automatically regress physiological noise out of your data, if you place it (appropriately named) in each RUN folder. The BioPak system outputs a single giant set of physiological data for the entirety of an MRI session. This program will take in this single file and split it into a set of heart rate and respiration time series for each run. These output files are placed in your current working directory and will need to be sorted manually.
+
+\subsubsection{EPIqueue}
+
+EPItome eventually generates a `proclist', a set of commands that must be executed in order to generate the desired outputs. This proclist can be run manually, if desired, but can also be submitted to the sun-grid queuing system by using EPIqueue. This is generally preferred, as multiple users attempting to run proclists simultaneously might overload the system.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Pipeline specifics: usage of each module.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -851,7 +863,7 @@ def surfsmooth(input_name):
 
 \subsection{Documentation}
 
-This is a very important part of module-building, and currently takes two forms: the \LaTeX document that produced this PDF, and the .JSON-formatted file \texttt{.../epitome/help.json} which should contain a similar, set of information, around the command-line usage of your module. Remember -- EPItome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
+This is a very important part of module-building, and currently takes two forms: the \LaTeX document that produced this PDF, and the .JSON-formatted file \texttt{.../epitome/help.json} which should contain a similar set of information, around the command-line usage of your module. Remember -- EPItome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
 
 %% End of document. Go to reference list.
 \newpage 
