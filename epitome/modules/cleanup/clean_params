@@ -25,6 +25,5 @@ for SUB in ${SUBJECTS}; do
     	done
     done
 done
-fi
 
 EOF

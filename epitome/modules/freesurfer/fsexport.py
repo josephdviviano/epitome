@@ -8,8 +8,21 @@
 
 import os, sys
 import fnmatch
+import subprocess
+import shlex
 
 import epitome as epi
+
+def bash_command(cmd):
+    # pipe = subprocess.Popen(shlex.split(cmd), 
+    #                               stdout=subprocess.PIPE,
+    #                               stderr=subprocess.PIPE,
+    #                               shell=True,
+    #                               executable='/bin/bash')
+    # out, err = pipe.communicate()
+    # result = out.decode()
+    # print('Result: ', result)
+    os.system("""/bin/bash -c '""" + cmd + """'""")
 
 def run_commands(path, directory, expt, subj, session):
     
@@ -19,57 +32,58 @@ def run_commands(path, directory, expt, subj, session):
 
     # convert freesurfer T1 to NII
     if os.path.isfile(dir_o + '/anat_T1_fs.nii.gz') == False:
-        cmd1 = ('mri_convert ' +
-                '--in_type mgz ' +
-                '--out_type nii ' +
-                '-odt float ' +
-                '-rt nearest ' + 
-                '--input_volume ' + dir_i + '/brain.mgz ' + 
-                '--output_volume ' + dir_o + '/anat_T1_fs.nii.gz')
-        os.system(cmd1) 
-    
+        cmd = ('mri_convert ' +
+               '--in_type mgz ' +
+               '--out_type nii ' +
+               '-odt float ' +
+               '-rt nearest ' + 
+               '--input_volume ' + dir_i + '/brain.mgz ' + 
+               '--output_volume ' + dir_o + '/anat_T1_fs.nii.gz')
+        print cmd
+        bash_command(cmd)
+
     # orient to RAI orientation
     if os.path.isfile(dir_o + '/anat_T1_brain.nii.gz') == False:
-        cmd2 = ('3daxialize ' +
-                '-prefix ' + dir_o + '/anat_T1_brain.nii.gz ' +
-                '-axial '  + dir_o + '/anat_T1_fs.nii.gz')
-        os.system(cmd2)
+        cmd = ('3daxialize ' +
+               '-prefix ' + dir_o + '/anat_T1_brain.nii.gz ' +
+               '-axial '  + dir_o + '/anat_T1_fs.nii.gz')
+        bash_command(cmd)
     
     # convert MGZ APARC atlas to NII
     if os.path.isfile(dir_o + '/anat_aparc_fs.nii.gz') == False:
-        cmd3 = ('mri_convert ' + 
-                '--in_type mgz ' +
-                '--out_type nii ' +
-                '-odt float ' +
-                '-rt nearest ' + 
-                '--input_volume ' + dir_i + '/aparc+aseg.mgz ' +
-                '--output_volume ' + dir_o + '/anat_aparc_fs.nii.gz')
-        os.system(cmd3)
+        cmd = ('mri_convert ' + 
+               '--in_type mgz ' +
+               '--out_type nii ' +
+               '-odt float ' +
+               '-rt nearest ' + 
+               '--input_volume ' + dir_i + '/aparc+aseg.mgz ' +
+               '--output_volume ' + dir_o + '/anat_aparc_fs.nii.gz')
+        bash_command(cmd)
     
     # orient to RAI orientation
     if os.path.isfile(dir_o + '/anat_aparc_brain.nii.gz') == False:
-        cmd4 = ('3daxialize ' +
-                '-prefix ' + dir_o + '/anat_aparc_brain.nii.gz ' +
-                '-axial '  + dir_o + '/anat_aparc_fs.nii.gz')
-        os.system(cmd4)
+        cmd = ('3daxialize ' +
+               '-prefix ' + dir_o + '/anat_aparc_brain.nii.gz ' +
+               '-axial '  + dir_o + '/anat_aparc_fs.nii.gz')
+        bash_command(cmd)
 
     # convert MGZ APARC2009 atlas to NII
     if os.path.isfile(dir_o + '/anat_aparc2009_fs.nii.gz') == False:
-        cmd5 = ('mri_convert ' +
-                '--in_type mgz ' +
-                '--out_type nii ' +
-                '-odt float ' +
-                '-rt nearest ' + 
-                '--input_volume ' + dir_i + '/aparc.a2009s+aseg.mgz ' + 
-                '--output_volume ' + dir_o + '/anat_aparc2009_fs.nii.gz')
-        os.system(cmd5)
+        cmd = ('mri_convert ' +
+               '--in_type mgz ' +
+               '--out_type nii ' +
+               '-odt float ' +
+               '-rt nearest ' + 
+               '--input_volume ' + dir_i + '/aparc.a2009s+aseg.mgz ' + 
+               '--output_volume ' + dir_o + '/anat_aparc2009_fs.nii.gz')
+        bash_command(cmd)
 
     # orient to RAI orientation
     if os.path.isfile(dir_o + '/anat_aparc2009_brain.nii.gz') == False:
-        cmd6 = ('3daxialize ' +
-                '-prefix ' + dir_o + '/anat_aparc2009_brain.nii.gz ' + 
-                '-axial '  + dir_o + '/anat_aparc2009_fs.nii.gz')
-        os.system(cmd6)
+        cmd = ('3daxialize ' +
+               '-prefix ' + dir_o + '/anat_aparc2009_brain.nii.gz ' + 
+               '-axial '  + dir_o + '/anat_aparc2009_fs.nii.gz')
+        bash_command(cmd)
 
 def T1_export(path, expt):
     

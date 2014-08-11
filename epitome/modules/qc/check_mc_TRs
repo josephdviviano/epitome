@@ -24,7 +24,7 @@ def reorient_to_radiological(image):
 	return image
 
 
-def mask_check(path, expt, mode):
+def mask_check(path, expt, mode, uid):
     """
     Prints TRs 6-10 from the first run of each session. TR 8 is marked, as
     this is the motion-correction image all runs are registered to. This
@@ -50,7 +50,7 @@ def mask_check(path, expt, mode):
             # resample T1 image to has EPI dimensions
 
             EPI = os.path.join(path, expt, subj, mode, sess,
-                                                      'func_ob.01.nii.gz')
+                                                'func_ob.'+ uid +'.01.nii.gz')
 
             # load in data
             EPI = nib.load(EPI).get_data()
@@ -150,4 +150,4 @@ def mask_check(path, expt, mode):
     pdf.close()
 
 if __name__ == "__main__":
-    mask_check(sys.argv[1], sys.argv[2], sys.argv[3])
+    mask_check(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

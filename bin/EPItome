@@ -774,6 +774,7 @@ def run_epitome():
             flag = 1
 
     # add each subject to a queue file, close the subject loop
+    f.write('\nchmod 750 ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd)
     f.write('\n# append this subject to the process queue')
     f.write('\necho bash ${DIR_DATA}/${DIR_EXPT}/${SUB}/' + cmd +
                            ' >> ${DIR_DATA}/${DIR_EXPT}/' + proc)
