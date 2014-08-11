@@ -820,6 +820,14 @@ def run_epitome():
     os.chmod(os.path.join(dir_data, expt, master), 0750)
     os.system('bash ' + os.path.join(dir_data, expt, master))
 
+    # print some final remarks
+    print('******************************************************************')
+    print('The pipeline can be manually executed via:\n' + 
+           '. ' + str(os.path.join(dir_data, expt, proc)) + '\n' +
+           'or submitted to the queue via:\n' +
+           'EPIqueue ' + str(os.path.join(dir_data, expt, proc)))
+    print('******************************************************************')
+
 # this is the command-line usage bit
 if __name__ == "__main__":
     
