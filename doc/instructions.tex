@@ -324,6 +324,19 @@ func\_prefix -- functional data prefix (eg., smooth in func\_smooth).
 Prerequisites: \texttt{init\_EPI}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{ICA}
+Usage: \texttt{ICA <func\_prefix> <mask\_prefix>}
+
+\begin{blockquote}
+func\_prefix -- functional data prefix (eg., smooth in func\_smooth).
+anat\_prefix -- mask data prefix (eg., EPI\_brain in anat\_EPI\_brain).
+\end{blockquote}
+
+\noindent Runs ICA on each input functional file of the type defined using the default MELODIC settings. This module could be easily tweaked to grant the user access to the dimensionality estimation settings, if need be. The output is the full MELODIC report in a `.ica' folder.
+
+Prerequisites: \texttt{init\_EPI}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{linreg\_calc\_AFNI}
 Usage: \texttt{linreg\_calc\_AFNI <cost> <reg\_dof> <data\_quality>}
 

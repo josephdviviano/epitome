@@ -508,13 +508,13 @@ def TRdrop(input_name):
         if decision == 'no' or None:
 
             print('\nInput head size (default 50)')
-            head_size, output = selector_float(output)
+            head_size = selector_float()
 
             print('\nInput FD threshold (default 0.3)')
-            FD, output = selector_float(output)
+            FD = selector_float()
 
             print('\nInput head size (default 1000000)')
-            DV, output = selector_float(output)
+            DV = selector_float()
 
         else:
             print('\nOK, using the defaults.')
@@ -551,7 +551,7 @@ def surfsmooth(input_name):
 
     try:
         print('\nInput smoothing kernel FWHM (mm):')
-        fwhm, output = selector_float(output)
+        fwhm, output = selector_float()
 
     # if we messed any of these up, we return None
     except ValueError as ve:

@@ -185,6 +185,13 @@
          "Requires volumes data in standard space to be computed."
         ],
 
+    "ICA" :
+        ["Usage:",
+         "    ICA <func_prefix> <mask_prefix>",
+         "",
+         "Runs MELODIC ICA on the input functional data."
+        ],
+
     "init_EPI" : 
         ["Usage:",
          "    init_EPI <data_quality> <del_tr> <t_pattern> <normalization>",
