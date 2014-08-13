@@ -192,7 +192,7 @@ def gen_regressors(input_name):
 def ICA(input_name):
     output = copy.copy(input_name) # return output unharmed
 
-     print('\nAdding MELODIC ICA calculation')
+    print('\nAdding MELODIC ICA calculation')
 
     try:
         # masking
@@ -207,7 +207,7 @@ def ICA(input_name):
     # otherwise we print the command and return it
     line = ('. ${DIR_PIPE}/epitome/modules/pre/ICA ' +
                                       str(input_name) + ' ' +
-                                      str(mask_prefix)
+                                      str(mask_prefix))
     return line, output
 
 def init_EPI():    
@@ -551,7 +551,7 @@ def surfsmooth(input_name):
 
     try:
         print('\nInput smoothing kernel FWHM (mm):')
-        fwhm, output = selector_float()
+        fwhm = selector_float()
 
     # if we messed any of these up, we return None
     except ValueError as ve:
