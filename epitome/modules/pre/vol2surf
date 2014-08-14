@@ -57,7 +57,7 @@ for SESS in ${DIR_SESS}; do
               -spec ${DIR_FS}/SUMA/${FS_NAME}_both.spec \
               -surf_A ${DIR_FS}/SUMA/rh.white.asc \
               -surf_B ${DIR_FS}/SUMA/rh.pial.asc \
-              -sv ${DIR_T1}/${FS_NAME}_SurfVol_Alnd_Exp+orig. \
+              -sv ${DIR_FS}/SUMA/${FS_NAME}_SurfVol_Alnd_Exp+orig. \
               -grid_parent ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz \
               -map_func midpoint \
               -f_index nodes \
@@ -71,7 +71,7 @@ for SESS in ${DIR_SESS}; do
               -spec ${DIR_FS}/SUMA/${FS_NAME}_both.spec \
               -surf_A ${DIR_FS}/SUMA/lh.white.asc \
               -surf_B ${DIR_FS}/SUMA/lh.pial.asc \
-              -sv ${DIR_T1}/${FS_NAME}_SurfVol_Alnd_Exp+orig. \
+              -sv ${DIR_FS}/SUMA/${FS_NAME}_SurfVol_Alnd_Exp+orig. \
               -grid_parent ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz \
               -map_func midpoint \
               -f_index nodes \
