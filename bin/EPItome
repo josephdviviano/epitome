@@ -82,7 +82,7 @@ def get_modules(interactive=False, moduletype='pre', used=[]):
 
     # either print a helpful message, or prompt the user to select a module    
     if interactive == False:
-        print("""Access help for each using 'epitome <module> --help'.""")
+        print("""Access help for each using 'EPItome <module> --help'.""")
     else:
         response = raw_input('module #: ')
         
@@ -178,7 +178,7 @@ def get_experiments(interactive=False):
 
     if interactive == False:
         print("""You can inspect each experiment's folder structure using""")
-        print("""'epitome check <experiment>'.\n""")
+        print("""'EPItome check <experiment>'.\n""")
     else:
         response = raw_input('experiment #:')
 
@@ -846,7 +846,7 @@ if __name__ == "__main__":
         check_directories(sys.argv[2]) 
     
     elif len(sys.argv) > 3 and sys.argv[1] == 'check':
-        print 'epitome check only works with 1 experiment at a time!'
+        print 'EPItome check only works with 1 experiment at a time!'
 
     elif len(sys.argv) == 2 and sys.argv[1] == 'clean':
         run_cleanup()
