@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-Takes a proclist created using EPItome run and submits it to the installed
-Oracle Sun Grid Engine using qsub.
+Takes a proclist created using EPItome run and submits it to the scheduler 
+installed on SHARCnet.
 """
 
 import os, sys
@@ -16,6 +16,9 @@ def init(input_file):
     This keeps jobs submitted by multiple users distinct.
     """
 
+    # replace proclist with cmd for identifying subject-wise scripts
+    command_file = 'cmd_' + input_file[9:]
+
     f = open(input_file)
     f = f.read()
 
@@ -23,57 +26,59 @@ def init(input_file):
     u_id = ''.join(random.choice(string.ascii_uppercase + 
                                  string.digits) for _ in range(6))
 
-    submit_jobs(f, u_id)
+    submit_jobs(f, u_id, command_file)
 
-def submit_jobs(f, u_id):
+def submit_jobs(f, u_id, command_file):
     """
     Parses the submitted proclist and generates a set of qsub commands.
     """
     subjlist = []
+    fslist = []
     for i, line in enumerate(f.split('\n')):
 
+        # skip empty entries
         if len(line) == 0:
             continue
 
-        # freesurfer
-        if i == 0:
-            name = 'qsub_freesurfer_' + u_id + '_0'
-            logfile = (name + '.log')
-            cmd = ('echo ' + line + ' | qsub -o ' + logfile + ' ' + 
-                   '-S /bin/bash -V ' +
-                   '-q epitome -cwd -N ' + name)
+        # parsed line
+        name = (line.replace('/', ' ').split(' ')[-1][0:-3] + '_' + str(i))
 
+        # freesurfer recon-alls
+        if line[0:9] == 'recon-all':
+            name = 'qsub_fs_' + u_id + '_' + str(i)
+            cmd = ('sqsub -r 23h --memperproc=2.5g -o ' + 
+                   str(name) + '.out' + 
+                   ' -q serial -j ' + name + ' ' + line)
+            fslist.append(name)
 
-        elif i == 1:
-            name = 'qsub_freesurfer_' + u_id + '_1'
-            logfile = (name + '.log')
-            cmd = ('echo ' + line + ' | qsub -o ' + logfile + ' ' +
-                   '-S /bin/bash -V ' +
-                   '-hold_jid freesurfer_' + u_id + '_0 ' +
-                   '-q epitome -cwd -N ' + name)
-
-        # subject-wise commands + QC
-        else:
-            name = (line.replace('/', ' ').split(' ')[-1][0:-3] + '_' + str(i))
-            name = 'qsub_' + name
-            # preprocessing
-            if len(name) > 4:
-                logfile = (name + '.log')
-                cmd = ('echo ' + line + ' | qsub -o ' + logfile + ' ' +
-                       '-S /bin/bash -V ' +
-                       '-hold_jid freesurfer_' + u_id + '_1 ' + 
-                       '-q epitome -cwd -N ' + name)
-                subjlist.append(name)
+        # freesurfer exports
+        elif line.find('fsexport.py') >= 0:
+            fsexport_name = 'qsub_fsexport_' + u_id
+            logfile = (fsexport_name + '.log')
+            cmd = ('sqsub -r 23h --memperproc=2.5g -o ' + 
+                   str(fsexport_name) + '.out' + 
+                   '-w ' + ",".join(fslist) + ' ' +
+                   '-q serial -j ' + fsexport_name + ' ' + line)
             
-            # qc
-            else:
-                name = 'qsub_qc_' + u_id + '_' + str(i)
-                logfile = (name + '.log')
-                cmd = ('echo ' + line + ' | qsub -o ' + logfile + ' ' +
-                       '-S /bin/bash -V ' +
-                       '-hold_jid ' + ",".join(subjlist) + ' ' +
-                       '-q epitome -cwd -N ' + name)
-
+        # preprocessing
+        elif line.find(command_file) >= 0:
+            name = 'qsub_' + name
+            logfile = (name + '.log')
+            cmd = ('sqsub -r 23h --memperproc=2.5g -o ' + 
+                   str(name) + '.out' + 
+                   '-w ' + str(fsexport_name) + ' ' +
+                   '-q serial -j ' + name + ' ' + line)         
+            subjlist.append(name)
+            
+        # qc
+        else:
+            name = 'qsub_qc_' + u_id + '_' + str(i)
+            logfile = (name + '.log')
+            cmd = ('sqsub -r 23h --memperproc=2.5g -o ' + 
+                   str(name) + '.out' + 
+                   '-w ' ",".join(subjlist) + ' ' +
+                   '-q serial -j ' + name + ' ' + line)
+        #print cmd
 
         # open a subprocess, print the result to the console
         pipe = subprocess.Popen(cmd, shell=True,
@@ -93,13 +98,3 @@ if __name__ == "__main__":
     else:
       input_file = str(sys.argv[1])
       init(input_file)
-
-
-# COUNT=1
-# while read LINE; do
-
-#     sqsub -r 23h --memperproc=2.5G -o out${COUNT}.out -q serial ${LINE}
-#     COUNT=$(($COUNT ++ 1))
-#     #echo ${LINE} | qsub -o log.log -S /bin/bash -V -cwd -N fs
-
-# done < fs_queue.sh
