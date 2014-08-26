@@ -302,6 +302,48 @@ def linreg_EPI2MNI_FSL(input_name):
                                               str(dims))
     return line, output
 
+def linreg_EPI2T1_AFNI(input_name):
+    output = 'T1'
+
+    # give us some feedback
+    print('\nResampling input EPI data to T1 space using AFNI.')
+
+    try:
+        # get the reslice dimensions
+        print('\nSelect target dimensions (isotropic mm):')
+        dims = selector_float()
+
+    # if we messed any of these up, we return None
+    except ValueError as ve:
+        return '', None
+
+    # otherwise we print the command and return it
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_EPI2T1_AFNI ' +
+                                               str(input_name) + ' ' +
+                                               str(dims))
+    return line, output
+
+def linreg_EPI2T1_FSL(input_name):
+    output = 'T1'
+
+    # give us some feedback
+    print('\nResampling input EPI data to T1 space using AFNI.')
+
+    try:
+        # get the reslice dimensions
+        print('\nSelect target dimensions (isotropic mm):')
+        dims = selector_float()
+
+    # if we messed any of these up, we return None
+    except ValueError as ve:
+        return '', None
+
+    # otherwise we print the command and return it
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_EPI2T1_FSL ' +
+                                               str(input_name) + ' ' +
+                                               str(dims))
+    return line, output
+
 def linreg_FS2EPI_AFNI(input_name):
     output = copy.copy(input_name) # return output unharmed
 
@@ -326,6 +368,28 @@ def linreg_FS2MNI_FSL(input_name):
     print('\nMoving Freesurfer atlases to MNI space using FSL.')
 
     line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_FS2MNI_FSL')
+
+    return line, output
+
+def linreg_T12MNI_AFNI(input_name):
+    output = 'MNI'
+
+    # give us some feedback
+    print('\nResampling input T1 data to MNI space using AFNI.')
+
+    try:
+        # get the reslice dimensions
+        print('\nSelect target dimensions (isotropic mm):')
+        dims = selector_float()
+
+    # if we messed any of these up, we return None
+    except ValueError as ve:
+        return '', None
+
+    # otherwise we print the command and return it
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_T12MNI_AFNI ' +
+                                               str(input_name) + ' ' +
+                                               str(dims))
 
     return line, output
 

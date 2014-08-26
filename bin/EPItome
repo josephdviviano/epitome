@@ -296,7 +296,8 @@ def help_query():
 
 def check_paths():
     """
-    This ensures paths defined in config.py are actual directories.
+    This ensures paths defined in config.py are actual directories, and checks
+    that the AFNI physio regression programs are configured properly..
     """
 
     # retrieve settings from config.py
@@ -310,6 +311,26 @@ def check_paths():
 
     elif os.path.isdir(dir_afni) == False:
         print('AFNI directory does not exist:' + str(dir_afni))
+    
+    elif os.path.isfile('/opt/mcretro/run_McRetroTS.sh') == False:
+        print('**********************************************')
+        print('/opt/mcretro/run_McRetroTS.sh cannot be found!')
+        print('**********************************************')
+        print('')
+        print("""Please Download the AFNI package 'McRetroTS' from """)
+        print("""   http://afni.nimh.nih.gov/sscc/dglen/McRetroTS  """)
+        print("""And install it to /opt/mcretro.                   """)
+        print('')
+
+    elif os.path.isdir('/opt/MATLAB/MATLAB_Compiler_Runtime/v715') == False:
+        print('**********************************************')
+        print('MATLAB compiler runtime v715 cannot be found!')
+        print('**********************************************')
+        print('')
+        print("""Please Download the MATLAB v715 (2011b) compiler from """)
+        print("""   http://afni.nimh.nih.gov/sscc/dglen/McRetroTS      """)
+        print("""And install it to /opt/MATLAB.                        """)
+        print('')
 
     else:
         print('\n*********************************************')
@@ -317,6 +338,8 @@ def check_paths():
         print('     data directory: ' + str(dir_data))
         print('     pipeline directory: ' + str(dir_pipe))
         print('     AFNI directory: ' + str(dir_afni))
+        print('     McRetroTS found: /opt/mcretro')
+        print('     MATLAB found: /opt/MATLAB/MATLAB_Compiler_Runtime/v715')
         print('*********************************************\n')
 
 def check_run(expt, subj, mode, sess, run):
@@ -676,7 +699,13 @@ def run_epitome():
     f.write('# Generated: ' + str(datetime) + ' by ' + str(user) + '.\n')
     f.write('\n')
     f.write('## Setup\n')
+    
     f.write("""export DIR_PIPE='""" + str(dir_pipe) + """'\n""")
+    
+    # this should work now that we are exporting and no longer referencing
+    # the master pipeline --!
+    #f.write("""export DIR_PIPE='~/EPItome-xl/""" + str(ID) + """'\n""")
+    
     f.write("""export DIR_DATA='""" + str(dir_data) + """'\n""")
     f.write("""export DIR_AFNI='""" + str(dir_afni) + """'\n""")
     f.write("""export DIR_EXPT='""" + str(expt) + """'\n""")

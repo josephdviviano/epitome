@@ -2,7 +2,7 @@
 
 cat <<EOF
 export INPUT=`echo 'func_'${1}`
-export FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
+export FS=`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
 
 EOF
 
@@ -34,9 +34,9 @@ for SESS in ${DIR_SESS}; do
               -prefix ${DIR}/func_tmp_ctx.R.${ID}.${NUM}.nii.gz \
               -spec ${DIR_FS}/SUMA/${FS_NAME}_both.spec \
               -surf_A ${DIR_FS}/SUMA/rh.white.asc \
-              -sv ${DIR_T1}/${FS_NAME}_SurfVol_Alnd_Exp+orig. \
+              -sv ${DIR_FS}/SUMA/${FS_NAME}_SurfVol_Alnd_Exp+orig. \
               -grid_parent ${DIR}/func_scaled.${ID}.${NUM}.nii.gz \
-              -map_func median \
+              -map_func ave \
               -f_steps 15 \
               -f_index nodes \
               -sdata ${DIR}/${INPUT}.R.${ID}.${NUM}.niml.dset
@@ -45,9 +45,9 @@ for SESS in ${DIR_SESS}; do
               -prefix ${DIR}/func_tmp_ctx.L.${ID}.${NUM}.nii.gz \
               -spec ${DIR_FS}/SUMA/${FS_NAME}_both.spec \
               -surf_A ${DIR_FS}/SUMA/lh.white.asc \
-              -sv ${DIR_T1}/${FS_NAME}_SurfVol_Alnd_Exp+orig. \
+              -sv ${DIR_FS}/SUMA/${FS_NAME}_SurfVol_Alnd_Exp+orig. \
               -grid_parent ${DIR}/func_scaled.${ID}.${NUM}.nii.gz \
-              -map_func median \
+              -map_func ave \
               -f_steps 15 \
               -f_index nodes \
               -sdata ${DIR}/${INPUT}.L.${ID}.${NUM}.niml.dset
@@ -55,11 +55,13 @@ for SESS in ${DIR_SESS}; do
             # add all volumes to create smoothed cortical dataset
             3dcalc \
               -prefix ${DIR}/func_ctx.${ID}.${NUM}.nii.gz \
-              -a ${DIR}/tmp/func_tmp_ctx.R.${ID}.${NUM}.nii.gz \
-              -b ${DIR}/tmp/func_tmp_ctx.L.${ID}.${NUM}.nii.gz \
+              -a ${DIR}/func_tmp_ctx.R.${ID}.${NUM}.nii.gz \
+              -b ${DIR}/func_tmp_ctx.L.${ID}.${NUM}.nii.gz \
               -expr 'a+b'
         fi
     done
+
+    rm ${SESS}/func_tmp*.nii.gz >& /dev/null
 done
 
 cd ${DIR_PIPE}

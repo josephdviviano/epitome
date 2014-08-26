@@ -416,6 +416,14 @@ Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_FSL}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{linreg\_T12MNI\_AFNI}
+Usage: \texttt{linreg\_T12MNI\_AFNI}
+
+\noindent Brings T1 data in register with MNI standard space.
+
+Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_AFNI}, \texttt{linreg\_EPI2T1\_AFNI}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{nonlinreg\_calc\_AFNI}
 Usage: \texttt{nonlinreg\_calc\_AFNI}
 
@@ -536,7 +544,7 @@ FWHM -- full-width half-maximum of the gaussian kernel convolved with the surfac
 
 \noindent This spatially-smooths cortical data along the surface mesh, estimated by Freesurfer.
 
-Prerequisites: \texttt{init\_EPI}, \texttt{vol2surf}.
+Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_AFNI}, \texttt{linreg\_EPI2T1\_AFNI}, \texttt{vol2surf}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{surf2vol}
@@ -549,7 +557,7 @@ target\_prefix -- target data prefix (eg.,smooth in func\_smooth). \
 
 \noindent This projects surface data back into a functional volume with the same properties as <target\_prefix>.
 
-Prerequisites: \texttt{init\_EPI}, \texttt{vol2surf}.
+Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_AFNI}, \texttt{linreg\_EPI2T1\_AFNI}, \texttt{vol2surf}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{vol2surf}
@@ -559,9 +567,9 @@ Usage: \texttt{vol2surf <func\_prefix>}
 func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
 \end{blockquote}
 
-\noindent Projects functional data from volume space to a Freesurfer generated cortical mesh.
+\noindent Projects functional data from volume space to a Freesurfer generated cortical mesh. This must be run on EPI data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter!
 
-Prerequisites: \texttt{init\_EPI}.
+Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_AFNI}, \texttt{linreg\_EPI2T1\_AFNI}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{volsmooth}
@@ -575,7 +583,7 @@ func\_prefix -- functional data prefix (eg.,smooth in func\_smooth).
 
 \noindent Re-samples a mask containing one or more labels to the functional data and smooths within unique values. All zero values in the mask are zeroed out in the output. The output of this can be combined with the outputs of \texttt{surfsmooth} \& \texttt{surf2vol} using \texttt{combine\_volumes}.
 
-Prerequisites: \texttt{init\_EPI}.
+Prerequisites: \texttt{init\_EPI}, \texttt{linreg\_calc\_AFNI}, \texttt{linreg\_EPI2T1\_AFNI}, \texttt{vol2surf}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -792,7 +800,7 @@ When studying the cortex, it is often best to look at the data on a surface. Thi
 \noindent
 \texttt{vol2surf scaled} \\
 
-This will projects the EPI data contained within the white-matter boundaries of the Freesurfer segmentation to a AFNI-based surface space. \\
+This will projects the EPI data contained within the white-matter boundaries of the Freesurfer segmentation to a AFNI-based surface space. This must be run on EPI data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter! \\
 
 \noindent
 \texttt{surfsmooth surface 10.0} \\

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# set variables
 cat <<EOF
 export INPUT=`echo 'func_'${1}`
 export MASK=`echo 'anat_'${2}`

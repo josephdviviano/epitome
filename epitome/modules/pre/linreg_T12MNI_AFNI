@@ -9,10 +9,10 @@ EOF
 cat <<"EOF"
 
 echo '************************************************************************'
-echo '                       AFNI T1-transform data'
+echo '                   AFNI T1-to-MNI transform data'
 echo ''
-echo '   - Resamples '${INPUT}' data to T1 space at '${DIMS}'^3mm,'
-echo '   - Transforms whole-brain masks to T1 space.'
+echo '   - Resamples '${INPUT}' data to MNI space at '${DIMS}'^3mm,'
+echo '   - Transforms whole-brain masks to MNI space.'
 echo ''
 echo '************************************************************************'
 
@@ -24,26 +24,26 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        # register runs with T1
-        if [ ! -f ${SESS}/func_T1.${ID}.${NUM}.nii.gz ]; then
+        # register runs with MNI
+        if [ ! -f ${SESS}/func_MNI.${ID}.${NUM}.nii.gz ]; then
             3dAllineate \
-                -prefix ${SESS}/func_T1.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_MNI.${ID}.${NUM}.nii.gz \
                 -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
-                -1Dmatrix_apply ${SESS}/mat_EPI_to_T1.aff12.1D \
-                -master ${SESS}/reg_EPI_to_T1.nii.gz \
+                -1Dmatrix_apply ${SESS}/mat_T1_to_TAL.aff12.1D \
+                -master ${SESS}/reg_T1_to_TAL.nii.gz \
                 -float \
                 -final wsinc5 \
                 -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
         fi
     done
 
-    # register session masks with T1
-    if [ ! -f ${SESS}/anat_EPI_mask_T1.nii.gz ]; then
+    # register session masks with MNI
+    if [ ! -f ${SESS}/anat_EPI_mask_MNI.nii.gz ]; then
         3dAllineate \
-            -prefix ${SESS}/anat_EPI_mask_T1.nii.gz \
+            -prefix ${SESS}/anat_EPI_mask_MNI.nii.gz \
             -input ${SESS}/anat_EPI_mask.nii.gz \
-            -1Dmatrix_apply ${SESS}/mat_EPI_to_T1.aff12.1D \
-            -master ${SESS}/reg_EPI_to_T1.nii.gz \
+            -1Dmatrix_apply ${SESS}/mat_EPI_to_TAL.aff12.1D \
+            -master ${SESS}/reg_T1_to_TAL.nii.gz \
             -float \
             -final NN \
             -mast_dxyz ${DIMS} ${DIMS} ${DIMS}

@@ -9,10 +9,10 @@ EOF
 cat <<"EOF"
 
 echo '************************************************************************'
-echo '                       FSL T1-transform data'
+echo '                    FSL T1-to-MNI-transform data'
 echo ''
-echo '   - Resamples '${INPUT}' data to T1 space at '${DIMS}'^3mm,'
-echo '   - Transforms whole-brain masks to T1 space,'
+echo '   - Resamples '${INPUT}' data to MNI space at '${DIMS}'^3mm,'
+echo '   - Transforms whole-brain masks to MNI space,'
 echo ''
 echo '************************************************************************'
 
@@ -37,7 +37,7 @@ for SESS in `basename ${DIR_SESS}`; do
         if [ ! -f ${DIR}/func_T1.${ID}.${NUM}.nii.gz ]; then
             flirt -in ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz \
                   -ref ${DIR}/anat_EPI_reg_target.nii.gz \
-                  -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
+                  -applyxfm -init ${DIR}/mat_T1_to_TAL.mat \
                   -out ${DIR}/func_T1.${ID}.${NUM}.nii.gz
                   -interp sinc \
                   -sincwidth 7 \
@@ -47,7 +47,7 @@ for SESS in `basename ${DIR_SESS}`; do
     done
     
     # register session masks with T1
-    if [ ! -f ${DIR}/anat_EPI_mask_T1.nii.gz ]; then
+    if [ ! -f ${DIR}/anat_EPI_mask_MNI.nii.gz ]; then
         flirt -in ${DIR}/anat_EPI_mask.nii.gz \
               -ref ${DIR}/anat_EPI_reg_target.nii.gz \
               -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \

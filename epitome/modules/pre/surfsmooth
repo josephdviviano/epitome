@@ -3,7 +3,7 @@
 cat <<EOF
 export INPUT=`echo 'func_'${1}`
 export FWHM=`echo ${2}`
-export FS =`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
+export FS=`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
 
 EOF
 

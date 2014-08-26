@@ -89,6 +89,12 @@ for SESS in ${DIR_SESS}; do
            ${DIR}/${SESS}/mat_EPI_to_T1.aff12.1D
         mv anat_T1_brainEPI_to_T1_mat.aff12.1D \
            ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D
+
+        # create T1 to TAL pathway
+        cat_matvec \
+            ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D \
+            ${DIR}/${SESS}/mat_EPI_to_TAL.aff12.1D > \
+            ${DIR}/${SESS}/mat_T1_to_TAL.aff12.1D
         
         3dcopy \
             anat_T1_brain+tlrc ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
