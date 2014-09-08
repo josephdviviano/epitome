@@ -1,6 +1,6 @@
-# EPItome-xl
+# EPItome-xl -- Kimel Family TIGR Lab
 
-This is the source code for the York University MRI Pipeline. Mostly written by Joseph D Viviano 2013-2014. It lives on a kindly gentlecomputer named Harford, but could be ported to live on another server with minimal effort.
+This is the source for the Kimel Family TIGR Lab EPItome-xl MRI Pipeline. Mostly written by Joseph D Viviano 2014. It has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
 
 ## Quick Start
 This project depends on the following free software: numpy, scipy, matplotlib, nibabel, AFNI, FSL, & sun grid engine.
@@ -14,5 +14,4 @@ This project depends on the following free software: numpy, scipy, matplotlib, n
 
 ## Detailed Instructions
 Please see the `.pdf` under /doc for all of the gory details, and contact joseph.d.viviano@gmail.com with any questions. Enjoy the science!
-
 
