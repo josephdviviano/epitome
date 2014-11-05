@@ -130,10 +130,10 @@ fsrecon.py
 ----------
 Usage: fsrecon.py <data_directory> <experiment> <modality> <cores> \
 
-data_directory -- full path to your MRI/WORKING directory. 
-experiment -- name of the experiment being analyzed. 
-modality -- image modality to import (normally T1). 
-cores -- number of cores to dedicate (one core per run).
++ data_directory -- full path to your MRI/WORKING directory.
++ experiment -- name of the experiment being analyzed.
++ modality -- image modality to import (normally T1).
++ cores -- number of cores to dedicate (one core per run).
 
 This sends each subject's T1s through the Freesurfer pipeline. It uses multiple T1s per imaging session, but does not combine them between sessions. Data is output to the dedicated `FREESURFER` directory, and should be exported to the MRI analysis folders using `fsexport.py`.
 
@@ -141,8 +141,8 @@ fsexport.py
 -----------
 Usage: fsexport.py <data_directory> <experiment>
 
-data_directory -- full path to your MRI/WORKING directory. 
-experiment -- name of the experiment being analyzed.
++ data_directory -- full path to your MRI/WORKING directory.
++ experiment -- name of the experiment being analyzed.
 
 Imports processed T1s from Freesurfer to the experiment directory.
 
@@ -154,11 +154,11 @@ init_EPI
 --------
 Usage: init_EPI <data_quality> <del_tr> <t_pattern> <normalization> <masking>
 
-data_quality -- `low' for poor internal contrast, otherwise `high'. 
-del_tr -- number of TRs to remove from the beginning of the run. 
-t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift). \
-normalization -- voxel wise time series normalization. One of `zscore', `pct', `demean'. 
-masking -- EPI brain masking tolerance. One of `loose', `normal' `tight'. \
++ data_quality -- `low' for poor internal contrast, otherwise `high'.
++ del_tr -- number of TRs to remove from the beginning of the run.
++ t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift).
++ normalization -- voxel wise time series normalization. One of `zscore', `pct', `demean'.
++ masking -- EPI brain masking tolerance. One of `loose', `normal' `tight'.
 
 Works from the raw data in each RUN folder. It performs general pre-processing for all fMRI data:
 
@@ -181,8 +181,8 @@ combine_volumes
 ---------------
 Usage: combine_volumes <func1_prefix> <func2_prefix>
 
-func1_prefix -- functional data prefix (eg., smooth in func_smooth).
-func2_prefix -- functional data prefix (eg., smooth in func_smooth).
++ func1_prefix -- functional data prefix (eg., smooth in func_smooth).
++ func2_prefix -- functional data prefix (eg., smooth in func_smooth).
 
 Combines two functional files via addition. Intended to combine the outputs of `surfsmooth` & `surf2vol` with `volsmooth`, but could be used to combine other things as well. The functional files should not have non-zeroed regions that overlap, or the output won't make much sense.
 
@@ -192,7 +192,7 @@ concatenate
 -----------
 Usage: concatenate <func_prefix>
 
-func_prefix -- functional data prefix (eg., smooth in func_smooth).
++ func_prefix -- functional data prefix (eg., smooth in func_smooth).
 
 Concatenates all runs in order of a particular type from a particular run of the pipeline (i.e., they will only be drawn from those with the same unique identifier).
 
@@ -202,8 +202,8 @@ ICA
 ---
 Usage: ICA <func_prefix> <mask_prefix>
 
-func_prefix -- functional data prefix (eg., smooth in func_smooth).
-anat_prefix -- mask data prefix (eg., EPI_brain in anat_EPI_brain).
++ func_prefix -- functional data prefix (eg., smooth in func_smooth).
++ anat_prefix -- mask data prefix (eg., EPI_brain in anat_EPI_brain).
 
 Runs ICA on each input functional file of the type defined using the default MELODIC settings. This module could be easily tweaked to grant the user access to the dimensionality estimation settings, if need be. The output is the full MELODIC report in a `.ica` folder.
 
@@ -213,9 +213,9 @@ linreg_calc_AFNI
 ----------------
 Usage: linreg_calc_AFNI <cost> <reg_dof> <data_quality>
 
-cost -- cost function minimized during registration. 
-reg_dof -- `big_move' or `giant_move' (from align_EPI_anat.py). 
-data_quality -- `low' for poor internal contrast, otherwise `high'.
++ cost -- cost function minimized during registration.
++ reg_dof -- `big_move' or `giant_move' (from align_EPI_anat.py).
++ data_quality -- `low' for poor internal contrast, otherwise `high'.
 
 Uses AFNI's align_EPI_anat.py to calculate linear registration between EPI <--> T1 <--> MNI152, and generate an EPI template registered to T1 \& T1 registered to EPI (sessionwise). Specific options can be found in the command-line interface's help function.
 
@@ -225,9 +225,9 @@ linreg_calc_FSL
 ---------------
 Usage: linreg_calc_FSL <cost> <reg_dof> <data_quality>
 
-cost -- cost function minimized during registration (see FSL FLIRT). 
-reg_dof -- 6, 7, 9, or 12 degrees of freedom (see FSL FLIRT), 
-data_quality -- `low' for poor internal contrast, otherwise `high'.
++ cost -- cost function minimized during registration (see FSL FLIRT).
++ reg_dof -- 6, 7, 9, or 12 degrees of freedom (see FSL FLIRT).
++ data_quality -- `low' for poor internal contrast, otherwise `high'.
 
 Uses FSL's FLIRT to calculate linear registration between EPI <--> T1 <--> MNI152, and generate an EPI template registered to T1 \& T1 registered to EPI (sessionwise). Specific options can be found in the command-line interface's help function.
 
@@ -237,8 +237,8 @@ linreg_EPI2MNI_AFNI
 -------------------
 Usage: linreg_EPI2MNI_AFNI <func_prefix> <voxel_dims>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-voxel_dims -- target voxel dimensions (isotropic).
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
++ voxel_dims -- target voxel dimensions (isotropic).
 
 Prepares data for analysis in MNI standard space.
 
@@ -248,8 +248,8 @@ linreg_EPI2MNI_FSL
 ------------------
 Usage: linreg_EPI2MNI_FSL <func_prefix> <voxel_dims>
 
-func_prefix -- functional data prefix (eg., smooth in func_smooth). 
-voxel_dims -- target voxel dimensions (isotropic). \
++ func_prefix -- functional data prefix (eg., smooth in func_smooth). 
++ voxel_dims -- target voxel dimensions (isotropic). \
 
 Prepares data for analysis in MNI standard space.
 
@@ -259,7 +259,7 @@ linreg_FS2EPI_AFNI
 ------------------
 Usage: linreg_FS2EPI_AFNI
 
-rings Freesurfer atlases in register with single-subject EPIs.
+Brings Freesurfer atlases in register with single-subject EPIs.
 
 Prerequisites: init_EPI, linreg_calc_AFNI.
 
@@ -299,8 +299,8 @@ nonlinreg_EPI2MNI_AFNI
 ----------------------
 Usage: nonlinreg_EPI2MNI_AFNI <func_prefix> <voxel_dims>
 
-func_prefix -- functional data prefix (eg., smooth in func_smooth). 
-voxel_dims -- target voxel dimensions (isotropic). \
++ func_prefix -- functional data prefix (eg., smooth in func_smooth). 
++ voxel_dims -- target voxel dimensions (isotropic). \
 
 Prepares data for analysis in MNI standard-space, including a nonlinear warp.
 
@@ -310,7 +310,7 @@ gen_regressors
 --------------
 Usage: gen_regressors <func_prefix>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth).
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
 
 Creates a series of regressors from fMRI data and a freesurfer segmentation: 
 
@@ -330,7 +330,7 @@ gen_gcor
 --------
 Usage: gen_gcor <func_prefix>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth).
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
 
 Calls an AFNI script to calculate the global correlation for each concatenated set of runs (across all sessions). Useful for resting state functional connectivity experiments.
 
@@ -340,13 +340,13 @@ filter
 ------
 Usage: filter <func_prefix> <det> <gs> <vent> <dv> <wm_loc> <wm_glo>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-det -- polynomial order to detrend each voxel against. 
-gs -- if == on, regress mean global signal from each voxel. 
-vent -- if == on, regress mean ventricle signal from each voxel. 
-dv -- if == on, regress mean draining vessel signal from each voxel. 
-wm_loc -- if == on, regress local white matter from target voxels. 
-wm_glo -- if == on, regress global white matter for all voxels. \
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
++ det -- polynomial order to detrend each voxel against. 
++ gs -- if == on, regress mean global signal from each voxel. 
++ vent -- if == on, regress mean ventricle signal from each voxel. 
++ dv -- if == on, regress mean draining vessel signal from each voxel. 
++ wm_loc -- if == on, regress local white matter from target voxels. 
++ wm_glo -- if == on, regress global white matter for all voxels. \
 
 This computes detrended nuisance time series, fits each run with a computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional, and generally advisable save global mean regression.
 
@@ -356,10 +356,10 @@ TRdrop
 ------
 Usage: TRdrop <func_prefix> <head_size> <FD_thresh> <DV_thresh>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-head_size -- head radius in mm (def. 50 mm). 
-thresh_FD -- censor TRs with $\Delta$ motion > $x$ mm (def. 0.3 mm). 
-thresh_DV -- censor TRs with $\Delta$ GS change > $x$ \% (def. [1000000](http://upload.wikimedia.org/wikipedia/en/1/16/Drevil_million_dollars.jpg). 
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
++ head_size -- head radius in mm (def. 50 mm). 
++ thresh_FD -- censor TRs with $\Delta$ motion > $x$ mm (def. 0.3 mm). 
++ thresh_DV -- censor TRs with $\Delta$ GS change > $x$ \% (def. [1000000](http://upload.wikimedia.org/wikipedia/en/1/16/Drevil_million_dollars.jpg). 
 
 This removes motion-corrupted TRs from fMRI scans and outputs shortened versions for connectivity analysis (mostly). By default, DVARS regression is set of OFF by using a very, very high threshold.
 
@@ -369,10 +369,10 @@ lowpass
 -------
 Usage: lowpass <func_prefix> <mask_prefix> <filter> <cutoff>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-mask_prefix -- mask data prefix (eg., EPI_mask in anat_EPI_mask). 
-filter -- filter type: `median', `average', `kaiser', or `butterworth'. 
-cutoff -- filter cuttoff: either window length, or cutoff frequency.
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
++ mask_prefix -- mask data prefix (eg., EPI_mask in anat_EPI_mask). 
++ filter -- filter type: `median', `average', `kaiser', or `butterworth'. 
++ cutoff -- filter cuttoff: either window length, or cutoff frequency.
 
 This low-passes input data using the specified filter type and cutoff. 
 
@@ -386,8 +386,8 @@ surfsmooth
 ----------
 Usage: surfsmooth <func_prefix> <FWHM>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-FWHM -- full-width half-maximum of the gaussian kernel convolved with the surface data.
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
++ FWHM -- full-width half-maximum of the gaussian kernel convolved with the surface data.
 
 This spatially-smooths cortical data along the surface mesh, estimated by Freesurfer.
 
@@ -397,8 +397,8 @@ surf2vol
 --------
 Usage: surf2vol <func_prefix> <target_prefix>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-target_prefix -- target data prefix (eg.,smooth in func_smooth). \
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
++ target_prefix -- target data prefix (eg.,smooth in func_smooth). \
 
 This projects surface data back into a functional volume with the same properties as <target_prefix>.
 
@@ -408,7 +408,7 @@ vol2surf
 --------
 Usage: vol2surf <func_prefix>
 
-func_prefix -- functional data prefix (eg.,smooth in func_smooth).
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
 
 Projects functional data from volume space to a Freesurfer generated cortical mesh. This must be run on EPI data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter!
 
@@ -418,9 +418,9 @@ volsmooth
 ---------
 Usage: volsmooth <func_prefix> <mask_prefix> <FWHM>
 
-func_prefix -- functional data prefix (eg., smooth in func_smooth).
-mask_prefix -- mask data prefix (eg., EPI_mask in anat_EPI_mask).
-func_prefix -- functional data prefix (eg.,smooth in func_smooth).
++ func_prefix -- functional data prefix (eg., smooth in func_smooth).
++ mask_prefix -- mask data prefix (eg., EPI_mask in anat_EPI_mask).
++ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
 
 Re-samples a mask containing one or more labels to the functional data and smooths within unique values. All zero values in the mask are zeroed out in the output. The output of this can be combined with the outputs of surfsmooth \& surf2vol using combine_volumes.
 
@@ -434,9 +434,9 @@ check_EPI2T1
 ------------
 Usage: check_EPI2T1 <path> <expt> <mode>
 
-path -- full path to EPItome data folder.
-expt -- experiment name.
-mode -- image modality (eg., TASK, REST).
++ path -- full path to EPItome data folder.
++ expt -- experiment name.
++ mode -- image modality (eg., TASK, REST).
 
 Prints out a PDF showing the quality of the linear registration between the functional and anatomical data for all subjects. On the top row, the EPI image is translucent and overlaid on the anatomical in red. On the bottom row, an edge-detected version of the anatomical is overlain on the EPI image in blues.
 
@@ -446,9 +446,9 @@ check_T12MNI
 ------------
 Usage: check_T12MNI <path> <expt> <mode>
 
-path -- full path to EPItome data folder.
-expt -- experiment name.
-mode -- image modality (eg., TASK, REST).
++ path -- full path to EPItome data folder.
++ expt -- experiment name.
++ mode -- image modality (eg., TASK, REST).
 
 Prints out a PDF showing the quality of the linear registration between the subject-specific anatomical data and the group-level MNI brain. On the top row, the T1 image is translucent and overlaid on the MNI brain in red. On the bottom row, the MNI brain is translucent and is overlaid on the T1 brain in red.
 
@@ -458,9 +458,9 @@ check_masks
 -----------
 Usage: check_masks <path> <expt> <mode>
 
-path -- full path to EPItome data folder.
-expt -- experiment name.
-mode -- image modality (eg., TASK, REST).
++ path -- full path to EPItome data folder.
++ expt -- experiment name.
++ mode -- image modality (eg., TASK, REST).
 
 Prints out a PDF showing the Freesurfer-derived masks overlain on each subject's T1 brain -- these masks are those used for regressor estimation. White matter is labeled in dark blue, gray matter is labeled in light blue, draining vessels are labeled in light blue?, and ventricles are labeled in ???.  
 Prerequisites: linreg_FS2EPI_AFNI/FSL.
@@ -469,9 +469,9 @@ check_MC_TRs
 ------------
 Usage: check_MC_TRs <path> <expt> <mode>
 
-path -- full path to EPItome data folder.
-expt -- experiment name.
-mode -- image modality (eg., TASK, REST).
++ path -- full path to EPItome data folder.
++ expt -- experiment name.
++ mode -- image modality (eg., TASK, REST).
 
 Prints TRs 6-10 from the first run of each session. The default motion-correction TR 8 is marked in red. This will allow the user to identify whether the motion-correction TR is somehow corrupted for any given subject, which can be manually changed and re-run.
 
@@ -481,10 +481,10 @@ check_motionind
 ---------------
 Usage: check_motionind <path> <expt> <mode> <uid>
 
-path -- full path to EPItome data folder.
-expt -- experiment name.
-mode -- image modality (eg., TASK, REST).
-uid -- unique identifier for run of EPItome.
++ path -- full path to EPItome data folder.
++ expt -- experiment name.
++ mode -- image modality (eg., TASK, REST).
++ uid -- unique identifier for run of EPItome.
 
 This prints the estimated framewise displacement and DVARS measurement for all subjects and runs in an experiment to one grid, ranking subjects by the sum of their framewise displacement (top left shows least motion, bottom right shows most motion). Vertical lines denote runs, and the horizontal line denotes a respectable threshold of 0.5 mm/TR for the framewise displacement plot, and 10\% signal change for the DVARS plot. This can be used to hopefully facilitate subject-wise or run-wise rejection due to excessive head motion.
 
@@ -494,8 +494,8 @@ check_runs
 ----------
 Usage: check_runs <path> <expt>
 
-path -- full path to EPItome data folder.
-expt -- experiment name.
++ path -- full path to EPItome data folder.
++ expt -- experiment name.
 
 This prints out a CSV containing the NIFTI dimensions of each file contained in a RUN folder. This works across all modalities simultaneously, and records subject, image modality, session, and run number. This should give the user a broad overview of the input data, hopefully assisting in identifying corrupted files or aborted runs in the MRI.
 
@@ -505,10 +505,10 @@ check_spectra
 -------------
 Usage: check_spectra <path> <expt> <mode> <uid>
 
-path -- full path to EPItome data folder.
-expt -- experiment name.
-mode -- image modality (eg., TASK, REST).
-uid -- unique identifier for run of EPItome.
++ path -- full path to EPItome data folder.
++ expt -- experiment name.
++ mode -- image modality (eg., TASK, REST).
++ uid -- unique identifier for run of EPItome.
 
 This gives an overview of the frequency content of the MRI data in multiple ways for each subject. First, it plots the log-log spectra of the regressors used for time-series filtering, as typically done in resting-state experiments. It also compares the mean raw data with the mean filtered output, and mean noise model, to show whether the modeled noise is qualitatively different from the input raw data. Finally, it compares the spectra of the mean time series with the mean of all computed spectra, which should be equivalent.
 
