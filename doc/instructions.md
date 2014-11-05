@@ -17,71 +17,55 @@ This manual will progress to more advanced topics in the end. First, I will expl
 
 Requirements & Dependencies
 ---------------------------
-
-EPItome contains a small number of programs that actually manipulate data, but also makes heavy use of widely-used MRI analysis tools and a number of python distributions. The user is assumed to have properly installed and configured FSL, AFNI, Freesurfer, and the python packages numpy, scipy, and matplotlib. For physiological noise regression, you must have the MATLAB compiler runtime installed, along with AFNI's (http://afni.nimh.nih.gov/sscc/dglen/McRetroTS)[McRetroTS] scripts installed in \texttt{/opt/MATLAB/MATLAB\_Compiler\_Runtime/} and \texttt{/opt/mcretro/}, respectively.
+EPItome contains a small number of programs that actually manipulate data, but also makes heavy use of widely-used MRI analysis tools and a number of python distributions. The user is assumed to have properly installed and configured FSL, AFNI, Freesurfer, and the python packages numpy, scipy, and matplotlib. For physiological noise regression, you must have the MATLAB compiler runtime installed, along with AFNI's [http://afni.nimh.nih.gov/sscc/dglen/McRetroTS](McRetroTS) scripts installed in /opt/MATLAB/MATLAB_Compiler_Runtime/ and /opt/mcretro/, respectively.
 
 The program itself was built and tested on a Ubuntu 12.04 server. I imagine it will work well in any Linux environment. It should run on Mac OS X as well, but this remains unverified. There will be no support for Windows.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The functionality of the pipeline
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Setting Up \& Using EPItome-xl}
+Setting Up & Using EPItome-xl
+-----------------------------
+Up to date EPItome code \& installation instructions are available from [https://github.com/josephdviviano/EPItome-xl](github). Briefly,
 
-Up to date EPItome code \& installation instructions are available from \href{https://github.com/josephdviviano/EPItome-xl}{github}). Briefly, \\
-
-% code to configure EPItome-xl
-\begin{lstlisting}[language=bash,frame=L,basicstyle=\footnotesize\ttfamily]
-git clone https://github.com/josephdviviano/EPItome-xl.git
-easy_install EPItome-xl
-\end{lstlisting}
-\
+    git clone -b kimel https://github.com/josephdviviano/EPItome-xl.git
+    pip install EPItome-xl
 
 After installation, EPItome requires you to specify a few paths. These settings can be found in the /epitome/config.py file.
 
-\begin{itemize}
-    \item{\texttt{dir\_data}: should point to your MRI experiment folder.}
-    \item{\texttt{dir\_pipe}: should point to your installation of EPItome-xl.}
-    \item{\texttt{dir\_afni}: should point to your installation of AFNI.}
-    \item{\texttt{cores}: could be set to the maximum number of cores you wish EPItome to use (defaults to the maximum possible -1).}
-\end{itemize}
+    + dir_data: should point to your MRI experiment folder.
+    + dir_pipe: should point to your installation of EPItome-xl.
+    + dir\_afni: should point to your installation of AFNI.
+    + cores: could be set to the maximum number of cores you wish EPItome to use (defaults to the maximum possible -1).
 
-EPItome-xl comes with a few command-line interfaces. \texttt{EPItome} is used to inspect data in the MRI directory, returns information on the currently-available modules, can be used to construct new pipelines, and to remove unwanted data from the MRI directory cleanly. \texttt{EPIphysio} is a tool built to parse physiological data from the BIOPAK 150 unit we have installed at York University (Toronto), and might need to be adapted / extended to work with other units. \texttt{EPIfolder} is used to generate an appropriate folder structure in the MRI directory for the EPItome pipeline to work on.
+EPItome-xl comes with a few command-line interfaces. EPItome is used to inspect data in the MRI directory, returns information on the currently-available modules, can be used to construct new pipelines, and to remove unwanted data from the MRI directory cleanly. EPIphysio is a tool built to parse physiological data from the BIOPAK 150 unit installed at York University (Toronto), and might need to be adapted / extended to work with other units. EPIfolder is used to generate an appropriate folder structure in the MRI directory for the EPItome pipeline to work on.
 
-The MRI directory itself must be organized as follows: \\
+The MRI directory itself must be organized as follows:
 
-%framebox hack fixes indentation problems
-\makebox{\begin{minipage}[t]{1\columnwidth}%
-\dirtree{%
-    .1 /EPItome.
-    .2 EXPERIMENTS.
-    .3 SUBJECTS.
-    .4 MODE.
-    .5 SESS.
-    .6 RUN.
-    .2 FREESURFER.
-    .3 SUBJECTS.
-}
-\
-\end{minipage}}
+    /EPItome
+        /EXPERIMENTS
+            /SUBJECTS
+                /MODE
+                    /SESS
+                        /RUN
+        /FREESURFER.
+            /SUBJECTS
 
-\noindent
-The Freesurfer subject directory should point to the Freesurfer directory in your MRI folder -- this can easily be accomplished using a \href{https://kb.iu.edu/d/abbe}{symbolic link}. The remaining folder structure is perhaps best generated by using the included \texttt{EPIfolder} tool (or via a home-brew script).
+The Freesurfer subject directory should point to the Freesurfer directory in your MRI folder -- this can easily be accomplished using a [https://kb.iu.edu/d/abbe](symbolic link). The remaining folder structure is perhaps best generated by using the included EPIfolder tool (or via a home-brew script).
 
-\subsection{Folders}
+Folders
+=======
 
-The folder structure is integral to EPItome -- if it is flawed, the pipeline will fail in \href{https://www.youtube.com/watch?v=TxcDTUMLQJI}{mysterious ways}. The structure itself is designed to be thought of as a tree. At the roots of the tree are the individual files collected at the scanner. As we ascend the tree, files are combined across sessions, image modalities, and subjects, so one finds experiment-wide outputs at the highest levels. The \texttt{EPIfolder} program will help you set up these folders appropriately.
+The folder structure is integral to EPItome -- if it is flawed, the pipeline will fail in [https://www.youtube.com/watch?v=TxcDTUMLQJI](mysterious ways). The structure itself is designed to be thought of as a tree. At the roots of the tree are the individual files collected at the scanner. As we ascend the tree, files are combined across sessions, image modalities, and subjects, so one finds experiment-wide outputs at the highest levels. The EPIfolder program will help you set up these folders appropriately.
 
-\subsubsection{EXPERIMENTS}
+EXPERIMENTS
+-----------
+This is a set of folders containing entire experiments. There are no important naming conventions, but it seems advisable (for consistency) to make the folder names all capitals, and short (e.g., LINGASD for `language study on those with autism spectrum disorder').
 
-This is a set of folders containing entire experiments. There are no important naming conventions, but it seems advisable (for consistency) to make the folder names all capitals, and short (e.g., \texttt{LINGASD} for `language study on those with autism spectrum disorder').
-
-\subsubsection{SUBJECTS}
-
+SUBJECTS
+--------
 Once again, these are simply folders with participant names. They follow no convention, but should be consistent for your own sake.
 
-\subsubsection{MODE}
-
-Image modality folders separate images of different kinds: anatomicals, EPI's collected using differing sequences, or EPI's of different task-types (e.g., rest vs. two-back matching). The T1 directory \textbf{must} exist for each subject at the very minimum in \texttt{SESS01}.
+MODE
+----
+Image modality folders separate images of different kinds: anatomicals, EPI's collected using differing sequences, or EPI's of different task-types (e.g., rest vs. two-back matching). The T1 directory *must* exist for each subject at the very minimum in SESS01.
 
 This is a good place to separate scans you would like to have analyzed in different ways, or to test multiple pre-processing strategies on the same set of subjects. For example, it may be that your \texttt{TASK} set is being prepared for a GLM or partial least squares analysis, and should be processed more minimally than your \texttt{REST} data, which will undergo things such as low-pass filtering and nuisance variable regression. In another example, it may be that you are curious about how your choice of pre-processing steps influences your results. Here, you could have a set of identical scans under \texttt{REST\_1} and \texttt{REST\_2}. You could build two sets of pipelines using EPItome with the unique identifiers `1' and `2', and run them on each modality separately.
 
