@@ -15,4 +15,4 @@ This project depends on the following free software: numpy, scipy, matplotlib, n
 
 Detailed Instructions
 ---------------------
-Please see the `.pdf` under /doc for all of the gory details, and contact joseph@viviano.ca with any questions. Enjoy the science!
+Please see [doc/instructions.md](doc/instructions.md) for all of the gory details, and contact joseph@viviano.ca with any questions. Enjoy the science!
