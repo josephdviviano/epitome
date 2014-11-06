@@ -149,411 +149,57 @@ Freesurfer
 Right now, the default `freesurfer recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
 
 [fsrecon](doc/fsrecon.md)
-
-fsexport.py
------------
-Usage: fsexport.py <data_directory> <experiment>
-
-+ data_directory -- full path to your MRI/WORKING directory.
-+ experiment -- name of the experiment being analyzed.
-
-Imports processed T1s from Freesurfer to the experiment directory.
+[fsexport](doc/fsexport.md)
 
 Pre-Processing
 ==============
 This contains the lion's share of the pipeline. Every run of epitome begins with `init_epi`, which contains a non-contentious set of pre-processing steps for epi images. THe following stages can be chained together at will to preform de-noising, spatial transformations, projections to surface-space, and spatial smoothing.
 
-init_epi
---------
-Usage: init_epi <data_quality> <del_tr> <t_pattern> <normalization> <masking>
-
-+ data_quality -- `low' for poor internal contrast, otherwise `high'.
-+ del_tr -- number of TRs to remove from the beginning of the run.
-+ t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift).
-+ normalization -- voxel wise time series normalization. One of `zscore', `pct', `demean'.
-+ masking -- epi brain masking tolerance. One of `loose', `normal' `tight'.
-
-Works from the raw data in each RUN folder. It performs general pre-processing for all fMRI data:
-
-+ Orients data to RAI
-+ Deletes initial time points (optionally)
-+ Removes data outliers
-+ Slice time correction
-+ Deobliques \& motion corrects data
-+ Creates session mean deskulled epis and whole-brain masks
-+ Scales and optionally normalizes each time series
-+ Calculates various statistics + time series
-
-Time series normalization can be accomplished in one of two ways: percent signal change, and scaling. For percent signal change, the data is normalized by the mean of each time series to mean = 100. A deviation of 1 from this mean value indicates 1\% signal change in the data. This is helpful for analyzing only relative fluctuations in the signal and is best at removing inter-session/subject/run variability, although it can also introduce rare artifacts in small localized regions of the images and may not play well with multivariate techniques such as partial least squares without accounting for these artifacts. Alternatively, one can scale the data, which applies single scaling factor to all voxels such that the global mean of the entire run = 1000. This will help normalize baseline shifts across sessions, runs, and participants. Your selection here might be motivated by personal preference, or in rarer cases, analytic requirements. When in doubt, it is safe to select `off', as scaling can be done later by hand, or `scale' if one is doing a simple GLM-style analysis. `pct' should be used by those with a good reason.
-
-Masking options are provided to improve masking performance across various acquisition types, but it is very hard to devise a simple one-size fits all solution for this option. Therefore the QC outputs will be very important for ensuring good masking, and these options may need to be tweaked on a site-by-site basis. Luckily, many analysis methods do not rely heavily on mask accuracy. In cases that do, such as partial least squares / ICA / PCA analysis, close attention should be paid to the output of this step. Hopefully the `loose', `normal', and `tight' nomenclature are self-explanatory. Generally, it is best to start with normal, and adjust if required.
-
-Prerequisites: None.
-
-combine_volumes
----------------
-Usage: combine_volumes <func1_prefix> <func2_prefix>
-
-+ func1_prefix -- functional data prefix (eg., smooth in func_smooth).
-+ func2_prefix -- functional data prefix (eg., smooth in func_smooth).
-
-Combines two functional files via addition. Intended to combine the outputs of `surfsmooth` & `surf2vol` with `volsmooth`, but could be used to combine other things as well. The functional files should not have non-zeroed regions that overlap, or the output won't make much sense.
-
-Prerequisites: Two epi modules with unique output prefixes. Intended to be used to combine the outputs of volsmooth and surfsmooth in a single volume. 
-
-concatenate
------------
-Usage: concatenate <func_prefix>
-
-+ func_prefix -- functional data prefix (eg., smooth in func_smooth).
-
-Concatenates all runs in order of a particular type from a particular run of the pipeline (i.e., they will only be drawn from those with the same unique identifier).
-
-Prerequisites: init_epi.
-
-ICA
----
-Usage: ICA <func_prefix> <mask_prefix>
-
-+ func_prefix -- functional data prefix (eg., smooth in func_smooth).
-+ anat_prefix -- mask data prefix (eg., epi_brain in anat_epi_brain).
-
-Runs ICA on each input functional file of the type defined using the default MELODIC settings. This module could be easily tweaked to grant the user access to the dimensionality estimation settings, if need be. The output is the full MELODIC report in a `.ica` folder.
-
-Prerequisites: init_epi.
-
-linreg_calc_AFNI
-----------------
-Usage: linreg_calc_AFNI <cost> <reg_dof> <data_quality>
-
-+ cost -- cost function minimized during registration.
-+ reg_dof -- `big_move' or `giant_move' (from align_epi_anat.py).
-+ data_quality -- `low' for poor internal contrast, otherwise `high'.
-
-Uses AFNI's align_epi_anat.py to calculate linear registration between epi <--> T1 <--> MNI152, and generate an epi template registered to T1 \& T1 registered to epi (sessionwise). Specific options can be found in the command-line interface's help function.
-
-Prerequisites: init_epi.
-
-linreg_calc_FSL
----------------
-Usage: linreg_calc_FSL <cost> <reg_dof> <data_quality>
-
-+ cost -- cost function minimized during registration (see FSL FLIRT).
-+ reg_dof -- 6, 7, 9, or 12 degrees of freedom (see FSL FLIRT).
-+ data_quality -- `low' for poor internal contrast, otherwise `high'.
-
-Uses FSL's FLIRT to calculate linear registration between epi <--> T1 <--> MNI152, and generate an epi template registered to T1 \& T1 registered to epi (sessionwise). Specific options can be found in the command-line interface's help function.
-
-Prerequisites: init_epi.
-
-linreg_epi2MNI_AFNI
--------------------
-Usage: linreg_epi2MNI_AFNI <func_prefix> <voxel_dims>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
-+ voxel_dims -- target voxel dimensions (isotropic).
-
-Prepares data for analysis in MNI standard space.
-
-Prerequisites: init_epi, linreg_calc_AFNI.
-
-linreg_epi2MNI_FSL
-------------------
-Usage: linreg_epi2MNI_FSL <func_prefix> <voxel_dims>
-
-+ func_prefix -- functional data prefix (eg., smooth in func_smooth). 
-+ voxel_dims -- target voxel dimensions (isotropic). \
-
-Prepares data for analysis in MNI standard space.
-
-Prerequisites: init_epi, linreg_calc_FSL.
-
-linreg_FS2epi_AFNI
-------------------
-Usage: linreg_FS2epi_AFNI
-
-Brings Freesurfer atlases in register with single-subject epis.
-
-Prerequisites: init_epi, linreg_calc_AFNI.
-
-linreg_FS2epi_FSL
------------------
-Usage: linreg_FS2epi_FSL
-
-Brings Freesurfer atlases in register with single-subject epis.
-
-Prerequisites: init_epi, linreg_calc_FSL.
-
-linreg_FS2MNI_FSL
------------------
-Usage: linreg_FS2MNI_FSL
-
-Brings Freesurfer atlases in register with MNI standard space.
-
-Prerequisites: init_epi, linreg_calc_FSL.
-
-linreg_T12MNI_AFNI
-------------------
-Usage: linreg_T12MNI_AFNI
-
-Brings T1 data in register with MNI standard space.
-
-Prerequisites: init_epi, linreg_calc_AFNI, linreg_epi2T1_AFNI.
-
-nonlinreg_calc_AFNI
--------------------
-Usage: nonlinreg_calc_AFNI
-
-Computes a nonlinear warp from linear-registered individual T1 to MNI space. This can be concatenated onto the end of a set of linear warps to push epi data into a more homogeneous space than by simply nonlinearly-warping the data, but beware the findings one can obtain by forcing a square peg into a round hole! Requires these linear registrations to be completed first.
-
-Prerequisites: init_epi, linreg_calc_AFNI.
-
-nonlinreg_epi2MNI_AFNI
-----------------------
-Usage: nonlinreg_epi2MNI_AFNI <func_prefix> <voxel_dims>
-
-+ func_prefix -- functional data prefix (eg., smooth in func_smooth). 
-+ voxel_dims -- target voxel dimensions (isotropic). \
-
-Prepares data for analysis in MNI standard-space, including a nonlinear warp.
-
-Prerequisites: init_epi, linreg_calc_AFNI, nonlinreg_calc_AFNI.
-
-gen_regressors
---------------
-Usage: gen_regressors <func_prefix>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
-
-Creates a series of regressors from fMRI data and a freesurfer segmentation: 
-
-+ white matter + eroded mask
-+ ventricles + eroded mask
-+ grey matter mask
-+ brain stem mask
-+ dialated whole-brain mask
-+ draining vessels mask
-+ local white matter regressors + 1 temporal lag
-+ ventricle regressors + 1 temporal lag
-+ draining vessel regressors + 1 temporal lag
-
-Prerequisites: init_epi, linreg_calc_AFNI/FSL, linreg_FS2epi_AFNI/FSL.
-
-gen_gcor
---------
-Usage: gen_gcor <func_prefix>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
-
-Calls an AFNI script to calculate the global correlation for each concatenated set of runs (across all sessions). Useful for resting state functional connectivity experiments.
-
-Prerequisites: init_epi.
-
-filter
-------
-Usage: filter <func_prefix> <det> <gs> <vent> <dv> <wm_loc> <wm_glo>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-+ det -- polynomial order to detrend each voxel against. 
-+ gs -- if == on, regress mean global signal from each voxel. 
-+ vent -- if == on, regress mean ventricle signal from each voxel. 
-+ dv -- if == on, regress mean draining vessel signal from each voxel. 
-+ wm_loc -- if == on, regress local white matter from target voxels. 
-+ wm_glo -- if == on, regress global white matter for all voxels. \
-
-This computes detrended nuisance time series, fits each run with a computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional, and generally advisable save global mean regression.
-
-Prerequisites: init_epi, linreg_calc_AFNI/FSL, linreg_FS2epi_AFNI/FSL, gen_regressors.
-
-TRdrop
-------
-Usage: TRdrop <func_prefix> <head_size> <FD_thresh> <DV_thresh>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-+ head_size -- head radius in mm (def. 50 mm). 
-+ thresh_FD -- censor TRs with $\Delta$ motion > $x$ mm (def. 0.3 mm). 
-+ thresh_DV -- censor TRs with $\Delta$ GS change > $x$ \% (def. [1000000](http://upload.wikimedia.org/wikipedia/en/1/16/Drevil_million_dollars.jpg). 
-
-This removes motion-corrupted TRs from fMRI scans and outputs shortened versions for connectivity analysis (mostly). By default, DVARS regression is set of OFF by using a very, very high threshold.
-
-Prerequisites: init_epi.
-
-lowpass
--------
-Usage: lowpass <func_prefix> <mask_prefix> <filter> <cutoff>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-+ mask_prefix -- mask data prefix (eg., epi_mask in anat_epi_mask). 
-+ filter -- filter type: `median', `average', `kaiser', or `butterworth'. 
-+ cutoff -- filter cuttoff: either window length, or cutoff frequency.
-
-This low-passes input data using the specified filter type and cutoff. 
-
-Both `median' and 'average' filters operate in the time domain and therefore, the best cutoff values are odd (and must be larger than 1 to do anything). Time-domain filters are very good at removing high-frequency noise from the data without introducing any phase-shifts or ringing into the time series. When in doubt, a moving average filter with window length of 3 is a decent and conservative choice.
-
-Alternatively, the 'kaiser' and 'butterworth' filters work in the frequency domain and accept a cutoff in Hz (people tend to use a default of 0.1). Both are implemented as bi-directional FIR filters. The kaiser window is high order and permits reasonably sharp rolloff with minimal passband ringing for shorter fMRI time series. The butterworth filter is of low order and achieves minimal passband ringing at the expense of passband roll off (in layman's terms, butterworth filters will retain more high-frequency content than a kaiser filter with equivalent cutoff). The effect of the passband ringing is an empirical question that would be best tested by the User.
-
-Prerequisites: init_epi.
-
-surfsmooth
-----------
-Usage: surfsmooth <func_prefix> <FWHM>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-+ FWHM -- full-width half-maximum of the gaussian kernel convolved with the surface data.
-
-This spatially-smooths cortical data along the surface mesh, estimated by Freesurfer.
-
-Prerequisites: init_epi, linreg_calc_AFNI, linreg_epi2T1_AFNI, vol2surf.
-
-surf2vol
---------
-Usage: surf2vol <func_prefix> <target_prefix>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
-+ target_prefix -- target data prefix (eg.,smooth in func_smooth). \
-
-This projects surface data back into a functional volume with the same properties as <target_prefix>.
-
-Prerequisites: init_epi, linreg_calc_AFNI, linreg_epi2T1_AFNI, vol2surf.
-
-vol2surf
---------
-Usage: vol2surf <func_prefix>
-
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
-
-Projects functional data from volume space to a Freesurfer generated cortical mesh. This must be run on epi data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter!
-
-Prerequisites: init_epi, linreg_calc_AFNI, linreg_epi2T1_AFNI.
-
-volsmooth
----------
-Usage: volsmooth <func_prefix> <mask_prefix> <FWHM>
-
-+ func_prefix -- functional data prefix (eg., smooth in func_smooth).
-+ mask_prefix -- mask data prefix (eg., epi_mask in anat_epi_mask).
-+ func_prefix -- functional data prefix (eg.,smooth in func_smooth).
-
-Re-samples a mask containing one or more labels to the functional data and smooths within unique values. All zero values in the mask are zeroed out in the output. The output of this can be combined with the outputs of surfsmooth \& surf2vol using combine_volumes.
-
-Prerequisites: init_epi, linreg_calc_AFNI, linreg_epi2T1_AFNI, vol2surf.
+[init_epi](doc/init_epi.md)
+[combine_volumes](doc/combine_volumes.md)
+[concatenate](doc/concatenate.md)
+[ica](doc/ica.md)
+[linreg_calc_afni](doc/linreg_calc_afni.md)
+[linreg_calc_fsl](doc/linreg_calc_fsl.md)
+[linreg_epi2mni_afni](doc/linreg_epi2mni_afni.md)
+[linreg_epi2mni_fsl](doc/linreg_epi2mni_fsl.md)
+[linreg_fs2epi_afni](doc/linreg_fs2epi_afni.md)
+[linreg_fs2epi_fsl](doc/linreg_fs2epi_fsl.md)
+[linreg_fs2mni_fsl](doc/linreg_fs2mni_fsl.md)
+[linreg_t12mni_afni](doc/linreg_t12mni_afni.md)
+[nonlinreg_calc_afni](doc/nonlinreg_calc_afni.md)
+[nonlinreg_epi2mni_afni](doc/nonlinreg_epi2mni_afni.md)
+[gen_regressors](doc/gen_regressors.md)
+[gen_gcor](doc/gen_gcor.md)
+[filter](doc/filter.md)
+[trdrop](doc/trdrop.md)
+[lowpass](doc/lowpass.md)
+[surfsmooth](doc/surfsmooth.md)
+[surf2vol](doc/surf2vol.md)
+[vol2surf](doc/vol2surf.md)
+[volsmooth](doc/volsmooth.md)
 
 Quality Control
 ===============
 These programs run experiment-wide, and therefore are run after all /pre modules have completed for every subject. They produce reports that give a broad overview of the data quality at different stages of pre-processing, encouraging visual inspection of the data and hopefully reducing the amount of time spent hunting for the source of bugs when they do arise.
 
-check_epi2T1
-------------
-Usage: check_epi2T1 <path> <expt> <mode>
-
-+ path -- full path to epitome data folder.
-+ expt -- experiment name.
-+ mode -- image modality (eg., TASK, REST).
-
-Prints out a PDF showing the quality of the linear registration between the functional and anatomical data for all subjects. On the top row, the epi image is translucent and overlaid on the anatomical in red. On the bottom row, an edge-detected version of the anatomical is overlain on the epi image in blues.
-
-Prerequisites: linreg_calc_AFNI/FSL.
-
-check_T12MNI
-------------
-Usage: check_T12MNI <path> <expt> <mode>
-
-+ path -- full path to epitome data folder.
-+ expt -- experiment name.
-+ mode -- image modality (eg., TASK, REST).
-
-Prints out a PDF showing the quality of the linear registration between the subject-specific anatomical data and the group-level MNI brain. On the top row, the T1 image is translucent and overlaid on the MNI brain in red. On the bottom row, the MNI brain is translucent and is overlaid on the T1 brain in red.
-
-Prerequisites: linreg_calc_AFNI/FSL.
-
-check_masks
------------
-Usage: check_masks <path> <expt> <mode>
-
-+ path -- full path to epitome data folder.
-+ expt -- experiment name.
-+ mode -- image modality (eg., TASK, REST).
-
-Prints out a PDF showing the Freesurfer-derived masks overlain on each subject's T1 brain -- these masks are those used for regressor estimation. White matter is labeled in dark blue, gray matter is labeled in light blue, draining vessels are labeled in light blue?, and ventricles are labeled in ???.  
-Prerequisites: linreg_FS2epi_AFNI/FSL.
-
-check_MC_TRs
-------------
-Usage: check_MC_TRs <path> <expt> <mode>
-
-+ path -- full path to epitome data folder.
-+ expt -- experiment name.
-+ mode -- image modality (eg., TASK, REST).
-
-Prints TRs 6-10 from the first run of each session. The default motion-correction TR 8 is marked in red. This will allow the user to identify whether the motion-correction TR is somehow corrupted for any given subject, which can be manually changed and re-run.
-
-Prerequisites: init_epi.
-
-check_motionind
----------------
-Usage: check_motionind <path> <expt> <mode> <uid>
-
-+ path -- full path to epitome data folder.
-+ expt -- experiment name.
-+ mode -- image modality (eg., TASK, REST).
-+ uid -- unique identifier for run of epitome.
-
-This prints the estimated framewise displacement and DVARS measurement for all subjects and runs in an experiment to one grid, ranking subjects by the sum of their framewise displacement (top left shows least motion, bottom right shows most motion). Vertical lines denote runs, and the horizontal line denotes a respectable threshold of 0.5 mm/TR for the framewise displacement plot, and 10\% signal change for the DVARS plot. This can be used to hopefully facilitate subject-wise or run-wise rejection due to excessive head motion.
-
-Prerequisites: init_epi.
-
-check_runs
-----------
-Usage: check_runs <path> <expt>
-
-+ path -- full path to epitome data folder.
-+ expt -- experiment name.
-
-This prints out a CSV containing the NIFTI dimensions of each file contained in a RUN folder. This works across all modalities simultaneously, and records subject, image modality, session, and run number. This should give the user a broad overview of the input data, hopefully assisting in identifying corrupted files or aborted runs in the MRI.
-
-Prerequisites: None.
-
-check_spectra
--------------
-Usage: check_spectra <path> <expt> <mode> <uid>
-
-+ path -- full path to epitome data folder.
-+ expt -- experiment name.
-+ mode -- image modality (eg., TASK, REST).
-+ uid -- unique identifier for run of epitome.
-
-This gives an overview of the frequency content of the MRI data in multiple ways for each subject. First, it plots the log-log spectra of the regressors used for time-series filtering, as typically done in resting-state experiments. It also compares the mean raw data with the mean filtered output, and mean noise model, to show whether the modeled noise is qualitatively different from the input raw data. Finally, it compares the spectra of the mean time series with the mean of all computed spectra, which should be equivalent.
-
-Prerequisites: linreg_FS2epi_AFNI/FSL, gen_regressors.
+[check_epi2t1](doc/check_epi2t1.md)
+[check_t12mni](doc/check_t12mni.md)
+[check_masks](doc/check_masks.md)
+[check_mc_trs](doc/check_mc_trs.md)
+[check_motionind](doc/check_motionind.md)
+[check_runs](doc/check_runs.md)
+[check_spectra](doc/check_spectra.md)
 
 Cleanup
 =======
 These programs are run separately using epitome clean. They generally provide the ability to eliminate faulty outputs or intermediate files from experiments. Due to their destructive nature, these scripts must be executed by hand and each step must be manually confirmed. They are therefore not amiable to unattended scripting, although one could easily write their own with some know-how. 
 
-clean_params
-------------
-Usage: clean_params
-
-If any error occurs while running the pipeline, faulty PARAMS file will be output (typically in 1D format). The presence of these files will confuse future runs of the pipeline, or downstream modules, resulting in cryptic errors. This module ONLY deletes PARAM files with no content, allowing you to flush your experiment of faulty outputs to permit a re-run of the pipeline.
-
-Prerequisites: clean_params.
-
-del_MNI
--------
-Usage: del_MNI
-
-del_everything
---------------
-Usage: del_everything
-
-del_postmc
-----------
-Usage: del_postmc
-
-del_reg
--------
-Usage: del_reg
+[clean_params](doc/clean_params.md)
+[del_everything](doc/del_everything.md)
+[del_mni](doc/del_mni.md)
+[del_postmc](doc/del_postmc.md)
+[del_reg](doc/del_reg.md)
 
 Workflows
 =========
@@ -663,17 +309,17 @@ Finally, variables can be defined within the module to allow the user to set the
 
 Python Wrapper
 --------------
-With modules written, an advanced user could write a master BASH script by hand to make use of it. However, most users will want to make use of the python-based command line interface, which will require you to write a small wrapper function in `.../epitome/commands.py`.
+With modules written, an advanced user could write a master BASH script by hand to make use of it. However, most users will want to make use of the python-based command line interface, which will require you to write a small wrapper function: `.../epitome/commands/foo.py`.
 
-Each function should have the same name as the associated module, and accept a single variable input_name. This denotes the filename prefix that the module will operate on.
+Each function should have the same name as the associated module and wrapper function, and accept a single variable input_name. This denotes the filename prefix that the module will operate on.
 
 Next, you should define the output prefix (e.g., lowpass). This will be passed on to the next module, assuming the user does not make any errors inputing the various module options.
 
-Finally, the function should ask the user a single question for each command-line argument. I have built 4 `selector' functions for integers, floats, lists, and dictionaries. These final two allow the user to select from a set of options, with or without an accompanying description. The first two allow the use to input a numerical value for appropriate settings, for example, smoothing kernel size in millimeters.
+Finally, the function should ask the user a single question for each command-line argument. I have built 4 `selector` functions for integers, floats, lists, and dictionaries. These final two allow the user to select from a set of options, with or without an accompanying description. The first two allow the use to input a numerical value for appropriate settings, for example, smoothing kernel size in millimeters.
 
-This set of questions should be wrapped in a try-except loop, checking for `ValueErrors`. If the user inputs an inappropriate option, the function will throw an error and return the special type `None', which will prompt epitome to ignore the current call to the function and ask the user to try again. If all is well, the collected variables should be passed to the line variable, which contains a BASH formatted string that will be printed to the master script.
+This set of questions should be wrapped in a try-except loop, checking for `ValueErrors`. If the user inputs an inappropriate option, the function will throw an error and return the special type `None`, which will prompt epitome to ignore the current call to the function and ask the user to try again. If all is well, the collected variables should be passed to the line variable, which contains a BASH formatted string that will be printed to the master script.
 
-The following is a code block demonstrating this structure (from the function surfsmooth).
+The following is a code block demonstrating this structure (from the function `epitome/commands/surfsmooth.py`):
 
     def surfsmooth(input_name):    
         output = 'smooth'
@@ -694,4 +340,4 @@ The following is a code block demonstrating this structure (from the function su
 
 Documentation
 -------------
-This is a very important part of module-building, and currently takes two forms: the \LaTeX document that produced this PDF, and the .JSON-formatted file .../epitome/help.json which should contain a similar set of information, around the command-line usage of your module. Remember -- epitome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
+This is a very important part of module-building. Documentation for a given module is supplied in the doc/ folder, in a markdown document sharing the name of the module itself. This will be viewable on both GitHub, any future web-hosted manual location, and will also be used to generate the command-line help. Remember -- epitome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
