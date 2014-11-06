@@ -19,7 +19,9 @@ Requirements & Dependencies
 ---------------------------
 EPItome contains a small number of programs that actually manipulate data, but also makes heavy use of widely-used MRI analysis tools and a number of python distributions. The user is assumed to have properly installed and configured FSL, AFNI, Freesurfer, and the python packages numpy, scipy, and matplotlib. For physiological noise regression, you must have the MATLAB compiler runtime installed, along with AFNI's [McRetroTS](http://afni.nimh.nih.gov/sscc/dglen/McRetroTS) scripts installed in /opt/MATLAB/MATLAB_Compiler_Runtime/ and /opt/mcretro/, respectively.
 
-The program itself was built and tested on a Ubuntu 12.04 server. I imagine it will work well in any Linux environment. It should run on Mac OS X as well, but this remains unverified. There will be no support for Windows.
+EPItome comes packaged with AFNI's [McRetroTS](http://afni.nimh.nih.gov/sscc/dglen/McRetroTS) scripts in bin/. Version downloaded: 2012.12.17.1431   McRetroTS_linux64pkg.zip on Nov 5th 2014.
+
+The program itself was built and tested on the Ubuntu 12.04/14.04 OS. I imagine it will work well in any Linux environment. It should run on Mac OS X as well, but this remains unverified. There will be no support for Windows.
 
 Setting Up & Using EPItome-xl
 -----------------------------

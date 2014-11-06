@@ -84,3 +84,6 @@ docs/_build/
 build/*
 EPItome_xl.egg-info/*
 temp/*
+
+# stored binaries
+src/*
