@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Takes a proclist created using EPItome run and submits it to the scheduler 
+Takes a proclist created using epitome run and submits it to the scheduler 
 installed on SHARCnet.
 """
 
@@ -92,7 +92,7 @@ def submit_jobs(f, u_id, command_file):
 if __name__ == "__main__":
     
     if len(sys.argv) != 2:
-        print('EPIsharc requires one proclist input file')
+        print('episharc requires one proclist input file')
         sys.exit()
 
     else:

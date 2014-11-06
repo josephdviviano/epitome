@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 ###############################################################################
-EPIphysio: Parses BIOPACK MP150 files from the York University, TO, MRI. 
+epiphysio: Parses BIOPACK MP150 files from the York University, TO, MRI. 
 
     This outputs one set of cardiac waveform data, respiratory waveform data,
     and heart rate data from each contiguous blocks of TTL pulses from the
@@ -12,7 +12,7 @@ EPIphysio: Parses BIOPACK MP150 files from the York University, TO, MRI.
 
     Usage:
 
-        EPIphysio <input_file>
+        epiphysio <input_file>
 
     Returns:
 
@@ -69,7 +69,7 @@ def main(input_file):
 
     # print a welcome message
     print('##################################################################')
-    print('EPIphysio: Parses BIOPACK physiological data collected at the York')
+    print('epiphysio: Parses BIOPACK physiological data collected at the York')
     print('           University, TO, MRI suite into their individual modal- ')
     print('           ities and runs. Place these outputs into the correct   ')
     print('           RUN directories!                                       ')
@@ -142,7 +142,7 @@ def main(input_file):
             writer.writerow(tmp) # write the data
             csvfile.close()
 
-    print('Finished, exiting EPIphysio.')
+    print('Finished, exiting epiphysio.')
 
 if __name__ == "__main__":
     

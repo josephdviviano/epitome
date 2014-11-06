@@ -144,22 +144,11 @@ What follows is a description of what each module in epitome does. These modules
 
 The types of modules included can be roughly split into 4 categories: `freesurfer`, `pre-processing`, `quality-control`, and `cleanup`.
 
-[doc/instructions.md](doc/instructions.md)
-
 Freesurfer
 ==========
 Right now, the default `freesurfer recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
 
-fsrecon.py
-----------
-Usage: fsrecon.py <data_directory> <experiment> <modality> <cores> \
-
-+ data_directory -- full path to your MRI/WORKING directory.
-+ experiment -- name of the experiment being analyzed.
-+ modality -- image modality to import (normally T1).
-+ cores -- number of cores to dedicate (one core per run).
-
-This sends each subject's T1s through the Freesurfer pipeline. It uses multiple T1s per imaging session, but does not combine them between sessions. Data is output to the dedicated `FREESURFER` directory, and should be exported to the MRI analysis folders using `fsexport.py`.
+[fsrecon](doc/fsrecon.md)
 
 fsexport.py
 -----------

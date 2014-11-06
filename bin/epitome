@@ -8,18 +8,18 @@
 
 Usage:
 
-    EPItome modules            -- prints a list of all available modules, and
+    epitome modules            -- prints a list of all available modules, and
                                   associated help.
-    EPItome experiments        -- returns a list of all available experiments.
+    epitome experiments        -- returns a list of all available experiments.
 
-    EPItome check              -- returns installation paths.
-    EPItome check <experiment> -- checks directory structure for a given 
+    epitome check              -- returns installation paths.
+    epitome check <experiment> -- checks directory structure for a given 
                                   experiment.
 
-    EPItome run                -- boots up the user interface for producing
+    epitome run                -- boots up the user interface for producing
                                   pre-processing and QC scripts.
 
-    EPItome clean              -- boots up the user interface for producing
+    epitome clean              -- boots up the user interface for producing
                                   clean-up scripts (for resetting subjects or
                                   removing intermediate files).
 

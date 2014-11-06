@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Takes a proclist created using EPItome run and submits it to the installed
+Takes a proclist created using epitome run and submits it to the installed
 Oracle Sun Grid Engine using qsub.
 """
 
@@ -94,7 +94,7 @@ def submit_jobs(f, u_id, command_file):
 if __name__ == "__main__":
     
     if len(sys.argv) != 2:
-        print('EPIqueue requires one proclist input file')
+        print('epiqueue requires one proclist input file')
         sys.exit()
 
     else:
