@@ -33,7 +33,6 @@ Usage:
 """
 
 import copy
-import json
 import time
 import getpass
 import platform
@@ -253,15 +252,11 @@ def print_help(module):
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
-    # load in the help data
-    fname = open(os.path.join(dir_pipe, 'epitome/help.json'), 'rb')
-    helpfile = json.load(fname)
-
     # print the contents of the JSON line by line
     print('')
     if module != None:
-        for line in helpfile[module]:
-            print line
+        helpfile = open(os.path.join(dir_pipe, 'doc/' + module + '.md'), 'rb')
+        print helpfile.read()
     print('')
 
 def help_query():

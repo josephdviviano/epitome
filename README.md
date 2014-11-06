@@ -153,7 +153,7 @@ Right now, the default `freesurfer recon-all` is run on every participant before
 
 Pre-Processing
 ==============
-This contains the lion's share of the pipeline. Every run of epitome begins with `init_epi`, which contains a non-contentious set of pre-processing steps for epi images. THe following stages can be chained together at will to preform de-noising, spatial transformations, projections to surface-space, and spatial smoothing.
+This contains the lion's share of the pipeline. Every run of epitome begins with `init_epi`, which contains a non-contentious set of pre-processing steps for EPI images. The following stages can be chained together at will to preform de-noising, spatial transformations, projections to surface-space, and spatial smoothing.
 
 + [init_epi](doc/init_epi.md)
 + [combine_volumes](doc/combine_volumes.md)
