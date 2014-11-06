@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
 Temporary solution: users must define relevant system-wide options here.
+Adding some functions that search for installed software.
 """
 
 import os
@@ -10,16 +11,34 @@ import multiprocessing as mp
 
 def find_afni():
     dir_afni = subprocess.check_output('which afni', shell=True)
-    dir_afni = os.path.dirname(dir_afni)
+    
+    if dir_afni == '':
+        dir_afni == None
+    else: 
+        dir_afni = os.path.dirname(dir_afni)
 
     return dir_afni
 
 def find_epitome():
-    dir_epitome = subprocess.check_output('which EPItome', shell=True)
-    # also removed '/bin'
-    dir_epitome = os.path.dirname(dir_epitome)[-4]
+    dir_epitome = subprocess.check_output('which epitome', shell=True)
+    
+    if dir_epitome == '':
+        dir_epitome == None
+    else:
+        # also removed '/bin'
+        dir_epitome = os.path.dirname(dir_epitome)[-4]
 
     return dir_epitome
+
+def find_matlab_compiler():
+    dir_matlab = subprocess.check_output('which matlab', shell=True)
+    
+    if dir_matlab = '':
+        dir_matlab == None
+    else:
+        dir_matlab = os.path.dirname(dir_matlab)[:-11]
+
+    return dir_matlab
 
 def return_paths():
     """

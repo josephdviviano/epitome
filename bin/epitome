@@ -302,25 +302,28 @@ def check_paths():
 
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
-    
+
     if os.path.isdir(dir_data) == False:
         print('Data directory does not exist:' + str(dir_data))
 
+    dir_pipe = epi.config.find_epitome()
     elif os.path.isdir(dir_pipe) == False:
         print('EPItome-XL directory does not exist:' + str(dir_pipe))
 
+    dir_afni = epi.config.find_afni()
     elif os.path.isdir(dir_afni) == False:
         print('AFNI directory does not exist:' + str(dir_afni))
-    
-    elif os.path.isfile('/opt/mcretro/run_McRetroTS.sh') == False:
-        print('**********************************************')
-        print('/opt/mcretro/run_McRetroTS.sh cannot be found!')
-        print('**********************************************')
-        print('')
-        print("""Please Download the AFNI package 'McRetroTS' from """)
-        print("""   http://afni.nimh.nih.gov/sscc/dglen/McRetroTS  """)
-        print("""And install it to /opt/mcretro.                   """)
-        print('')
+
+    # we not include mcretro with epitome, so the dir_pipe var covers this.
+    # elif os.path.isfile('/opt/mcretro/run_McRetroTS.sh') == False:
+    #     print('**********************************************')
+    #     print('/opt/mcretro/run_McRetroTS.sh cannot be found!')
+    #     print('**********************************************')
+    #     print('')
+    #     print("""Please Download the AFNI package 'McRetroTS' from """)
+    #     print("""   http://afni.nimh.nih.gov/sscc/dglen/McRetroTS  """)
+    #     print("""And install it to /opt/mcretro.                   """)
+    #     print('')
 
     elif os.path.isdir('/opt/MATLAB/MATLAB_Compiler_Runtime/v715') == False:
         print('**********************************************')
@@ -603,6 +606,10 @@ def run_epitome():
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
+    dir_afni = epi.config.find_afni()
+    dir_pipe = epi.config.find_epitome()
+    dir_matlab = epi.config.find_matlab()
+
     # make sure we have permissions to access the experiment directory.
     if epi.utilities.has_permissions(dir_data) == False:
         sys.exit()
@@ -639,35 +646,35 @@ def run_epitome():
 
     # create a copy of the pipeline in the user's home directory
     print('******************************************************************')
-    print('Replicating the current pipeline in ~/EPItome-xl/' +str(ID) + '.')
+    print('Replicating the current pipeline in ~/epitome/' +str(ID) + '.')
     print('******************************************************************')
 
     # check the OS -- for paths
     operating_system = platform.system()
     if operating_system == 'Linux':
         
-        # make the EPItome-xl directory if required
-        if os.path.isdir('/home/' + str(user) + '/EPItome-xl') == False:
-            os.system('mkdir /home/' + str(user) + '/EPItome-xl')
+        # make the epitome directory if required
+        if os.path.isdir('/home/' + str(user) + '/epitome') == False:
+            os.system('mkdir /home/' + str(user) + '/epitome')
 
         # make the unique ID folder for this module set
-        if os.path.isdir('/home/' + str(user) + '/EPItome-xl/' + 
+        if os.path.isdir('/home/' + str(user) + '/epitome/' + 
                                                        str(ID)) == True:
             print('This UID already exists! Skipping replication ...')
             pass
         
         # replicate the pipeline into the home folder
         else:
-            os.system('mkdir /home/' + str(user) + '/EPItome-xl/' + str(ID))
+            os.system('mkdir /home/' + str(user) + '/epitome/' + str(ID))
             os.system('cp -r ' + str(dir_pipe) + '/*' +
-                      ' /home/' + str(user) + '/EPItome-xl/' + str(ID) +'/')
-            dir_pipe = '/home/' + str(user) + '/EPItome-xl/' + str(ID) +'/'
+                      ' /home/' + str(user) + '/epitome/' + str(ID) +'/')
+            dir_pipe = '/home/' + str(user) + '/epitome/' + str(ID) +'/'
 
     else:
         print("""
               *****************************************************************
               Sorry, your operating system isn't supported yet. At the moment,
-              EPItome-xl only work with Linux operating systems. Bug the author
+              epitome only work with Linux operating systems. Bug the author
               about OSX support!
               *****************************************************************
               """)
@@ -725,7 +732,7 @@ def run_epitome():
     #f.close()
 
     fs  = ('python ' + 
-           os.path.join(dir_pipe, 'epitome/modules/freesurfer/fsrecon.py') +
+           os.path.join(dir_pipe, 'epitome/modules/freesurfer/fsrecon') +
            ' ' + str(dir_data) + 
            ' ' + str(expt) + 
            ' ' + str(mode) + 
@@ -738,7 +745,7 @@ def run_epitome():
     
     # re-open the file to continue
     #f = open(os.path.join(dir_data, expt, master), 'wb')
-    f.write('echo python ${DIR_PIPE}/epitome/modules/freesurfer/fsexport.py ' +
+    f.write('echo python ${DIR_PIPE}/epitome/modules/freesurfer/fsexport ' +
             '${DIR_DATA} ${DIR_EXPT} ' + 
             '>> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
     f.write('\n')
@@ -757,8 +764,8 @@ def run_epitome():
     f.write('export DATA_TYPE=${DATA_TYPE}\n')
     f.write('export ID=${ID}\n')
     f.write('export SUB=${SUB}\n')
-    f.write("""McRetroTS='/opt/mcretro/run_McRetroTS.sh """ +
-            """/opt/MATLAB/MATLAB_Compiler_Runtime/v715'\n""")
+    f.write("""McRetroTS='""" + str(dir_pipe) + """bin/run_McRetroTS.sh""" 
+                              + str(dir_matlab) + """'\n""")
     f.write('EOF\n')
     f.write('\n')
 
