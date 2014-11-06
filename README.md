@@ -1,5 +1,5 @@
-EPItome-xl -- Kimel Family TIGR Lab
------------------------------------
+EPItome -- Kimel Family TIGR Lab
+--------------------------------
 This is the source for the Kimel Family TIGR Lab EPItome-xl MRI Pipeline. Mostly written by Joseph D Viviano 2014. It has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
 
 Quick Start
