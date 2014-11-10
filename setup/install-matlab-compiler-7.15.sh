@@ -1,17 +1,27 @@
 #!/bin/bash
 
-# download the data into tmp/
-echo '*** Grabbing data from AFNI ***'
+echo '************************************************************************'
+echo '*********************** Grabbing data from AFNI ************************'
+echo '************************************************************************'
+echo ''
+
 mkdir tmp 
 cd tmp
 wget -c http://afni.nimh.nih.gov/sscc/staff/glend/matlab_compiler/McRetroTS_linux64pkg.zip
 unzip McRetroTS_linux64pkg.zip
 
-# run the installer
+echo '************************************************************************'
+echo '********************** Installing MATLAB Compiler **********************'
+echo '************************************************************************'
+echo ''
+
 sudo ./MCRInstaller.bin
 
-# remove temporary files
-echo '*** Cleaning up ***'
+echo '************************************************************************'
+echo '***************************** Cleaning Up ******************************'
+echo '************************************************************************'
+echo ''
+
 cd ../
-rm -r tmp
+rm -r tmp/
 

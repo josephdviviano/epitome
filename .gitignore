@@ -87,3 +87,6 @@ temp/*
 
 # stored binaries
 src/*
+
+# site specific scripts
+load-tigr-modules.sh

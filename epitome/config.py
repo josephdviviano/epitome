@@ -8,7 +8,6 @@ import os
 import subprocess
 import multiprocessing as mp
 
-
 def find_afni():
     dir_afni = subprocess.check_output('which afni', shell=True)
     
@@ -26,14 +25,14 @@ def find_epitome():
         dir_epitome == None
     else:
         # also removed '/bin'
-        dir_epitome = os.path.dirname(dir_epitome)[-4]
+        dir_epitome = os.path.dirname(dir_epitome)[:-4]
 
     return dir_epitome
 
-def find_matlab_compiler():
+def find_matlab():
     dir_matlab = subprocess.check_output('which matlab', shell=True)
     
-    if dir_matlab = '':
+    if dir_matlab == '':
         dir_matlab == None
     else:
         dir_matlab = os.path.dirname(dir_matlab)[:-11]
@@ -47,7 +46,7 @@ def return_paths():
     """
     
     # the data directory absolute path
-    dir_data = '/srv/MRI/WORKING'
+    dir_data = '/projects/jdv/data/epitome'
     
     # the pipeline directory absolute path
     dir_pipe = find_epitome()

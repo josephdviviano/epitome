@@ -11,7 +11,7 @@ This branch has been modified to work on the local cluster at CAMH's College St.
 
 Setup
 =====
-epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with
+epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with epitome under bin/
 
 Steps to install:
 

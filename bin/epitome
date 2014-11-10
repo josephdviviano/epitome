@@ -2,14 +2,14 @@
 """
 ###############################################################################
 
-                               _ _                       
-                              (_) |                                            
-                     ___ _ __  _| |_ ___  _ __ ___   ___ 
-                    / _ \ '_ \| | __/ _ \| '_ ` _ \ / _ \
-                   |  __/ |_) | | || (_) | | | | | |  __/
-                    \___| .__/|_|\__\___/|_| |_| |_|\___|
-                        | |                              
-                        |_|                              
+                               _ _                        
+                              (_) |                       
+                     ___ _ __  _| |_ ___  _ __ ___   ___  
+                    / _ \ '_ \| | __/ _ \| '_ ` _ \ / _ \ 
+                   |  __/ |_) | | || (_) | | | | | |  __/ 
+                    \___| .__/|_|\__\___/|_| |_| |_|\___| 
+                        | |                               
+                        |_|                               
 
 Usage:
 
@@ -307,11 +307,11 @@ def check_paths():
         print('Data directory does not exist:' + str(dir_data))
 
     dir_pipe = epi.config.find_epitome()
-    elif os.path.isdir(dir_pipe) == False:
+    if os.path.isdir(dir_pipe) == False:
         print('EPItome-XL directory does not exist:' + str(dir_pipe))
 
     dir_afni = epi.config.find_afni()
-    elif os.path.isdir(dir_afni) == False:
+    if os.path.isdir(dir_afni) == False:
         print('AFNI directory does not exist:' + str(dir_afni))
 
     # we not include mcretro with epitome, so the dir_pipe var covers this.
@@ -515,7 +515,7 @@ def run_cleanup():
     while flag == 0:
         output = ''
         choice = ['all', 'some']
-        decision = epi.commands.selector_list(choice)
+        decision = epi.commands.utils.selector_list(choice)
 
         if decision == None:
             print ('Invalid selection, please try again.')
@@ -530,7 +530,7 @@ def run_cleanup():
             print('Please select a subject.')
             output = ''
             subj_list = epi.utilities.get_subj(os.path.join(dir_data, expt))
-            subj = epi.commands.selector_list(subj_list)
+            subj = epi.commands.utils.selector_list(subj_list)
 
             if output == None:
                 print('Invalid subject, please try again.')

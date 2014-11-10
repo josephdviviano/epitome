@@ -1,12 +1,12 @@
 from setuptools import setup
 
-setup(name='EPItome-xl',
+setup(name='epitome',
       version='0.2',
-      description='A MRI pre-processing pipeline',
-      url='https://github.com/josephdviviano/EPItome-xl',
+      description='A MRI metapipeline',
+      url='https://github.com/josephdviviano/epitome',
       author='Joseph D Viviano',
       author_email='joseph@viviano.ca',
       license='MIT',
       packages=['epitome'],
-      scripts=['bin/EPItome', 'bin/EPIphysio', 'bin/EPIfolder', 'bin/EPIqueue'],
+      scripts=['bin/epitome', 'bin/epiphysio', 'bin/epifolder', 'bin/epiqueue'],
       zip_safe=False)
