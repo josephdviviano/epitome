@@ -2,11 +2,11 @@
 
 import copy 
 
-def linreg_FS2MNI_FSL(input_name):   
+def run(input_name):   
     output = copy.copy(input_name) # return output unharmed
 
     print('\nMoving Freesurfer atlases to MNI space using FSL.')
 
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_FS2MNI_FSL')
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_fs2mni_fsl')
 
     return line, output

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-def surf2vol(input_name):   
+def run(input_name):   
     output = 'ctx'
 
     print('\nProjecting surface data to volume space.')

@@ -3,7 +3,7 @@
 import os
 import epitome as epi
 
-def clean_params(expt, clean):
+def run(expt, clean):
 
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
 

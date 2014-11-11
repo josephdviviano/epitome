@@ -2,7 +2,7 @@
 
 import epitome as epi
 
-def TRdrop(input_name):
+def run(input_name):
     output = 'scrubbed'
 
     print('\nRemoving motion-corrupted TRs.')
@@ -39,7 +39,7 @@ def TRdrop(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/TRdrop ' + 
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/trdrop ' + 
                                   str(input_name) + ' ' +
                                   str(head_size) + ' ' +
                                   str(FD) + ' ' +

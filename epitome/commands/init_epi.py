@@ -2,7 +2,7 @@
 
 import epitome as epi
 
-def init_EPI():    
+def run():    
     output = 'scaled'
 
     print('\nInitializing functional MRI pre-processing.')
@@ -44,7 +44,7 @@ def init_EPI():
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/init_EPI ' +
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/init_epi ' +
                                       str(quality) + ' ' +
                                       str(deltr) + ' ' +
                                       str(slice_timing) + ' ' +

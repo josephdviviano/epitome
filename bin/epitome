@@ -13,7 +13,7 @@
 
 Usage:
 
-    epitome modules            -- prints a list of all available modules, and
+    epitome help               -- prints a list of all available modules, and
                                   associated help.
     epitome experiments        -- returns a list of all available experiments.
 
@@ -289,7 +289,7 @@ def help_query():
 
     # present the user with a list
     print('Which module do you need help with?')
-    module = get_modules(interactive=True, moduletype=str(selection))
+    module, used = get_modules(interactive=True, moduletype=str(selection))
 
     # print help for that module
     print_help(module)
@@ -515,7 +515,7 @@ def run_cleanup():
     while flag == 0:
         output = ''
         choice = ['all', 'some']
-        decision = epi.commands.utils.selector_list(choice)
+        decision = epi.utilities.selector_list(choice)
 
         if decision == None:
             print ('Invalid selection, please try again.')
@@ -530,7 +530,7 @@ def run_cleanup():
             print('Please select a subject.')
             output = ''
             subj_list = epi.utilities.get_subj(os.path.join(dir_data, expt))
-            subj = epi.commands.utils.selector_list(subj_list)
+            subj = epi.utilities.selector_list(subj_list)
 
             if output == None:
                 print('Invalid subject, please try again.')
@@ -581,7 +581,7 @@ def run_cleanup():
             print('')
         else:
             # executes the chosen module, write cleanup commands
-            command = 'epi.commands.' + str(module) + '(expt, clean)'
+            command = 'epi.commands.' + str(module) + '.run(expt, clean)'
             eval(command)
         
         # ask if we should continue
@@ -778,8 +778,15 @@ def run_epitome():
     flag = 0 # breaks us out of the loop
     while flag == 0:    
         
+        #
+        #
+        # -- THIS IS WHERE I WILL ADD THE PATHWAY OPTIONS:
+        #       --> DTI, HCP, fMRI, etc...
+        #       --> current 'PRE' pipeline becomes 'fMRI' 
+        #
+        #
         # add init_EPI, check for mistakes, break the loop if flawless
-        line, output = epi.commands.init_EPI()
+        line, output = epi.commands.init_EPI.run()
         pipe_list, output = writer_sub(pipe_list, 
                                        line, cmd, f, output, None)
         if output != None:
@@ -802,7 +809,7 @@ def run_epitome():
             bkup = copy.copy(output)
 
             # executes the chosen module, write pipeline commands
-            command = 'epi.commands.' + str(module) + '(output)'
+            command = 'epi.commands.' + str(module) + '.run(output)'
             line, output = eval(command)
 
             # if module call was unsuccessful, don't count as used.
@@ -848,7 +855,8 @@ def run_epitome():
             bkup = copy.copy(output)
              
             # executes the chosen module, write pipeline commands
-            command = 'epi.commands.' + str(module) + '(dir_data, expt, mode)'
+            command = ('epi.commands.' + str(module) + 
+                         '.run(dir_data, expt, mode)')
             line, output = eval(command)
             pipe_list, output = writer_exp(pipe_list, 
                                            line, proc, f, output, bkup)
@@ -882,7 +890,7 @@ def run_epitome():
 if __name__ == "__main__":
     
     # listing available modules and associated help
-    if len(sys.argv) == 2 and sys.argv[1] == 'modules':
+    if len(sys.argv) == 2 and sys.argv[1] == 'help':
         help_query()
     
     elif len(sys.argv) == 2 and sys.argv[1] == 'experiments':

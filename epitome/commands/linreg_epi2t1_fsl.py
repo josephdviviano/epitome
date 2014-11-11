@@ -2,11 +2,11 @@
 
 import epitome as epi
 
-def linreg_EPI2T1_FSL(input_name):
+def run(input_name):
     output = 'T1'
 
     # give us some feedback
-    print('\nResampling input EPI data to T1 space using AFNI.')
+    print('\nResampling input EPI data to T1 space using FSL.')
 
     try:
         # get the reslice dimensions
@@ -18,7 +18,7 @@ def linreg_EPI2T1_FSL(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_EPI2T1_FSL ' +
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_epi2t1_fsl ' +
                                                str(input_name) + ' ' +
                                                str(dims))
     return line, output

@@ -2,7 +2,7 @@
 
 import epitome as epi
 
-def volsmooth(input_name):
+def run(input_name):
     output = 'volsmooth'
 
     print('\nVolumetric smoothing within a defined mask.')

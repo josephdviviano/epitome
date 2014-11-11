@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-def vol2surf(input_name):
+def run(input_name):
     output = 'surface'
 
     print('\nProjecting data to cortical surface.')

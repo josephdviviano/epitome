@@ -2,7 +2,7 @@
 
 import epitome as epi
 
-def filter(input_name):
+def run(input_name):
     output = 'filtered'
 
     print('\nAdding filter module.')

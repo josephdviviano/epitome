@@ -2,7 +2,7 @@
 
 import copy
 
-def gen_regressors(input_name):
+def run(input_name):
     output = copy.copy(input_name) # return output unharmed
 
     print('\nGenerating regressors from ' + str(input_name))

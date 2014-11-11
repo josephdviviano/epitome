@@ -2,7 +2,7 @@
 
 import epitome as epi
 
-def surfsmooth(input_name):    
+def run(input_name):    
     output = 'smooth'
 
     print('\nSmoothing functional data on a cortical surface.')

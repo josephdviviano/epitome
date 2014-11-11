@@ -2,7 +2,7 @@
 
 import copy 
 
-def gen_gcor(input_name):
+def run(input_name):
     output = copy.copy(input_name) # return output unharmed
     
     print('\nAdding global correlation calculation')

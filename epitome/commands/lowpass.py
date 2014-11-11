@@ -3,7 +3,7 @@
 import copy
 import epitome as epi
 
-def lowpass(input_name):
+def run(input_name):
     import numpy as np
 
     output = 'lowpass'

@@ -43,6 +43,9 @@ def return_paths():
     """
     Returns the paths to the data, pipeline, AFNI, and specifies the number of 
     CPU cores to use.
+
+    This function is retained for backwards-compatibility, but I would like to
+    move towards the 'find' funct
     """
     
     # the data directory absolute path

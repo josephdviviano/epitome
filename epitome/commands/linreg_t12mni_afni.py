@@ -2,7 +2,7 @@
 
 import epitome as epi
 
-def linreg_T12MNI_AFNI(input_name):
+def run(input_name):
     output = 'MNI'
 
     # give us some feedback
@@ -18,7 +18,7 @@ def linreg_T12MNI_AFNI(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_T12MNI_AFNI ' +
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_t12mni_afni ' +
                                                str(input_name) + ' ' +
                                                str(dims))
 

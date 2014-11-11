@@ -3,7 +3,7 @@
 import copy
 import epitome as epi
 
-def linreg_calc_AFNI(input_name):
+def run(input_name):
     output = copy.copy(input_name) # return output unharmed
 
     print('\nCalculating linear registration pathways using AFNI.')
@@ -43,7 +43,7 @@ def linreg_calc_AFNI(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_calc_AFNI ' +
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/linreg_calc_afni ' +
                                                str(quality) + ' ' +
                                                str(cost) + ' ' +
                                                str(reg_dof))

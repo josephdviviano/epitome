@@ -2,7 +2,7 @@
 
 import copy
 
-def ICA(input_name):
+def run(input_name):
     output = copy.copy(input_name) # return output unharmed
 
     print('\nAdding MELODIC ICA calculation')
@@ -18,7 +18,7 @@ def ICA(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/ICA ' +
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/ica ' +
                                       str(input_name) + ' ' +
                                       str(mask_prefix))
     return line, output

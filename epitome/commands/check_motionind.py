@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-def check_motionind(dir_data, expt, mode):
+def run(dir_data, expt, mode):
     output = ''
 
     print('\nAdding subject-wise motion QC to the outputs.')

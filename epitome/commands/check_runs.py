@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-def check_runs(dir_data, expt, mode):
+def run(dir_data, expt, mode):
     output = ''
 
     print('\nAdding NIFTI dimension-checking QC to the outputs.')

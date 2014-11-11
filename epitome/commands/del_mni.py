@@ -3,7 +3,7 @@
 import os
 import epitome as epi
 
-def del_MNI(expt, clean):
+def run(expt, clean):
 
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
 
@@ -12,5 +12,5 @@ def del_MNI(expt, clean):
 
     fname = os.path.join(dir_data, expt, clean)
     line = ('. ' + str(dir_pipe) +
-            '/epitome/modules/cleanup/del_MNI >> ' + fname)
+            '/epitome/modules/cleanup/del_mni >> ' + fname)
     os.system(line)
