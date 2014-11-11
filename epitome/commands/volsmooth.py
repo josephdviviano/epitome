@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import epitome.commands as cmd
+import epitome as epi
 
 def volsmooth(input_name):
     output = 'volsmooth'
@@ -14,7 +14,7 @@ def volsmooth(input_name):
             mask_prefix = 'EPI_mask'
         
         print('\nInput smoothing kernel FWHM (mm):')
-        fwhm = cmd.utils.selector_float()
+        fwhm = epi.utilities.selector_float()
 
     # if we messed any of these up, we return None
     except ValueError as ve:

@@ -8,4 +8,4 @@ I'll add more here later, promise.
 
 from . import config
 from . import utilities
-from epitome.commands import *
+#from commands import *

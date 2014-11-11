@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import epitome.commands as cmd
+import epitome as epi
 
 def TRdrop(input_name):
     output = 'scrubbed'
@@ -14,19 +14,19 @@ def TRdrop(input_name):
     
     try:
         defaults = ['yes', 'no']
-        decision = cmd.utils.selector_list(defaults)
+        decision = epi.utilities.selector_list(defaults)
 
         # if the user rejects the defaults or makes a mistake
         if decision == 'no' or None:
 
             print('\nInput head size (default 50)')
-            head_size = cmd.utils.selector_float()
+            head_size = epi.utilities.selector_float()
 
             print('\nInput FD threshold (default 0.3)')
-            FD = cmd.utils.selector_float()
+            FD = epi.utilities.selector_float()
 
             print('\nInput head size (default 1000000)')
-            DV = cmd.utils.selector_float()
+            DV = epi.utilities.selector_float()
 
         else:
             print('\nOK, using the defaults.')

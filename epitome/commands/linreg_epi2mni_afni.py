@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import epitome.commands as cmd
+import epitome as epi
 
 def linreg_EPI2MNI_AFNI(input_name):
     output = 'MNI'
@@ -11,7 +11,7 @@ def linreg_EPI2MNI_AFNI(input_name):
     try:
         # get the reslice dimensions
         print('\nSelect target dimensions (isotropic mm):')
-        dims = cmd.utils.selector_float()
+        dims = epi.utilities.selector_float()
 
     # if we messed any of these up, we return None
     except ValueError as ve:

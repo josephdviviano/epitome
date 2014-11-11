@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import copy
-import epitome.commands as cmd
+import epitome as epi
 
 def lowpass(input_name):
     import numpy as np
@@ -18,7 +18,7 @@ def lowpass(input_name):
 
         print('\nWhich filter type would you like to use (see documentation)?')
         filter_list = ['median', 'average', 'kaiser', 'butterworth']
-        filter_type = cmd.utils.selector_list(filter_list)
+        filter_type = epi.utilities.selector_list(filter_list)
 
         if filter_type in ['median', 'average']:
             flag = 0
@@ -26,7 +26,7 @@ def lowpass(input_name):
             # ensures input length is odd
             while flag == 0:
                 print('\nSelect window length (must be odd, default = 3):')
-                lowpass_param = cmd.utils.selector_int()
+                lowpass_param = epi.utilities.selector_int()
 
                 if np.remainder(lowpass_param, 2) != 0:
                     flag = 1
@@ -36,7 +36,7 @@ def lowpass(input_name):
         elif filter_type in ['kaiser', 'butterworth']:
             
             print('\nInput cutoff frequency in Hz (default = 0.1 Hz):')
-            lowpass_param = cmd.utils.selector_float()
+            lowpass_param = epi.utilities.selector_float()
 
     # if we messed any of these up, we return None
     except ValueError as ve:

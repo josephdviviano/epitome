@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import copy
-import epitome.commands as cmd
+import epitome as epi
 
 def linreg_calc_AFNI(input_name):
     output = copy.copy(input_name) # return output unharmed
@@ -12,7 +12,7 @@ def linreg_calc_AFNI(input_name):
         # get the data-quality option
         print('\nSelect data quality:')
         data_quality = ['low', 'high']
-        quality = cmd.utils.selector_list(data_quality)
+        quality = epi.utilities.selector_list(data_quality)
 
         # set the cost function option
         print('\nCost function: (see AFNI align_EPI_anat.py for help)')
@@ -31,12 +31,12 @@ def linreg_calc_AFNI(input_name):
                      'lpc+' : '= Local Pearson Signed + Others',
                      'ncd' : '= Normalized Compression Distance',
                      'lpc+zz' : '= Local Pearson Correlation Signed + Magic'}
-        cost = cmd.utils.selector_dict(cost_fxns)
+        cost = epi.utilities.selector_dict(cost_fxns)
 
         # get registration degrees of freedom
         print('\nDegrees of freedom: (see AFNI align_EPI_anat.py for help)')
         degrees_of_freedom = ['big_move', 'giant_move']
-        reg_dof = cmd.utils.selector_list(degrees_of_freedom)
+        reg_dof = epi.utilities.selector_list(degrees_of_freedom)
 
     # if we messed any of these up, we return None
     except ValueError as ve:
