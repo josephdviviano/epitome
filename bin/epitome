@@ -786,11 +786,11 @@ def run_epitome():
         #
         #
         # add init_EPI, check for mistakes, break the loop if flawless
-        line, output = epi.commands.init_EPI.run()
+        line, output = epi.commands.init_epi.run()
         pipe_list, output = writer_sub(pipe_list, 
                                        line, cmd, f, output, None)
         if output != None:
-            used = ['init_EPI'] # start the 'used module' list
+            used = ['init_epi'] # start the 'used module' list
             flag = 1 # breaks us out of the loop
  
     # now loop through the modules until the user aborts
