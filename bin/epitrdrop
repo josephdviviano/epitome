@@ -8,7 +8,7 @@ import numpy as np
 import scipy as sp
 import nibabel as nib
 
-def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
+def TR_drop(directory, func_name, u_id, num, head_mm=50, FD_t=0.3, DV_t=0.3):
     """
     Removes motion-corrupted TRs from data, without interpolation. If called
     from the command line, this will batch process all runs in all sessions 
@@ -29,9 +29,9 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
 
     print('')
     print(' TR_drop: ' + str(func_name) + '.' + str(u_id) + '.' + str(num))
-    print('             FD = ' + str(FD) + ' mm,')
-    print('          DVARS = ' + str(DV) + ' %,')
-    print('    Head Radius = ' + str(head_size) + ' mm.')
+    print('             FD = ' + str(FD_t) + ' mm,')
+    print('          DVARS = ' + str(DV_t) + ' %,')
+    print('    Head Radius = ' + str(head_mm) + ' mm.')
     print('')
 
     # convert/confirm variable types
@@ -39,15 +39,15 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
     func_name = str(func_name)
     num = str(num)
     head_mm = float(head_mm)
-    FD = float(FD)
-    DV = float(DV)
+    FD_t = float(FD_t)
+    DV_t = float(DV_t)
 
     # open up a csv
     f = open(directory + '/PARAMS/retained_TRs.' + str(u_id) + '.' + 
                                                    str(num) + '.1D', 'wb')
 
     # load data, affine, header, get image dimensions
-    data = nib.load(os.path.join(directory, func_name))
+    data = nib.load(os.path.join(directory, func_name + '.' + u_id + '.' + num + '.nii.gz'))
     outA = data.get_affine()
     outH = data.get_header()
     dims = np.array(data.shape)
@@ -61,9 +61,9 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
         if fnmatch.fnmatch(fname, 'motion.' + str(u_id) + '.' + str(num) + '*'):
             FD = np.genfromtxt(os.path.join(directory, 'PARAMS', fname))
 
-            FD[:,0] = np.radians(FD[:,0])*head_size # roll
-            FD[:,1] = np.radians(FD[:,1])*head_size # pitch
-            FD[:,2] = np.radians(FD[:,2])*head_size # yaw
+            FD[:,0] = np.radians(FD[:,0])*head_mm # roll
+            FD[:,1] = np.radians(FD[:,1])*head_mm # pitch
+            FD[:,2] = np.radians(FD[:,2])*head_mm # yaw
 
             # sum over absolute derivative for the 6 motion parameters
             FD = np.sum(np.abs(np.diff(FD, n=1, axis=0)), axis=1)
@@ -74,8 +74,8 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
             DV = (DV) / 1000 # convert to % signal change
     
     # mask TRs 2 back and 2 forward from threshold
-    idx_FD = np.where(FD >= FD)[0]
-    idx_DV = np.where(DV >= DV)[0] 
+    idx_FD = np.where(FD >= FD_t)[0]
+    idx_DV = np.where(DV >= DV_t)[0] 
     idx = np.union1d(idx_FD, idx_DV)
     idx = np.union1d(
           np.union1d(
@@ -100,7 +100,7 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
     outH.set_data_shape((dims[0], dims[1], dims[2], dims[3]))
     data = np.reshape(data, (dims[0], dims[1], dims[2], dims[3]))
     
-    # write 4D output
+    # write 4D output,
     data = nib.nifti1.Nifti1Image(data, outA, outH)
     data.to_filename(os.path.join(directory, 'func_scrubbed.' +
                                     str(u_id) + '.' + str(num) + '.nii.gz'))
