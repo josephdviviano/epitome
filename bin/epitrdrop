@@ -29,8 +29,8 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
 
     print('')
     print(' TR_drop: ' + str(func_name) + '.' + str(u_id) + '.' + str(num))
-    print('             FD = ' + str(thresh_FD) + ' mm,')
-    print('          DVARS = ' + str(thresh_DV) + ' %,')
+    print('             FD = ' + str(FD) + ' mm,')
+    print('          DVARS = ' + str(DV) + ' %,')
     print('    Head Radius = ' + str(head_size) + ' mm.')
     print('')
 
@@ -39,8 +39,8 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
     func_name = str(func_name)
     num = str(num)
     head_mm = float(head_mm)
-    FD = float(thresh_FD)
-    DV = float(thresh_DV)
+    FD = float(FD)
+    DV = float(DV)
 
     # open up a csv
     f = open(directory + '/PARAMS/retained_TRs.' + str(u_id) + '.' + 
@@ -74,8 +74,8 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD=0.3, DV=0.3):
             DV = (DV) / 1000 # convert to % signal change
     
     # mask TRs 2 back and 2 forward from threshold
-    idx_FD = np.where(FD >= thresh_FD)[0]
-    idx_DV = np.where(DV >= thresh_DV)[0] 
+    idx_FD = np.where(FD >= FD)[0]
+    idx_DV = np.where(DV >= DV)[0] 
     idx = np.union1d(idx_FD, idx_DV)
     idx = np.union1d(
           np.union1d(
