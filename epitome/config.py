@@ -9,8 +9,14 @@ import subprocess
 import multiprocessing as mp
 
 def find_afni():
+
+    """
+    Returns the path of the afni bin/ folder, or None if it isn't
+    on your path.
+    """
+
     dir_afni = subprocess.check_output('which afni', shell=True)
-    
+ 
     if dir_afni == '':
         dir_afni == None
     else: 
@@ -19,6 +25,11 @@ def find_afni():
     return dir_afni
 
 def find_epitome():
+    """
+    Returns the path of the epitome bin/ folder, or None if it isn't
+    on your path.
+    """
+
     dir_epitome = subprocess.check_output('which epitome', shell=True)
     
     if dir_epitome == '':
@@ -30,6 +41,11 @@ def find_epitome():
     return dir_epitome
 
 def find_matlab():
+    """
+    Returns the path of the matlab bin/ folder, or None if it isn't
+    on your path.
+    """
+
     dir_matlab = subprocess.check_output('which matlab', shell=True)
     
     if dir_matlab == '':
@@ -38,6 +54,36 @@ def find_matlab():
         dir_matlab = os.path.dirname(dir_matlab)[:-11]
 
     return dir_matlab
+
+def find_fsl():
+    """
+    Returns the path of the fsl bin/ folder, or None if it isn't
+    on your path.
+    """
+
+    dir_fsl = subprocess.check_output('which fsl', shell=True)
+
+    if dir_fsl == '':
+        dir_fsl == None
+    else:
+        dir_fsl = os.path.dirname(dir_fsl)[:-4]
+
+    return dir_fsl
+
+def find_fix():
+    """
+    Returns the path of the fix bin/ folder, or None if it isn't
+    on your path.
+    """
+
+    dir_fix = subprocess.check_output('which fix', shell=True)
+
+    if dir_fix == '':
+        dir_fix == None
+    else:
+        dir_fix = os.path.dirname(dir_fsl)[:-4]
+
+    return dir_fix
 
 def return_paths():
     """
@@ -63,3 +109,4 @@ def return_paths():
     cores = mp.cpu_count() - 1
 
     return dir_data, dir_pipe, dir_afni, cores
+
