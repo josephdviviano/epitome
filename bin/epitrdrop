@@ -100,13 +100,13 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD_t=0.3, DV_t=0.3):
     #outH.set_data_shape((dims[0], dims[1], dims[2], dims[3]))
     data = np.reshape(data, (dims[0], dims[1], dims[2], dims[3]))
     
-    
     # removed header as this interferes with downstream AFNI calls 
     #data = nib.nifti1.Nifti1Image(data, outA, outH)
     data = nib.nifti1.Nifti1Image(data, outA)
 
     data.update_header()
     data.header_class(extensions=())
+
     # write 4D output,
     data.to_filename(os.path.join(directory, 'func_scrubbed.' +
                                     str(u_id) + '.' + str(num) + '.nii.gz'))

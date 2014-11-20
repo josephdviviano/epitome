@@ -305,7 +305,19 @@ def write_output(path, uid, num, out, aff, head):
     """
     Writes a NIFTI file to the specified path with the specified run number.
     """
-    out = nib.nifti1.Nifti1Image(out, aff, head)
+    # we're disabling the header output bit for now, until we figure out
+    # why afni does not like them.
+
+    # this old way retains the extended header, but makes downstream
+    # AFNI calls angry, for some reason.
+    #out = nib.nifti1.Nifti1Image(out, aff, head)
+    
+    ### temporary solution below
+    out = nib.nifti1.Nifti1Image(out, aff)
+    out.update_header()
+    out.header_class(extensions=())
+    ### temporary solution above
+
     out.to_filename(os.path.join(path, 'func_lowpass.' + 
                                               str(uid) + '.' + 
                                               str(num) + '.nii.gz'))
