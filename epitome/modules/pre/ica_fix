@@ -1,0 +1,43 @@
+#!/bin/bash
+
+cat <<EOF
+export TRAINDATA=`echo 'anat_'${1}`
+export THRESHOLD=`echo ${2}`
+export 
+
+EOF
+
+cat <<"EOF"
+
+echo '************************************************************************'
+echo '                MELODIC-based component regression using FIX'
+echo ''
+echo '                                   LOL                                  '
+echo ''
+echo '   - Runs FSL fix on MELODIC outputs using '${TRAINDATA}'.'
+echo ''
+echo '************************************************************************'
+
+cd /tmp
+
+# find the FSL FIX folder
+DIR_FIX=`which fix`
+DIR_FIX=`dirname ${DIR_FIX}`
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        # run FIX X-noisifier -- no highpass options for now...
+        if [ ! -d ${SESS}/MELODIC.${ID}.${NUM}/ ]; then
+            fix \
+                ${SESS}/MELODIC.${ID}.${NUM}.ica \
+                ${DIR_FIX}/training_data/${TRAINDATA} \
+                ${THRESHOLD}
+        fi 
+    done
+done
+
+EOF

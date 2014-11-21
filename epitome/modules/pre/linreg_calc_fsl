@@ -33,53 +33,51 @@ for SESS in `basename ${DIR_SESS}`; do
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
     
-    if [ ! -f ${DIR_T1}/${SESS}/mat_T1_to_TAL.1D ]; then
-        # Copy EPI and MNI brain into /tmp.
-        3dcopy \
-            ${DIR_AFNI}/MNI_avg152T1+tlrc template
+    # if [ ! -f ${DIR_T1}/${SESS}/mat_T1_to_TAL.1D ]; then
+    #     # Copy EPI and MNI brain into /tmp.
+    #     3dcopy \
+    #         ${DIR_AFNI}/MNI_avg152T1+tlrc template.nii.gz
 
-        # If we have a T1 for each session, we register to the session T1. 
-        # Otherwise, we go to the first session.
-        if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
-             `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
-            3dcopy \
-                ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz anat_T1_brain
-        else
-            3dcopy \
-                ${DIR_T1}/SESS01/anat_T1_brain.nii.gz anat_T1_brain
-        fi
-
-        # T1 to MNI
-        @auto_tlrc \
-            -base template+tlrc \
-            -input anat_T1_brain+orig \
-            -no_ss -maxite 300 -OK_maxite \
-            -init_xform AUTO_CENTER
-
-        mv anat_T1_brain.Xat.1D ${DIR_T1}/${SESS}/mat_T1_to_TAL.1D
-
-        if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
-             `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
-            3dcopy \
-                anat_T1_brain+tlrc ${DIR_T1}/${SESS}/reg_T1_to_TAL.nii.gz
-        else
-            3dcopy \
-                anat_T1_brain+tlrc ${DIR_T1}/SESS01/reg_T1_to_TAL.nii.gz
-        fi
+    # If we have a T1 for each session, we register to the session T1. 
+    # Otherwise, we go to the first session.
+    if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
+         `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
+        ANAT_T1=`echo ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz`
+    else
+        ANAT_T1=`echo ${DIR_T1}/SESS01/anat_T1_brain.nii.gz`
     fi
+
+    #     # T1 to MNI
+    #     @auto_tlrc \
+    #         -base template+tlrc \
+    #         -input anat_T1_brain+orig \
+    #         -no_ss -maxite 300 -OK_maxite \
+    #         -init_xform AUTO_CENTER
+
+    #     mv anat_T1_brain.Xat.1D ${DIR_T1}/${SESS}/mat_T1_to_TAL.1D
+
+    #     if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
+    #          `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
+    #         3dcopy \
+    #             anat_T1_brain+tlrc ${DIR_T1}/${SESS}/reg_T1_to_TAL.nii.gz
+    #     else
+    #         3dcopy \
+    #             anat_T1_brain+tlrc ${DIR_T1}/SESS01/reg_T1_to_TAL.nii.gz
+    #     fi
+    # fi
     
     # Set EPI data file (for low vs high quality data).
     if [ ${DATA_QUALITY} = 'low' ]; then
-        EPI_BRAIN=`echo ${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz`
+        ANAT_EPI=`echo ${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz`
     else
-        EPI_BRAIN=`echo ${DIR}/${SESS}/anat_EPI_brain.nii.gz`
+        ANAT_EPI=`echo ${DIR}/${SESS}/anat_EPI_brain.nii.gz`
     fi
 
     # calculate registration of EPI to T1
-    if [ ! -f ${DIR_T1}/${SESS}/reg_EPI_to_T1.nii.gz ]; then
+    if [ ! -f ${DIR}/${SESS}/mat_T1_to_EPI.mat ]; then
         flirt \
-            -in ${EPI_BRAIN} \
-            -ref ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
+            -in ${ANAT_EPI} \
+            -ref ${ANAT_T1} \
             -out ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz \
             -omat ${DIR}/${SESS}/mat_EPI_to_T1.mat \
             -dof ${REG_DOF} \
@@ -87,10 +85,8 @@ for SESS in `basename ${DIR_SESS}`; do
             -searchcost ${COST} \
             -searchrx -180 180 -searchry -180 180 -searchrz -180 180 \
             -v
-    fi
 
-    # invert flirt transform
-    if [ ! -f ${DIR}/${SESS}/mat_T1_to_EPI.mat ]; then
+        # invert flirt transform
         convert_xfm \
             -omat ${DIR}/${SESS}/mat_T1_to_EPI.mat \
             -inverse \
@@ -98,15 +94,50 @@ for SESS in `basename ${DIR_SESS}`; do
     fi
 
     # produce T1 registered to EPI
-    if [ ! -f ${DIR_T1}/${SESS}/reg_T1_to_EPI.nii.gz ]; then
+    if [ ! -f ${DIR}/${SESS}/reg_T1_to_EPI.nii.gz ]; then
         # T1 to EPI -- FSL
         flirt \
-            -in ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
-            -ref ${EPI_BRAIN} \
-            -out ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz \
+            -in ${ANAT_T1} \
+            -ref ${ANAT_EPI} \
+            -out ${DIR}/${SESS}/reg_T1_to_EPI.nii.gz \
             -applyxfm \
-            -init ${DIR}/${SESS}/mat_EPI_to_T1.mat \
+            -init ${DIR}/${SESS}/mat_T1_to_EPI.mat \
             -v
+    fi
+
+    # calculate registration of T1 to reg_T1_to_TAL
+    if [ ! -f ${DIR}/${SESS}/reg_TAL_to_T1.mat ]; then
+        flirt \
+            -in ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
+            -ref ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz \
+            -out ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz \
+            -omat ${DIR}/${SESS}/mat_T1_to_TAL.mat \
+            -dof ${REG_DOF} \
+            -searchcost corratio \
+            -cost ${COST} \
+            -searchcost ${COST} \
+            -searchrx -180 180 -searchry -180 180 -searchrz -180 180 \
+            -v
+
+        # invert flirt transform
+        convert_xfm \
+            -omat ${DIR}/${SESS}/mat_TAL_to_T1.mat \
+            -inverse \
+            ${DIR}/${SESS}/mat_T1_to_TAL.mat
+    fi
+
+    # concatenate transformations
+    if [ ! -f ${DIR}/${SESS}/reg_TAL_to_EPI.mat ]; then
+
+        convert_xfm \
+            -omat ${DIR}/${SESS}/mat_EPI_to_TAL.mat \
+            -concat ${DIR}/${SESS}/mat_T1_to_TAL.mat \
+                    ${DIR}/${SESS}/mat_EPI_to_T1.mat 
+
+        convert_xfm \
+            -omat ${DIR}/${SESS}/mat_TAL_to_EPI.mat \
+            -concat ${DIR}/${SESS}/mat_T1_to_EPI.mat \
+                    ${DIR}/${SESS}/mat_TAL_to_T1.mat
     fi
 
     # Clean up leftovers in /tmp

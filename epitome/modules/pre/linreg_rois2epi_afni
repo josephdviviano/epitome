@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_${1}'`
+export INPUT=`echo {1}`
 export DIMS=`echo ${2}`
 
 EOF
@@ -9,9 +9,9 @@ EOF
 cat <<"EOF"
 
 echo '************************************************************************'
-echo '                    AFNI MNI-to-EPI transform data'
+echo '                 Transform AFNI MNI-space ROIs to EPI space'
 echo ''
-echo '   - Resamples '${INPUT}' data to MNI space at '${DIMS}'^3mm,'
+echo '   - Resamples '${INPUT}' mask data to MNI space at '${DIMS}'^3mm,'
 echo '   - Transforms whole-brain masks to MNI space,'
 echo '   - Creates 1 concatenated run per participant in run order.'
 echo ''
@@ -29,29 +29,17 @@ for SESS in ${DIR_SESS}; do
         cat_matvec mat_EPI_to_TAL.aff12.1D -I > mat_TAL_to_EPI.aff12.1D
 
         # register runs with MNI
-        if [ ! -f ${SESS}/func_MNI.${ID}.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/anat_mask_MNI2EPI.${ID}.nii.gz ]; then
             3dAllineate \
-                -prefix ${SESS}/func_MNI2T1.${ID}.${NUM}.nii.gz \
-                -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/anat_mask_MNI2EPI.${ID}.nii.gz \
+                -input ${SESS}/${INPUT}.nii.gz \
                 -1Dmatrix_apply ${SESS}/mat_TAL_to_EPI.aff12.1D \
                 -master ${SESS}/anat_EPI_brain.nii.gz \
                 -float \
-                -final wsinc5 \
+                -final NN \
                 -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
         fi
     done
-    
-    # register session masks with MNI
-    if [ ! -f ${SESS}/anat_EPI_mask_MNI.nii.gz ]; then
-        3dAllineate \
-            -prefix ${SESS}/anat_EPI_mask_MNI.nii.gz \
-            -input ${SESS}/anat_EPI_mask.nii.gz \
-            -1Dmatrix_apply ${SESS}/mat_EPI_to_TAL.aff12.1D \
-            -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
-            -float \
-            -final NN \
-            -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
-    fi
 done
 
 cd ${DIR_PIPE}
