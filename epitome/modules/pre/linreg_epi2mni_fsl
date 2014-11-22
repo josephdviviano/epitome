@@ -38,38 +38,38 @@ for SESS in `basename ${DIR_SESS}`; do
         if [ ! -f ${DIR}/func_T1.${ID}.${NUM}.nii.gz ]; then
             flirt -in ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz \
                   -ref ${DIR}/anat_EPI_reg_target.nii.gz \
-                  -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
-                  -out ${DIR}/func_T1.${ID}.${NUM}.nii.gz
+                  -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
+                  -out ${DIR}/func_MNI.${ID}.${NUM}.nii.gz
                   -interp sinc \
                   -sincwidth 7 \
                   -sincwindow blackman
         fi
 
-        # register runs with MNI
-        if [ ! -f ${DIR}/func_MNI.${ID}.${NUM}.nii.gz ]; then
-            3dAllineate -prefix ${DIR}/func_MNI.${ID}.${NUM}.nii.gz \
-                        -input ${DIR}/func_T1.${ID}.${NUM}.nii.gz \
-                        -1Dmatrix_apply ${DIR_T1}/mat_T1_to_TAL.1D \
-                        -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
-                        -float -final wsinc5 \
-                        -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
-        fi
+        # # register runs with MNI
+        # if [ ! -f ${DIR}/func_MNI.${ID}.${NUM}.nii.gz ]; then
+        #     3dAllineate -prefix ${DIR}/func_MNI.${ID}.${NUM}.nii.gz \
+        #                 -input ${DIR}/func_T1.${ID}.${NUM}.nii.gz \
+        #                 -1Dmatrix_apply ${DIR_T1}/mat_T1_to_TAL.1D \
+        #                 -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
+        #                 -float -final wsinc5 \
+        #                 -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
+        # fi
     done
     
     # register session masks with MNI
     if [ ! -f ${DIR}/anat_EPI_mask_MNI.nii.gz ]; then
         flirt -in ${DIR}/anat_EPI_mask.nii.gz \
               -ref ${DIR}/anat_EPI_reg_target.nii.gz \
-              -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
+              -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
               -interp nearestneighbour \
               -out ${DIR}/anat_EPI_mask_T1.nii.gz
 
-        3dAllineate -prefix ${DIR}/anat_EPI_mask_MNI.nii.gz \
-                    -input ${DIR}/anat_EPI_mask_T1.nii.gz \
-                    -1Dmatrix_apply ${DIR_T1}/mat_T1_to_TAL.1D \
-                    -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
-                    -float -final NN \
-                    -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
+    #     3dAllineate -prefix ${DIR}/anat_EPI_mask_MNI.nii.gz \
+    #                 -input ${DIR}/anat_EPI_mask_T1.nii.gz \
+    #                 -1Dmatrix_apply ${DIR_T1}/mat_T1_to_TAL.1D \
+    #                 -master ${DIR_AFNI}/MNI_avg152T1+tlrc \
+    #                 -float -final NN \
+    #                 -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
     fi
 done
 

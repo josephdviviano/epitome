@@ -1,8 +1,9 @@
 #!/bin/bash
 
 cat <<EOF
-export TRAINDATA=`echo 'anat_'${1}`
-export THRESHOLD=`echo ${2}`
+export INPUT=`echo 'func_'${1}`
+export TRAINDATA=`echo 'anat_'${2}`
+export THRESHOLD=`echo ${3}`
 export 
 
 EOF
@@ -31,11 +32,67 @@ for SESS in ${DIR_SESS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         # run FIX X-noisifier -- no highpass options for now...
-        if [ ! -d ${SESS}/MELODIC.${ID}.${NUM}/ ]; then
+        if [ ! -f ${SESS}/func_fix.${ID}.${NUM}.nii.gz ]; then
+            
+            # create a fake FEAT directory
+            mkdir ${SESS}/fake.${ID}.${NUM}.feat
+            mkdir ${SESS}/fake.${ID}.${NUM}.feat/reg
+
+            # melodic (command-line program) full output 
+            cp -r \
+                ${SESS}/MELODIC.${ID}.${NUM} \
+                ${SESS}/fake.${ID}.${NUM}.feat/filtered_func_data.ica
+
+            # preprocessed 4D data
+            cp \
+                ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
+                ${SESS}/MELODIC.${ID}.${NUM}/filtered_func_data.nii.gz
+
+            # temporal mean of 4D data
+            cp ${SESS}/anat_EPI_brain.nii.gz ${SESS}/fake.${ID}.${NUM}.feat/mean_func.nii.gz
+            
+            # valid mask relating to the 4D data
+            cp ${SESS}/anat_EPI_mask.nii.gz ${SESS}/fake.${ID}.${NUM}.feat/mask.nii.gz
+
+            # example image from 4D data
+            cp \
+                ${SESS}/anat_EPI_brain.nii.gz \
+                ${SESS}/fake.${ID}.${NUM}.feat/reg/example_func.nii.gz
+            
+            # brain-extracted structural
+            cp \
+                ${SESS}/anat_T1_brain.nii.gz \
+                ${SESS}/fake.${ID}.${NUM}.feat/reg/highres.nii.gz
+
+            # FLIRT transform from structural to functional space
+            cp \
+                ${SESS}/mat_T1_to_EPI.mat \
+                ${SESS}/fake.${ID}.${NUM}.feat/reg/highres2example_func.mat
+
+            # 3dcopy \
+            #     ${DIR_AFNI}/MNI_avg152T1+tlrc \
+            #     ${SESS}/MELODIC.${ID}.${NUM}/reg/standard.nii.gz
+            # cp \
+            #     ${SESS}/mat_TAL_to_EPI.mat \
+            #     ${SESS}/MELODIC.${ID}.${NUM}/reg/standard2example_func.mat
+            # cp \
+            #     ${SESS}/mat_EPI_to_TAL.mat \
+            #     ${SESS}/MELODIC.${ID}.${NUM}/reg/example_func2standard.mat
+
+            # FSL FIXAFY TILL THE BREAK OF DAWN 
+            # https://www.youtube.com/watch?v=uu6DRAvHJVM
             fix \
-                ${SESS}/MELODIC.${ID}.${NUM}.ica \
+                ${SESS}/fake.${ID}.${NUM}.feat \
                 ${DIR_FIX}/training_data/${TRAINDATA} \
                 ${THRESHOLD}
+
+            # copy output to SESS folder
+            cp \
+                ${SESS}/fake.${ID}.${NUM}.feat/filtered_func_data_clean.nii.gz \
+                ${SESS}/func_fix.${ID}.${NUM}.nii.gz
+
+            # X-destroyifiy fake.feat
+            rm -r ${SESS}/fake.${ID}.${NUM}.feat
         fi 
     done
 done
