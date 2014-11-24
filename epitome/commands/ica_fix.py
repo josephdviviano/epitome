@@ -14,7 +14,7 @@ def run(input_name):
                       'HCP_hp2000.RData' : '= use on "minimally-preprocessed" HCP-like datasets, e.g., TR=0.7s, Resolution=2x2x2mm, Session=15mins, no spatial smoothing, minimal (2000s FWHM) highpass temporal filtering', 
                       'WhII_MB6.RData' : '= use on multiband x6 EPI acceleration: TR=1.3s, Resolution=2x2x2mm, Session=10mins, no spatial smoothing, 100s FWHM highpass temporal filtering', 
                       'WhII_Standard.RData' : '= use on no EPI acceleration: TR=3s, Resolution=3x3x3mm, Session=10mins, no spatial smoothing, 100s FWHM highpass temporal filtering.'}
-        cost = epi.utilities.selector_dict(train_data)
+        train_data = epi.utilities.selector_dict(train_data)
 
         # set the ICA THRESHOLD WTF IS THIS EVEN
         print('\nThresholding. Default 20. See FSL FIX for help. I just work here (WTF FSL, seriously).')
