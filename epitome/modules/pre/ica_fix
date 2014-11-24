@@ -2,9 +2,8 @@
 
 cat <<EOF
 export INPUT=`echo 'func_'${1}`
-export TRAINDATA=`echo 'anat_'${2}`
+export TRAINDATA=`echo ${2}`
 export THRESHOLD=`echo ${3}`
-export 
 
 EOF
 
@@ -13,7 +12,7 @@ cat <<"EOF"
 echo '************************************************************************'
 echo '                MELODIC-based component regression using FIX'
 echo ''
-echo '                                   LOL                                  '
+echo '                                 LOL :D                                 '
 echo ''
 echo '   - Runs FSL fix on MELODIC outputs using '${TRAINDATA}'.'
 echo ''
@@ -34,10 +33,12 @@ for SESS in ${DIR_SESS}; do
         # run FIX X-noisifier -- no highpass options for now...
         if [ ! -f ${SESS}/func_fix.${ID}.${NUM}.nii.gz ]; then
             
-            # create a fake FEAT directory
+            ## create a fake FEAT directory
             mkdir ${SESS}/fake.${ID}.${NUM}.feat
             mkdir ${SESS}/fake.${ID}.${NUM}.feat/reg
+            mkdir ${SESS}/fake.${ID}.${NUM}.feat/mc
 
+            ## copy relevent nifti inputs
             # melodic (command-line program) full output 
             cp -r \
                 ${SESS}/MELODIC.${ID}.${NUM} \
@@ -46,7 +47,12 @@ for SESS in ${DIR_SESS}; do
             # preprocessed 4D data
             cp \
                 ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
-                ${SESS}/MELODIC.${ID}.${NUM}/filtered_func_data.nii.gz
+                ${SESS}/fake.${ID}.${NUM}.feat/filtered_func_data.nii.gz
+
+            # raw data (for generating motion paramaters)
+            cp \
+                ${SESS}/func_ob.${ID}.${NUM}.nii.gz \
+                ${SESS}/fake.${ID}.${NUM}.feat/mc/prefiltered_func_data.nii.gz
 
             # temporal mean of 4D data
             cp ${SESS}/anat_EPI_brain.nii.gz ${SESS}/fake.${ID}.${NUM}.feat/mean_func.nii.gz
@@ -54,6 +60,15 @@ for SESS in ${DIR_SESS}; do
             # valid mask relating to the 4D data
             cp ${SESS}/anat_EPI_mask.nii.gz ${SESS}/fake.${ID}.${NUM}.feat/mask.nii.gz
 
+            ## generate FSL-friendly motion paramaters
+            mcflirt \
+                -in ${SESS}/fake.${ID}.${NUM}.feat/mc/prefiltered_func_data.nii.gz \
+                -stats \
+                -mats \
+                -plots \
+                -report 
+            
+            ## fill in registration folder
             # example image from 4D data
             cp \
                 ${SESS}/anat_EPI_brain.nii.gz \
@@ -87,7 +102,7 @@ for SESS in ${DIR_SESS}; do
                 ${THRESHOLD}
 
             # copy output to SESS folder
-            cp \
+            mv \
                 ${SESS}/fake.${ID}.${NUM}.feat/filtered_func_data_clean.nii.gz \
                 ${SESS}/func_fix.${ID}.${NUM}.nii.gz
 
