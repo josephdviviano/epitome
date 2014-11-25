@@ -123,7 +123,7 @@ for SESS in `basename ${DIR_SESS}`; do
                 ${DIR}/${SESS}/func_fix.${ID}.${NUM}.nii.gz
 
             # X-destroyifiy fake.feat
-            #rm -r ${SESS}/fake.${ID}.${NUM}.feat
+            rm -r ${SESS}/fake.${ID}.${NUM}.feat
         fi
     done
 done
