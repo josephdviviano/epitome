@@ -1,5 +1,5 @@
-epitome -- Kimel Family TIGR Lab
-================================
+![epitome -- an MRI metapipeline](assets/overview.png "epitome -- an MRI metapipeline")
+
 epitome is a MRI pipeline for generating pipelines out of BASH 'modules'. It is intended to produce highly-portable BASH analysis scripts out of small code chunks that non-programmers can contribute, while exposing the underbelly of the system for more experienced programmers to work on.
 
 Written by Joseph D. Viviano, 2014. Contact: joseph@viviano.ca
@@ -8,8 +8,6 @@ Written by Joseph D. Viviano, 2014. Contact: joseph@viviano.ca
 > -- Santiago Ramón y Cajal
 
 This branch has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
-
-![epitome schematic](assets/overview.png "Overview")
 
 Setup
 =====
