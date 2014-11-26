@@ -10,7 +10,14 @@ I don't trust this software.
 
 Runs FSL ICA-based de-noising based on expert rating of ICA components into signal and noise. FSL FIX is not easy to run outside of the FSL ecosystem, so you must follow a pretty tight perscription to run this module (see prereqs below). The key is all registrations need to be done with FSL, and you really should use 'filter' to remove (at least) the linear trend from all voxels.
 
-Recommended (or rather, tested):
+There are currently 4 trained-weights files supplied:
+
++ Standard.RData - for use on more "standard" FMRI datasets / analyses; e.g., TR=3s, Resolution=3.5x3.5x3.5mm, Session=6mins, default FEAT preprocessing (including default spatial smoothing).
++ HCP_hp2000.RData for use on "minimally-preprocessed" HCP-like datasets, e.g., TR=0.7s, Resolution=2x2x2mm, Session=15mins, no spatial smoothing, minimal (2000s FWHM) highpass temporal filtering.
++ WhII_MB6.RData derived from the Whitehall imaging study, using multiband x6 EPI acceleration: TR=1.3s, Resolution=2x2x2mm, Session=10mins, no spatial smoothing, 100s FWHM highpass temporal filtering.
++ WhII_Standard.RData derived from more traditional early parallel scanning in the Whitehall imaging study, using no EPI acceleration: TR=3s, Resolution=3x3x3mm, Session=10mins, no spatial smoothing, 100s FWHM highpass temporal filtering. 
+
+Recommended epitome steps pre ica_fix (or rather, tested):
 
     . ${DIR_PIPE}/epitome/modules/pre/init_epi high 0 alt+z scale normal
     . ${DIR_PIPE}/epitome/modules/pre/linreg_calc_fsl high corratio 12

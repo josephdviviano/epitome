@@ -9,6 +9,8 @@ Written by Joseph D. Viviano, 2014. Contact: joseph@viviano.ca
 
 This branch has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
 
+![epitome schematic](assets/overview.png "Overview")
+
 Setup
 =====
 epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with epitome under bin/
