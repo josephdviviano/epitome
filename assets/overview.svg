@@ -16,7 +16,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.5 r"
-   sodipodi:docname="overview.svg">
+   sodipodi:docname="overview.svg"
+   inkscape:export-filename="/projects/jdv/code/epitome/assets/overview.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <metadata
      id="metadata216">
     <rdf:RDF>
@@ -25,6 +28,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -742,8 +746,8 @@
      inkscape:zoom="0.25156887"
      inkscape:cx="1268.7577"
      inkscape:cy="932.66109"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-x="444"
+     inkscape:window-y="70"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2" />
   <rect
