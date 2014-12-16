@@ -25,26 +25,28 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        # register runs with MNI
-        if [ ! -f ${SESS}/func_MNI.${ID}.${NUM}.nii.gz ]; then
+        # register runs with MNI (concatenates linear transform)
+        if [ ! -f ${SESS}/func_MNI-nonlin.${ID}.${NUM}.nii.gz ]; then
             3dNwarpApply \
-                -prefix ${SESS}/func_MNI.${ID}.${NUM}.nii.gz \
-                -source ${SEES}/${INPUT}.${ID}.${NUM}.nii.gz \
-                -affter ${SESS}/mat_EPI_to_TAL.aff12.1D \
+                -prefix ${SESS}/func_MNI-nonlin.${ID}.${NUM}.nii.gz \
+                -source ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
+                -master WARP \
                 -dxyz ${DIMS} \
-                -nwarp ${SESS}/reg_nlin_TAL_WARP.nii.gz
+                -nwarp ${SESS}/reg_nlin_TAL_WARP.nii.gz \
+                       ${SESS}/mat_EPI_to_TAL.aff12.1D
         fi
     done
     
-    # register session masks with MNI
-    if [ ! -f ${SESS}/anat_EPI_mask_MNI.nii.gz ]; then
-        3dwarpApply \
-            -prefix ${SESS}/anat_EPI_mask_MNI.nii.gz \
+    # register session masks with MNI (concatenates linear transform)
+    if [ ! -f ${SESS}/anat_EPI_mask_MNI-nonlin.nii.gz ]; then
+        3dNwarpApply \
+            -prefix ${SESS}/anat_EPI_mask_MNI-nonlin.nii.gz \
             -source ${SESS}/anat_EPI_mask.nii.gz \
-            -affter ${SESS}/mat_EPI_to_TAL.aff12.1D \
+            -master WARP \
             -dxyz ${DIMS} \
             -ainterp NN \
-            -nwarp ${SESS}/reg_nlin_TAL_WARP.nii.gz
+            -nwarp ${SESS}/reg_nlin_TAL_WARP.nii.gz \
+                   ${SESS}/mat_EPI_to_TAL.aff12.1D
     fi
 done
 
@@ -52,12 +54,12 @@ done
 3dMean \
     -datum short \
     -prefix ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
-    ${DIR_DATA}/${DIR_EXPT}/*/${DATA_TYPE}/*/anat_EPI_mask_MNI.nii.gz
+    ${DIR_DATA}/${DIR_EXPT}/*/${DATA_TYPE}/*/anat_EPI_mask_MNI-nonlin.nii.gz
 
 3dcalc \
     -a ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
     -expr 'step(a-0.999)' \
-    -prefix ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI_group.nii.gz
+    -prefix ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI-nonlin_group.nii.gz
 
 rm ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz
 

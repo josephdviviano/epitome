@@ -10,3 +10,5 @@ Usage: TRdrop <func_prefix> <head_size> <FD_thresh> <DV_thresh>
 This removes motion-corrupted TRs from fMRI scans and outputs shortened versions for connectivity analysis (mostly). By default, DVARS regression is set of OFF by using a very, very high threshold.
 
 Prerequisites: init_epi.
+
+Outputs: scrubbed

@@ -9,3 +9,5 @@ Usage: volsmooth <func_prefix> <mask_prefix> <FWHM>
 Re-samples a mask containing one or more labels to the functional data and smooths within unique values. All zero values in the mask are zeroed out in the output. The output of this can be combined with the outputs of surfsmooth \& surf2vol using combine_volumes.
 
 Prerequisites: init_epi, linreg_calc_afni, linreg_epi2T1_afni, vol2surf.
+
+Outputs: volsmooth

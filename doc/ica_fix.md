@@ -30,3 +30,5 @@ Recommended epitome steps pre ica_fix (or rather, tested):
 This takes the above MELODIC output, generates a phony '.feat' folder, and runs FIX within that. The output it moved to the epitome SESS folder as `func_fix`.
 
 Prerequisites: init_epi, linreg_calc_fsl, filter, ica.
+
+Outputs: fix

@@ -17,3 +17,5 @@ Creates a series of regressors from fMRI data and a freesurfer segmentation:
 + draining vessel regressors + 1 temporal lag
 
 Prerequisites: init_epi, linreg_calc_afni/fsl, linreg_FS2epi_afni/fsl.
+
+Outputs: set of masks, and regressors in PARAMS/

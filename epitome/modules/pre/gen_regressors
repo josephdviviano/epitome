@@ -8,18 +8,23 @@ EOF
 cat<<"EOF"
 
 echo '************************************************************************'
-echo '                         Regressor generator'
+echo '                    Freesurfer regressor generator'
 echo ''
 echo '   - Creates a set of regressors from '${INPUT}' functional data and'
 echo '     a freesurfer segmentation. Outputs:'
-echo '         - white matter + eroded mask,'
-echo '         - ventricles + eroded mask,'
-echo '         - grey matter mask,'
-echo '         - brain stem mask,'
-echo '         - dialated brain mask,'
-echo '         - draining vessels mask,'
-echo '         - ventricle regressors + lagged,'
-echo '         - draining vessel regressors + lagged.'
+echo ''
+echo '         - MASKS:'
+echo '             - white matter + eroded mask,'
+echo '             - ventricles + eroded mask,'
+echo '             - grey matter mask,'
+echo '             - brain stem mask,'
+echo '             - dialated brain mask,'
+echo '             - draining vessels mask,'
+echo ''
+echo '         - REGRESSORS:'
+echo '             - white matter: local (15mm sphere) and average, + lags'
+echo '             - ventricles averaged + lagged,'
+echo '             - draining vessel averaged + lagged.'
 echo ''
 echo '************************************************************************'
 
@@ -198,17 +203,6 @@ for SESS in ${DIR_SESS}; do
     DIR_RUNS=`ls -d -- ${DIR}/RUN*`
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
-
-        # create lagged motion regressors
-        if [ ! -f ${DIR}/PARAMS/lag.motion.${ID}.${NUM}.1D ]; then
-            1dcat \
-                ${DIR}/PARAMS/motion.${ID}.${NUM}.1D'{0}' > \
-                ${DIR}/PARAMS/lag.motion.${ID}.${NUM}.1D
-            
-            1dcat \
-                ${DIR}/PARAMS/motion.${ID}.${NUM}.1D'{0..$}' >> \
-                ${DIR}/PARAMS/lag.motion.${ID}.${NUM}.1D
-        fi
 
         # create local white matter regressors (+ lagged)
         if [ ! -f ${DIR}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz ]; then

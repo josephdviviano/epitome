@@ -24,3 +24,5 @@ Time series normalization can be accomplished in one of two ways: percent signal
 Masking options are provided to improve masking performance across various acquisition types, but it is very hard to devise a simple one-size fits all solution for this option. Therefore the QC outputs will be very important for ensuring good masking, and these options may need to be tweaked on a site-by-site basis. Luckily, many analysis methods do not rely heavily on mask accuracy. In cases that do, such as partial least squares / ICA / PCA analysis, close attention should be paid to the output of this step. Hopefully the 'loose', 'normal', and 'tight' nomenclature are self-explanatory. Generally, it is best to start with normal, and adjust if required.
 
 Prerequisites: None.
+
+Outputs: tshift (before deobliquing), ob (before motion-correction), scaled (final)

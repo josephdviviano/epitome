@@ -21,7 +21,7 @@ echo '   - Deletes '${DELTR}' TRs from the beginning of each run,'
 echo '   - Removes time-series outliers, or "despikes", the data,'
 echo '   - Corrects for slice timing using the pattern '${TPATTERN}','
 echo '   - Deobliques the data,'
-echo '   - Motion correction (also outputs motion parameters),'
+echo '   - Motion correction (also outputs motion parameters + 1st lag),'
 echo '   - Creates deskulled template EPI and '${MASKING}' whole-brain mask,'
 echo '   - Scales each voxel using '${NORMALIZE}','
 echo '   - Calculates global mean & DVARS (Power et al., 2012).'
@@ -169,6 +169,17 @@ for SESS in ${DIR_SESS}; do
                 -1Dfile ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
                 -1Dmatrix_save ${SESS}/PARAMS/3dvolreg.${ID}.${NUM}.aff12.1D \
                 ${SESS}/func_ob.${ID}.${NUM}.nii.gz
+
+            # create lagged motion regressors
+            if [ ! -f ${SESS}/PARAMS/lag.motion.${ID}.${NUM}.1D ]; then
+                1dcat \
+                    ${SESS}/PARAMS/motion.${ID}.${NUM}.1D'{0}' > \
+                    ${SESS}/PARAMS/lag.motion.${ID}.${NUM}.1D
+
+                1dcat \
+                    ${SESS}/PARAMS/motion.${ID}.${NUM}.1D'{0..$}' >> \
+                    ${SESS}/PARAMS/lag.motion.${ID}.${NUM}.1D
+            fi
 
             # make a registration volume for low-quality data if required
             if [ ${DATA_QUALITY} = 'low' ] && [ ${NUM} = 01 ]; then

@@ -3,7 +3,7 @@
 import epitome as epi
 
 def run(input_name):
-    output = 'MNI'
+    output = 'MNI-nonlin'
 
     # give us some feedback
     print('\nNonlinearly re-sampling input EPI data to MNI space using AFNI.')

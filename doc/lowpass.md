@@ -14,3 +14,5 @@ Both `median' and 'average' filters operate in the time domain and therefore, th
 Alternatively, the 'kaiser' and 'butterworth' filters work in the frequency domain and accept a cutoff in Hz (people tend to use a default of 0.1). Both are implemented as bi-directional FIR filters. The kaiser window is high order and permits reasonably sharp rolloff with minimal passband ringing for shorter fMRI time series. The butterworth filter is of low order and achieves minimal passband ringing at the expense of passband roll off (in layman's terms, butterworth filters will retain more high-frequency content than a kaiser filter with equivalent cutoff). The effect of the passband ringing is an empirical question that would be best tested by the User.
 
 Prerequisites: init_epi.
+
+Outputs: lowpass
