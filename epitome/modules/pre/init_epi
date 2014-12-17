@@ -227,6 +227,11 @@ for SESS in ${DIR_SESS}; do
             ${SESS}/anat_EPI_tmp_mean.nii.gz
         
         # set masking variables given each preset
+        if [ ${MASKING} == 'loosest' ]; then
+            CLFRAC=0.15
+            PEELS=1
+        fi
+
         if [ ${MASKING} == 'loose' ]; then
             CLFRAC=0.3
             PEELS=1

@@ -36,7 +36,7 @@ def run():
 
         # masking
         print('\nEPI masking: acquisition dependent')
-        mask_list = ['loose', 'normal', 'tight']
+        mask_list = ['loosest', 'loose', 'normal', 'tight']
         masking = epi.utilities.selector_list(mask_list)
 
     # if we messed any of these up, we return None

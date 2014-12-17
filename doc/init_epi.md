@@ -6,7 +6,7 @@ Usage: init_epi <data_quality> <del_tr> <t_pattern> <normalization> <masking>
 + del_tr -- number of TRs to remove from the beginning of the run.
 + t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift).
 + normalization -- voxel wise time series normalization. One of 'zscore', 'pct', 'demean'.
-+ masking -- EPI brain masking tolerance. One of 'loose', 'normal', or 'tight'.
++ masking -- EPI brain masking tolerance. One of 'loosest', 'loose', 'normal', or 'tight'.
 
 Works from the raw data in each RUN folder. It performs general pre-processing for all fMRI data:
 
