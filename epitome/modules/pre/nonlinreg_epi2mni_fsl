@@ -15,6 +15,9 @@ echo '   - Resamples '${INPUT}' data to MNI space at '${DIMS}'^3mm,'
 echo '   - Transforms whole-brain masks to MNI space,'
 echo '   - Creates 1 concatenated run per participant in run order.'
 echo ''
+echo '             DO NOT RUN LINREG_EPI2MNI_FSL BEFORE THIS!!!'
+echo '                    This does that part for you :)'
+echo ''
 echo '************************************************************************'
 
 cd /tmp
@@ -34,17 +37,28 @@ for SESS in `basename ${DIR_SESS}`; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        # register runs with individual T1s
-        if [ ! -f ${DIR}/func_T1.${ID}.${NUM}.nii.gz ]; then
-            flirt -in ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz \
-                  -ref ${DIR}/anat_EPI_reg_target.nii.gz \
-                  -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
-                  -out ${DIR}/func_MNI.${ID}.${NUM}.nii.gz
-                  -interp sinc \
-                  -sincwidth 7 \
-                  -sincwindow blackman
+        # register runs with MNI
+        if [ ! -f ${DIR}/func_MNI-nonlin.${ID}.${NUM}.nii.gz ]; then
+            applywarp \
+                --ref=${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz \
+                --in=${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
+                --aff=${SESS}/mat_EPI_to_TAL.mat \
+                --warp=${SESS}/reg_nlin_TAL_WARP.nii.gz \
+                --premat=${SESS}/mat_EPI_to_TAL.mat \
+                --out=${SESS}/func_MNI-nonlin.${ID}.${NUM}.nii.gz
         fi
     done
+    
+    # register session masks with MNI
+    if [ ! -f ${SESS}/anat_EPI_mask_MNI-nonlin.nii.gz ]; then
+            applywarp \
+                --ref=${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+                --in=${SESS}/anat_EPI_mask.nii.gz
+                --aff=${SESS}/mat_EPI_to_TAL.mat \
+                --warp=${SESS}/reg_nlin_TAL_WARP.nii.gz \
+                --premat=${SESS}/mat_EPI_to_TAL.mat \
+                --out=${SESS}/anat_EPI_mask_MNI-nonlin.nii.gz
+    fi
 done
 
 cd ${DIR_PIPE}

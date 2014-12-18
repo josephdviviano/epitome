@@ -32,11 +32,6 @@ DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in `basename ${DIR_SESS}`; do
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
-    
-    # if [ ! -f ${DIR_T1}/${SESS}/mat_T1_to_TAL.1D ]; then
-    #     # Copy EPI and MNI brain into /tmp.
-    #     3dcopy \
-    #         ${DIR_AFNI}/MNI_avg152T1+tlrc template.nii.gz
 
     # If we have a T1 for each session, we register to the session T1. 
     # Otherwise, we go to the first session.
@@ -47,25 +42,6 @@ for SESS in `basename ${DIR_SESS}`; do
         ANAT_T1=`echo ${DIR_T1}/SESS01/anat_T1_brain.nii.gz`
     fi
 
-    #     # T1 to MNI
-    #     @auto_tlrc \
-    #         -base template+tlrc \
-    #         -input anat_T1_brain+orig \
-    #         -no_ss -maxite 300 -OK_maxite \
-    #         -init_xform AUTO_CENTER
-
-    #     mv anat_T1_brain.Xat.1D ${DIR_T1}/${SESS}/mat_T1_to_TAL.1D
-
-    #     if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
-    #          `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
-    #         3dcopy \
-    #             anat_T1_brain+tlrc ${DIR_T1}/${SESS}/reg_T1_to_TAL.nii.gz
-    #     else
-    #         3dcopy \
-    #             anat_T1_brain+tlrc ${DIR_T1}/SESS01/reg_T1_to_TAL.nii.gz
-    #     fi
-    # fi
-    
     # Set EPI data file (for low vs high quality data).
     if [ ${DATA_QUALITY} = 'low' ]; then
         ANAT_EPI=`echo ${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz`
@@ -138,6 +114,15 @@ for SESS in `basename ${DIR_SESS}`; do
             -omat ${DIR}/${SESS}/mat_TAL_to_EPI.mat \
             -concat ${DIR}/${SESS}/mat_T1_to_EPI.mat \
                     ${DIR}/${SESS}/mat_TAL_to_T1.mat
+    fi
+
+    # register session masks with MNI
+    if [ ! -f ${DIR}/${SESS}/anat_EPI_mask_MNI-linreg.nii.gz ]; then
+        flirt -in ${DIR}/${SESS}/anat_EPI_mask.nii.gz \
+              -ref ${DIR}/${SESS}/anat_EPI_reg_target.nii.gz \
+              -applyxfm -init ${DIR}/${SESS}/mat_EPI_to_TAL.mat \
+              -interp nearestneighbour \
+              -out ${DIR}/${SESS}/anat_EPI_mask_MNI-linreg.nii.gz
     fi
 
     # Clean up leftovers in /tmp
