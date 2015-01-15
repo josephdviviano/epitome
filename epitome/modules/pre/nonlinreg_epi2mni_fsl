@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_${1}'`
+export INPUT=`echo 'func_'${1}`
 export DIMS=`echo ${2}`
 
 EOF
@@ -31,7 +31,7 @@ for SESS in `basename ${DIR_SESS}`; do
     # create registration dummy for FSL
     3dresample -dxyz ${DIMS} ${DIMS} ${DIMS} \
                -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
-               -inset ${DIR_T1}/anat_T1_brain.nii.gz
+               -inset ${DIR}/reg_nlin_TAL.nii.gz
 
     DIR_RUNS=`ls -d -- ${DIR}/RUN*`
     for RUN in ${DIR_RUNS}; do
@@ -40,24 +40,34 @@ for SESS in `basename ${DIR_SESS}`; do
         # register runs with MNI
         if [ ! -f ${DIR}/func_MNI-nonlin.${ID}.${NUM}.nii.gz ]; then
             applywarp \
-                --ref=${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz \
-                --in=${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
-                --aff=${SESS}/mat_EPI_to_TAL.mat \
-                --warp=${SESS}/reg_nlin_TAL_WARP.nii.gz \
-                --premat=${SESS}/mat_EPI_to_TAL.mat \
-                --out=${SESS}/func_MNI-nonlin.${ID}.${NUM}.nii.gz
+                --ref=${DIR}/anat_EPI_reg_target.nii.gz \
+                --in=${DIR}/${INPUT}.${ID}.${NUM}.nii.gz \
+                --warp=${DIR}/reg_nlin_TAL_WARP.nii.gz \
+                --premat=${DIR}/mat_EPI_to_TAL.mat \
+                --interp=spline \
+                --out=${DIR}/func_MNI-nonlin.${ID}.${NUM}.nii.gz
         fi
     done
     
-    # register session masks with MNI
-    if [ ! -f ${SESS}/anat_EPI_mask_MNI-nonlin.nii.gz ]; then
-            applywarp \
-                --ref=${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
-                --in=${SESS}/anat_EPI_mask.nii.gz
-                --aff=${SESS}/mat_EPI_to_TAL.mat \
-                --warp=${SESS}/reg_nlin_TAL_WARP.nii.gz \
-                --premat=${SESS}/mat_EPI_to_TAL.mat \
-                --out=${SESS}/anat_EPI_mask_MNI-nonlin.nii.gz
+    # register session masks with MNI-lin
+    if [ ! -f ${DIR}/anat_EPI_mask_MNI-lin.nii.gz ]; then
+        flirt \
+            -in ${DIR}/anat_EPI_mask.nii.gz \
+            -ref ${DIR}/anat_EPI_reg_target.nii.gz \
+            -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
+            -interp nearestneighbour \
+            -out ${DIR}/anat_EPI_mask_MNI-lin.nii.gz
+    fi
+
+    # register session masks with MNI-nonlin
+    if [ ! -f ${DIR}/anat_EPI_mask_MNI-nonlin.nii.gz ]; then
+        applywarp \
+            --ref=${DIR}/anat_EPI_reg_target.nii.gz \
+            --in=${DIR}/anat_EPI_mask.nii.gz \
+            --warp=${DIR}/reg_nlin_TAL_WARP.nii.gz \
+            --premat=${DIR}/mat_EPI_to_TAL.mat \
+            --interp nearestneighbour \
+            --out=${DIR}/anat_EPI_mask_MNI-nonlin.nii.gz
     fi
 done
 

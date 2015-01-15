@@ -45,6 +45,15 @@ for SESS in `basename ${DIR_SESS}`; do
                   -sincwindow blackman
         fi
     done
+
+    # register session masks with MNI
+    if [ ! -f ${DIR}/${SESS}/anat_EPI_mask_MNI-linreg.nii.gz ]; then
+        flirt -in ${DIR}/${SESS}/anat_EPI_mask.nii.gz \
+              -ref ${DIR}/${SESS}/anat_EPI_reg_target.nii.gz \
+              -applyxfm -init ${DIR}/${SESS}/mat_EPI_to_TAL.mat \
+              -interp nearestneighbour \
+              -out ${DIR}/${SESS}/anat_EPI_mask_MNI-linreg.nii.gz
+    fi
 done
 
 cd ${DIR_PIPE}

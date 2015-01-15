@@ -35,7 +35,7 @@ for SESS in ${DIR_SESS}; do
             SurfSmooth \
               -met HEAT_07 \
               -spec ${DIR_FS}/SUMA/${FS_NAME}_both.spec \
-              -surf_A ${DIR_FS}/SUMA/rh.white.asc \
+              -surf_A ${DIR_FS}/SUMA/lh.white.asc \
               -input ${DIR}/${INPUT}.L.${ID}.${NUM}.niml.dset \
               -target_fwhm ${FWHM} \
               -output ${DIR}/func_smooth.L.${ID}.${NUM}.niml.dset

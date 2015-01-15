@@ -300,7 +300,7 @@ for SESS in ${DIR_SESS}; do
                    -a ${SESS}/func_motion.${ID}.${NUM}.nii.gz \
                    -b ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
                    -c ${SESS}/anat_EPI_mask.nii.gz \
-                   -expr "(a-b)/b*c"
+                   -expr "(a-b)/b*c*100-1"
             fi
  
             # SCALE: set global mean = 1000, arbitrary units, no normalization
