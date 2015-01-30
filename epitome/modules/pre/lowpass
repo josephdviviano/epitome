@@ -32,7 +32,7 @@ for SESS in ${DIR_SESS}; do
             ANAT=`echo ${SESS}/${MASK}.nii.gz`
 
             # lowpass data
-            epilowpass \
+            epi-lowpass \
                 ${FILTER} \
                 ${FUNC} \
                 ${ANAT} \

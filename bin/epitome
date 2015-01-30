@@ -28,7 +28,7 @@ Usage:
                                   clean-up scripts (for resetting subjects or
                                   removing intermediate files).
 
-#######################################################################jdv2014#
+####################################################################jdv2014-15#
 
 """
 
@@ -883,7 +883,7 @@ def run_epitome():
     print('The pipeline can be manually executed via:\n' + 
            '. ' + str(os.path.join(dir_data, expt, proc)) + '\n' +
            'or submitted to the queue via:\n' +
-           'EPIqueue ' + str(os.path.join(dir_data, expt, proc)))
+           'epi-queue ' + str(os.path.join(dir_data, expt, proc)))
     print('******************************************************************')
 
 # this is the command-line usage bit
