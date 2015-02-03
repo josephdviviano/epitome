@@ -55,7 +55,7 @@ for SESS in `basename ${DIR_SESS}`; do
             -in ${DIR}/anat_EPI_mask.nii.gz \
             -ref ${DIR}/anat_EPI_reg_target.nii.gz \
             -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
-            -interp nearestneighbour \
+            -interp=nearestneighbour \
             -out ${DIR}/anat_EPI_mask_MNI-lin.nii.gz
     fi
 
@@ -66,7 +66,7 @@ for SESS in `basename ${DIR_SESS}`; do
             --in=${DIR}/anat_EPI_mask.nii.gz \
             --warp=${DIR}/reg_nlin_TAL_WARP.nii.gz \
             --premat=${DIR}/mat_EPI_to_TAL.mat \
-            --interp nearestneighbour \
+            --interp=nearestneighbour \
             --out=${DIR}/anat_EPI_mask_MNI-nonlin.nii.gz
     fi
 done
