@@ -362,7 +362,7 @@ def check_run(expt, subj, mode, sess, run):
                          if os.path.isfile(os.path.join(dir_file, d))]
 
     # return True if any file ends with a NIFTI extension
-    if any(f[-7:] == '.nii.gz' or f[-4] == '.nii' for f in file_list):
+    if any(f[-7:] == '.nii.gz' or f[-4:] == '.nii' for f in file_list):
         return True
     else:
         return False
