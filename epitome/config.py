@@ -110,3 +110,10 @@ def return_paths():
 
     return dir_data, dir_pipe, dir_afni, cores
 
+def return_queue():
+    """
+    Returns the name of the queue for the system epitome is installed on.
+    """
+    queue = 'main.q'
+
+    return queue
