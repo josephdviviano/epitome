@@ -11,6 +11,9 @@ import datetime
 import numpy as np
 import scipy as sp
 
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -272,8 +275,7 @@ def individual_motion_plot(path, expt, mode, uid):
 
     # export PDF
     pdf = PdfPages(os.path.join(path, expt, 
-                  'qc_' + str(mode) + '_' + str(uid) + 
-                                           '_motion_individual.pdf'))
+                  'qc_' + str(uid) + '_motion_individual_' + mode + '.pdf'))
     fig_FD.savefig(pdf, format='pdf')
     fig_DV.savefig(pdf, format='pdf')
 

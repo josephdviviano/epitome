@@ -9,6 +9,9 @@ import scipy.signal as sig
 
 import nibabel as nib
 
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -211,8 +214,7 @@ def regressor_spectra(path, expt, mode, uid):
 
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 
-                  'qc_' + str(mode) + '_' + str(uid) + 
-                                           '_regressor_spectra.pdf'))
+                  'qc_' + uid + '_regressor_spectra' + mode + '.pdf'))
     for subj in subjects:
 
         # define some useful shortcuts

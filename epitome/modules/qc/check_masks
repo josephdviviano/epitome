@@ -8,6 +8,9 @@ import nibabel as nib
 import numpy as np
 from scipy import ndimage as nd
 
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -34,7 +37,7 @@ def mask_check(path, expt, mode):
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
     # loop through all subjects
-    pdf = PdfPages(os.path.join(path, expt, 'qc_masks.pdf'))
+    pdf = PdfPages(os.path.join(path, expt, 'qc_masks' + mode + '.pdf'))
     for subj in subjects:
 
         # resample T1 image to has EPI dimensions

@@ -7,6 +7,9 @@ import nibabel as nib
 import numpy as np
 from scipy import ndimage as nd
 
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -52,7 +55,7 @@ def reg_check_T12MNI(path, expt, mode):
     anat_masked = np.ma.masked_where(anat == 0, anat)
 
     # loop through all subjects
-    pdf = PdfPages(os.path.join(path, expt, 'qc_reg_T1_to_MNI.pdf'))
+    pdf = PdfPages(os.path.join(path, expt, 'qc_reg_T1_to_MNI' + mode + '.pdf'))
     for subj in subjects:
 
         print 'working on subject ' + str(subj)
