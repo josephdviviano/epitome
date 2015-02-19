@@ -37,7 +37,7 @@ def mask_check(path, expt, mode):
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
     # loop through all subjects
-    pdf = PdfPages(os.path.join(path, expt, 'qc_masks' + mode + '.pdf'))
+    pdf = PdfPages(os.path.join(path, expt, 'qc_masks_' + mode + '.pdf'))
     for subj in subjects:
 
         # resample T1 image to has EPI dimensions
