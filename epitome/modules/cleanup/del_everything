@@ -18,7 +18,7 @@ for SUB in ${SUBJECTS}; do
     for SESS in ${DIR_SESS}; do
         
         # remove per-session files
-        rm -r ${SESS}/PARAMS/ >& /dev/null
+        rm -r ${SESS}/PARAMS >& /dev/null
         rm ${SESS}/anat_* >& /dev/null
         rm ${SESS}/func_* >& /dev/null
         rm ${SESS}/mat_* >& /dev/null

@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# cat <<EOF
-# export DATA_QUALITY=`echo ${1}`
-# export COST=`echo ${2}`
-# export REG_DOF=`echo ${3}`
-
-# EOF
-
 cat <<"EOF"
 
 echo '************************************************************************'
@@ -14,7 +7,7 @@ echo '               FSL: Nonlinear registration pathway calculator'
 echo ''
 echo '   Calculates MNI linreg --> MNI nonlinreg using FSL FNIRT'
 echo ''
-echo '   - Generates T1 template warped to MNI ans associated transforms,'
+echo '   - Generates T1 template warped to MNI and associated transforms,'
 echo ''
 echo '************************************************************************'
 
