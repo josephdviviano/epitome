@@ -20,7 +20,7 @@ def run():
         # turn on/off despiking 
         print('\nSelect despike option:')
         despike_list = ['on', 'off']
-        despike = epi.utilities.selector_list(despike)
+        despike = epi.utilities.selector_list(despike_list)
 
         # get the slice timing
         print('\nSlice-timing pattern: (see AFNI 3dTshift for more help)')

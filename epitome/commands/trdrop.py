@@ -9,8 +9,8 @@ def run(input_name):
     
     print('\nWould you like to use the defaults?')
     print('                           Head Size = 50 mm')
-    print('    Framewise Displacement Threshold = 0.3 mm / TR')
-    print('                     DVARS Threshold = 3 pct signal change / TR')
+    print('    Framewise Displacement Threshold = 0.5 mm / TR')
+    print('                     DVARS Threshold = 1,000,000 pct signal change / TR')
     
     try:
         defaults = ['yes', 'no']
@@ -22,16 +22,16 @@ def run(input_name):
             print('\nInput head size (default 50)')
             head_size = epi.utilities.selector_float()
 
-            print('\nInput FD threshold (default 0.3)')
+            print('\nInput FD threshold (default 0.5)')
             FD = epi.utilities.selector_float()
 
-            print('\nInput head size (default 1000000)')
+            print('\nInput DVARS threshold (default 1000000)')
             DV = epi.utilities.selector_float()
 
         else:
             print('\nOK, using the defaults.')
             head_size = 50
-            FD = 0.3
+            FD = 0.5
             DV = 1000000 # this turns DVARS off, effectively
 
     # if we messed any of these up, we return None
@@ -46,3 +46,4 @@ def run(input_name):
                                   str(DV))
 
     return line, output
+
