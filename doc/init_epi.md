@@ -4,7 +4,8 @@ Usage: init_epi <data_quality> <del_tr> <t_pattern> <normalization> <masking>
 
 + data_quality -- 'low' for poor internal contrast, otherwise 'high'.
 + del_tr -- number of TRs to remove from the beginning of the run.
-+ t_pattern -- slice-timing at acquisition (from AFNI's 3dTshift).
++ despike -- turns despiking on and off.
++ t_pattern -- optional slice-timing at acquisition (from AFNI's 3dTshift).
 + normalization -- voxel wise time series normalization. One of 'zscore', 'pct', 'demean'.
 + masking -- EPI brain masking tolerance. One of 'loosest', 'loose', 'normal', or 'tight'.
 
