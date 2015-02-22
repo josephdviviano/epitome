@@ -16,10 +16,16 @@ def run():
         # get the number of TRs to delete
         print('\nNumber of TRs to delete:')
         deltr = epi.utilities.selector_int()
+        
+        # turn on/off despiking 
+        print('\nSelect despike option:')
+        despike_list = ['on', 'off']
+        despike = epi.utilities.selector_list(despike)
 
         # get the slice timing
         print('\nSlice-timing pattern: (see AFNI 3dTshift for more help)')
-        t_patterns = {'alt+z' : '= alternating in the plus direction', 
+        t_patterns = {'none': '= skip this step entirely',
+                      'alt+z' : '= alternating in the plus direction', 
                       'alt+z2' : '= alternating, starting at slice #1', 
                       'alt-z' : '= alternating in the minus direction', 
                       'alt-z2' : '= alternating, starting at slice #nz-2', 
@@ -47,6 +53,7 @@ def run():
     line = ('. ${DIR_PIPE}/epitome/modules/pre/init_epi ' +
                                       str(quality) + ' ' +
                                       str(deltr) + ' ' +
+                                      str(despike) + ' ' +
                                       str(slice_timing) + ' ' +
                                       str(normalization) + ' ' +
                                       str(masking))
