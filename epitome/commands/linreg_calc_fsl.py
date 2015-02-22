@@ -18,7 +18,7 @@ def run(input_name):
         print('\nRegistration cost function: (see FSL FLIRT for help)')
         cost_fxns = {'mutualinfo' : '= Mutual Information [H(b)+H(s)-H(b,s)]', 
                      'leastsq' : '=  Least Squares [Pearson Correlation]',
-                     'corratio' : '= Correlation Ratio', 
+                     'corratio' : '= Correlation Ratio (default)', 
                      'normcorr' : '= Normalized Correlation', 
                      'labeldiff' : '= FSL magic!',
                      'bbr' : '= FSL magic!'}
