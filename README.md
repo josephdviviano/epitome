@@ -209,9 +209,9 @@ Basic MRI: GLM, PLS, etc.
 -------------------------
 Here, we are interested in doing a set of basic tasks before running a GLM analysis on some task-based MRI design. We've already placed the anatomical and functional NIFTI (and .phys files, if appropriate) into their RUN folders and have run epitome run. Every run begins with init_epi 
 
-    init_epi high 0 alt+z off normal 
+    init_epi high 0 on alt+z off normal 
 
-Here, we are telling epitome that we are working with high contrast data, want to remove 0 TRs from the beginning of each run, have acquired our data in the alternating plus direction, we are turning off time series normalization, and would like a brain mask of normal tightness, which is a reasonable default. 
+Here, we are telling epitome that we are working with high contrast data, want to remove 0 TRs from the beginning of each run, use despiking, have acquired our data in the alternating plus direction, we are turning off time series normalization, and would like a brain mask of normal tightness, which is a reasonable default. 
 
     linreg_calc_AFNI high lpc giant_move 
 
@@ -238,7 +238,7 @@ Connectivity Analysis
 ---------------------
 Functional connectivity analysis benefits from the application of tissue-based regressors pre-analysis, unlike in a GLM where one can inset these regressors at the same time. For this reason, connectivity analysis will require a slightly modified pipeline: 
 
-    init_epi high 0 alt+z off normal 
+    init_epi high 0 on alt+z off normal 
     linreg_calc_AFNI high lpc giant_move 
     linreg_FS2epi_AFNI 
     gen_regressors scaled 
@@ -258,7 +258,7 @@ Surface Analysis & Surface Smoothing for Volume Analysis
 --------------------------------------------------------
 When studying the cortex, it is often desirable to look at the data on a surface. This prevents the blurring of signals between sulci and gyri, allows for finer localization of function, and permits some interesting co-registration methods. For simplicity, we will do this to data intended for a simple GLM analysis. 
 
-    init_epi high 0 alt+z off normal 
+    init_epi high 0 on alt+z off normal 
     linreg_calc_AFNI high lpc giant_move 
     linreg_FS2epi_AFNI 
     gen_regressors scaled 
