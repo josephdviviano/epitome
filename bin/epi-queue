@@ -65,7 +65,7 @@ def submit_jobs(f, u_id, queue, command_file):
             
         # preprocessing
         elif line.find(command_file) >= 0:
-            cmdname = 'epitome_cmd_' + name
+            cmdname = 'epitome_' + name
             log = cmdname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid {hold} -cwd -N {name} \
