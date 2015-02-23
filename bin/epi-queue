@@ -55,7 +55,7 @@ def submit_jobs(f, u_id, queue, command_file):
             fslist.append(name)
 
         # freesurfer exports
-        elif line.find('fsexport.py') >= 0:
+        elif line.find('fsexport') >= 0:
             holdname = 'qsub_fsexport_' + u_id
             log = holdname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
