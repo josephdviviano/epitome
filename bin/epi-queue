@@ -47,40 +47,40 @@ def submit_jobs(f, u_id, queue, command_file):
 
         # freesurfer recon-alls
         if line[0:9] == 'recon-all':
-            name = 'qsub_fs_' + u_id + '_' + str(i)
-            log = name + '.log'
+            fsname = 'epitome_fs_' + u_id + '_' + str(i)
+            log = fsname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -cwd -N {name} -l mem_free=6G,virtual_free=6G -j y \
-                  """.format(line=line, log=log, queue=queue, name=name)
-            fslist.append(name)
+                  """.format(line=line, log=log, queue=queue, name=fsname)
+            fslist.append(fsname)
 
         # freesurfer exports
         elif line.find('fsexport') >= 0:
-            holdname = 'qsub_fsexport_' + u_id
-            log = holdname + '.log'
+            fsexportname = 'epitome_fsexport_' + u_id
+            log = fsexportname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid {hold} -cwd -N {name} \
                   """.format(line=line, log=log, hold=",".join(fslist),
-                                                 queue=queue, name=holdname)
+                                                 queue=queue, name=fsexportname)
             
         # preprocessing
         elif line.find(command_file) >= 0:
-            name = 'qsub_' + name
-            log = name + '.log'
+            cmdname = 'epitome_cmd_' + name
+            log = cmdname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid {hold} -cwd -N {name} \
-                  """.format(line=line, log=log, hold=holdname,
-                                                 queue=queue, name=name)
-            sublist.append(name)
+                  """.format(line=line, log=log, hold=fsexportname,
+                                                 queue=queue, name=cmdname)
+            sublist.append(cmdname)
             
         # qc
         else:
-            name = 'qsub_qc_' + u_id + '_' + str(i)
-            log = name + '.log'
+            qcname = 'qsub_qc_' + u_id + '_' + str(i)
+            log = qcname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid  {hold} -cwd -N {name} \
                   """.format(line=line, log=log, hold=",".join(sublist),
-                                                 queue=queue, name=name)
+                                                 queue=queue, name=qcname)
 
         # open a subprocess, print the result to the console
         pipe = subprocess.Popen(cmd, shell=True,
