@@ -356,16 +356,16 @@ def check_run(expt, subj, mode, sess, run):
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
-    # retrieve the files within each run folder
+    # retrieve the number of files within each run folder
     dir_file = os.path.join(dir_data, expt, subj, mode, sess, run)
     file_list = [d for d in os.listdir(dir_file)
                          if os.path.isfile(os.path.join(dir_file, d))]
 
-    # return True if any file ends with a NIFTI extension
-    if any(f[-7:] == '.nii.gz' or f[-4:] == '.nii' for f in file_list):
-        return True
-    else:
-        return False
+    n_files = filter(lambda x: x[-7:] == '.nii.gz' or 
+                               x[-4:] == '.nii', file_list)
+    n_files = len(n_files)
+
+    return n_files
 
 def check_mode(expt, subj, mode):
     """
@@ -392,16 +392,24 @@ def check_mode(expt, subj, mode):
                             if os.path.isdir(os.path.join(dir_sess, d))
                             and d[0:3] == 'RUN']
 
-        # check for runs missing NIFTI files, print a warning if required
+        # check for runs missing/too many NIFTI files, print warnings
         for run in run_list:
-            if check_run(expt, subj, mode, sess, run) == True:
-                n_runs = n_runs + 1
-            else:
-                print('subject ' + str(subj) +
-                      ', image modality ' + str(mode) +
-                      ', session ' + str(sess) +
-                      ', run ' + str(run) +
-                      ' contains no NIFTI file.')
+            n_files = check_run(expt, subj, mode, sess, run) 
+            n_runs = n_runs + n_files
+            
+            if n_files == 0:
+                print("""subject {subj}, {mode}, sess {sess}, run {run} \
+                         contains no NIFTI file.""".format(subj=str(subj), 
+                                                           mode=str(mode),
+                                                           sess=str(sess), 
+                                                           run=str(run)))
+            if n_files > 1:
+                print("""subject {subj}, {mode}, sess {sess}, run {run} \
+                         contains {n} NIFTI files.""".format(subj=str(subj), 
+                                                             mode=str(mode),
+                                                             sess=str(sess), 
+                                                             run=str(run),
+                                                             n=str(n_files)))
 
     return n_runs
 
