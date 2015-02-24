@@ -75,7 +75,7 @@ def submit_jobs(f, u_id, queue, command_file):
             
         # qc
         else:
-            qcname = 'qsub_qc_' + u_id + '_' + str(i)
+            qcname = 'epitome_qc_' + u_id + '_' + str(i)
             log = qcname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid  {hold} -cwd -N {name} \
