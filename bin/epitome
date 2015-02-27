@@ -739,12 +739,11 @@ def run_epitome():
     # NB: We reset the proclist here
     #f.close()
 
-    fs  = ('python ' + 
-           os.path.join(dir_pipe, 'epitome/modules/freesurfer/fsrecon') +
-           ' ' + str(dir_data) + 
-           ' ' + str(expt) + 
-           ' ' + str(mode) + 
-           ' ' + os.path.join(dir_data, expt, str(proc)))
+    fs  = ('epi-fsrecon {dir_data} {expt} {mode} {proc}'.format(
+                dir_data=str(dir_data), 
+                expt=str(expt), 
+                mode=str(mode), 
+                proc=os.path.join(dir_data, expt, str(proc))))
     f.write(fs + '\n')
     
     #f.write('echo python ${DIR_PIPE}/epitome/modules/freesurfer/fsrecon.py ' +
@@ -753,7 +752,7 @@ def run_epitome():
     
     # re-open the file to continue
     #f = open(os.path.join(dir_data, expt, master), 'wb')
-    f.write('echo python ${DIR_PIPE}/epitome/modules/freesurfer/fsexport ' +
+    f.write('. ${DIR_PIPE}/epitome/modules/freesurfer/fsexport ' +
             '${DIR_DATA} ${DIR_EXPT} ' + 
             '>> ${DIR_DATA}/${DIR_EXPT}/' + proc + '\n')
     f.write('\n')

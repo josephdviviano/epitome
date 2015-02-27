@@ -68,7 +68,15 @@ def get_TR(path):
     frequency.
     """
     TR = os.popen('fslhd ' + path + ' | sed -n 22p | cut -c 8- | xargs').read()
-    TR = float(TR)
+
+    # workaround for strange TR-is-missing bug
+    try:
+        TR = float(TR)
+    except:
+        print('ERROR: Trouble reading TR from ' + path + ', using TR = 2 s.')
+        print('NB: Frequencies are likely wrong!!!')
+        TR = 2.0
+
     if TR >= 1000:
         TR = TR / 1000
     fs = 1.0 / TR
@@ -92,7 +100,7 @@ def plotter_format(ax, ind, y_min, y_max, freq):
 
     return ax[ind]
 
-def plotter(raw, noise, signal, dv, vent, gm, n):
+def plotter(raw, noise, signal, dv, vent, gm, n, freq):
     """
     Takes in the data from regressor_spectra to produce a single subject's
     spectra. Outputs a PDF page that can be combined with others to produce
@@ -207,6 +215,7 @@ def plotter(raw, noise, signal, dv, vent, gm, n):
 
 def regressor_spectra(path, expt, mode, uid):
     """
+    :D
     """
 
     # get subject numbers
@@ -214,7 +223,7 @@ def regressor_spectra(path, expt, mode, uid):
 
     # loop through all subjects
     pdf = PdfPages(os.path.join(path, expt, 
-                  'qc_' + uid + '_regressor_spectra' + mode + '.pdf'))
+                  'qc_' + uid + '_regressor_spectra_' + mode + '.pdf'))
     for subj in subjects:
 
         # define some useful shortcuts
@@ -269,27 +278,28 @@ def regressor_spectra(path, expt, mode, uid):
                 files = os.listdir(os.path.join(
                            modepath, 'SESS' + '%02d'%(sess+1), 'PARAMS'))
                 
-                for i, f in enumerate(files):
-                    if files[i][:-6] == 'global_mean':
+                for f in files:
+                    
+                    if f[:11] == 'global_mean':
+
+                        tmp = np.genfromtxt(os.path.join(
+                              modepath, 'SESS' + '%02d'%(sess+1), 'PARAMS', f))
+                        freqs, power = load_PSD(tmp, fs)
+                        gm = np.vstack((gm, power))
+                    
+                    elif f[:2] == 'dv':
 
                         tmp = np.genfromtxt(os.path.join(
                               modepath, 'SESS' + '%02d'%(sess+1), 'PARAMS', f))
                         freqs, power = load_PSD(tmp, fs)
                         dv = np.vstack((dv, power))
 
-                    elif files[i][:-6] == 'dv':
+                    elif f[:4] == 'vent':
 
                         tmp = np.genfromtxt(os.path.join(
                               modepath, 'SESS' + '%02d'%(sess+1), 'PARAMS', f))
                         freqs, power = load_PSD(tmp, fs)
                         vent = np.vstack((vent, power))
-
-                    elif files[i][:-6] == 'vent':
-
-                        tmp = np.genfromtxt(os.path.join(
-                              modepath, 'SESS' + '%02d'%(sess+1), 'PARAMS', f))
-                        freqs, power = load_PSD(tmp, fs)
-                        gm = np.vstack((gm, power))
 
                 # load in unfiltered data spectra
                 ts = load_masked_func(os.path.join(path, expt, subj, mode, 
@@ -328,12 +338,13 @@ def regressor_spectra(path, expt, mode, uid):
                 ind = ind + len(idx)
 
             # strip off empty vector
+            print(str(subj) + ' ' + str(sess))
             dv = dv[1:, :]
             vent = vent[1:, :]
             gm = gm[1:, :]
 
             # plot everything, format, and save to the PDF
-            fig, ax = plotter(raw, noise, signal, dv, vent, gm, n)
+            fig, ax = plotter(raw, noise, signal, dv, vent, gm, n, freqs)
 
             fig.subplots_adjust(hspace=0.15)
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import os
-import sys
+import os, sys
 import datetime
 
 import nibabel as nib
@@ -40,17 +39,22 @@ def mask_check(path, expt, mode, uid):
     for subj in subjects:
 
         modepath = os.path.join(path, expt, subj, mode)
-        sessions = [s for
-                    s in os.listdir(modepath)
-                      if os.path.isdir(os.path.join(modepath, s)) == True]
-        sessions.sort()    
+        try:
+            sessions = [s for
+                        s in os.listdir(modepath)
+                          if os.path.isdir(os.path.join(modepath, s)) == True]
+            sessions.sort()
+        except:
+            continue  
 
         for sess in sessions:
 
             # resample T1 image to has EPI dimensions
-
-            EPI = os.path.join(path, expt, subj, mode, sess,
+            try:
+                EPI = os.path.join(path, expt, subj, mode, sess,
                                                 'func_ob.'+ uid +'.01.nii.gz')
+            except:
+                continue
 
             # load in data
             EPI = nib.load(EPI).get_data()

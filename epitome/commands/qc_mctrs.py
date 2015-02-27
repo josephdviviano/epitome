@@ -5,7 +5,8 @@ def run(dir_data, expt, mode):
 
     print('\nAdding Motion Correction TR checking QC to the outputs.')
 
-    line = ('echo python ${DIR_PIPE}/epitome/modules/qc/check_mc_trs ' + 
+    line = ('. ${DIR_PIPE}/epitome/modules/qc/qc_mctrs ' + 
              str(dir_data) + ' ' + str(expt) + ' ' + str(mode) + ' ${ID}')
 
     return line, output
+

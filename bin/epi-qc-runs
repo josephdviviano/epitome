@@ -5,8 +5,11 @@ DIR_EXPT=`echo ${2}`
 # report raw data's file dimensions (4D)
 echo 'Generating 4D file dimensions for '${DIR_EXPT}
 echo Subj_ID,Mode,Session,Run,X,Y,Z,TR > \
-                              ${DIR_DATA}/${DIR_EXPT}/raw_NIFTI_overview.csv
+                              ${DIR_DATA}/${DIR_EXPT}/qc_NIFTI_overview.csv
+
+# get a list of all the subjects
 SUBJECTS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/*/`
+
 for SUB in ${SUBJECTS}; do
     DIR_MODE=`ls -d -- ${SUB}/*/`
     for MODE in ${DIR_MODE}; do
@@ -22,9 +25,9 @@ for SUB in ${SUBJECTS}; do
                 Y=`fslhd ${FILE} | sed -n 7p | cut -c 5- | xargs`
                 Z=`fslhd ${FILE} | sed -n 8p | cut -c 5- | xargs`
                 TR=`fslhd ${FILE} | sed -n 9p | cut -c 5- | xargs`
-                echo `basename ${SUB}`,`basename ${MODE}`,`basename ${SESS}`,`basename ${RUN}`,${X},${Y},${Z},${TR} >> ${DIR_DATA}/${DIR_EXPT}/raw_NIFTI_overview.csv
+                echo `basename ${SUB}`,`basename ${MODE}`,`basename ${SESS}`,`basename ${RUN}`,${X},${Y},${Z},${TR} >> ${DIR_DATA}/${DIR_EXPT}/qc_NIFTI_overview.csv
             done
         done
     done
 done
-echo 'Wrote data to '${DIR_DATA}/${DIR_EXPT}/raw_NIFTI_overview.csv
+echo 'Wrote data to '${DIR_DATA}/${DIR_EXPT}/qc_NIFTI_overview.csv

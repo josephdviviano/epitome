@@ -55,11 +55,11 @@ def submit_jobs(f, u_id, queue, command_file):
             fslist.append(fsname)
 
         # freesurfer exports
-        elif line.find('fsexport') >= 0:
+        elif line.find('epi-fsexport') >= 0:
             fsexportname = 'epitome_fsexport_' + u_id
             log = fsexportname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
-                     -hold_jid {hold} -cwd -N {name} \
+                     -hold_jid {hold} -cwd -N {name} -j y \
                   """.format(line=line, log=log, hold=",".join(fslist),
                                                  queue=queue, name=fsexportname)
             
@@ -68,7 +68,7 @@ def submit_jobs(f, u_id, queue, command_file):
             cmdname = 'epitome_' + name
             log = cmdname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
-                     -hold_jid {hold} -cwd -N {name} \
+                     -hold_jid {hold} -cwd -N {name} -j y \
                   """.format(line=line, log=log, hold=fsexportname,
                                                  queue=queue, name=cmdname)
             sublist.append(cmdname)
@@ -78,7 +78,7 @@ def submit_jobs(f, u_id, queue, command_file):
             qcname = 'epitome_qc_' + u_id + '_' + str(i)
             log = qcname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
-                     -hold_jid {hold} -cwd -N {name} \
+                     -hold_jid {hold} -cwd -N {name} -j y \
                   """.format(line=line, log=log, hold=",".join(sublist),
                                                  queue=queue, name=qcname)
 
