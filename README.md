@@ -11,14 +11,16 @@ Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 
 This branch has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
 
-[Setup](#Setup)
-[Introduction](#Introduction)
-[Dependencies](#Dependencies)
-[Overview](#Overview)
-[Usage](#Usage)
-[Modules](#Modules)
-[Workflows](#Workflows)
-[Writing Modules](#Writing Modules)
+**Shortcuts:**
+
++ [Setup](#setup)
++ [Introduction](#introduction)
++ [Dependencies](#dependencies)
++ [Overview](#overview)
++ [Usage](#usage)
++ [Modules](#modules)
++ [Workflows](#workflows)
++ [Writing Modules](#writing-modules)
 
 Setup
 -----
