@@ -11,6 +11,8 @@ Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 
 This branch has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
 
+[#Setup]
+
 Setup
 -----
 epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with epitome under bin/
@@ -61,8 +63,8 @@ epitome comes packaged with AFNI's [McRetroTS](http://afni.nimh.nih.gov/sscc/dgl
 
 The program itself was built and tested on the Ubuntu 12.04/14.04 OS. I imagine it will work well in any Linux environment. It should run on Mac OS X as well, but this remains unverified. There will be no support for Windows.
 
-Using epitome
--------------
+Overview
+--------
 epitome comes with a few command-line interfaces. epitome is used to inspect data in the MRI directory, returns information on the currently-available modules, can be used to construct new pipelines, and to remove unwanted data from the MRI directory cleanly. `epi-physio` is a tool built to parse physiological data from the BIOPAK 150 unit installed at York University (Toronto), and might need to be adapted / extended to work with other units. `epi-folder` is used to generate an appropriate folder structure in the MRI directory for the epitome pipeline to work on.
 
 The MRI directory itself must be organized as follows:
@@ -76,15 +78,13 @@ The MRI directory itself must be organized as follows:
 
 The Freesurfer subject directory does not need to be inside the epitome folder structure.
 
-**folders**
-
 The folder structure is integral to epitome -- if it is flawed, the pipeline will fail in [mysterious ways](https://www.youtube.com/watch?v=TxcDTUMLQJI). The structure itself is designed to be thought of as a tree. At the roots of the tree are the individual files collected at the scanner. As we ascend the tree, files are combined across sessions, image modalities, and subjects, so one finds experiment-wide outputs at the highest levels. The `epi-folder` program will help you set up these folders appropriately.
 
-**EXPERIMENTS/**
+**EXPERIMENTS**
 
 This is a set of folders containing entire experiments. There are no important naming conventions, but it seems advisable (for consistency) to make the folder names all capitals, and short (e.g., `LINGASD` for 'language study on those with autism spectrum disorder').
 
-**SUBJECTS/**
+**SUBJECTS**
 
 Once again, these are simply folders with participant names. They follow no convention, but should be consistent for your own sake.
 
@@ -108,8 +108,8 @@ These session folders are currently used to match epis with the T1 taken on the 
 
 Each `RUN` folder should contain one and only one .nii or .nii.gz formatted file. Appropriate companion files should also be entered here: physiological noise recordings (extension .PHYS, and/or custom slice timing files (extension .1D). If more than one NIFTI file is in this folder, the pipeline will fail. Any other files kept in this folder will remain untouched, so this is a fine place to keep run-specific notes.
 
-Running epitome
----------------
+Usage
+-----
 epitome contains a set of helper subroutines and two main functions: `run' and `clean'. Typing epitome into your command line after installation should show each function and a brief description of each, so I won't reiterate that here. I will mention that `epitome check <experiment>` allows you to check the total number of raw NIFTIs in the `RUN` folders of each image modality. This allows you to quickly find empty `RUN` folders, and ensure you have properly imported all of your data.
 
 **epitome run**
@@ -181,7 +181,7 @@ This contains the lion's share of the pipeline. Every run of epitome begins with
 + [vol2surf](doc/vol2surf.md)
 + [volsmooth](doc/volsmooth.md)
 
-*quality control**
+**quality control**
 
 These programs run experiment-wide, and therefore are run after all /pre modules have completed for every subject. They produce reports that give a broad overview of the data quality at different stages of pre-processing, encouraging visual inspection of the data and hopefully reducing the amount of time spent hunting for the source of bugs when they do arise.
 
@@ -233,7 +233,7 @@ This will smooth the epi data within the defined mask (anat_epi_mask.nii.gz in t
 
     linreg_epi2MNI_AFNI volsmooth 3.0 
 
-Finally, this will transform each smoothed run up into MNI space with a isotropic voxel resolution of 3 mm$^2$. 
+Finally, this will transform each smoothed run up into MNI space with a isotropic voxel resolution of 3 mm^2. 
 
 
 **functional connectivity**
@@ -338,6 +338,6 @@ The following is a code block demonstrating this structure (from the function `e
                                           str(fwhm))
         return line, output
 
-** documentation **
+**documentation**
 
 This is a very important part of module-building. Documentation for a given module is supplied in the doc/ folder, in a markdown document sharing the name of the module itself. This will be viewable on both GitHub, any future web-hosted manual location, and will also be used to generate the command-line help. Remember -- epitome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
