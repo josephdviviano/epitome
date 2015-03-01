@@ -174,10 +174,9 @@ def get_experiments(interactive=False):
     i = 0
     selection_list = []
     for expt in expt_list:
-        if expt != 'FREESURFER':
-            print(str(i+1) + ': ' + expt)
-            selection_list.append(expt)
-            i = i + 1
+        print(str(i+1) + ': ' + expt)
+        selection_list.append(expt)
+        i = i + 1
     print('')
 
     if interactive == False:
