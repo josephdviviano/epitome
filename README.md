@@ -11,7 +11,14 @@ Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 
 This branch has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
 
-[#Setup]
+[Setup](#Setup)
+[Introduction](#Introduction)
+[Dependencies](#Dependencies)
+[Overview](#Overview)
+[Usage](#Usage)
+[Modules](#Modules)
+[Workflows](#Workflows)
+[Writing Modules](#Writing Modules)
 
 Setup
 -----
@@ -55,8 +62,8 @@ This system is also designed to facilitate easy-to-reproduce research, as these 
 
 This manual will progress to more advanced topics in the end. First, I will explain the basic use of epitome. Next, I'll explain the modules one-by-one, follow with a description of a few common pre-processing tasks. I'll then  and finish with an explanation on how to add new modules.
 
-Requirements & Dependencies
----------------------------
+Dependencies
+------------
 epitome contains a small number of programs that actually manipulate data, but also makes heavy use of widely-used MRI analysis tools and a number of python distributions. The user is assumed to have properly installed and configured FSL, AFNI, Freesurfer, and the python packages numpy, scipy, and matplotlib. For physiological noise regression, you must have the MATLAB compiler runtime installed, along with AFNI's [McRetroTS](http://afni.nimh.nih.gov/sscc/dglen/McRetroTS) scripts installed in /opt/MATLAB/MATLAB_Compiler_Runtime/ and /opt/mcretro/, respectively.
 
 epitome comes packaged with AFNI's [McRetroTS](http://afni.nimh.nih.gov/sscc/dglen/McRetroTS) scripts in bin/. Version downloaded: 2012.12.17.1431   McRetroTS_linux64pkg.zip on Nov 5th 2014.
