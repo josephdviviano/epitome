@@ -36,7 +36,7 @@ Steps to install:
     + dir_data: should point to your MRI experiment folder.
     + queue: should be the name of your desired queue (e.g., `main.q`).
 + Add some MRI data to your data directory.
-+ Make a folder/link in your MRI data directory called `FREESURFER` that points to your freesurfer subjects folder. 
++ Ensure `SUBJECTS_DIR` points to the desired freesurfer subjects folder. 
 + Check your work using `epitome check <experiment>`.
 + Generate some pre-processing scripts using `epitome run`.
 
@@ -52,7 +52,7 @@ Currently, epitome requires the user to have installed and configured the follow
 + Python NiBabel
 + Oracle Sun Grid Engine
 
-In a multi-user environment, you might want to customize your `SUBJECTS_DIR` environment variable.
+In a multi-user environment, you might want to customize your `SUBJECTS_DIR` environment variable as well.
 
 Introduction
 ------------
