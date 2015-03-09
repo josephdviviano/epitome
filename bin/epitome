@@ -27,24 +27,6 @@ from copy import copy
 
 import epitome as epi
 
-def getter(item_list):
-    """
-    Prompts the user to input a number, returns the corresponding list item.
-    """
-    response = raw_input('#: ')
-
-    try:
-        selection = item_list[int(response)-1]
-    
-    except:
-        print('Invalid selection!')
-        selection = None 
-    if response == 0:
-        print('Invalid selection!')
-        selection = None
-
-    return selection
-
 def get_modules(interactive=False, moduletype='pre', used=[]):
     """
     Prints the available modules. Optionally prompts the user to select one.
@@ -84,7 +66,7 @@ def get_modules(interactive=False, moduletype='pre', used=[]):
 
     # either print a helpful message, or prompt the user to select a module    
     if interactive == False:
-        print("""Access help for each using 'epitome help <module>'.""")
+        print("""\nAccess help for each using 'epitome help <module>'.""")
     else:
         selection = getter(module_list)
         if selection != None:
@@ -137,16 +119,34 @@ def get_experiments(interactive=False):
                          if os.path.isdir(os.path.join(dir_data, d))]
     expt_list.sort()
     
-    print('Experiments found:\n')
+    print('\nExperiments found:\n')
     for i, expt in enumerate(expt_list):
-        print(str(i+1) + ': ' + expt)
+        print('    ' + str(i+1) + ': ' + expt)
 
     if interactive == False:
-        print("""'epitome check <experiment>' to verify experiment contents.""")
+        print("""\n'epitome check <experiment>' for details.\n""")
     else:
         selection = getter(expt_list)
         
         return selection
+
+def getter(item_list):
+    """
+    Prompts the user to input a number, returns the corresponding list item.
+    """
+    response = raw_input('#: ')
+
+    try:
+        selection = item_list[int(response)-1]
+    
+    except:
+        print('Invalid selection!')
+        selection = None 
+    if response == 0:
+        print('Invalid selection!')
+        selection = None
+
+    return selection
 
 def writer(p_list, line, filename, f, output, bkup, mode):
 
@@ -167,6 +167,17 @@ def writer(p_list, line, filename, f, output, bkup, mode):
         output = copy(bkup)
 
     return p_list, output
+
+def printer(item_list, msg):
+    """
+    Prints a message and all of the items in the supplied list, 
+    enumerated and sorted.
+    """
+    item_list.sort()
+    for i, item in enumerate(item_list):
+        print('    ' + str(i+1) + ': ' + item)
+
+    return item_list
 
 def get_date_user():
     """
@@ -190,7 +201,6 @@ def print_help(module):
     if module != None:
         helpfile = open(os.path.join(dir_pipe, 'doc/' + module + '.md'), 'rb')
         print helpfile.read()
-    print('')
 
 def help_query():
 
@@ -199,27 +209,16 @@ def help_query():
 
     # ask which module type we want to look at
     module_types = os.listdir(os.path.join(dir_pipe, 'epitome/modules'))
-    module_types.sort()
-    print('Module types found:\n')
-    for i, module in enumerate(module_types):
-        print(str(i+1) + ': ' + module)
-
-    # prompt the user to select a module type 
+    module_types = printer(module_types, 'Module types found:\n')
     print('\nWhich kind of module?')
-    response = raw_input('module #: ')
-    
-    # attempt to retrieve the selected module
-    try:
-        selection = module_types[int(response)-1]
-    except:
+    response = getter(module_types)
+
+    if response == None:
         print("""\nYou didn't input a valid number! Default = 'pre'.""")
-        selection = 'pre'
+        response = 'pre'
 
-    # present the user with a list
     print('Which module do you need help with?')
-    module, used = get_modules(interactive=True, moduletype=str(selection))
-
-    # print help for that module
+    module, used = get_modules(interactive=True, moduletype=str(response))
     print_help(module)
 
 def check_paths():
@@ -242,25 +241,21 @@ def check_paths():
     if os.path.isdir(dir_afni) == False:
         print('AFNI directory does not exist:' + str(dir_afni))
 
-    elif os.path.isdir('/opt/MATLAB/MATLAB_Compiler_Runtime/v715') == False:
-        print('**********************************************')
-        print('MATLAB compiler runtime v715 cannot be found!')
-        print('**********************************************')
+    dir_matlab = epi.config.find_matlab()
+    if os.path.isdir(dir_matlab) == False:
+        print('MATLAB / MATLAB compiler runtime v715 cannot be found!')
         print('')
-        print("""Please Download the MATLAB v715 (2011b) compiler from """)
-        print("""   http://afni.nimh.nih.gov/sscc/dglen/McRetroTS      """)
-        print("""And install it to /opt/MATLAB.                        """)
+        print(""" Either point your path to your install of MATLAB, or """)
+        print("""    Download the MATLAB v715 (2011b) compiler from    """)
+        print("""    http://afni.nimh.nih.gov/sscc/dglen/McRetroTS     """)
         print('')
 
     else:
-        print('\n*********************************************')
-        print('config.py appears to be properly configured!\n')
+        print('\nconfig.py appears to be properly configured!\n')
         print('     data directory: ' + str(dir_data))
         print('     pipeline directory: ' + str(dir_pipe))
         print('     AFNI directory: ' + str(dir_afni))
-        print('     McRetroTS found: /opt/mcretro')
-        print('     MATLAB found: /opt/MATLAB/MATLAB_Compiler_Runtime/v715')
-        print('*********************************************\n')
+        print('     MATLAB found: ' + str(dir_matlab))
 
 def check_run(expt, subj, mode, sess, run):
     """
@@ -371,10 +366,10 @@ def check_directories(expt):
                 mode_dict[str(mode)] = n_runs
 
     # print out the file counts per image modality
-    print('\n****************************************************************')
+    print('')
     for mode_key in mode_dict:
-        print str(mode_dict[mode_key]) + ' NIFTIs found in ' + str(mode_key)
-    print('****************************************************************\n')
+        print('    ' + str(mode_dict[mode_key]) + ' NIFTIs in ' + str(mode_key))
+    print('')
 
 def check_os():
     operating_system = platform.system()
