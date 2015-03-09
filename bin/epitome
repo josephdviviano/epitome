@@ -19,9 +19,6 @@ Usage:
 
 """
 
-import time
-import getpass
-import platform
 import os, sys, stat
 from copy import copy
 
@@ -58,13 +55,9 @@ def get_modules(interactive=False, moduletype='pre', used=[]):
                 module_list.remove(u)
             except:
                 pass
-    module_list.sort()
 
-    print('Modules found:\n')
-    for i, module in enumerate(module_list):
-        print(str(i+1) + ': ' + module)
+    module_list = printer(module_list, '\nModules found:\n')
 
-    # either print a helpful message, or prompt the user to select a module    
     if interactive == False:
         print("""\nAccess help for each using 'epitome help <module>'.""")
     else:
@@ -90,11 +83,8 @@ def get_mode(expt, interactive=False):
     dir_subj = os.path.join(dir_expt, subj_list[0])
     mode_list = [d for d in os.listdir(dir_subj)
                          if os.path.isdir(os.path.join(dir_subj, d))]
-    mode_list.sort()
 
-    print('Image modalities found:\n')
-    for i, mode in enumerate(mode_list):
-        print(str(i+1) + ': ' + mode)
+    expt_list = printer(expt_list, '\nImage modalities found:\n')
 
     if interactive == True:
         selection = getter(mode_list)
@@ -117,11 +107,8 @@ def get_experiments(interactive=False):
     # get a sorted list of the experiments
     expt_list = [d for d in os.listdir(dir_data)
                          if os.path.isdir(os.path.join(dir_data, d))]
-    expt_list.sort()
-    
-    print('\nExperiments found:\n')
-    for i, expt in enumerate(expt_list):
-        print('    ' + str(i+1) + ': ' + expt)
+
+    expt_list = printer(expt_list, '\nExperiments found:\n')    
 
     if interactive == False:
         print("""\n'epitome check <experiment>' for details.\n""")
@@ -184,6 +171,8 @@ def get_date_user():
     Returns a eyeball-friendly timestamp, the current user's name, 
     and a filename-friendly timestamp.
     """
+    import time
+    import getpass
 
     datetime = time.strftime("%Y/%m/%d -- %H:%M:%S")
     user = getpass.getuser()
@@ -192,15 +181,23 @@ def get_date_user():
     return datetime, user, f_id
 
 def print_help(module):
+
+    import textwrap
     
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
-    # print the contents of the JSON line by line
+    # print the contents of the JSON line by line, wrapping long sections
     print('')
     if module != None:
         helpfile = open(os.path.join(dir_pipe, 'doc/' + module + '.md'), 'rb')
-        print helpfile.read()
+        helpfile = helpfile.readlines()
+
+        for line in helpfile:
+            if len(line) < 80:
+                print line.strip('\n')
+            else:
+                print("\n".join(textwrap.wrap(line)))
 
 def help_query():
 
@@ -290,7 +287,6 @@ def check_mode(expt, subj, mode):
 
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
-
     
     # retrieve the sessions for a given image modality
     dir_mode = os.path.join(dir_data, expt, subj, mode)
@@ -342,7 +338,7 @@ def check_directories(expt):
     try:
         subjects = epi.utilities.get_subj(os.path.join(dir_data, expt))
     except:
-        print 'Your experiment path is incorrect ' + str(expt)
+        print('Your experiment path is incorrect ' + str(expt))
 
     # this dict will hold our count
     mode_dict = {}
@@ -372,6 +368,12 @@ def check_directories(expt):
     print('')
 
 def check_os():
+    """
+    Ensures the user isn't Bill Gates.
+    """
+
+    import platform
+
     operating_system = platform.system()
     if operating_system == 'Windows':
         print("""
