@@ -2,7 +2,6 @@
 
 cat <<EOF
 export INPUT=`echo 'func_'${1}`
-export FS=`echo ${DIR_DATA}/FREESURFER/SUBJECTS/`
 
 EOF
 
@@ -22,7 +21,7 @@ for SESS in ${DIR_SESS}; do
     SESS=`basename ${SESS}`
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
-    DIR_FS=`echo ${FS}/${DIR_EXPT}_${SUB}_${SESS}`
+    DIR_FS=`echo ${SUBJECTS_DIR}/${DIR_EXPT}_${SUB}_${SESS}`
     FS_NAME=`echo ${DIR_EXPT}_${SUB}_${SESS}`
 
     for RUN in ${DIR_RUNS}; do

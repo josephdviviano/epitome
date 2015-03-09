@@ -4,14 +4,25 @@ epitome
 
 epitome is a MRI pipeline for generating pipelines out of BASH 'modules'. It is intended to produce highly-portable BASH analysis scripts out of small code chunks that non-programmers can contribute, while exposing the underbelly of the system for more experienced programmers to work on.
 
-Written by Joseph D. Viviano, 2014. Contact: joseph@viviano.ca
+Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 
 > As long as our brain is a mystery, the universe, the reflection of the structure of the brain will also be a mystery.
 > -- Santiago Ramón y Cajal
 
 This branch has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
 
-setup
+**Shortcuts:**
+
++ [Setup](#setup)
++ [Introduction](#introduction)
++ [Dependencies](#dependencies)
++ [Overview](#overview)
++ [Usage](#usage)
++ [Modules](#modules)
++ [Workflows](#workflows)
++ [Writing Modules](#writing-modules)
+
+Setup
 -----
 epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with epitome under bin/
 
@@ -19,10 +30,13 @@ Steps to install:
 
 + `git clone -b kimel` this repository to a directory of your choosing.
 + Add epitome/bin to your PATH.
++ Add epitome to your PYTHONPATH.
 + Create an MRI data directory somewhere.
-+ Add MRI data path to epitome/config.py
++ Add MRI data path & sun grid engine queue to epitome/config.py
     + dir_data: should point to your MRI experiment folder.
+    + queue: should be the name of your desired queue (e.g., `main.q`).
 + Add some MRI data to your data directory.
++ Ensure `SUBJECTS_DIR` points to the desired freesurfer subjects folder. 
 + Check your work using `epitome check <experiment>`.
 + Generate some pre-processing scripts using `epitome run`.
 
@@ -38,9 +52,9 @@ Currently, epitome requires the user to have installed and configured the follow
 + Python NiBabel
 + Oracle Sun Grid Engine
 
-    NB: FIX THIS `SUBJECTS_DIR    /usr/local/freesurfer/subjects`
+In a multi-user environment, you might want to customize your `SUBJECTS_DIR` environment variable as well.
 
-introduction
+Introduction
 ------------
 epitome is a program designed for the flexible construction of MRI pre-processing pipelines, with a focus on functional MRI images and their associated problems. Its primary function is to take BASH modules and chain them together in any way the user desires to create a set of batch-processing scripts for an MRI experiment. These modules are not necessarily dependent on one another, allowing users of this package to easily extend the functionality of epitome by simply depositing a shell script into the appropriate module folder and writing the associated python wrapper command (and documentation!)
 
@@ -50,16 +64,16 @@ This system is also designed to facilitate easy-to-reproduce research, as these 
 
 This manual will progress to more advanced topics in the end. First, I will explain the basic use of epitome. Next, I'll explain the modules one-by-one, follow with a description of a few common pre-processing tasks. I'll then  and finish with an explanation on how to add new modules.
 
-requirements & dependencies
----------------------------
+Dependencies
+------------
 epitome contains a small number of programs that actually manipulate data, but also makes heavy use of widely-used MRI analysis tools and a number of python distributions. The user is assumed to have properly installed and configured FSL, AFNI, Freesurfer, and the python packages numpy, scipy, and matplotlib. For physiological noise regression, you must have the MATLAB compiler runtime installed, along with AFNI's [McRetroTS](http://afni.nimh.nih.gov/sscc/dglen/McRetroTS) scripts installed in /opt/MATLAB/MATLAB_Compiler_Runtime/ and /opt/mcretro/, respectively.
 
 epitome comes packaged with AFNI's [McRetroTS](http://afni.nimh.nih.gov/sscc/dglen/McRetroTS) scripts in bin/. Version downloaded: 2012.12.17.1431   McRetroTS_linux64pkg.zip on Nov 5th 2014.
 
 The program itself was built and tested on the Ubuntu 12.04/14.04 OS. I imagine it will work well in any Linux environment. It should run on Mac OS X as well, but this remains unverified. There will be no support for Windows.
 
-Using epitome
--------------
+Overview
+--------
 epitome comes with a few command-line interfaces. epitome is used to inspect data in the MRI directory, returns information on the currently-available modules, can be used to construct new pipelines, and to remove unwanted data from the MRI directory cleanly. `epi-physio` is a tool built to parse physiological data from the BIOPAK 150 unit installed at York University (Toronto), and might need to be adapted / extended to work with other units. `epi-folder` is used to generate an appropriate folder structure in the MRI directory for the epitome pipeline to work on.
 
 The MRI directory itself must be organized as follows:
@@ -70,49 +84,45 @@ The MRI directory itself must be organized as follows:
                 /MODE
                     /SESS
                         /RUN
-        /FREESURFER
-            /SUBJECTS
 
-The Freesurfer subject directory should point to the Freesurfer directory in your MRI folder -- this can easily be accomplished using a [symbolic link](https://kb.iu.edu/d/abbe). The remaining folder structure is perhaps best generated by using the included `epi-folder` tool (or via a home-brew script).
+The Freesurfer subject directory does not need to be inside the epitome folder structure.
 
-folders
--------
 The folder structure is integral to epitome -- if it is flawed, the pipeline will fail in [mysterious ways](https://www.youtube.com/watch?v=TxcDTUMLQJI). The structure itself is designed to be thought of as a tree. At the roots of the tree are the individual files collected at the scanner. As we ascend the tree, files are combined across sessions, image modalities, and subjects, so one finds experiment-wide outputs at the highest levels. The `epi-folder` program will help you set up these folders appropriately.
 
-EXPERIMENTS/
-------------
+**EXPERIMENTS**
+
 This is a set of folders containing entire experiments. There are no important naming conventions, but it seems advisable (for consistency) to make the folder names all capitals, and short (e.g., `LINGASD` for 'language study on those with autism spectrum disorder').
 
-SUBJECTS/
----------
+**SUBJECTS**
+
 Once again, these are simply folders with participant names. They follow no convention, but should be consistent for your own sake.
 
-MODE/
------
+**MODE**
+
 Image modality folders separate images of different kinds: anatomicals, epi's collected using differing sequences, or epi's of different task-types (e.g., rest vs. two-back matching). The T1 directory *must* exist for each subject at the very minimum in `SESS01`.
 
 This is a good place to separate scans you would like to have analyzed in different ways, or to test multiple pre-processing strategies on the same set of subjects. For example, it may be that your `TASK` set is being prepared for a GLM or partial least squares analysis, and should be processed more minimally than your REST data, which will undergo things such as low-pass filtering and nuisance variable regression. In another example, it may be that you are curious about how your choice of pre-processing steps influences your results. Here, you could have a set of identical scans under `REST_1` and `REST_2`. You could build two sets of pipelines using epitome with the unique identifiers `1` and `2`, and run them on each modality separately.
 
 epitome has no modules built for DTI scans at the moment, but they could easily be added here under their own DTI modality. Note that a set of DTI-friendly modules would need to be built for these kinds of scans.
 
-SESS/
------
+**SESS**
+
 The session folders are used to separate scans taken on different days. They must begin with `SESS` and end with a zero-padded 2-digit number (e.g., `02`). epitome does not currently support experiments where participants were scanned on more than 99 days.
 
 These session folders are currently used to match epis with the T1 taken on the same day. Best practice is to collect a T1 with every epi scan. The pipeline is also able to use the T1 collected on the first day as the target for all sessions. This will be automatically decided by the pipeline: if the number of T1s does not equal the number of sessions, only the first T1 will be used.
 
 **While it is normally advisable for the sessions to align chronologically, in the case that the only T1 collected was _not on the first day_, it should still be entered as `SESS01`.**
 
-RUN/
-----
+**RUN**
+
 Each `RUN` folder should contain one and only one .nii or .nii.gz formatted file. Appropriate companion files should also be entered here: physiological noise recordings (extension .PHYS, and/or custom slice timing files (extension .1D). If more than one NIFTI file is in this folder, the pipeline will fail. Any other files kept in this folder will remain untouched, so this is a fine place to keep run-specific notes.
 
-running epitome
----------------
+Usage
+-----
 epitome contains a set of helper subroutines and two main functions: `run' and `clean'. Typing epitome into your command line after installation should show each function and a brief description of each, so I won't reiterate that here. I will mention that `epitome check <experiment>` allows you to check the total number of raw NIFTIs in the `RUN` folders of each image modality. This allows you to quickly find empty `RUN` folders, and ensure you have properly imported all of your data.
 
-epitome run
------------
+**epitome run**
+
 This is the heart and soul of epitome. This command line interface will walk you through the construction of a pipeline for a single image modality within a single experiment. Every run of epitome begins with a lengthly run of Freesurfer on all T1s, and `init_epi`, which does the most basic kinds of MRI pre-processing. Following that, you are free to chain together modules as you see fit.
 
 In order to retain the modular and easily-customized structure of epitome, this program allows you to shoot yourself in the foot. In fact, if you aren't clear on what to do, you are more likely to make a malformed pipeline than you are to making a good one. Therefore, I recommend reading the Pipeline section of this manual at least once, and perhaps skimming the Presets section following, to get a sense of reasonable usage.
@@ -123,37 +133,37 @@ Finally, a few outputs will be deposited in your experiment directory: a master 
 
 epitome scripts are written to never re-do done work. Therefore, to replace a bad set of outputs with good ones, one must first delete the bad outputs. This can be done by hand, or via a set of helper cleanup scripts, detailed below.
 
-epitome clean
--------------
+**epitome clean**
+
 This program works similarly to run, but produces scripts for deleting intermediate files. Generally, it is good practice to inspect the outputs of epitome first, and if problems are identified, to work backwards through the pipeline until the problem arises to determine the origin of the issue. After the outputs have been vetted, these cleanup scripts will go a long way to keeping your hard drives and system administrators happy.
 
-epi-folder
----------
+**epi-folder**
+
 This simple tool will help you generate folders properly-formatted for epitome. It is run on a per-subject basis, but a clever user could manually duplicate a single folder structure for as many participants as needed. These folders will automatically be generated in the designated working directory.
 
-epi-physio
----------
+**epi-physio**
+
 epitome will automatically regress physiological noise out of your data, if you place it (appropriately named) in each RUN folder. The BioPak system outputs a single giant set of physiological data for the entirety of an MRI session. This program will take in this single file and split it into a set of heart rate and respiration time series for each run. These output files are placed in your current working directory and will need to be sorted manually.
 
-epi-queue
---------
+**epi-queue**
+
 epitome eventually generates a `proclist', a set of commands that must be executed in order to generate the desired outputs. This proclist can be run manually, if desired, but can also be submitted to the sun-grid queuing system by using epi-queue. This is generally preferred, as multiple users attempting to run proclists simultaneously might overload the system.
 
-the pipeline
-------------
+Modules
+-------
 What follows is a description of what each module in epitome does. These modules can be easily chained together manually, or by using the command-line interface included with the pipeline. New modules are simply bash scripts which call various programs, including FSL, Freesurfer, AFNI, and custom python programs. Therefore, functionality of epitome is easily extended without perturbing the function of older modules. Any script found in the modules directories will be added to the command line interface automatically, but will not work properly unless a matching wrappper function is added to commands.py.
 
 The types of modules included can be roughly split into 4 categories: `freesurfer`, `pre-processing`, `quality-control`, and `cleanup`.
 
-freesurfer
-----------
+**freesurfer**
+
 Right now, the default `freesurfer recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
 
 + [fsrecon](doc/fsrecon.md)
 + [fsexport](doc/fsexport.md)
 
-pre-processing
---------------
+**pre-processing**
+
 This contains the lion's share of the pipeline. Every run of epitome begins with `init_epi`, which contains a non-contentious set of pre-processing steps for EPI images. The following stages can be chained together at will to preform de-noising, spatial transformations, projections to surface-space, and spatial smoothing.
 
 + [init_epi](doc/init_epi.md)
@@ -180,8 +190,8 @@ This contains the lion's share of the pipeline. Every run of epitome begins with
 + [vol2surf](doc/vol2surf.md)
 + [volsmooth](doc/volsmooth.md)
 
-quality control
----------------
+**quality control**
+
 These programs run experiment-wide, and therefore are run after all /pre modules have completed for every subject. They produce reports that give a broad overview of the data quality at different stages of pre-processing, encouraging visual inspection of the data and hopefully reducing the amount of time spent hunting for the source of bugs when they do arise.
 
 + [qc_epi2t1](doc/qc_epi2t1.md)
@@ -192,8 +202,8 @@ These programs run experiment-wide, and therefore are run after all /pre modules
 + [qc_runs](doc/qc_runs.md)
 + [qc_spectra](doc/qc_spectra.md)
 
-cleanup
--------
+**cleanup**
+
 These programs are run separately using epitome clean. They generally provide the ability to eliminate faulty outputs or intermediate files from experiments. Due to their destructive nature, these scripts must be executed by hand and each step must be manually confirmed. They are therefore not amiable to unattended scripting, although one could easily write their own with some know-how. 
 
 + [clean_params](doc/clean_params.md)
@@ -202,12 +212,12 @@ These programs are run separately using epitome clean. They generally provide th
 + [del_postmc](doc/del_postmc.md)
 + [del_reg](doc/del_reg.md)
 
-workflows
+Workflows
 ---------
 epitome give you the ability to chain modular BASH scripts together to generate a great number of MRI pre-processing pathways, and in doing so, gives you the power to create very bad pipelines. Here, I detail a few reasonable workflows.
 
-basic: GLM, PLS, etc.
----------------------
+**basic: GLM, PLS, etc.**
+
 Here, we are interested in doing a set of basic tasks before running a GLM analysis on some task-based MRI design. We've already placed the anatomical and functional NIFTI (and .phys files, if appropriate) into their RUN folders and have run epitome run. Every run begins with init_epi 
 
     init_epi high 0 on alt+z off normal 
@@ -232,11 +242,11 @@ This will smooth the epi data within the defined mask (anat_epi_mask.nii.gz in t
 
     linreg_epi2MNI_AFNI volsmooth 3.0 
 
-Finally, this will transform each smoothed run up into MNI space with a isotropic voxel resolution of 3 mm$^2$. 
+Finally, this will transform each smoothed run up into MNI space with a isotropic voxel resolution of 3 mm^2. 
 
 
-functional connectivity
------------------------
+**functional connectivity**
+
 Functional connectivity analysis benefits from the application of tissue-based regressors pre-analysis, unlike in a GLM where one can inset these regressors at the same time. For this reason, connectivity analysis will require a slightly modified pipeline: 
 
     init_epi high 0 on alt+z off normal 
@@ -255,8 +265,8 @@ Next, we low-pass the data using a moving-average filter of span 3. Most of the 
     volsmooth lowpass epi_mask 6.0 
     linreg_epi2MNI_AFNI volsmooth 3.0 
 
-surface analysis / smoothing for volume analysis
-------------------------------------------------
+**surface analysis / smoothing for volume analysis**
+
 When studying the cortex, it is often desirable to look at the data on a surface. This prevents the blurring of signals between sulci and gyri, allows for finer localization of function, and permits some interesting co-registration methods. For simplicity, we will do this to data intended for a simple GLM analysis. 
 
     init_epi high 0 on alt+z off normal 
@@ -277,12 +287,10 @@ This will smooth along the cortical surface with a FWHM of 10mm. Generally, surf
 
 This will project the surface data in smooth back into volume format in the same space as the scaled data, from whence it came. Many of the spatial-specificity advantages of surface-based analysis are now available in volume space, ensuring compatibility with many traditional analysis programs.
 
-module creation
+Writing Modules
 ---------------
 epitome, as it stands, has very few novel features over traditional pipelining programs. However, its strength lies with ease of extensibility. Here, I will detail how one would create a new module to be included in the epitome pipeline.
 
-writing a module
-----------------
 Modules take the form of either BASH scripts, or stand alone programs (such is the case with most QC modules at the moment) with a few stylistic conventions. They are `active' so long as they are kept in a .../epitome/modules/XXX directory, and will be accessed by the pipeline according to their type. `freesurfer' and `pre' modules are accessed first by epitome run, followed by those in `qc'. At the moment, the two freesurfer modules are not optional.
 
 The modules themselves use a [here-doc trick](http://tldp.org/LDP/abs/html/here-docs.html) to set variables defined on the command line first, and then `cat` the remaining script to STDOUT. Therefore, running a properly formatted module should not run anything, but should simply print it's contents out to the command line. There are a few reserved variables used in most, if not all, modules. 
@@ -308,8 +316,8 @@ loop. This is not mandatory, but highly recommended. It allows one to re-run the
 
 Finally, variables can be defined within the module to allow the user to set them before running the module via the command line. Each command-line argument should correspond to a variable at the top of the module, which is then referenced in the appropriate locations throughout the script. Since the variables are defined before each module, the name-space between modules does not need to be maintained. However, for consistency, it is best to select variable names that are specific and unlikely to have shared meanings in other areas of the pipeline. 
 
-python wrapper
---------------
+**python wrapper**
+
 With modules written, an advanced user could write a master BASH script by hand to make use of it. However, most users will want to make use of the python-based command line interface, which will require you to write a small wrapper function: `.../epitome/commands/foo.py`.
 
 Each function should have the same name as the associated module and wrapper function, and accept a single variable input_name. This denotes the filename prefix that the module will operate on.
@@ -339,6 +347,6 @@ The following is a code block demonstrating this structure (from the function `e
                                           str(fwhm))
         return line, output
 
-documentation
--------------
+**documentation**
+
 This is a very important part of module-building. Documentation for a given module is supplied in the doc/ folder, in a markdown document sharing the name of the module itself. This will be viewable on both GitHub, any future web-hosted manual location, and will also be used to generate the command-line help. Remember -- epitome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.

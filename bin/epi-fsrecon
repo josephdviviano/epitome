@@ -6,22 +6,23 @@ import subprocess
 
 import epitome as epi
 
-def check_if_exists(root, expt, subj, sess):
+def add_t1s(path, sess, cmd):
     """
-    Checks if a freesurfer directory already exists, returns truth.
+    This loops through a session, appending input T1s to the recon-all command.
     """
-    if os.path.isdir(os.path.join(
-        str(root) + '/FREESURFER/SUBJECTS', 
-        str(expt) + '_' + str(subj) + '_' + str(sess))) == False:
-        return False
+    for run in os.listdir(os.path.join(path, sess)):
+        if os.path.isdir(os.path.join(path, sess, run)) == True:
+            for f in os.listdir(os.path.join(path, sess, run)):
+                
+                # add all available files to the inputs
+                if f.endswith(".nii") == True or f.endswith(".nii.gz") == True:
+                    cmd = cmd + ' -i ' + os.path.join(path, sess, run, f)
 
-    else:
-        return True
+    return cmd
 
 def generate_stack(root, expt):
     """
-    Returns a stack of freesurfer recon-all commands to run, with great 
-    uglyness.
+    Returns a stack of all the freesurfer recon-all commands to run.
     """
     stack = []
 
@@ -34,26 +35,21 @@ def generate_stack(root, expt):
 
         for sess in os.listdir(path):
             if os.path.isdir(os.path.join(path, sess)) == True:
-                if check_if_exists(root, expt, subj, sess) == False:
-                    
-                    cmd = ('recon-all -all -notal-check -cw256 -subjid ' + 
-                            str(expt) + '_' + str(subj) + '_' + str(sess))
-                    
-                    for run in os.listdir(os.path.join(path, sess)):
-                        if os.path.isdir(os.path.join(path, sess, run)) == True:
-                            for filename in os.listdir(os.path.join(path, sess, run)):
-                                
-                                # add all available filename files to the inputs
-                                if filename.endswith(".nii") == True or filename.endswith(".nii.gz") == True:
-                                    cmd = cmd + ' -i ' + os.path.join(path, sess, run, filename)
 
-                    # add the qcache flag (for cortical thickness analysis)
-                    cmd = cmd + ' -qcache'
-                    
-                    # create a list of cmds
-                    stack.append(cmd)
-                else:
-                    pass
+                fs_dir = os.environ['SUBJECTS_DIR']
+                fs_subj = '{expt}_{subj}_{sess}'.format(expt=expt, 
+                                                        subj=subj, 
+                                                        sess=sess)
+    
+                if os.path.isdir(os.path.join(fs_dir, fs_subject)) == True:
+                    continue
+
+                # construct the command with all available T1s per session
+                cmd = 'recon-all -all -notal-check -cw256 -subjid ' + fs_subj
+                cmd = add_t1s(path, sess, cmd)                
+                cmd = cmd + ' -qcache' # for cortical thickness analysis
+                
+                stack.append(cmd)
     
     return stack
 

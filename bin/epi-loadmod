@@ -1,14 +1,32 @@
 #!/bin/bash
 
-echo '************************************************************************'
-echo '************ Loading modules for epitome, TIGRlab version. *************'
-echo '************************************************************************'
-echo ''
+cat <<EOF
 
+Loading TIGRlab modules for epitome.
+
+    + matlab 2013b
+    + matlab compiler runtime 7.15
+    + fsl 5.0.7
+    + fix 1.061
+    + R 3.1.1
+    + R-extras 3.1.1
+    + AFNI 2014.12.16
+    + freesurfer 5.3.0
+    + python 2.7.9-anaconda-2.1.0-150119
+    + python-extras 2.7.9
+    + mricron 2014.08.04
+
+EOF
+
+module load mricron/0.20140804
+module load matlab/R2013b_concurrent
 module load matlab/compiler-runtime-715
 module load FSL/5.0.7
-module load AFNI/2014.09.22.1635EDT
+module load FIX/1.061
+module load R/3.1.1
+module load R-extras/3.1.1
+module load AFNI/2014.12.16
 module load freesurfer/5.3.0
-module load python/2.7.8-anaconda-2.1.0
-module load python-extras/2.7.8
-module load dcm2nii/2014.10.11
+module load python/2.7.9-anaconda-2.1.0-150119
+module load python-extras/2.7.9
+

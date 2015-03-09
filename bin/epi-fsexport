@@ -27,7 +27,7 @@ def bash_command(cmd):
 def run_commands(path, directory, expt, subj, session):
     
     subjID = str(expt) + '_' + str(subj) + '_' + str(session)
-    dir_i = os.path.join(path, 'FREESURFER/SUBJECTS', subjID, 'mri')
+    dir_i = os.path.join(os.environ['SUBJECTS_DIR'], subjID, 'mri')
     dir_o = os.path.join(directory, session)
 
     # convert freesurfer T1 to NII
