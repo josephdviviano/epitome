@@ -240,19 +240,17 @@ def check_paths():
 
     dir_matlab = epi.config.find_matlab()
     if os.path.isdir(dir_matlab) == False:
-        print('MATLAB / MATLAB compiler runtime v715 cannot be found!')
-        print('')
+        print('\nMATLAB / MATLAB compiler runtime v715 cannot be found!\n')
         print(""" Either point your path to your install of MATLAB, or """)
         print("""    Download the MATLAB v715 (2011b) compiler from    """)
-        print("""    http://afni.nimh.nih.gov/sscc/dglen/McRetroTS     """)
-        print('')
+        print("""    http://afni.nimh.nih.gov/sscc/dglen/McRetroTS   \n""")
 
     else:
-        print('\nconfig.py appears to be properly configured!\n')
+        print('\nepitome/config.py appears to be properly configured!\n')
         print('     data directory: ' + str(dir_data))
         print('     pipeline directory: ' + str(dir_pipe))
         print('     AFNI directory: ' + str(dir_afni))
-        print('     MATLAB found: ' + str(dir_matlab))
+        print('     MATLAB found: ' + str(dir_matlab) + '\n')
 
 def check_run(expt, subj, mode, sess, run):
     """
