@@ -42,7 +42,7 @@ def find_epitome():
 
 def find_matlab():
     """
-    Returns the path of the matlab bin/ folder, or None if it isn't
+    Returns the path of the matlab folder, or None if it isn't
     on your path.
     """
 
@@ -51,7 +51,7 @@ def find_matlab():
     if dir_matlab == '':
         dir_matlab == None
     else:
-        dir_matlab = os.path.dirname(dir_matlab)[:-11]
+        dir_matlab = '/'.join(dir_matlab.split('/')[:-2])
 
     return dir_matlab
 

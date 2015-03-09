@@ -19,31 +19,10 @@ Usage:
 
 """
 
-import time
-import getpass
-import platform
 import os, sys, stat
 from copy import copy
 
 import epitome as epi
-
-def getter(item_list):
-    """
-    Prompts the user to input a number, returns the corresponding list item.
-    """
-    response = raw_input('#: ')
-
-    try:
-        selection = item_list[int(response)-1]
-    
-    except:
-        print('Invalid selection!')
-        selection = None 
-    if response == 0:
-        print('Invalid selection!')
-        selection = None
-
-    return selection
 
 def get_modules(interactive=False, moduletype='pre', used=[]):
     """
@@ -76,15 +55,11 @@ def get_modules(interactive=False, moduletype='pre', used=[]):
                 module_list.remove(u)
             except:
                 pass
-    module_list.sort()
 
-    print('Modules found:\n')
-    for i, module in enumerate(module_list):
-        print(str(i+1) + ': ' + module)
+    module_list = printer(module_list, '\nModules found:\n')
 
-    # either print a helpful message, or prompt the user to select a module    
     if interactive == False:
-        print("""Access help for each using 'epitome help <module>'.""")
+        print("""\nAccess help for each using 'epitome help <module>'.""")
     else:
         selection = getter(module_list)
         if selection != None:
@@ -108,11 +83,8 @@ def get_mode(expt, interactive=False):
     dir_subj = os.path.join(dir_expt, subj_list[0])
     mode_list = [d for d in os.listdir(dir_subj)
                          if os.path.isdir(os.path.join(dir_subj, d))]
-    mode_list.sort()
 
-    print('Image modalities found:\n')
-    for i, mode in enumerate(mode_list):
-        print(str(i+1) + ': ' + mode)
+    expt_list = printer(expt_list, '\nImage modalities found:\n')
 
     if interactive == True:
         selection = getter(mode_list)
@@ -135,18 +107,33 @@ def get_experiments(interactive=False):
     # get a sorted list of the experiments
     expt_list = [d for d in os.listdir(dir_data)
                          if os.path.isdir(os.path.join(dir_data, d))]
-    expt_list.sort()
-    
-    print('Experiments found:\n')
-    for i, expt in enumerate(expt_list):
-        print(str(i+1) + ': ' + expt)
+
+    expt_list = printer(expt_list, '\nExperiments found:\n')    
 
     if interactive == False:
-        print("""'epitome check <experiment>' to verify experiment contents.""")
+        print("""\n'epitome check <experiment>' for details.\n""")
     else:
         selection = getter(expt_list)
         
         return selection
+
+def getter(item_list):
+    """
+    Prompts the user to input a number, returns the corresponding list item.
+    """
+    response = raw_input('#: ')
+
+    try:
+        selection = item_list[int(response)-1]
+    
+    except:
+        print('Invalid selection!')
+        selection = None 
+    if response == 0:
+        print('Invalid selection!')
+        selection = None
+
+    return selection
 
 def writer(p_list, line, filename, f, output, bkup, mode):
 
@@ -168,11 +155,24 @@ def writer(p_list, line, filename, f, output, bkup, mode):
 
     return p_list, output
 
+def printer(item_list, msg):
+    """
+    Prints a message and all of the items in the supplied list, 
+    enumerated and sorted.
+    """
+    item_list.sort()
+    for i, item in enumerate(item_list):
+        print('    ' + str(i+1) + ': ' + item)
+
+    return item_list
+
 def get_date_user():
     """
     Returns a eyeball-friendly timestamp, the current user's name, 
     and a filename-friendly timestamp.
     """
+    import time
+    import getpass
 
     datetime = time.strftime("%Y/%m/%d -- %H:%M:%S")
     user = getpass.getuser()
@@ -181,16 +181,23 @@ def get_date_user():
     return datetime, user, f_id
 
 def print_help(module):
+
+    import textwrap
     
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
-    # print the contents of the JSON line by line
+    # print the contents of the JSON line by line, wrapping long sections
     print('')
     if module != None:
         helpfile = open(os.path.join(dir_pipe, 'doc/' + module + '.md'), 'rb')
-        print helpfile.read()
-    print('')
+        helpfile = helpfile.readlines()
+
+        for line in helpfile:
+            if len(line) < 80:
+                print line.strip('\n')
+            else:
+                print("\n".join(textwrap.wrap(line)))
 
 def help_query():
 
@@ -199,27 +206,16 @@ def help_query():
 
     # ask which module type we want to look at
     module_types = os.listdir(os.path.join(dir_pipe, 'epitome/modules'))
-    module_types.sort()
-    print('Module types found:\n')
-    for i, module in enumerate(module_types):
-        print(str(i+1) + ': ' + module)
-
-    # prompt the user to select a module type 
+    module_types = printer(module_types, 'Module types found:\n')
     print('\nWhich kind of module?')
-    response = raw_input('module #: ')
-    
-    # attempt to retrieve the selected module
-    try:
-        selection = module_types[int(response)-1]
-    except:
+    response = getter(module_types)
+
+    if response == None:
         print("""\nYou didn't input a valid number! Default = 'pre'.""")
-        selection = 'pre'
+        response = 'pre'
 
-    # present the user with a list
     print('Which module do you need help with?')
-    module, used = get_modules(interactive=True, moduletype=str(selection))
-
-    # print help for that module
+    module, used = get_modules(interactive=True, moduletype=str(response))
     print_help(module)
 
 def check_paths():
@@ -242,25 +238,19 @@ def check_paths():
     if os.path.isdir(dir_afni) == False:
         print('AFNI directory does not exist:' + str(dir_afni))
 
-    elif os.path.isdir('/opt/MATLAB/MATLAB_Compiler_Runtime/v715') == False:
-        print('**********************************************')
-        print('MATLAB compiler runtime v715 cannot be found!')
-        print('**********************************************')
-        print('')
-        print("""Please Download the MATLAB v715 (2011b) compiler from """)
-        print("""   http://afni.nimh.nih.gov/sscc/dglen/McRetroTS      """)
-        print("""And install it to /opt/MATLAB.                        """)
-        print('')
+    dir_matlab = epi.config.find_matlab()
+    if os.path.isdir(dir_matlab) == False:
+        print('\nMATLAB / MATLAB compiler runtime v715 cannot be found!\n')
+        print(""" Either point your path to your install of MATLAB, or """)
+        print("""    Download the MATLAB v715 (2011b) compiler from    """)
+        print("""    http://afni.nimh.nih.gov/sscc/dglen/McRetroTS   \n""")
 
     else:
-        print('\n*********************************************')
-        print('config.py appears to be properly configured!\n')
+        print('\nepitome/config.py appears to be properly configured!\n')
         print('     data directory: ' + str(dir_data))
         print('     pipeline directory: ' + str(dir_pipe))
         print('     AFNI directory: ' + str(dir_afni))
-        print('     McRetroTS found: /opt/mcretro')
-        print('     MATLAB found: /opt/MATLAB/MATLAB_Compiler_Runtime/v715')
-        print('*********************************************\n')
+        print('     MATLAB found: ' + str(dir_matlab) + '\n')
 
 def check_run(expt, subj, mode, sess, run):
     """
@@ -295,7 +285,6 @@ def check_mode(expt, subj, mode):
 
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
-
     
     # retrieve the sessions for a given image modality
     dir_mode = os.path.join(dir_data, expt, subj, mode)
@@ -347,7 +336,7 @@ def check_directories(expt):
     try:
         subjects = epi.utilities.get_subj(os.path.join(dir_data, expt))
     except:
-        print 'Your experiment path is incorrect ' + str(expt)
+        print('Your experiment path is incorrect ' + str(expt))
 
     # this dict will hold our count
     mode_dict = {}
@@ -371,12 +360,18 @@ def check_directories(expt):
                 mode_dict[str(mode)] = n_runs
 
     # print out the file counts per image modality
-    print('\n****************************************************************')
+    print('')
     for mode_key in mode_dict:
-        print str(mode_dict[mode_key]) + ' NIFTIs found in ' + str(mode_key)
-    print('****************************************************************\n')
+        print('    ' + str(mode_dict[mode_key]) + ' NIFTIs in ' + str(mode_key))
+    print('')
 
 def check_os():
+    """
+    Ensures the user isn't Bill Gates.
+    """
+
+    import platform
+
     operating_system = platform.system()
     if operating_system == 'Windows':
         print("""

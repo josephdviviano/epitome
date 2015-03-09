@@ -8,7 +8,7 @@ Usage: filter <func_prefix> <det> <gs> <vent> <dv> <wm_loc> <wm_glo>
 + vent -- if == on, regress mean ventricle signal from each voxel. 
 + dv -- if == on, regress mean draining vessel signal from each voxel. 
 + wm_loc -- if == on, regress local white matter from target voxels. 
-+ wm_glo -- if == on, regress global white matter for all voxels. \
++ wm_glo -- if == on, regress global white matter for all voxels.
 
 This computes detrended nuisance time series, fits each run with a computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional, and generally advisable save global mean regression.
 
