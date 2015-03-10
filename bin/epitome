@@ -84,7 +84,7 @@ def get_mode(expt, interactive=False):
     mode_list = [d for d in os.listdir(dir_subj)
                          if os.path.isdir(os.path.join(dir_subj, d))]
 
-    expt_list = printer(expt_list, '\nImage modalities found:\n')
+    mode_list = printer(mode_list, '\nImage modalities found:\n')
 
     if interactive == True:
         selection = getter(mode_list)
