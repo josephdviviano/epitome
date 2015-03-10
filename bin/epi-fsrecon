@@ -41,7 +41,7 @@ def generate_stack(root, expt):
                                                         subj=subj, 
                                                         sess=sess)
     
-                if os.path.isdir(os.path.join(fs_dir, fs_subject)) == True:
+                if os.path.isdir(os.path.join(fs_dir, fs_subj)) == True:
                     continue
 
                 # construct the command with all available T1s per session
