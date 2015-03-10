@@ -21,7 +21,6 @@ Usage:
 
 import os, sys, stat
 from copy import copy
-
 import epitome as epi
 
 def get_modules(interactive=False, moduletype='pre', used=[]):
@@ -67,7 +66,7 @@ def get_modules(interactive=False, moduletype='pre', used=[]):
 
         return selection, used
 
-def get_mode(expt, interactive=False):
+def get_mode(expt):
     """
     Prints the available image modalities. Optionally prompts the user to 
     select one.
@@ -84,14 +83,14 @@ def get_mode(expt, interactive=False):
     mode_list = [d for d in os.listdir(dir_subj)
                          if os.path.isdir(os.path.join(dir_subj, d))]
 
-    mode_list = printer(mode_list, '\nImage modalities found:\n')
-
-    if interactive == True:
-        selection = getter(mode_list)
-
+    try:
+        selection = epi.utilities.selector_list(mode_list)
         return selection
+    except ValueError as ve:
+        print('Invalid selection')
+        sys.exit()
 
-def get_experiments(interactive=False):
+def get_experiments():
     """
     Prints the available experiments. Optionally prompts the user to select
     one.
@@ -109,13 +108,9 @@ def get_experiments(interactive=False):
                          if os.path.isdir(os.path.join(dir_data, d))]
 
     expt_list = printer(expt_list, '\nExperiments found:\n')    
-
-    if interactive == False:
-        print("""\n'epitome check <experiment>' for details.\n""")
-    else:
-        selection = getter(expt_list)
+    selection = getter(expt_list)
         
-        return selection
+    return selection
 
 def getter(item_list):
     """
@@ -206,12 +201,11 @@ def help_query():
 
     # ask which module type we want to look at
     module_types = os.listdir(os.path.join(dir_pipe, 'epitome/modules'))
-    module_types = printer(module_types, 'Module types found:\n')
-    print('\nWhich kind of module?')
-    response = getter(module_types)
 
-    if response == None:
-        print("""\nYou didn't input a valid number! Default = 'pre'.""")
+    try: 
+        response = epi.utilities.selector_list(module_types)
+    except ValueError as ve:
+        print("""You didn't input a valid number! Default = 'pre'.""")
         response = 'pre'
 
     print('Which module do you need help with?')
@@ -231,17 +225,17 @@ def check_paths():
         print('Data directory does not exist:' + str(dir_data))
 
     dir_pipe = epi.config.find_epitome()
-    if os.path.isdir(dir_pipe) == False:
-        print('epitome directory does not exist:' + str(dir_pipe))
+    if dir_pipe == None:
+        print('epitome is not on your path (how are you running me??)')
 
     dir_afni = epi.config.find_afni()
-    if os.path.isdir(dir_afni) == False:
-        print('AFNI directory does not exist:' + str(dir_afni))
+    if dir_afni == None:
+        print('AFNI is not on your path.')
 
     dir_matlab = epi.config.find_matlab()
-    if os.path.isdir(dir_matlab) == False:
-        print('\nMATLAB / MATLAB compiler runtime v715 cannot be found!\n')
-        print(""" Either point your path to your install of MATLAB, or """)
+    if dir_matlab == None:
+        print('\nMATLAB / MATLAB compiler runtime v715 is not on your path!\n')
+        print("""               If you don't own MATLAB,               """)
         print("""    Download the MATLAB v715 (2011b) compiler from    """)
         print("""    http://afni.nimh.nih.gov/sscc/dglen/McRetroTS   \n""")
 
