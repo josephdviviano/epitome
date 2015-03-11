@@ -14,13 +14,12 @@ def find_afni():
     Returns the path of the afni bin/ folder, or None if it isn't
     on your path.
     """
-
-    dir_afni = subprocess.check_output('which afni', shell=True)
- 
-    if dir_afni == '':
-        dir_afni == None
-    else: 
+     
+    try:
+        dir_afni = subprocess.check_output('which afni', shell=True)
         dir_afni = os.path.dirname(dir_afni)
+    except:
+        dir_afni = None
 
     return dir_afni
 
@@ -30,13 +29,11 @@ def find_epitome():
     on your path.
     """
 
-    dir_epitome = subprocess.check_output('which epitome', shell=True)
-    
-    if dir_epitome == '':
-        dir_epitome == None
-    else:
-        # also removed '/bin'
-        dir_epitome = os.path.dirname(dir_epitome)[:-4]
+    try:
+        dir_epitome = subprocess.check_output('which epitome', shell=True)
+        dir_epitome = os.path.dirname(dir_epitome)[:-4] # also remove '/bin'
+    except:
+        dir_epitome = None
 
     return dir_epitome
 
@@ -46,13 +43,13 @@ def find_matlab():
     on your path.
     """
 
-    dir_matlab = subprocess.check_output('which matlab', shell=True)
-    
-    if dir_matlab == '':
-        dir_matlab == None
-    else:
+    try:
+        dir_matlab = subprocess.check_output('which matlab', shell=True)
         dir_matlab = '/'.join(dir_matlab.split('/')[:-2])
 
+    except:
+        dir_matlab = None
+ 
     return dir_matlab
 
 def find_fsl():
@@ -60,13 +57,11 @@ def find_fsl():
     Returns the path of the fsl bin/ folder, or None if it isn't
     on your path.
     """
-
-    dir_fsl = subprocess.check_output('which fsl', shell=True)
-
-    if dir_fsl == '':
-        dir_fsl == None
-    else:
+    try:
+        dir_fsl = subprocess.check_output('which fsl', shell=True)
         dir_fsl = os.path.dirname(dir_fsl)[:-4]
+    except:
+        dir_fsl = None
 
     return dir_fsl
 
@@ -75,13 +70,12 @@ def find_fix():
     Returns the path of the fix bin/ folder, or None if it isn't
     on your path.
     """
-
-    dir_fix = subprocess.check_output('which fix', shell=True)
-
-    if dir_fix == '':
-        dir_fix == None
-    else:
+    
+    try:
+        dir_fix = subprocess.check_output('which fix', shell=True)
         dir_fix = os.path.dirname(dir_fsl)[:-4]
+    except:
+        dir_fix = None
 
     return dir_fix
 

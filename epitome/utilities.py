@@ -64,7 +64,7 @@ def selector_list(item_list):
 
     # print the options, and their numbers
     for i, item in enumerate(item_list):
-        print(str(i+1) +': ' + str(item))
+        print('    ' + str(i+1) +': ' + str(item))
 
     # retrieve the option number
     option = raw_input('option #: ')
