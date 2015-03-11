@@ -256,6 +256,10 @@ Functional connectivity analysis benefits from the application of tissue-based r
 
     filter scaled 4 off on on on on 
 
+*Optional:* In some cases it may be advantageous to remove motion-corrupted TRs from your data, especially if you are comparing two groups you suspect move in different ways. This can be done with the TR drop module. We're just going to use the default settings here.
+
+    trdrop 50 0.5 100000
+
 Here, we are detrending the scaled data against the head motion parameters, Legendre polynomials up to the 4th order, the mean white matter signal, the local white matter signal, the mean cerebral spinal fluid signal, and the mean draining vessel signal. For all of these signals, we also regress against the 1st temporal lag. 
 
     lowpass filtered epi_mask average 3 
