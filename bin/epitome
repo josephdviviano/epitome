@@ -197,7 +197,10 @@ def check_paths():
     # retrieve settings from config.py
     dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
 
-    if os.path.isdir(dir_data) == False:
+   
+    if dir_data == None:
+        print('EPITOME_DATA variable is not set!') 
+    elif os.path.isdir(dir_data) == None:
         print('Data directory does not exist:' + str(dir_data))
 
     dir_pipe = epi.config.find_epitome()
@@ -211,7 +214,7 @@ def check_paths():
     dir_matlab = epi.config.find_matlab()
     if dir_matlab == None:
         txt = ('\nMATLAB / MATLAB compiler runtime v715 is not on your path!\n'
-               'If you need MATLAB, Download the MATLAB v715 (2011b) compiler:'
+               'If you need MATLAB, Download the MATLAB v715 2011b compiler,\n'
                '        http://afni.nimh.nih.gov/sscc/dglen/McRetroTS       \n')
         print(txt)
 
