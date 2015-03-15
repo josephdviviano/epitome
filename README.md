@@ -26,17 +26,17 @@ Setup
 -----
 epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with epitome under bin/
 
-Steps to install:
+Quickstart:
 
-+ `git clone -b kimel` this repository to a directory of your choosing.
++ `git clone` this repository to a directory of your choosing.
 + Add epitome/bin to your PATH.
 + Add epitome to your PYTHONPATH.
 + Create an MRI data directory somewhere.
-+ Add MRI data path & sun grid engine queue to epitome/config.py
-    + dir_data: should point to your MRI experiment folder.
++ Add sun grid engine queue to epitome/config.py
     + queue: should be the name of your desired queue (e.g., `main.q`).
++ Set `EPITOME_DATA` to point to your MRI data folder.
 + Add some MRI data to your data directory.
-+ Ensure `SUBJECTS_DIR` points to the desired freesurfer subjects folder. 
++ Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
 + Check your work using `epitome check <experiment>`.
 + Generate some pre-processing scripts using `epitome run`.
 
@@ -45,14 +45,16 @@ Currently, epitome requires the user to have installed and configured the follow
 + FSL
 + AFNI
 + Freesurfer
-+ Matlab Compiler 7.15
++ Matlab (with Stats and Signals toolboxes) and/or Matlab Compiler 7.15
 + Python Numpy
 + Python Scipy
 + Python MatPlotLib
 + Python NiBabel
-+ Oracle Sun Grid Engine
 
-In a multi-user environment, you might want to customize your `SUBJECTS_DIR` environment variable as well.
+Optional:
+
++ Oracle Sun Grid Engine
++ FSL FIX 1.61
 
 Introduction
 ------------

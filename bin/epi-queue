@@ -2,6 +2,11 @@
 """
 Takes a proclist created using epitome run and submits it to the installed
 Oracle Sun Grid Engine using qsub.
+
+Usage:
+
+    epi-queue proclist.sh queue.q
+
 """
 
 import os, sys
@@ -11,15 +16,13 @@ import subprocess
 import epitome as epi
 
 
-def init(input_file):
+def init(input_file, queue):
     """
     Opens the input file, and generates a unique string for each run.
     This keeps jobs submitted by multiple users distinct.
     """
     # replace proclist with cmd for identifying subject-wise scripts
     command_file = 'cmd_' + input_file[9:]
-
-    queue = epi.config.return_queue()
 
     f = open(input_file)
     f = f.read()
@@ -93,10 +96,11 @@ def submit_jobs(f, u_id, queue, command_file):
 
 if __name__ == "__main__":
     
-    if len(sys.argv) != 2:
-        print('epiqueue requires one proclist input file')
+    if len(sys.argv) != 3:
+        print('epi-queue requires one input proclist and a queue name')
+        print(__doc__)
         sys.exit()
 
     else:
-      input_file = str(sys.argv[1])
-      init(input_file)
+      init(sys.argv[1], sys.argv[2])
+

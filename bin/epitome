@@ -732,7 +732,7 @@ def run_epitome():
     print('The pipeline can be manually executed via:\n' + 
            '. ' + str(os.path.join(dir_data, expt, proc)) + '\n' +
            'or submitted to the queue via:\n' +
-           'epi-queue ' + str(os.path.join(dir_data, expt, proc)))
+           'epi-queue ' + str(os.path.join(dir_data, expt, proc))+'queuename.q')
     print('******************************************************************')
 
 # this is the command-line usage bit
@@ -765,4 +765,4 @@ if __name__ == "__main__":
 
     # return the usage if the user does a silly thing
     else:
-        print __doc__
+        print(__doc__)
