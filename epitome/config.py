@@ -79,6 +79,19 @@ def find_fix():
 
     return dir_fix
 
+def find_data():
+    """
+    Returns the data path defined by the EPITOME_DATA environment
+    variable.
+    """
+
+    try:
+        dir_data = os.getenv('EPITOME_DATA')
+    except:
+        dir_data = None
+
+    return dir_data
+
 def return_paths():
     """
     Returns the paths to the data, pipeline, AFNI, and specifies the number of 
@@ -89,7 +102,7 @@ def return_paths():
     """
     
     # the data directory absolute path
-    dir_data = '/projects/jdv/data/epitome'
+    dir_data = find_data()
     
     # the pipeline directory absolute path
     dir_pipe = find_epitome()
@@ -103,11 +116,3 @@ def return_paths():
     cores = mp.cpu_count() - 1
 
     return dir_data, dir_pipe, dir_afni, cores
-
-def return_queue():
-    """
-    Returns the name of the queue for the system epitome is installed on.
-    """
-    queue = 'main.q'
-
-    return queue
