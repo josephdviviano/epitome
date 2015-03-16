@@ -139,6 +139,19 @@ def has_permissions(directory):
 
     return flag
 
+def check_os():
+    """
+    Ensures the user isn't Bill Gates.
+    """
+    import platform
+
+    operating_system = platform.system()
+    if operating_system == 'Windows':
+        print("""
+              Windows detected. epitome requires Unix-like operating systems!
+              """)
+        sys.exit()
+
 def init_shell(path, expt):
     """
     Gets all of the subjects and prints them as a BASH friendly variable.

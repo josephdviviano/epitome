@@ -92,27 +92,27 @@ def find_data():
 
     return dir_data
 
-def return_paths():
-    """
-    Returns the paths to the data, pipeline, AFNI, and specifies the number of 
-    CPU cores to use.
+# def return_paths():
+#     """
+#     Returns the paths to the data, pipeline, AFNI, and specifies the number of 
+#     CPU cores to use.
 
-    This function is retained for backwards-compatibility, but I would like to
-    move towards the 'find' funct
-    """
+#     This function is retained for backwards-compatibility, but I would like to
+#     move towards the 'find' funct
+#     """
     
-    # the data directory absolute path
-    dir_data = find_data()
+#     # the data directory absolute path
+#     dir_data = find_data()
     
-    # the pipeline directory absolute path
-    dir_pipe = find_epitome()
+#     # the pipeline directory absolute path
+#     dir_pipe = find_epitome()
     
-    # AFNI directory absolute path
-    dir_afni = find_afni()
+#     # AFNI directory absolute path
+#     dir_afni = find_afni()
     
-    # get the number of CPU cores available 
-    # (this will have to change when we improve this code to work in a cluster 
-    # environment).
-    cores = mp.cpu_count() - 1
+#     # get the number of CPU cores available 
+#     # (this will have to change when we improve this code to work in a cluster 
+#     # environment).
+#     cores = mp.cpu_count() - 1
 
-    return dir_data, dir_pipe, dir_afni, cores
+#     return dir_data, dir_pipe, dir_afni, cores
