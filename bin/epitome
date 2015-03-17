@@ -156,43 +156,78 @@ def help_query():
     module, used = get_modules(moduletype=str(response))
     print_help(module)
 
-def check_paths():
+def check_environment(mode='verbose'):
     """
-    Looks for the various manditory and optional dependencies and warns the user if the
-    environment is not configured correctly.
+    Looks for the various manditory and optional dependencies and warns 
+    the user if the environment is not configured correctly.
     """
+    # collect local checks from config.py
+    dir_freesurfer = epi.config.find_freesurfer()
+    dir_freesurfer_data = epi.config.find_freesurfer_data()
+    dir_fix = epi.config.find_fix()
+    dir_fsl = epi.config.find_fsl()
+
+    # checks for manditory software
     if DIR_DATA == None:
-        print('ERROR: EPITOME_DATA variable is not set!')
+        print('ERROR: Manditory EPITOME_DATA variable is not set.')
         sys.exit()
     
     if os.path.isdir(DIR_DATA) == False:
-        print('ERROR: Data directory does not exist: ' + str(DIR_DATA))
+        print('ERROR: Manditory epitome data directory does not exist: ' 
+                                                        + str(DIR_DATA))
         sys.exit()
 
     if DIR_PIPE == None:
-        print('ERROR: epitome is not on your path (how are you running me??)')
+        print('ERROR: Manditory package epitome is not on your path??')
         sys.exit()
 
     if DIR_AFNI == None:
-        print('ERROR: AFNI is not on your path.')
+        print('ERROR: Manditory package AFNI is not on your path.')
+        sys.exit()
+
+    if dir_fsl == None:
+       print('ERROR: Manditory package FSL is not on your path.')
+       sys.exit()
+    
+    if dir_freesurfer == None:
+        print('ERROR: Manditory package Freesurfer is not on your path.')
+        sys.exit()
+
+    if dir_freesurfer_data == None:
+        print('ERROR: Manditory variable SUBJECTS_DIR is not set.')
+        sys.exit()
+
+    if os.path.isdir(dir_freesurfer_data) == False:
+        print('ERROR: Manditory Freesurfer data directory does not exist: ' 
+                                                           + str(DIR_DATA))
         sys.exit()
 
     if DIR_MATLAB == None:
-        txt = ('\nERROR: MATLAB / compiler is not on your path!\n'
-               'If you need MATLAB, Download the MATLAB v715 2011b compiler,\n'
-               '        http://afni.nimh.nih.gov/sscc/dglen/McRetroTS       \n')
+        txt = ('WARNING: MATLAB / compiler is unavailable. Some \n' 
+               'modules will not work. See here for more:, \n'
+               'http://afni.nimh.nih.gov/sscc/dglen/McRetroTS\n')
         print(txt)
-        sys.exit()
+    
+    if dir_fix == None:
+        print('WARNING: FSL FIX is unavailable. Some modules will not work.')
 
-    else:
-        txt = ('\nEnvironment appears to be properly configured:\n\n'
-               '    data     -- {DIR_DATA}\n'
-               '    pipeline -- {DIR_PIPE}\n'
-               '    AFNI     -- {DIR_AFNI}\n'
-               '    MATLAB   -- {DIR_MATLAB}\n'.format(
+    if mode == 'verbose':
+        txt = ('\nCurrent environment configuration:\n\n'
+               '    data            -- {DIR_DATA}\n'
+               '    epitome         -- {DIR_PIPE}\n'
+               '    freesurfer      -- {dir_freesurfer}\n'
+               '    freesurfer data -- {dir_freesurfer_data}\n'
+               '    afni            -- {DIR_AFNI}\n'
+               '    fsl             -- {dir_fsl}\n'
+               '    fsl fix         -- {dir_fix}\n' 
+               '    matlab          -- {DIR_MATLAB}\n'.format(
                     DIR_DATA=DIR_DATA,
                     DIR_PIPE=DIR_PIPE,
+                    dir_freesurfer=dir_freesurfer,
+                    dir_freesurfer_data=dir_freesurfer_data,
                     DIR_AFNI=DIR_AFNI,
+                    dir_fsl=dir_fsl,
+                    dir_fix=dir_fix,
                     DIR_MATLAB=DIR_MATLAB))
         print(txt)
 
@@ -461,8 +496,9 @@ def main():
     Runs the main epitome CLI. 
     """
     epi.utilities.check_os()
+    check_environment('quiet')
 
-    print('\nRunning epitome. Select experiment.')
+    print('Running epitome. Select experiment.')
 
     DIR_AFNI = epi.config.find_afni()
     DIR_PIPE = epi.config.find_epitome()
@@ -712,7 +748,7 @@ if __name__ == "__main__":
 
     # checking functions
     elif len(sys.argv) == 2 and sys.argv[1] == 'check':
-        check_paths()
+        check_environment('verbose')
 
     elif len(sys.argv) == 2 and sys.argv[1] == 'clean':
         run_cleanup()
