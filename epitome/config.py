@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
-Temporary solution: users must define relevant system-wide options here.
-Adding some functions that search for installed software.
+These functions search the environment for software depenencies and configuration.
 """
 
 import os
@@ -11,10 +10,8 @@ import multiprocessing as mp
 def find_afni():
 
     """
-    Returns the path of the afni bin/ folder, or None if it isn't
-    on your path.
+    Returns the path of the afni bin/ folder, or None if unavailable.
     """
-     
     try:
         dir_afni = subprocess.check_output('which afni', shell=True)
         dir_afni = os.path.dirname(dir_afni)
@@ -25,13 +22,11 @@ def find_afni():
 
 def find_epitome():
     """
-    Returns the path of the epitome bin/ folder, or None if it isn't
-    on your path.
+    Returns path of the epitome bin/ folder, or None if unavailable.
     """
-
     try:
         dir_epitome = subprocess.check_output('which epitome', shell=True)
-        dir_epitome = os.path.dirname(dir_epitome)[:-4] # also remove '/bin'
+        dir_epitome = '/'.join(dir_epitome.split('/')[:-1])
     except:
         dir_epitome = None
 
@@ -39,10 +34,8 @@ def find_epitome():
 
 def find_matlab():
     """
-    Returns the path of the matlab folder, or None if it isn't
-    on your path.
+    Returns the path of the matlab folder, or None if unavailable.
     """
-
     try:
         dir_matlab = subprocess.check_output('which matlab', shell=True)
         dir_matlab = '/'.join(dir_matlab.split('/')[:-2])
@@ -54,12 +47,11 @@ def find_matlab():
 
 def find_fsl():
     """
-    Returns the path of the fsl bin/ folder, or None if it isn't
-    on your path.
+    Returns the path of the fsl bin/ folder, or None if unavailable.
     """
     try:
         dir_fsl = subprocess.check_output('which fsl', shell=True)
-        dir_fsl = os.path.dirname(dir_fsl)[:-4]
+        dir_fsl = '/'.join(dir_fsl.split('/')[:-1])
     except:
         dir_fsl = None
 
@@ -67,24 +59,32 @@ def find_fsl():
 
 def find_fix():
     """
-    Returns the path of the fix bin/ folder, or None if it isn't
-    on your path.
+    Returns the path of the fix bin/ folder, or None if unavailable.
     """
-    
     try:
         dir_fix = subprocess.check_output('which fix', shell=True)
-        dir_fix = os.path.dirname(dir_fsl)[:-4]
+        dir_fix = '/'.join(dir_fix.split('/')[:-1])
     except:
         dir_fix = None
 
     return dir_fix
 
+def find_freesurfer():
+    """
+    Returns the path of the freesurfer bin/ folder, or None if unavailable.
+    """
+    try:
+        dir_freesurfer = subprocess.check_output('which recon-all', shell=True)
+        dir_freesurfer = '/'.join(dir_freesurfer.split('/')[:-1])
+    except:
+        dir_freesurfer = None
+ 
+    return dir_freesurfer
+
 def find_data():
     """
-    Returns the data path defined by the EPITOME_DATA environment
-    variable.
+    Returns the epitome data path defined in the environment.
     """
-
     try:
         dir_data = os.getenv('EPITOME_DATA')
     except:
@@ -92,27 +92,13 @@ def find_data():
 
     return dir_data
 
-def return_paths():
+def find_freesurfer_data():
     """
-    Returns the paths to the data, pipeline, AFNI, and specifies the number of 
-    CPU cores to use.
-
-    This function is retained for backwards-compatibility, but I would like to
-    move towards the 'find' funct
+    Returns the freesurfer data path defined in the environment.
     """
-    
-    # the data directory absolute path
-    dir_data = find_data()
-    
-    # the pipeline directory absolute path
-    dir_pipe = find_epitome()
-    
-    # AFNI directory absolute path
-    dir_afni = find_afni()
-    
-    # get the number of CPU cores available 
-    # (this will have to change when we improve this code to work in a cluster 
-    # environment).
-    cores = mp.cpu_count() - 1
+    try:
+        dir_freesurfer_data = os.getenv('SUBJECTS_DIR')
+    except:
+        dir_freesurfer_data = None
 
-    return dir_data, dir_pipe, dir_afni, cores
+    return dir_freesurfer_data

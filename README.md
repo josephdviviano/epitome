@@ -32,8 +32,6 @@ Quickstart:
 + Add epitome/bin to your PATH.
 + Add epitome to your PYTHONPATH.
 + Create an MRI data directory somewhere.
-+ Add sun grid engine queue to epitome/config.py
-    + queue: should be the name of your desired queue (e.g., `main.q`).
 + Set `EPITOME_DATA` to point to your MRI data folder.
 + Add some MRI data to your data directory.
 + Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
