@@ -26,7 +26,7 @@ def find_epitome():
     """
     try:
         dir_epitome = subprocess.check_output('which epitome', shell=True)
-        dir_epitome = '/'.join(dir_epitome.split('/')[:-1])
+        dir_epitome = '/'.join(dir_epitome.split('/')[:-2])
     except:
         dir_epitome = None
 
