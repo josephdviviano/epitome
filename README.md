@@ -151,66 +151,25 @@ epitome eventually generates a `proclist', a set of commands that must be execut
 
 Modules
 -------
-What follows is a description of what each module in epitome does. These modules can be easily chained together manually, or by using the command-line interface included with the pipeline. New modules are simply bash scripts which call various programs, including FSL, Freesurfer, AFNI, and custom python programs. Therefore, functionality of epitome is easily extended without perturbing the function of older modules. Any script found in the modules directories will be added to the command line interface automatically, but will not work properly unless a matching wrappper function is added to commands.py.
+Modules can be easily chained together manually, or by using the command-line interface included with the pipeline. New modules are simply bash scripts which call various programs, including FSL, Freesurfer, AFNI, and custom python program. Any script found in the modules directories will be added to the command line interface automatically, but will not work properly unless a matching python wrappper function is added to epitome/commands.
 
-The types of modules included can be roughly split into 4 categories: `freesurfer`, `pre-processing`, `quality-control`, and `cleanup`.
+For specific documentation on each module, use the `epitome help` command.
 
 **freesurfer**
 
 Right now, the default `freesurfer recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
 
-+ [fsrecon](doc/fsrecon.md)
-+ [fsexport](doc/fsexport.md)
-
 **pre-processing**
 
 This contains the lion's share of the pipeline. Every run of epitome begins with `init_epi`, which contains a non-contentious set of pre-processing steps for EPI images. The following stages can be chained together at will to preform de-noising, spatial transformations, projections to surface-space, and spatial smoothing.
-
-+ [init_epi](doc/init_epi.md)
-+ [combine_volumes](doc/combine_volumes.md)
-+ [concatenate](doc/concatenate.md)
-+ [ica](doc/ica.md)
-+ [linreg_calc_afni](doc/linreg_calc_afni.md)
-+ [linreg_calc_fsl](doc/linreg_calc_fsl.md)
-+ [linreg_epi2mni_afni](doc/linreg_epi2mni_afni.md)
-+ [linreg_epi2mni_fsl](doc/linreg_epi2mni_fsl.md)
-+ [linreg_fs2epi_afni](doc/linreg_fs2epi_afni.md)
-+ [linreg_fs2epi_fsl](doc/linreg_fs2epi_fsl.md)
-+ [linreg_fs2mni_fsl](doc/linreg_fs2mni_fsl.md)
-+ [linreg_t12mni_afni](doc/linreg_t12mni_afni.md)
-+ [nonlinreg_calc_afni](doc/nonlinreg_calc_afni.md)
-+ [nonlinreg_epi2mni_afni](doc/nonlinreg_epi2mni_afni.md)
-+ [gen_regressors](doc/gen_regressors.md)
-+ [gen_gcor](doc/gen_gcor.md)
-+ [filter](doc/filter.md)
-+ [trdrop](doc/trdrop.md)
-+ [lowpass](doc/lowpass.md)
-+ [surfsmooth](doc/surfsmooth.md)
-+ [surf2vol](doc/surf2vol.md)
-+ [vol2surf](doc/vol2surf.md)
-+ [volsmooth](doc/volsmooth.md)
 
 **quality control**
 
 These programs run experiment-wide, and therefore are run after all /pre modules have completed for every subject. They produce reports that give a broad overview of the data quality at different stages of pre-processing, encouraging visual inspection of the data and hopefully reducing the amount of time spent hunting for the source of bugs when they do arise.
 
-+ [qc_epi2t1](doc/qc_epi2t1.md)
-+ [qc_t12mni](doc/qc_t12mni.md)
-+ [qc_masks](doc/qc_masks.md)
-+ [qc_mctrs](doc/qc_mctrs.md)
-+ [qc_motionind](doc/qc_motionind.md)
-+ [qc_runs](doc/qc_runs.md)
-+ [qc_spectra](doc/qc_spectra.md)
-
 **cleanup**
 
 These programs are run separately using epitome clean. They generally provide the ability to eliminate faulty outputs or intermediate files from experiments. Due to their destructive nature, these scripts must be executed by hand and each step must be manually confirmed. They are therefore not amiable to unattended scripting, although one could easily write their own with some know-how. 
-
-+ [clean_params](doc/clean_params.md)
-+ [del_everything](doc/del_everything.md)
-+ [del_mni](doc/del_mni.md)
-+ [del_postmc](doc/del_postmc.md)
-+ [del_reg](doc/del_reg.md)
 
 Workflows
 ---------
