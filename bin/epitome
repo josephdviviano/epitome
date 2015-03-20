@@ -1,21 +1,14 @@
 #!/usr/bin/env python
 """
-                               _ _                        
-                              (_) |                       
-                     ___ _ __  _| |_ ___  _ __ ___   ___  
-                    / _ \ '_ \| | __/ _ \| '_ ` _ \ / _ \ 
-                   |  __/ |_) | | || (_) | | | | | |  __/ 
-                    \___| .__/|_|\__\___/|_| |_| |_|\___| 
-                        | |                               
-                        |_|                               
-Usage:
-
-    epitome help                -- prints help for selected module.
-    epitome verify <experiment> -- checks input files for experiment.
-    epitome check               -- checks installation paths & environment.
-    epitome run                 -- produce pre-processing and QC scripts.
-    epitome clean               -- produce clean-up scripts.
-
+     _  _  . |_  _   _   _  | a mri metapipeline
+    (- |_) | |_ (_) ||| (-  | github.com/josephdviviano/epitome
+       |                    | 
+                       
+    epitome help   -- prints help for selected module.
+    epitome verify -- checks input files for experiment.
+    epitome check  -- checks installation paths & environment.
+    epitome run    -- produce pre-processing and QC scripts.
+    epitome clean  -- produce clean-up scripts.
 """
 
 import os, sys, stat
@@ -740,11 +733,11 @@ if __name__ == "__main__":
         print('Please specify an experiment.')
         get_experiments(check='check')
 
-    elif len(sys.argv) == 3 and sys.argv[1] == 'verify':
-        check_directories(sys.argv[2]) 
+    #elif len(sys.argv) == 3 and sys.argv[1] == 'verify':
+    #    check_directories(sys.argv[2]) 
 
-    elif len(sys.argv) > 3 and sys.argv[1] == 'verify':
-        print 'epitome check only works with 1 experiment at a time!'
+    #elif len(sys.argv) > 3 and sys.argv[1] == 'verify':
+    #    print 'epitome check only works with 1 experiment at a time!'
 
     # checking functions
     elif len(sys.argv) == 2 and sys.argv[1] == 'check':
