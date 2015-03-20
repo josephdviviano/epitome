@@ -1,5 +1,29 @@
 #!/usr/bin/env python
+"""
+epi-trdrop <func> <output> <motion> <DVARS> <report> <head_mm> <FD> <DV>
 
+Removes motion-corrupted TRs from data, without interpolation. If called
+from the command line, this will batch process all runs in all sessions 
+for a given subject.
+
+func   = full path to input nifti file.
+out    = full path to output nifti file.
+motion = full path to AFNI motion parameters.
+DVARS  = full path to DVARS calculation.
+report = full path to report on TRs scrubbed per subject.
+head   = head radius in mm (default 50 mm).
+FD     = censor TRs with instantaneous motion > x mm (default 0.3 mm).
+DV     = censor TRs with instantaneous GS fluctuation > x % (def. 0.3 %).
+
+Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to
+change.
+
+{{Runs in two modes. In mode one, high-motion TRs are cropped out of the data.
+This is really only appropriate with resting state data. In mode two, a linear
+interpolate is constructed between the deleted TRs, which is more appropriate
+for task-based fMRI (and maybe resting state).}}
+
+"""
 import os, sys
 import csv
 import fnmatch
@@ -8,46 +32,32 @@ import numpy as np
 import scipy as sp
 import nibabel as nib
 
-def TR_drop(directory, func_name, u_id, num, head_mm=50, FD_t=0.3, DV_t=0.3):
+def interp(data, idx):
     """
-    Removes motion-corrupted TRs from data, without interpolation. If called
-    from the command line, this will batch process all runs in all sessions 
-    for a given subject.
-
-    func__pre = functional data prefix (e.g., 'func_filtered')
-    mask_name = mask file name (e.g., 'anat_EPI_mask')
-    u_id      = unique identifier
-    num       = run number
-    head_mm   = head radius in mm (default 50 mm)
-    FD        = censor TRs with instantaneous motion > x mm (default 0.3 mm)
-    DV        = censor TRs with instantaneous GS fluctuation > x % (def. 0.3 %)
-
-    Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to
-    change.
-
+    Replaces TRs corrupted by head motion with a linear interpolate.
     """
 
-    print('')
-    print(' TR_drop: ' + str(func_name) + '.' + str(u_id) + '.' + str(num))
+    print('I dont do anything right now')
+
+def drop(data, idx, length):
+    """
+    Removes TRs corruped by head motion.
+    """
+    idx_retained = np.setdiff1d(np.arange(length), idx)
+    data = data[:, idx_retained]
+
+    return data
+
+def TR_drop(func, out, motion, DVARS=None, report=None, head=50, FD_t=0.3, 
+                                                                 DV_t=0.3):
+    # convert/confirm variable types
+    print('\n TR_drop: ' + func)
     print('             FD = ' + str(FD_t) + ' mm,')
     print('          DVARS = ' + str(DV_t) + ' %,')
-    print('    Head Radius = ' + str(head_mm) + ' mm.')
-    print('')
-
-    # convert/confirm variable types
-    directory = str(directory)
-    func_name = str(func_name)
-    num = str(num)
-    head_mm = float(head_mm)
-    FD_t = float(FD_t)
-    DV_t = float(DV_t)
-
-    # open up a csv
-    f = open(directory + '/PARAMS/retained_TRs.' + str(u_id) + '.' + 
-                                                   str(num) + '.1D', 'wb')
+    print('    Head Radius = ' + str(head) + ' mm.\n')
 
     # load data, affine, header, get image dimensions
-    data = nib.load(os.path.join(directory, func_name + '.' + u_id + '.' + num + '.nii.gz'))
+    data = nib.load(func)
     outA = data.get_affine()
     outH = data.get_header()
     dims = np.array(data.shape)
@@ -57,44 +67,41 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD_t=0.3, DV_t=0.3):
     data = np.reshape(data, (dims[0] * dims[1] * dims[2], dims[3]))
 
     # load motion parameters
-    for fname in os.listdir(os.path.join(directory, 'PARAMS')):
-        if fnmatch.fnmatch(fname, 'motion.' + str(u_id) + '.' + str(num) + '*'):
-            FD = np.genfromtxt(os.path.join(directory, 'PARAMS', fname))
+    FD = np.genfromtxt(motion)
 
-            FD[:,0] = np.radians(FD[:,0])*head_mm # roll
-            FD[:,1] = np.radians(FD[:,1])*head_mm # pitch
-            FD[:,2] = np.radians(FD[:,2])*head_mm # yaw
+    FD[:,0] = np.radians(FD[:,0])*head # roll
+    FD[:,1] = np.radians(FD[:,1])*head # pitch
+    FD[:,2] = np.radians(FD[:,2])*head # yaw
 
-            # sum over absolute derivative for the 6 motion parameters
-            FD = np.sum(np.abs(np.diff(FD, n=1, axis=0)), axis=1)
-            FD = np.insert(FD, 0, 0) # align FD & DVARS
+    # sum over absolute derivative for the 6 motion parameters
+    FD = np.sum(np.abs(np.diff(FD, n=1, axis=0)), axis=1)
+    FD = np.insert(FD, 0, 0) # align FD & DVARS
+    idx_FD = np.where(FD >= FD_t)[0]
 
-        if fnmatch.fnmatch(fname, 'DVARS.' + str(u_id) + '.' + str(num) + '*'):
-            DV = np.genfromtxt(os.path.join(directory, 'PARAMS', fname))
-            DV = (DV) / 1000 # convert to % signal change
+    if DVARS != None:
+        DV = np.genfromtxt(DVARS)
+        DV = (DV) / 1000 # convert to % signal change
+        idx_DV = np.where(DV >= DV_t)[0] 
+        idx = np.union1d(idx_FD, idx_DV)
+    else:
+        idx = idx_FD
     
     # mask TRs 2 back and 2 forward from threshold
-    idx_FD = np.where(FD >= FD_t)[0]
-    idx_DV = np.where(DV >= DV_t)[0] 
-    idx = np.union1d(idx_FD, idx_DV)
     idx = np.union1d(
           np.union1d(
           np.union1d(
           np.union1d(idx-2, idx-1), idx), idx+1), idx+2)
 
-    # remove censor idx < 0 and > length of run
-    idx = idx[idx > 0]
-    idx = idx[idx < dims[3]]
+    # remove censor idx < 1 and > length of run -1 (always keep 1st and last tr)
+    idx = idx[idx > 1]
+    idx = idx[idx < dims[3]-1]
     
-    # find all the kosher TRs
-    idx_retained = np.setdiff1d(np.arange(dims[3]), idx)
-
-    # 'scrub' the data
-    data = data[:, idx_retained]
+    # find all the kosher TRs and scrub data
+    data = drop(data, idx, dims[3])
 
     # keep track of the number of retained TRs
     dims[3] = len(idx_retained)
-    print('Retained ' + str(dims[3]) + 'TRs: run ' + str(num))
+    print('Retained ' + str(dims[3]) + 'TRs: run ' + os.path.basename(func))
 
     # reshape data, header
     #outH.set_data_shape((dims[0], dims[1], dims[2], dims[3]))
@@ -108,14 +115,37 @@ def TR_drop(directory, func_name, u_id, num, head_mm=50, FD_t=0.3, DV_t=0.3):
     data.header_class(extensions=())
 
     # write 4D output,
-    data.to_filename(os.path.join(directory, 'func_scrubbed.' +
-                                    str(u_id) + '.' + str(num) + '.nii.gz'))
+    data.to_filename(out)
     
-
-    # write out number of retained TRs
-    f.write(str(dims[3]))
-    f.close()
+    # if we specify a report, wrtie it out yo
+    if report != None:
+        f = open(report, 'wb')
+        f.write(str(dims[3]))
+        f.close()
 
 if __name__ == "__main__":
-    TR_drop(sys.argv[1], sys.argv[2], sys.argv[3],
-            sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
+
+    if len(sys.argv) != 7:
+        print(__doc__)
+        sys.exit()
+
+    # check inputs
+    func = str(sys.argv[1])
+    output = str(sys.argv[2])
+    motion = str(sys.argv[3])
+
+    if str(sys.argv[4]).lower() != 'none':
+        DVARS = str(sys.argv[4])
+    else:
+        DVARS = None
+
+    if str(sys.argv[5]).lower() != 'none':
+        report = str(sys.argv[5])
+    else:
+        report = None
+
+    head_mm = float(sys.argv[6])
+    FD_t = float(sys.argv[7])
+    DV_t = float(sys.argv[8])
+
+    TR_drop(func, output, motion, DVARS, report, head_mm, FD_t, DV_t)
