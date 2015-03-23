@@ -586,7 +586,7 @@ def main():
            'epi-fsrecon {DIR_DATA} {expt} {mode} {fullproc}\n'
            '. ${{DIR_PIPE}}/epitome/modules/freesurfer/fsexport '
            '${{DIR_DATA}} ${{DIR_EXPT}} '
-           '>> ${{DIR_DATA}}/${{DIR_EXPT}}{proc}\n\n'
+           '>> ${{DIR_DATA}}/${{DIR_EXPT}}/{proc}\n\n'
            '## Begin Pipeline\n'
            'for SUB in ${{SUBJECTS}}; do\n\n'
            'cat > ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/{cmd} << EOF\n'
