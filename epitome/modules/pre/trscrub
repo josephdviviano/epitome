@@ -1,10 +1,11 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
-export HEAD=`echo ${2}`
-export FD=`echo ${3}`
-export DV=`echo ${4}`
+export INPUT=$(echo 'func_'${1})
+export HEAD=$(echo ${2})
+export FD=$(echo ${3})
+export DV=$(echo ${4})
+export MODE=$(echo ${5})
 
 EOF
 
@@ -31,14 +32,16 @@ for SESS in ${DIR_SESS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         if [ ! -f ${SESS}/func_scrubbed.${ID}.${NUM}.nii.gz ]; then
-            epi-trdrop \
-                ${SESS} \
-                ${INPUT} \
-                ${ID} \
-                ${NUM} \
+            epi-trscrub \
+                ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
+                ${SESS}/func_scrubbed.${ID}.${NUM}.nii.gz \
+                ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
+                ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D \
+                ${SESS}/PARAMS/retained_TRs.${ID}.${NUM}.1D \
                 ${HEAD} \
                 ${FD} \
-                ${DV}
+                ${DV} \
+                ${MODE}
         fi
     done
 done
