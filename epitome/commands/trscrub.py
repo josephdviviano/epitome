@@ -34,6 +34,9 @@ def run(input_name):
             FD = 0.5
             DV = 1000000 # this turns DVARS off, effectively
 
+        print('\nSelect scrubbing method')
+        mode = epi.utilities.selector_list(['drop', 'interp'])
+
     # if we messed any of these up, we return None
     except ValueError as ve:
         return '', None
@@ -43,7 +46,8 @@ def run(input_name):
                                   str(input_name) + ' ' +
                                   str(head_size) + ' ' +
                                   str(FD) + ' ' +
-                                  str(DV))
+                                  str(DV) + ' ' +
+                                  str(mode))
 
     return line, output
 
