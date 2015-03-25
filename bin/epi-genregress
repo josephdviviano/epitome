@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
-Takes input NIFTI and returns 
+Takes input NIFTI and returns a single time series that explains the
+maximum variance across the entire brain. Requires a brain mask.
 """
-
+import os, sys
 import scipy as sp
 import numpy as np
 import ninet as nn
@@ -19,8 +20,8 @@ def main(data, mask, output):
     data, idx = nn.utilities.maskdata(data, mask)
 
     # retrieve the top component and save to an afni-compatible 1D file
-    components, exp_var = nn.stats.pca_reduce(data, n=1, copy=True)
-    np.savetxt(output, components[0], fmt='%10.8f')
+    components, exp_var = nn.stats.pca_reduce(data.T, n=1, copy=True, whiten=True)
+    np.savetxt(output, components, fmt='%10.8f')
 
 if __name__ == '__main__':
     data = sys.argv[1]

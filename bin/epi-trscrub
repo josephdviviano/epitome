@@ -206,7 +206,7 @@ def TR_drop(func, out, motion, DVARS=None, report=None, head=50,
         data = interp(data, idx)
 
     # keep track of the number of retained TRs
-    print('TRs Retained: ' + np.setdiff1d(np.arange(ntrs), idx)
+    print('TRs Retained: ' + np.setdiff1d(np.arange(ntrs), idx) + 
           ', run ' + os.path.basename(func))
 
     # reshape data, header
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     FD_t = float(sys.argv[7])
     DV_t = float(sys.argv[8])
 
-    if str(sys.argv[9]).lower() not in ['drop', 'interp']):
+    if str(sys.argv[9]).lower() not in ['drop', 'interp']:
         print('Mode: ' + str(sys.argv[9]) + ' invalid, using mode = drop.')
         mode = 'drop'
     else:

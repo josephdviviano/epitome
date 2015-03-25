@@ -352,13 +352,7 @@ for SESS in ${DIR_SESS}; do
                 > ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D
         fi
 
-        # Global mean
-        if [ ! -f ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D ]; then
-            3dmaskave \
-                -mask ${SESS}/anat_EPI_mask.nii.gz \
-                -quiet ${SESS}/func_scaled.${ID}.${NUM}.nii.gz \
-                > ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D
-        fi
+
 
         # Top PC regressor
         if [ ! -f ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D ]; then

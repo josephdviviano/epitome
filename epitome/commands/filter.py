@@ -34,12 +34,13 @@ def run(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/filter {input_name} {polort} '
+    line = ('. ${{DIR_PIPE}}/epitome/modules/pre/filter {input_name} {polort} '
                '{gs} {vent} {dv} {wm_loc} {wm_glo} {top_pc}').format(
                               input_name=str(input_name),
                               polort=str(polort),
                               gs=gs,
                               vent=vent,
+                              dv=dv,
                               wm_loc=wm_loc,
                               wm_glo=wm_glo,
                               top_pc=top_pc)
