@@ -266,6 +266,29 @@ for SESS in ${DIR_SESS}; do
                 ${DIR}/PARAMS/dv.${ID}.${NUM}.1D'{0..$}' >> \
                 ${DIR}/PARAMS/lag.dv.${ID}.${NUM}.1D
         fi
+
+        # create lagged global mean time series
+        if [ ! -f ${DIR}/PARAMS/lag.global_mean.${ID}.${NUM}.1D ]; then
+            1dcat \
+                ${DIR}/PARAMS/global_mean.${ID}.${NUM}.1D'{0}' > \
+                ${DIR}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
+            
+            1dcat \
+                ${DIR}/PARAMS/global_mean.${ID}.${NUM}.1D'{0..$}' >> \
+                ${DIR}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
+        fi
+
+        # create lagged top pc time series
+        if [ ! -f ${DIR}/PARAMS/lag.top_pc.${ID}.${NUM}.1D ]; then
+            1dcat \
+                ${DIR}/PARAMS/top_pc.${ID}.${NUM}.1D'{0}' > \
+                ${DIR}/PARAMS/lag.top_pc.${ID}.${NUM}.1D
+            
+            1dcat \
+                ${DIR}/PARAMS/top_pc.${ID}.${NUM}.1D'{0..$}' >> \
+                ${DIR}/PARAMS/lag.top_pc.${ID}.${NUM}.1D
+        fi
+
     done
     rm ${DIR}/anat_tmp*
 done

@@ -360,6 +360,14 @@ for SESS in ${DIR_SESS}; do
                 > ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D
         fi
 
+        # Top PC regressor
+        if [ ! -f ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D ]; then
+            epi-genregress \
+                ${SESS}/func_scaled.${ID}.${NUM}.nii.gz \
+                ${SESS}/anat_EPI_mask.nii.gz \
+                ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D
+        fi
+
     done
     rm ${SESS}/anat_EPI_tmp*.nii.gz >& /dev/null
     rm ${SESS}/func_tmp*.nii.gz >& /dev/null

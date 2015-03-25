@@ -29,30 +29,31 @@ epitome does not have any direct dependencies, but the scripts it generates rely
 Quickstart:
 
 + `git clone` this repository to a directory of your choosing.
++ Create an MRI data directory somewhere.
++ Add some MRI data to your data directory.
 + Add epitome/bin to your PATH.
 + Add epitome to your PYTHONPATH.
-+ Create an MRI data directory somewhere.
 + Set `EPITOME_DATA` to point to your MRI data folder.
-+ Add some MRI data to your data directory.
 + Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
 + Check your work using `epitome check <experiment>`.
 + Generate some pre-processing scripts using `epitome run`.
 
 Currently, epitome requires the user to have installed and configured the following packages to be in their path:
 
-+ FSL
-+ AFNI
-+ Freesurfer
-+ Matlab (with Stats and Signals toolboxes) and/or Matlab Compiler 7.15
-+ Python Numpy
-+ Python Scipy
-+ Python MatPlotLib
-+ Python NiBabel
++ [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/)
++ [AFNI](http://afni.nimh.nih.gov/)
++ [Freesurfer](http://freesurfer.net/)
++ [Matlab (with Stats and Signals toolboxes) and/or Matlab Compiler](http://afni.nimh.nih.gov/sscc/dglen/CompiledMatlab)
++ [Numpy](http://www.numpy.org/)
++ [Scipy](http://www.scipy.org/)
++ [MatPlotLib](http://matplotlib.org/)
++ [NiBabel](http://nipy.org/nibabel/)
++ [NiNet](https://github.com/josephdviviano/ninet)
 
 Optional:
 
-+ Oracle Sun Grid Engine
-+ FSL FIX 1.61
++ [Grid Engine](http://gridscheduler.sourceforge.net/) or [PBS](http://www.adaptivecomputing.com/products/open-source/torque/)
++ [FSL FIX 1.61](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX)
 
 Introduction
 ------------

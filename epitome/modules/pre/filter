@@ -1,13 +1,14 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
-export POLORT=`echo ${2}`
-export GS_FLAG=`echo ${3}`
-export VENT_FLAG=`echo ${4}`
-export DV_FLAG=`echo ${5}`
-export WM_LOC_FLAG=`echo ${6}`
-export WM_GLO_FLAG=`echo ${7}`
+export INPUT=$(echo 'func_'${1})
+export POLORT=$(echo ${2})
+export GS_FLAG=$(echo ${3})
+export VENT_FLAG=$(echo ${4})
+export DV_FLAG=$(echo ${5})
+export WM_LOC_FLAG=$(echo ${6})
+export WM_GLO_FLAG=$(echo ${7})
+export PC_FLAG=$(echo ${8})
 
 EOF
 
@@ -148,6 +149,34 @@ for SESS in ${DIR_SESS}; do
                 ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D\' > \
                 ${SESS}/PARAMS/det.global_mean.${ID}.${NUM}.1D
         fi
+
+        if [ ! -f ${SESS}/PARAMS/det.lag.global_mean.${ID}.${NUM}.1D ]; then
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort ${POLORT} \
+                ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.lag.global_mean.${ID}.${NUM}.1D
+        fi
+
+        # detrend top pc regressors
+        if [ ! -f ${SESS}/PARAMS/det.top_pc.${ID}.${NUM}.1D ]; then
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort ${POLORT} \
+                ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.top_pc.${ID}.${NUM}.1D
+        fi
+
+        if [ ! -f ${SESS}/PARAMS/det.lag.top_pc.${ID}.${NUM}.1D ]; then
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort ${POLORT} \
+                ${SESS}/PARAMS/lag.top_pc.${ID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.lag.top_pc.${ID}.${NUM}.1D
+        fi
         
         # fit each run with all nuisance regressors
         if [ ! -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
@@ -188,6 +217,11 @@ for SESS in ${DIR_SESS}; do
             if [ `echo ${WM_GLO_FLAG}` = 'on' ]; then
                 CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm.${ID}.${NUM}.1D`
                 CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm.${ID}.${NUM}.1D`
+            fi
+
+            if [ `echo ${PC_FLAG}` = 'on' ]; then
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.top_pc.${ID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.top_pc.${ID}.${NUM}.1D`
             fi
             
             # and add the physio regressors if they exist

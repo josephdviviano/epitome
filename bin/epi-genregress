@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+"""
+Takes input NIFTI and returns 
+"""
+
+import scipy as sp
+import numpy as np
+import ninet as nn
+
+def main(data, mask, output):
+    """
+    Takes an input NIFTI and brain mask to produce a PC component time series 
+    that explains the most variance in the data.
+
+    This might be a useful regressor for cleaning up resting-state data.
+    """
+    data, _, _, _ = nn.utilities.loadnii(data)
+    mask, _, _, _ = nn.utilities.loadnii(mask)
+    data, idx = nn.utilities.maskdata(data, mask)
+
+    # retrieve the top component and save to an afni-compatible 1D file
+    components, exp_var = nn.stats.pca_reduce(data, n=1, copy=True)
+    np.savetxt(output, components[0], fmt='%10.8f')
+
+if __name__ == '__main__':
+    data = sys.argv[1]
+    mask = sys.argv[2]
+    output = sys.argv[3]
+
+    main(data, mask, output)
