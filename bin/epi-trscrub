@@ -167,14 +167,7 @@ def TR_drop(func, out, motion, DVARS=None, report=None, head=50,
     print('    Head Radius = ' + str(head) + ' mm.\n')
 
     # load data, affine, header, get image dimensions
-    data = nib.load(func)
-    outA = data.get_affine()
-    outH = data.get_header()
-    dims = np.array(data.shape)
-    data = data.get_data()
-
-    # reshape to 2D
-    data = np.reshape(data, (dims[0] * dims[1] * dims[2], dims[3]))
+    data, outA, outH, dims = nn.utilities.loadnii(func)
 
     # load motion parameters
     FD = np.genfromtxt(motion)
