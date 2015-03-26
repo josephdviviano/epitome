@@ -26,4 +26,4 @@ Masking options are provided to improve masking performance across various acqui
 
 Prerequisites: None.
 
-Outputs: tshift (before deobliquing), ob (before motion-correction), scaled (final)
+Outputs: func_tshift (before deobliquing), func_ob (before motion-correction), func_scaled (final)

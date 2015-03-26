@@ -7,7 +7,8 @@ export STD=$(echo ${3})
 export GM=$(echo ${4})
 export ANATICOR=$(echo ${5})
 export COMPCOR=$(echo ${6})
-export DV=$(echo ${7})
+export COMPNUM=$(echo ${7})
+export DV=$(echo ${8})
 
 EOF
 
@@ -32,6 +33,7 @@ echo '             - white matter: local (15mm sphere) and average, + lags'
 echo '             - ventricles averaged + lagged,'
 echo '             - draining vessel averaged + lagged.'
 echo ''
+echo '   - Calculates global mean & DVARS (Power et al., 2012).'
 echo '   - Detrends input with legrende polynomials up to order '${POLORT}','
 echo '   - Computes temporal signal to noise ratio of input,'
 echo '   - Computes nusiance time series from physio, motion paramaters, and:'
@@ -217,23 +219,21 @@ for SESS in ${DIR_SESS}; do
             fi
 
             # % signal change DVARS (+ lag) (Power et. al Neuroimage 2012)
-            if [ ! -f ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D ]; then
-                3dcalc \
-                    -a ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
-                    -b 'a[0,0,0,-1]' \
-                    -expr '(a - b)^2' \
-                    -prefix ${SESS}/func_tmp_backdif.${ID}.${NUM}.nii.gz
-               
-                3dmaskave \
-                    -mask ${SESS}/anat_EPI_mask.nii.gz \
-                    -quiet ${SESS}/func_tmp_backdif.${ID}.${NUM}.nii.gz \
-                    > ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D
-                
-                1deval \
-                    -a ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D \
-                    -expr 'sqrt(a)' \
-                    > ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D
-            fi
+            3dcalc \
+                -a ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                -b 'a[0,0,0,-1]' \
+                -expr '(a - b)^2' \
+                -prefix ${SESS}/func_tmp_backdif.${ID}.${NUM}.nii.gz
+           
+            3dmaskave \
+                -mask ${SESS}/anat_EPI_mask.nii.gz \
+                -quiet ${SESS}/func_tmp_backdif.${ID}.${NUM}.nii.gz \
+                > ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D
+            
+            1deval \
+                -a ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D \
+                -expr 'sqrt(a)' \
+                > ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D
         fi 
 
         # initialize filter command
@@ -256,36 +256,32 @@ for SESS in ${DIR_SESS}; do
             if [ `echo ${STD}` = 'on' ]; then
 
                 # white matter mean (+ lag)
-                if [ ! -f ${SESS}/PARAMS/wm.${ID}.${NUM}.1D ]; then
-                    3dmaskave \
-                        -q -mask ${SESS}/anat_wm_ero.nii.gz \
-                        ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
-                        ${SESS}/PARAMS/wm.${ID}.${NUM}.1D
-                    
-                    1dcat \
-                        ${SESS}/PARAMS/wm.${ID}.${NUM}.1D'{0}' > \
-                        ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
-                    
-                    1dcat \
-                        ${SESS}/PARAMS/wm.${ID}.${NUM}.1D'{0..$}' >> \
-                        ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
-                fi
+                3dmaskave \
+                    -q -mask ${SESS}/anat_wm_ero.nii.gz \
+                    ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
+                    ${SESS}/PARAMS/wm.${ID}.${NUM}.1D
+                
+                1dcat \
+                    ${SESS}/PARAMS/wm.${ID}.${NUM}.1D'{0}' > \
+                    ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
+                
+                1dcat \
+                    ${SESS}/PARAMS/wm.${ID}.${NUM}.1D'{0..$}' >> \
+                    ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
 
                 # ventricle mean (+ lag)
-                if [ ! -f ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D ]; then
-                    3dmaskave \
-                        -q -mask ${SESS}/anat_vent_ero.nii.gz \
-                        ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
-                        ${SESS}/PARAMS/vent.${ID}.${NUM}.1D
-                    
-                    1dcat \
-                        ${SESS}/PARAMS/vent.${ID}.${NUM}.1D'{0}' > \
-                        ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
-                    
-                    1dcat \
-                        ${SESS}/PARAMS/vent.${ID}.${NUM}.1D'{0..$}' >> \
-                        ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
-                fi
+                3dmaskave \
+                    -q -mask ${SESS}/anat_vent_ero.nii.gz \
+                    ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
+                    ${SESS}/PARAMS/vent.${ID}.${NUM}.1D
+                
+                1dcat \
+                    ${SESS}/PARAMS/vent.${ID}.${NUM}.1D'{0}' > \
+                    ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
+                
+                1dcat \
+                    ${SESS}/PARAMS/vent.${ID}.${NUM}.1D'{0..$}' >> \
+                    ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
 
                 CMD=`echo ${CMD} ${SESS}/PARAMS/vent.${ID}.${NUM}.1D`
                 CMD=`echo ${CMD} ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D`
@@ -296,22 +292,18 @@ for SESS in ${DIR_SESS}; do
             if [ `echo ${GM}` = 'on' ]; then
 
                 # global mean (+ lag)
-                if [ ! -f ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D ]; then
-                    3dmaskave \
-                        -mask ${SESS}/anat_EPI_mask.nii.gz \
-                        -quiet ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
-                        > ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D
-                fi
+                3dmaskave \
+                    -mask ${SESS}/anat_EPI_mask.nii.gz \
+                    -quiet ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                    > ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D
 
-                if [ ! -f ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D ]; then
-                    1dcat \
-                        ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0}' > \
-                        ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
-                    
-                    1dcat \
-                        ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0..$}' >> \
-                        ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
-                fi
+                1dcat \
+                    ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0}' > \
+                    ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
+                
+                1dcat \
+                    ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0..$}' >> \
+                    ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
    
                 CMD=`echo ${CMD} ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D`
                 CMD=`echo ${CMD} ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D`
@@ -340,47 +332,43 @@ for SESS in ${DIR_SESS}; do
 
             if [ `echo ${COMPCOR}` = 'on' ]; then
 
-
-                # Top PC regressor
-                if [ ! -f ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D ]; then
+                # aCompcor regressors for WM and ventricles
+                if [ ! -f ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D ]; then
                     epi-genregress \
                         ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
-                        ${SESS}/anat_EPI_mask.nii.gz \
-                        ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D
+                        ${SESS}/anat_vent_ero.nii.gz \
+                        ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D \
+                        ${COMPNUM}
                 fi
 
-                # create lagged top pc time series
-                if [ ! -f ${SESS}/PARAMS/lag.top_pc.${ID}.${NUM}.1D ]; then
-                    1dcat \
-                        ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D'{0}' > \
-                        ${SESS}/PARAMS/lag.top_pc.${ID}.${NUM}.1D
-                    
-                    1dcat \
-                        ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D'{0..$}' >> \
-                        ${SESS}/PARAMS/lag.top_pc.${ID}.${NUM}.1D
+                if [ ! -f ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D ]; then
+                    epi-genregress \
+                        ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                        ${SESS}/anat_wm_ero.nii.gz \
+                        ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D \
+                        ${COMPNUM}
                 fi
 
-                CMD=`echo ${CMD} ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.top_pc.${ID}.${NUM}.1D`
+                # https://www.youtube.com/watch?v=oavMtUWDBTM
+                CMD=`echo ${CMD} ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D`
             fi
 
             if [ `echo ${DV}` = 'on' ]; then
 
                 # create mean draining vessel time series (+ lagged)
-                if [ ! -f ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D ]; then
-                    3dmaskave \
-                        -q -mask ${SESS}/anat_dv_ero.nii.gz \
-                        ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
-                        ${SESS}/PARAMS/dv.${ID}.${NUM}.1D
-                    
-                    1dcat \
-                        ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0}' > \
-                        ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
-                    
-                    1dcat \
-                        ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0..$}' >> \
-                        ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
-                fi
+                3dmaskave \
+                    -q -mask ${SESS}/anat_dv_ero.nii.gz \
+                    ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
+                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D
+                
+                1dcat \
+                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0}' > \
+                    ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
+                
+                1dcat \
+                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0..$}' >> \
+                    ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
 
                 CMD=`echo ${CMD} ${SESS}/PARAMS/dv.${ID}.${NUM}.1D`
                 CMD=`echo ${CMD} ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D`

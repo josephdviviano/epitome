@@ -23,6 +23,12 @@ def run(input_name):
         print('\nCompcor on? (Regress top PCs of white matter, csf):')
         compcor = epi.utilities.selector_list(['off', 'on'])
 
+        if compcor == 'on':
+            print('\nCompcor on. How many components per ROI?')
+            compnum = epi.utilities.selector_int()
+        else:
+            compnum = 'na'
+
         print('\nDraining vessel regression on?:')
         dv = epi.utilities.selector_list(['off', 'on'])
 
@@ -32,13 +38,14 @@ def run(input_name):
 
     # otherwise we print the command and return it
     line = ('. ${{DIR_PIPE}}/epitome/modules/pre/filter {input_name} {polort} '
-               '{std} {gm} {anaticor} {compcor} {dv}').format(
+               '{std} {gm} {anaticor} {compcor} {compnum} {dv}').format(
                               input_name=str(input_name),
                               polort=str(polort),
                               std=std,
                               gm=gm,
                               anaticor=anaticor,
                               compcor=compcor,
+                              compnum=compnum,
                               dv=dv)
 
     return line, output

@@ -25,7 +25,6 @@ echo '   - Deobliques the data,'
 echo '   - Motion correction (also outputs motion parameters + 1st lag),'
 echo '   - Creates deskulled template EPI and '${MASKING}' whole-brain mask,'
 echo '   - Scales each voxel using '${NORMALIZE}','
-echo '   - Calculates global mean & DVARS (Power et al., 2012).'
 echo ''
 echo '************************************************************************'
 
