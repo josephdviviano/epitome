@@ -9,16 +9,6 @@ export ANATICOR=$(echo ${5})
 export COMPCOR=$(echo ${6})
 export DV=$(echo ${7})
 
-
-# export INPUT=$(echo 'func_'${1})
-# export POLORT=$(echo ${2})
-# export GS_FLAG=$(echo ${3})
-# export VENT_FLAG=$(echo ${4})
-# export DV_FLAG=$(echo ${5})
-# export WM_LOC_FLAG=$(echo ${6})
-# export WM_GLO_FLAG=$(echo ${7})
-# export PC_FLAG=$(echo ${8})
-
 EOF
 
 cat <<"EOF"

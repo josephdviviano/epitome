@@ -11,23 +11,20 @@ def run(input_name):
         print('\nSet detrend order:')
         polort = epi.utilities.selector_int()
 
-        print('\nSet mean global signal regression:')
-        gs = epi.utilities.selector_list(['off', 'on'])
+        print('\nStandard regressors on? (White matter, csf):')
+        std = epi.utilities.selector_list(['off', 'on'])
 
-        print('\nSet mean ventricle signal regression:')
-        vent = epi.utilities.selector_list(['off', 'on'])
+        print('\nGlobal mean regression on?:')
+        gm = epi.utilities.selector_list(['off', 'on'])
 
-        print('\nSet mean draining vessel signal regression:')
+        print('\nAnaticor on? (15 mm local white matter regression):')
+        anaticor = epi.utilities.selector_list(['off', 'on'])
+
+        print('\nCompcor on? (Regress top PCs of white matter, csf):')
+        compcor = epi.utilities.selector_list(['off', 'on'])
+
+        print('\nDraining vessel regression on?:')
         dv = epi.utilities.selector_list(['off', 'on'])
-
-        print('\nSet local white matter regression:')
-        wm_loc = epi.utilities.selector_list(['off', 'on'])
-
-        print('\nSet mean white matter regression:')
-        wm_glo = epi.utilities.selector_list(['off', 'on'])
-
-        print('\nSet top principal component regression:')
-        top_pc = epi.utilities.selector_list(['off', 'on'])
 
     # if we messed any of these up, we return None
     except ValueError as ve:
@@ -35,14 +32,13 @@ def run(input_name):
 
     # otherwise we print the command and return it
     line = ('. ${{DIR_PIPE}}/epitome/modules/pre/filter {input_name} {polort} '
-               '{gs} {vent} {dv} {wm_loc} {wm_glo} {top_pc}').format(
+               '{std} {gm} {anaticor} {compcor} {dv}').format(
                               input_name=str(input_name),
                               polort=str(polort),
-                              gs=gs,
-                              vent=vent,
-                              dv=dv,
-                              wm_loc=wm_loc,
-                              wm_glo=wm_glo,
-                              top_pc=top_pc)
+                              std=std,
+                              gm=gm,
+                              anaticor=anaticor,
+                              compcor=compcor,
+                              dv=dv)
 
     return line, output
