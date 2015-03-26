@@ -332,36 +332,6 @@ for SESS in ${DIR_SESS}; do
             fi
 
         fi
-
-        # % signal change DVARS (Power et. al Neuroimage 2012)
-        if [ ! -f ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D ]; then
-            3dcalc \
-                -a ${SESS}/func_scaled.${ID}.${NUM}.nii.gz \
-                -b 'a[0,0,0,-1]' \
-                -expr '(a - b)^2' \
-                -prefix ${SESS}/func_tmp_backdif.${ID}.${NUM}.nii.gz
-           
-            3dmaskave \
-                -mask ${SESS}/anat_EPI_mask.nii.gz \
-                -quiet ${SESS}/func_tmp_backdif.${ID}.${NUM}.nii.gz \
-                > ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D
-            
-            1deval \
-                -a ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D \
-                -expr 'sqrt(a)' \
-                > ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D
-        fi
-
-
-
-        # Top PC regressor
-        if [ ! -f ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D ]; then
-            epi-genregress \
-                ${SESS}/func_scaled.${ID}.${NUM}.nii.gz \
-                ${SESS}/anat_EPI_mask.nii.gz \
-                ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D
-        fi
-
     done
     rm ${SESS}/anat_EPI_tmp*.nii.gz >& /dev/null
     rm ${SESS}/func_tmp*.nii.gz >& /dev/null

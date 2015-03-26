@@ -335,8 +335,8 @@ for SESS in ${DIR_SESS}; do
                         ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz'[0..$]'
                 fi
 
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.wm_local15.${ID}.${NUM}.nii.gz`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.wm_local15.${ID}.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz`
             fi
 
             if [ `echo ${COMPCOR}` = 'on' ]; then
