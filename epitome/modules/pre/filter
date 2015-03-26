@@ -32,15 +32,15 @@ echo '             - white matter: local (15mm sphere) and average, + lags'
 echo '             - ventricles averaged + lagged,'
 echo '             - draining vessel averaged + lagged.'
 echo ''
-echo '   - Computes nusiance time series from tissues, motion paramaters,'
-echo '   - Optionally uses the global mean: '${GS_FLAG}','
-echo '   - Optionally uses the ventricles: '${VENT_FLAG}','
-echo '   - Optionally uses the draining vessels: '${DV_FLAG}','
-echo '   - Optionally uses the local white matter: '${WM_LOC_FLAG}','
-echo '   - Optionally uses the mean white matter: '${WM_GLO_FLAG}','
-echo '   - Detrends each with legrende polynomials up to order '${POLORT}','
+echo '   - Detrends input with legrende polynomials up to order '${POLORT}','
+echo '   - Computes temporal signal to noise ratio of input,'
+echo '   - Computes nusiance time series from physio, motion paramaters, and:'
+echo '         - Standard regressors: '${STD}','
+echo '         - Global mean regression: '${GM}','
+echo '         - ANATICOR local white matter regression: '${ANATICOR}','
+echo '         - COMPCOR principal component regression: '${COMPCOR}','
+echo '         - Draining vessel regression: '${DV}','
 echo '   - Computes fit of run with nusiances via least squares regression,'
-echo '   - Computes temporal signal to noise ratio,'
 echo '   - Subtracts noise model from each voxel, retaining the mean.'
 echo ''
 echo '************************************************************************'
@@ -51,7 +51,6 @@ DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
 
     ## Make Masks ##
-    
     # eroded white matter mask
     if [ ! -f ${SESS}/anat_wm_ero.nii.gz ]; then
         3dcalc \
@@ -361,8 +360,8 @@ for SESS in ${DIR_SESS}; do
                         ${SESS}/PARAMS/lag.top_pc.${ID}.${NUM}.1D
                 fi
 
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.top_pc.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.top_pc.${ID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/top_pc.${ID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.top_pc.${ID}.${NUM}.1D`
             fi
 
             if [ `echo ${DV}` = 'on' ]; then
@@ -383,8 +382,8 @@ for SESS in ${DIR_SESS}; do
                         ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
                 fi
 
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.dv.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.dv.${ID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/dv.${ID}.${NUM}.1D`
+                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D`
             fi
 
             ####################################################################
