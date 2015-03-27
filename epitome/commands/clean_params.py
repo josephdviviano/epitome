@@ -5,7 +5,8 @@ import epitome as epi
 
 def run(expt, clean):
 
-    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths() 
+    dir_data = epi.config.find_data()
+    dir_pipe = epi.config.find_epitome()
 
     print('\n *** Adding PARAMS PURGE to the cleanup Queue! ***')
 

@@ -6,8 +6,6 @@ Usage: ica_fix <func_prefix> <train_data> <threshold>
 + train_data -- name of the .RData file in your fix/training_data/ folder.
 + threshold -- a number. Who knows what it means? It should be between 1-100, and the FSL people recommend 20, or a number between 1-5 for 'more conservative' cleanup. I always use 20 because the FSL people never explained what this number does.
 
-I don't trust this software.
-
 Runs FSL ICA-based de-noising based on expert rating of ICA components into signal and noise. FSL FIX is not easy to run outside of the FSL ecosystem, so you must follow a pretty tight perscription to run this module (see prereqs below). The key is all registrations need to be done with FSL, and you really should use 'filter' to remove (at least) the linear trend from all voxels.
 
 There are currently 4 trained-weights files supplied:
@@ -23,7 +21,7 @@ Recommended epitome steps pre ica_fix (or rather, tested):
     . ${DIR_PIPE}/epitome/modules/pre/linreg_calc_fsl high corratio 12
     . ${DIR_PIPE}/epitome/modules/pre/linreg_fs2epi_fsl
     . ${DIR_PIPE}/epitome/modules/pre/gen_regressors scaled
-    . ${DIR_PIPE}/epitome/modules/pre/filter scaled 1 off on off on on
+    . ${DIR_PIPE}/epitome/modules/pre/filter scaled 1 off off off off off
     . ${DIR_PIPE}/epitome/modules/pre/volsmooth filtered EPI_mask 5.0
     . ${DIR_PIPE}/epitome/modules/pre/ica volsmooth EPI_mask
 
@@ -31,4 +29,4 @@ This takes the above MELODIC output, generates a phony '.feat' folder, and runs 
 
 Prerequisites: init_epi, linreg_calc_fsl, filter, ica.
 
-Outputs: fix
+Outputs: func_fix

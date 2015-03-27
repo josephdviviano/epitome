@@ -42,7 +42,7 @@ def run(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/trdrop ' + 
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/trscrub ' + 
                                   str(input_name) + ' ' +
                                   str(head_size) + ' ' +
                                   str(FD) + ' ' +

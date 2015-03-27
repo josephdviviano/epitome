@@ -22,139 +22,18 @@ import numpy as np
 import scipy as sp
 import scipy.signal as sig
 import nibabel as nib
+import ninet as nn
 
-def loadnii(filename):
+def get_samp_nyq(TR):
     """
-    Usage:
-        nifti, affine, header, dims = loadnii(filename)
-
-    Loads a Nifti file (3 or 4 dimensions).
-    
-    Returns: 
-        a 2D matrix of voxels x timepoints, 
-        the input file affine transform, 
-        the input file header, 
-        and input file dimensions.
+    From a TR, return the sampling rate and nyquist frequency.
     """
+    if TR > 1000:
+        TR = TR / 1000.0
+    samp_rate = 1.0/TR
+    nyq = samp_rate/2.0
 
-    # load everything in
-    nifti = nib.load(filename)
-    affine = nifti.get_affine()
-    header = nifti.get_header()
-    dims = nifti.shape
-
-    # if smaller than 3D
-    if len(dims) < 3:
-        raise Exception("""
-                        Your data has less than 3 dimensions!
-                        """)
-
-    # if smaller than 4D
-    if len(dims) > 4:
-        raise Exception("""
-                        Your data is at least a penteract (over 4 dimensions!)
-                        """)
-    
-    # load in nifti and reshape to 2D
-    nifti = nifti.get_data()
-    if len(dims) == 3:
-        dims = tuple(list(dims) + [1])
-    nifti = nifti.reshape(dims[0]*dims[1]*dims[2], dims[3])
-
-    return nifti, affine, header, dims
-
-def maskdata(data, mask, rule='>', threshold=[0]):
-    """
-    Usage:
-        data, idx = maskdata(data, mask, rule, threshold)
-
-    Extracts voxels of interest from a 2D data matrix, using a threshold rule
-    applied to the mask file, which is assumed to only contain one value per 
-    voxel.
-
-    Valid thresholds:
-        '<' = keep voxels less than threshold value.
-        '>' = keep voxels greater than threshold value.
-        '=' = keep voxels equal to threshold value.
-
-    The threshold(s) should be a list of value(s).
-
-    By default, this program finds all voxels that are greater than zero in the
-    mask, which is handy for removing non-brain voxels (for example).
-
-    Finally, this program *always* removes voxels with constant-zero values
-    regardless of your mask, because they are both annoying and useless.
-    If it finds voxels like this, it will tell you about them so you can
-    investigate.
-
-    Returns: 
-        voxels of interest in data as a collapsed 2D array 
-        and a set of indices relative to the size of the original array.
-    """
-
-    # ensure the input data and mask are appropriately formatted
-    if np.shape(data)[0] != np.shape(mask)[0]:
-        print('data = ' + str(data) + ', mask = ' + str(mask))
-        raise Exception("""
-                        Your data and mask are not in from the same space!
-                        """)
-
-    if np.shape(mask)[1] > 1:
-        print('mask contains ' + str(np.shape(mask)[1]) + 'values per voxel,')
-        raise Exception("""
-                        Your mask can't contain multiple values per voxel!
-                        """)
-
-    # make sure the rule chosen is kosher
-    if any(rule == item for item in ['=', '>', '<']) == False:
-        print('threshold rule is ' + str(rule))
-        raise Exception("""
-                        Your threshold rule must be '=', '>', or '<'!
-                        """)
-
-    # make sure the threshold are numeric and non-numpy
-    if type(threshold) != list:
-        print('threshold datatype is ' + str(type(threshold)))
-        raise Exception("""
-                        Your threshold(s) must be in a list.
-                        """)
-
-    # compute the index
-    idx = np.array([])
-    threshold = list(threshold)
-    for t in threshold:
-        # add any new voxels corresponding to a given threshold
-        if rule == '=':
-            idx = np.unique(np.append(idx, np.where(mask == t)[0]))
-        elif rule == '>':
-            idx = np.unique(np.append(idx, np.where(mask > t)[0]))
-        elif rule == '<':
-            idx = np.unique(np.append(idx, np.where(mask < t)[0]))
-
-    # find voxels with constant zeros, remove those from the index
-    idx_zeros = np.where(np.sum(data, axis=1) == 0)[0]
-    idx = np.setdiff1d(idx, idx_zeros)
-
-    # collapse data using the index
-    idx = idx.tolist()
-    data = data[idx, :]
-
-    return data, idx
-
-def moving_average(data, N=5):
-    # pad the to-be-smoothed vector by the window length on each side
-    vector = np.zeros(data.shape[0]+(N*2),)
-    vector[N:-N] = data
-
-    # insert the 1st and last value, respectively
-    vector[0:N] = data[0]
-    vector[-1-N:] = data[-1]
-
-    # convolve the time series with a vector of 1/N
-    output = np.convolve(vector, np.ones((N,), ) / N, mode='full')[(N-1):]
-    output = output[N:-N]
-
-    return output
+    return samp_rate, nyq
 
 def median_filter(func, mask, kernel_size=5):
     """
@@ -165,9 +44,9 @@ def median_filter(func, mask, kernel_size=5):
     The default kernel size is extremely conservative, but does a nice job.
     """
     # load in everything
-    func, func_aff, func_head, func_dims  = loadnii(func)
-    mask, mask_aff, mask_head, mask_dims  = loadnii(mask)
-    tmp, idx = maskdata(func, mask)
+    func, func_aff, func_head, func_dims  = nn.utilities.loadnii(func)
+    mask, mask_aff, mask_head, mask_dims  = nn.utilities.loadnii(mask)
+    tmp, idx = nn.utilities.maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
@@ -193,16 +72,16 @@ def mean_filter(func, mask, kernel_size=5):
     The default kernel size is extremely conservative, but does a nice job.
     """
     # load in everything
-    func, func_aff, func_head, func_dims  = loadnii(func)
-    mask, mask_aff, mask_head, mask_dims  = loadnii(mask)
-    tmp, idx = maskdata(func, mask)
+    func, func_aff, func_head, func_dims  = nn.utilities.loadnii(func)
+    mask, mask_aff, mask_head, mask_dims  = nn.utilities.loadnii(mask)
+    tmp, idx = nn.utilities.maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
 
     # filter data
     for x in np.arange(tmp.shape[0]):
-        filt[x, :] = moving_average(tmp[x, :], N=kernel_size)
+        filt[x, :] = nn.signal.moving_average(tmp[x, :], N=kernel_size)
 
     # create a 4D output array
     output = np.zeros(func.shape)
@@ -222,19 +101,15 @@ def kaiser_filter(func, mask, cutoff=0.1):
     The default cutoff is the traditional resting-state cutoff.
     """
     # load in everything
-    func, func_aff, func_head, func_dims  = loadnii(func)
-    mask, mask_aff, mask_head, mask_dims  = loadnii(mask)
-    tmp, idx = maskdata(func, mask)
+    func, func_aff, func_head, func_dims  = nn.utilities.loadnii(func)
+    mask, mask_aff, mask_head, mask_dims  = nn.utilities.loadnii(mask)
+    tmp, idx = nn.utilities.maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
 
     # get sampling rate, nyquist frequency
-    TR_len = func_head.values()[15][4]
-    if TR_len > 1000:
-        TR_len = TR_len / 1000.0
-    samp_rate = 1.0/TR_len
-    nyq = samp_rate/2.0
+    samp_rate, nyq = get_samp_nyq(func_head.values()[15][4])
 
     # return a kaiser window with 60 Hz attenuation over a 0.1 Hz transition
     width = 0.1
@@ -271,19 +146,15 @@ def butterworth_filter(func, mask, cutoff=0.1):
     The default cutoff is the traditional resting-state cutoff.
     """
     # load in everything
-    func, func_aff, func_head, func_dims  = loadnii(func)
-    mask, mask_aff, mask_head, mask_dims  = loadnii(mask)
-    tmp, idx = maskdata(func, mask)
+    func, func_aff, func_head, func_dims  = nn.utilities.loadnii(func)
+    mask, mask_aff, mask_head, mask_dims  = nn.utilities.loadnii(mask)
+    tmp, idx = nn.utilities.maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
 
     # get sampling rate, nyquist frequency
-    TR_len = func_head.values()[15][4]
-    if TR_len > 1000:
-        TR_len = TR_len / 1000.0
-    samp_rate = 1.0/TR_len
-    nyq = samp_rate/2.0
+    samp_rate, nyq = get_samp_nyq(func_head.values()[15][4])
 
     # design and apply lowpass filter
     b, a = sig.butter(3, cutoff/nyq)
@@ -305,18 +176,10 @@ def write_output(path, uid, num, out, aff, head):
     """
     Writes a NIFTI file to the specified path with the specified run number.
     """
-    # we're disabling the header output bit for now, until we figure out
-    # why afni does not like them.
-
-    # this old way retains the extended header, but makes downstream
-    # AFNI calls angry, for some reason.
-    #out = nib.nifti1.Nifti1Image(out, aff, head)
-    
-    ### temporary solution below
+    #out = nib.nifti1.Nifti1Image(out, aff, head)    
     out = nib.nifti1.Nifti1Image(out, aff)
     out.update_header()
     out.header_class(extensions=())
-    ### temporary solution above
 
     out.to_filename(os.path.join(path, 'func_lowpass.' + 
                                               str(uid) + '.' + 
@@ -352,4 +215,4 @@ if __name__ == "__main__":
         write_output(sys.argv[5], sys.argv[6], sys.argv[7], o, a, h)
     
     else:
-        print('*** INVALID FILTER SELECTION! ***')
+        print(__doc__)
