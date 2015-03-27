@@ -402,6 +402,8 @@ def run_cleanup():
                 DIR_PIPE=DIR_PIPE, 
                 DIR_DATA=DIR_DATA, 
                 DIR_AFNI=DIR_AFNI))
+    f.write(txt)
+
 
     # get the subjects
     print('\nWould you like to cleanup all subjects, or just some?')
