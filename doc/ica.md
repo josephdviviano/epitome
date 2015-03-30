@@ -9,4 +9,5 @@ Runs ICA on each input functional file of the type defined using the default MEL
 
 Prerequisites: init_epi.
 
-outputs MELODIC.ica folders (no .nii.gz are produced)
+Outputs: MELODIC.ica folders (does not directly affect pipeline, no func_whatever.nii.gzs are produced).
+

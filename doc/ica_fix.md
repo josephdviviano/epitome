@@ -29,4 +29,4 @@ This takes the above MELODIC output, generates a phony '.feat' folder, and runs 
 
 Prerequisites: init_epi, linreg_calc_fsl, filter, ica.
 
-Outputs: func_fix
+Outputs: fix
