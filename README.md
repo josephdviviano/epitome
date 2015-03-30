@@ -29,30 +29,31 @@ epitome does not have any direct dependencies, but the scripts it generates rely
 Quickstart:
 
 + `git clone` this repository to a directory of your choosing.
++ Create an MRI data directory somewhere.
++ Add some MRI data to your data directory.
 + Add epitome/bin to your PATH.
 + Add epitome to your PYTHONPATH.
-+ Create an MRI data directory somewhere.
 + Set `EPITOME_DATA` to point to your MRI data folder.
-+ Add some MRI data to your data directory.
 + Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
 + Check your work using `epitome check <experiment>`.
 + Generate some pre-processing scripts using `epitome run`.
 
 Currently, epitome requires the user to have installed and configured the following packages to be in their path:
 
-+ FSL
-+ AFNI
-+ Freesurfer
-+ Matlab (with Stats and Signals toolboxes) and/or Matlab Compiler 7.15
-+ Python Numpy
-+ Python Scipy
-+ Python MatPlotLib
-+ Python NiBabel
++ [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/)
++ [AFNI](http://afni.nimh.nih.gov/)
++ [Freesurfer](http://freesurfer.net/)
++ [Matlab (with Stats and Signals toolboxes) and/or Matlab Compiler](http://afni.nimh.nih.gov/sscc/dglen/CompiledMatlab)
++ [Numpy](http://www.numpy.org/)
++ [Scipy](http://www.scipy.org/)
++ [MatPlotLib](http://matplotlib.org/)
++ [NiBabel](http://nipy.org/nibabel/)
++ [NiNet](https://github.com/josephdviviano/ninet)
 
 Optional:
 
-+ Oracle Sun Grid Engine
-+ FSL FIX 1.61
++ [Grid Engine](http://gridscheduler.sourceforge.net/) or [PBS](http://www.adaptivecomputing.com/products/open-source/torque/)
++ [FSL FIX 1.61](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX)
 
 Introduction
 ------------
@@ -124,6 +125,8 @@ epitome contains a set of helper subroutines and two main functions: `run' and `
 **epitome run**
 
 This is the heart and soul of epitome. This command line interface will walk you through the construction of a pipeline for a single image modality within a single experiment. Every run of epitome begins with a lengthly run of Freesurfer on all T1s, and `init_epi`, which does the most basic kinds of MRI pre-processing. Following that, you are free to chain together modules as you see fit.
+
+Each pipeline is generated from a local copy of the epitome repo in `~/epitome`. This is to prevent software updates from interfering with any ongoing project (which currently are happening quite frequently relative to the length of a typical project). This also means you can make local hacks to a copy of the pipeline and not disturb your other projects, or other users. Ideally, some of these hacks will end up being integrated back into the main branch of epitome. Before each run of the pipeline, you will be required to pick between an old branch of the pipeline (so try to name them reasonably), or `***NEW***`, which will work from a copy of the master epitome repo.
 
 In order to retain the modular and easily-customized structure of epitome, this program allows you to shoot yourself in the foot. In fact, if you aren't clear on what to do, you are more likely to make a malformed pipeline than you are to making a good one. Therefore, I recommend reading the Pipeline section of this manual at least once, and perhaps skimming the Presets section following, to get a sense of reasonable usage.
 

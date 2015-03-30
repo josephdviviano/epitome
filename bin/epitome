@@ -16,23 +16,23 @@ from copy import copy
 import epitome as epi
 
 DIR_DATA = epi.config.find_data()
-DIR_PIPE = epi.config.find_epitome()
 DIR_AFNI = epi.config.find_afni()
 DIR_MATLAB = epi.config.find_matlab()
 
-def get_modules(moduletype='pre', used=[]):
+def get_modules(dir_pipe, moduletype='pre', used=[]):
     """
     Prints the available modules. Optionally prompts the user to select one.
     If provided with a list of 'used' modules, these are stripped from the
     output.
     """
+
     # try to import a list of the module types
-    dir_modules = os.path.join(DIR_PIPE, 'epitome/modules', str(moduletype))
+    dir_modules = os.path.join(dir_pipe, 'epitome/modules', str(moduletype))
     try:
         module_list = [f for f in os.listdir(dir_modules)
                                if os.path.isfile(os.path.join(dir_modules, f))]
     except:
-        module_types = os.listdir(os.path.join(DIR_PIPE, 'epitome/modules'))
+        module_types = os.listdir(os.path.join(dir_pipe, 'epitome/modules'))
         print('Invalid module type. Available:\n')
         for m in module_types:
             print('    ' + str(m))
@@ -59,6 +59,7 @@ def get_mode(expt):
     Prints the available image modalities. Optionally prompts the user to 
     select one.
     """
+
     # get a sorted list of the experiments
     dir_expt = os.path.join(DIR_DATA, expt)
     subj_list = [d for d in os.listdir(dir_expt)
@@ -136,8 +137,10 @@ def help_query():
     """
     Lists all modules ans allows user to select one to print the associated help.
     """
+    dir_pipe = epi.config.find_epitome()
+
     # ask which module type we want to look at
-    module_types = os.listdir(os.path.join(DIR_PIPE, 'epitome/modules'))
+    module_types = os.listdir(os.path.join(dir_pipe, 'epitome/modules'))
 
     try: 
         response = epi.utilities.selector_list(module_types)
@@ -146,7 +149,7 @@ def help_query():
         response = 'pre'
 
     print('Which module do you need help with?')
-    module, used = get_modules(moduletype=str(response))
+    module, used = get_modules(dir_pipe, moduletype=str(response))
     print_help(module)
 
 def check_environment(mode='verbose'):
@@ -159,6 +162,7 @@ def check_environment(mode='verbose'):
     dir_freesurfer_data = epi.config.find_freesurfer_data()
     dir_fix = epi.config.find_fix()
     dir_fsl = epi.config.find_fsl()
+    dir_pipe = epi.config.find_epitome()
 
     # checks for manditory software
     if DIR_DATA == None:
@@ -170,7 +174,7 @@ def check_environment(mode='verbose'):
                                                         + str(DIR_DATA))
         sys.exit()
 
-    if DIR_PIPE == None:
+    if dir_pipe == None:
         print('ERROR: Manditory package epitome is not on your path??')
         sys.exit()
 
@@ -207,7 +211,7 @@ def check_environment(mode='verbose'):
     if mode == 'verbose':
         txt = ('\nCurrent environment configuration:\n\n'
                '    data            -- {DIR_DATA}\n'
-               '    epitome         -- {DIR_PIPE}\n'
+               '    epitome         -- {dir_pipe}\n'
                '    freesurfer      -- {dir_freesurfer}\n'
                '    freesurfer data -- {dir_freesurfer_data}\n'
                '    afni            -- {DIR_AFNI}\n'
@@ -215,7 +219,7 @@ def check_environment(mode='verbose'):
                '    fsl fix         -- {dir_fix}\n' 
                '    matlab          -- {DIR_MATLAB}\n'.format(
                     DIR_DATA=DIR_DATA,
-                    DIR_PIPE=DIR_PIPE,
+                    dir_pipe=dir_pipe,
                     dir_freesurfer=dir_freesurfer,
                     dir_freesurfer_data=dir_freesurfer_data,
                     DIR_AFNI=DIR_AFNI,
@@ -344,6 +348,16 @@ def writer(p_list, line, filename, f, output, bkup, mode):
 
     return p_list, output
 
+def mangle_string(string):
+    """
+    Turns an arbitrary string into a decent filename (no underscores allowed)!
+    """
+    string = string.replace(' ', '-')
+    string = string.strip(",./;'[]\|_=+<>?:{}!@#$%^&*()`~")
+    string = string.strip('"')
+
+    return string
+
 # The Cleanup Pipeline
 ###############################################################################
 def run_cleanup():
@@ -353,6 +367,7 @@ def run_cleanup():
         Perhaps this can be merged with the main function?
     """
     epi.utilities.check_os()
+    dir_pipe = epi.config.find_epitome()
 
     print('epitome cleanup: THIS DELETES DATA.')
 
@@ -389,7 +404,7 @@ def run_cleanup():
            '# Master script for {expt}: {mode}.\n'
            '# Generated: {datetime} by {user}.\n\n'
            '## Setup\n'
-           'export DIR_PIPE={DIR_PIPE}\n'
+           'export dir_pipe={dir_pipe}\n'
            'export DIR_DATA={DIR_DATA}\n'
            'export DIR_AFNI={DIR_AFNI}\n'
            'export DIR_EXPT={expt}\n'
@@ -399,9 +414,11 @@ def run_cleanup():
                 mode=mode,
                 user=user,
                 datetime=datetime, 
-                DIR_PIPE=DIR_PIPE, 
+                dir_pipe=dir_pipe, 
                 DIR_DATA=DIR_DATA, 
                 DIR_AFNI=DIR_AFNI))
+    f.write(txt)
+
 
     # get the subjects
     print('\nWould you like to cleanup all subjects, or just some?')
@@ -462,7 +479,7 @@ def run_cleanup():
     while flag == 0:
 
         print('\nPlease select the next cleanup module:\n')
-        module, used = get_modules(moduletype='cleanup')
+        module, used = get_modules(dir_pipe, moduletype='cleanup')
         if module == None:
             print('')
         else:
@@ -490,12 +507,11 @@ def main():
     """
     epi.utilities.check_os()
     check_environment('quiet')
+    datetime, user, f_id = get_date_user()
+    dir_pipe = epi.config.find_epitome()
+
 
     print('Running epitome. Select experiment.')
-
-    DIR_AFNI = epi.config.find_afni()
-    DIR_PIPE = epi.config.find_epitome()
-    DIR_MATLAB = epi.config.find_matlab()
 
     # make sure we have permissions to access the experiment directory.
     if epi.utilities.has_permissions(DIR_DATA) == False:
@@ -514,44 +530,41 @@ def main():
     if epi.utilities.has_permissions(os.path.join(DIR_DATA, expt)) == False:
         sys.exit()
 
-    # input unique identifier
-    print('\nInput unique identifier for this pipeline (alphanumeric):')
-
-    # replace spaces with underscores, and remove every other special char
-    ID = raw_input('ID: ')
-    ID = ID.replace(' ', '_')
-    ID = ID.strip(",./;'[]\|-=+<>?:{}!@#$%^&*()`~")
-    ID = ID.strip('"')
-
-    # get the date and time, current user, f_id
-    datetime, user, f_id = get_date_user()
-    master = 'master_{f_id}_{ID}.sh'.format(f_id=f_id, ID=ID)
-    cmd = 'cmd_{f_id}_{ID}.sh'.format(f_id=f_id, ID=ID)
-    proc = 'proclist_{f_id}_{ID}.sh'.format(f_id=f_id, ID=ID)
-
-    # create a copy of the pipeline in the user's home directory
-    print('\nReplicating the current pipeline in ~/epitome/' +str(ID) + '.')
-
     # make the epitome directory if required
     if os.path.isdir('/home/' + str(user) + '/epitome') == False:
         os.system('mkdir /home/' + str(user) + '/epitome')
 
-    # make the unique ID folder for this module set
-    localpath = '/home/{user}/epitome/{ID}'.format(user=user, ID=ID)
-    if os.path.isdir(localpath) == True:
-        print('UID already exists, skipping replication.')
-        pass
-    
-    # replicate the pipeline into the home folder
-    else:
+    # present the user with the curent pipelines
+    pipelist = os.listdir(os.path.join('/home', user, 'epitome'))
+    pipelist = filter(lambda x: os.path.isdir(os.path.join(
+                                        '/home', user, 'epitome', x)), pipelist)
+    pipelist.append('***NEW***')
+    print('\nSelect which replicant you want from ~/epitome:')
+    ID = epi.utilities.selector_list(pipelist)
+
+    if ID == '***NEW***':
+        print('\nInput unique identifier for this pipeline (alphanumeric):')
+        ID = raw_input('ID: ')
+        ID = mangle_string(ID)
+        localpath = '/home/{user}/epitome/{ID}'.format(user=user, ID=ID)
+        
+        print('\nReplicating the current pipeline in ~/epitome/' +str(ID) + '.')
         os.system('mkdir ' + localpath)
-        os.system('cp -r {pipe}/bin {path}'.format(pipe=DIR_PIPE, 
+        os.system('cp -r {pipe}/bin {path}'.format(pipe=dir_pipe, 
                                                      path=localpath))
-        os.system('cp -r {pipe}/doc {path}'.format(pipe=DIR_PIPE, 
+        os.system('cp -r {pipe}/doc {path}'.format(pipe=dir_pipe, 
                                                      path=localpath))
-        os.system('cp -r {pipe}/epitome {path}'.format(pipe=DIR_PIPE, 
+        os.system('cp -r {pipe}/epitome {path}'.format(pipe=dir_pipe, 
                                                          path=localpath))
-        DIR_PIPE = copy(localpath)
+
+    else:
+        localpath = '/home/{user}/epitome/{ID}'.format(user=user, ID=ID)
+
+    # get the date and time, current user, f_id, set dir_pipe to be local
+    master = 'master_{f_id}_{ID}.sh'.format(f_id=f_id, ID=ID)
+    cmd = 'cmd_{f_id}_{ID}.sh'.format(f_id=f_id, ID=ID)
+    proc = 'proclist_{f_id}_{ID}.sh'.format(f_id=f_id, ID=ID)
+    dir_pipe = copy(localpath)
 
     print('\nExperiment: ' + str(expt) + '. Select image modality.')
 
@@ -573,23 +586,24 @@ def main():
            '# Master script for {expt}: {mode}.\n'
            '# Generated: {datetime} by {user}.\n\n'
            '## Setup\n'
-           'export DIR_PIPE={DIR_PIPE}\n'
+           'export DIR_PIPE={dir_pipe}\n'
            'export DIR_DATA={DIR_DATA}\n'
            'export DIR_AFNI={DIR_AFNI}\n'
            'export DIR_EXPT={expt}\n'
            'export DATA_TYPE={mode}\n'
-           'export ID={ID}\n'
+           'export ID={ID}\n\n'
+           'export PROC={proc}\n'
+           'export CMD={cmd}\n\n'
            'export AFNI_DECONFLICT=OVERWRITE\n'
            'export SUBJECTS=$(python ${{DIR_PIPE}}/epitome/utilities.py ' 
            '${{DIR_DATA}} ${{DIR_EXPT}})\n\n'
            '## Freesurfer\n'
-           'epi-fsrecon {DIR_DATA} {expt} {mode} {fullproc}\n'
+           'epi-fsrecon ${{DIR_DATA}} ${{DIR_EXPT}} ${{DATA_TYPE}} ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'
            '. ${{DIR_PIPE}}/epitome/modules/freesurfer/fsexport '
-           '${{DIR_DATA}} ${{DIR_EXPT}} '
-           '>> ${{DIR_DATA}}/${{DIR_EXPT}}/{proc}\n\n'
+           '${{DIR_DATA}} ${{DIR_EXPT}} >> ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n\n'
            '## Begin Pipeline\n'
            'for SUB in ${{SUBJECTS}}; do\n\n'
-           'cat > ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/{cmd} << EOF\n'
+           'cat > ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/${{CMD}} << EOF\n'
            'export DIR_PIPE=${{DIR_PIPE}}\n'
            'export DIR_DATA=${{DIR_DATA}}\n'
            'export DIR_AFNI=${{DIR_AFNI}}\n'
@@ -597,7 +611,7 @@ def main():
            'export DATA_TYPE=${{DATA_TYPE}}\n'
            'export ID=${{ID}}\n'
            'export SUB=${{SUB}}\n'
-           'McRetroTS={DIR_PIPE}bin/run_McRetroTS.sh {DIR_MATLAB}\n'
+           """McRetroTS='{dir_pipe}bin/run_McRetroTS.sh {DIR_MATLAB}'\n"""
            'EOF\n\n'.format(
                 ID=ID, 
                 cmd=cmd,
@@ -605,16 +619,12 @@ def main():
                 mode=mode,
                 proc=proc,
                 user=user,
-                fullproc=os.path.join(DIR_DATA, expt, proc),
                 datetime=datetime, 
-                DIR_PIPE=DIR_PIPE, 
+                dir_pipe=dir_pipe, 
                 DIR_DATA=DIR_DATA, 
                 DIR_AFNI=DIR_AFNI,
                 DIR_MATLAB=DIR_MATLAB))               
     f.write(txt)
-
-    # we always start the pipeline with init_EPI
-    print('\nBeginning pipeline construction.')
 
     p_list = [] # keeps track of our command-list
     flag = 0 # breaks us out of the loop
@@ -629,7 +639,7 @@ def main():
         #
         # add init_EPI, check for mistakes, break the loop if flawless
         line, output = epi.commands.init_epi.run()
-        p_list, output = writer(p_list, line, cmd, f, output, None, 'sub')
+        p_list, output = writer(p_list, line, '${CMD}', f, output, None, 'sub')
         if output != None:
             used = ['init_epi'] # start the 'used module' list
             flag = 1 # breaks us out of the loop
@@ -638,8 +648,8 @@ def main():
     flag = 0 # breaks us out of the loop
     while flag == 0:
 
-        print('\nPlease select the next pipeline module:\n')
-        module, used = get_modules(moduletype='pre', used=used)
+        print('\nPlease select the next pipeline module:')
+        module, used = get_modules(dir_pipe, moduletype='pre', used=used)
 
         if module == None:
             print('')
@@ -656,7 +666,7 @@ def main():
                 used.pop()
             
             # write line in script if successful
-            p_list, output = writer(p_list, line, cmd, f, output, bkup, 'sub')
+            p_list, output = writer(p_list, line, '${CMD}', f, output, bkup, 'sub')
 
         # print the current pipeline configuration, ask to continue
         print('\nCurrent pre-processing pipeline:')
@@ -669,10 +679,10 @@ def main():
             flag = 1
 
     # add each subject to the proclist, close the subject loop
-    txt = ('\nchmod 750 ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/{cmd}\n'
+    txt = ('\nchmod 750 ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/${{CMD}}\n'
            '# append this subject to the process queue\n'
-           'echo bash ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/{cmd} '
-           '>> ${{DIR_DATA}}/${{DIR_EXPT}}/{proc}\n'
+           'echo bash ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/${{CMD}} '
+           '>> ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'
            'done\n\n'
            '# calls to QC programs\n'.format(cmd=cmd, proc=proc))
     f.write(txt)
@@ -684,7 +694,7 @@ def main():
     while flag == 0:
 
         print('\nPlease select the next QC module:')
-        module, used = get_modules(moduletype='qc', used=used)
+        module, used = get_modules(dir_pipe, moduletype='qc', used=used)
         if module == None:
             print('')
         else:
@@ -695,7 +705,7 @@ def main():
             command = ('epi.commands.' + str(module) + 
                          '.run(DIR_DATA, expt, mode)')
             line, output = eval(command)
-            p_list, output = writer(p_list, line, proc, f, output, bkup, 'exp')
+            p_list, output = writer(p_list, line, '${PROC}', f, output, bkup, 'exp')
 
         # print the current pipeline configuration, ask to continue
         print('\nThe QC pipeline currently looks like this:')
@@ -719,7 +729,7 @@ def main():
     print('The pipeline can be manually executed via:\n' + 
            '. ' + str(os.path.join(DIR_DATA, expt, proc)) + '\n' +
            'or submitted to the queue via:\n' +
-           'epi-queue ' + str(os.path.join(DIR_DATA, expt, proc))+'queuename.q')
+           'epi-queue ' + str(os.path.join(DIR_DATA, expt, proc))+' queuename.q')
     print('******************************************************************')
 
 # this is the command-line usage bit
@@ -732,12 +742,6 @@ if __name__ == "__main__":
     elif len(sys.argv) == 2 and sys.argv[1] == 'verify':
         print('Please specify an experiment.')
         get_experiments(check='check')
-
-    #elif len(sys.argv) == 3 and sys.argv[1] == 'verify':
-    #    check_directories(sys.argv[2]) 
-
-    #elif len(sys.argv) > 3 and sys.argv[1] == 'verify':
-    #    print 'epitome check only works with 1 experiment at a time!'
 
     # checking functions
     elif len(sys.argv) == 2 and sys.argv[1] == 'check':
