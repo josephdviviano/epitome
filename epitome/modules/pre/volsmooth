@@ -1,17 +1,37 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
-export MASK=`echo 'anat_'${2}`
-export FWHM=`echo ${3}`
+export INPUT=$(echo ${1})
+export MASK=$(echo ${2})
+export FWHM=$(echo ${3})
+export MODE=$(echo ${4})
 
 EOF
 
 cat<<"EOF"
 
 echo '************************************************************************'
-echo '     Smooths data in volumetric space, obeying mask label boundaries'
-echo '   Anything labeled zero in the mask will become zeroed in the output.'
+echo '                        Spatially smooth data.'
+echo ''
+echo '    - Smooths data in volumetric space.
+echo '    - Anything labeled zero in the mask will become zeroed in the output.'
+
+
+if [ ${MODE} -eq 'multimask' ]; then
+echo '    - Obeys mask label boundaries.'
+echo '    - Uses simpler blurring (iterative on input dataset).'
+fi
+
+if [ ${MODE} -eq 'normal' ]; then
+echo '    - Iteratively blurs data to some FWHM within a mask.'
+echo '    - Ideally uses the noise model from the filter module to estimate'
+echo '      smoothness, otherwise, detrends input and uses that.'
+echo '    - But if you didn't use filter before, this detrends the input'
+echo '      and uses that.'
+echo '    - NB: Assumes these images are in register!!! Use before going to'
+echo '      MNI space!'
+fi
+
 echo ''
 echo '************************************************************************'
 
@@ -32,14 +52,40 @@ for SESS in ${DIR_SESS}; do
                 -inset ${SESS}/${MASK}.nii.gz
         fi
 
-        # resample mask to single-run space, then smooth
+        # smooth to specified FWHM
         if [ ! -f ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz ]; then
-            3dBlurInMask \
-                -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
-                -Mmask ${SESS}/anat_smoothmask.nii.gz \
-                -FWHM ${FWHM} \
-                -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
+            # use 3dBlurToFWHM
+            if [ ${MODE} -eq 'normal' ]; then
+
+                # If already run filter, use noise model from it as blurmaster
+                if [ -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
+
+                    3dBlurToFWHM \
+                        -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                        -mask ${SESS}/anat_smoothmask.nii.gz \
+                        -FWHM ${FWHM} \
+                        -blurmaster ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
+                        -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
+
+                else
+
+                    3dBlurToFWHM \
+                        -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                        -mask ${SESS}/anat_smoothmask.nii.gz \
+                        -FWHM ${FWHM} \
+                        -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
+                fi
+
+            # use 3dBlurInMask
+            elif [ ${MODE} -eq 'multimask' ]; then
+                
+                3dBlurInMask \
+                    -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                    -Mmask ${SESS}/anat_smoothmask.nii.gz \
+                    -FWHM ${FWHM} \
+                    -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
+            fi
         fi
     done
 done

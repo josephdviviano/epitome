@@ -15,4 +15,5 @@ Alternatively, the 'kaiser' and 'butterworth' filters work in the frequency doma
 
 Prerequisites: init_epi.
 
-Outputs: lowpass
+Outputs: lowpass.
+

@@ -237,7 +237,7 @@ for SESS in ${DIR_SESS}; do
         fi 
 
         # initialize filter command
-        if [ ! -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_filtered.${ID}.${NUM}.nii.gz ]; then
             
             # start with the standard motion-parameter regressors
             CMD=`echo 3dTfitter \
