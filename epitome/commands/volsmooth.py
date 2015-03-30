@@ -16,15 +16,15 @@ def run(input_name):
         if mask_prefix == 'custom':
             mask_prefix = raw_input('Custom Mask Prefix: ')
         if mask_prefix == '':
-            raise ValueError as ve
+            raise ValueError
         
         print('\nInput smoothing kernel FWHM (mm):')
         fwhm = epi.utilities.selector_float()
 
         print('\nSelect mode:')
         mode = epi.utilities.selector_dict(
-                   {'normal': 'Uses AFNIs 3dBlurToFWHM', 
-                    'multimask': 'Uses AFNIs 3dBlurInMask'})
+                   {'normal': ': AFNIs 3dBlurToFWHM', 
+                    'multimask': ': AFNIs 3dBlurInMask'})
 
     # if we messed any of these up, we return None
     except ValueError as ve:
