@@ -9,7 +9,7 @@ Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 > As long as our brain is a mystery, the universe, the reflection of the structure of the brain will also be a mystery.
 > -- Santiago Ramón y Cajal
 
-This branch has been modified to work on the local cluster at CAMH's College St. location, and updated with modules to meet the demands of this site.
+*Current under active development at the TIGRLab (CAMH), and is regularly updated with modules to meet the demands of this site.*
 
 **Shortcuts:**
 
