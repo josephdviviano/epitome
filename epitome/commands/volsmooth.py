@@ -31,7 +31,7 @@ def run(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${DIR_PIPE}/epitome/modules/pre/blur2FWHM ' + 
+    line = ('. ${DIR_PIPE}/epitome/modules/pre/volsmooth ' + 
                                      str(input_name) + ' ' +
                                      str(mask_prefix) + ' ' +
                                      str(fwhm) + ' ' +
