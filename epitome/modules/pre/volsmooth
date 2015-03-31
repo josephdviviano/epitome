@@ -1,8 +1,8 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=$(echo ${1})
-export MASK=$(echo ${2})
+export INPUT=$(echo func_${1})
+export MASK=$(echo anat_${2})
 export FWHM=$(echo ${3})
 export MODE=$(echo ${4})
 
@@ -56,7 +56,7 @@ for SESS in ${DIR_SESS}; do
         if [ ! -f ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz ]; then
 
             # use 3dBlurToFWHM
-            if [ ${MODE} -eq 'normal' ]; then
+            if [ ${MODE} == 'normal' ]; then
 
                 # If already run filter, use noise model from it as blurmaster
                 if [ -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
@@ -78,7 +78,7 @@ for SESS in ${DIR_SESS}; do
                 fi
 
             # use 3dBlurInMask
-            elif [ ${MODE} -eq 'multimask' ]; then
+            elif [ ${MODE} == 'multimask' ]; then
                 
                 3dBlurInMask \
                     -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
