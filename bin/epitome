@@ -611,7 +611,7 @@ def main():
            'export DATA_TYPE=${{DATA_TYPE}}\n'
            'export ID=${{ID}}\n'
            'export SUB=${{SUB}}\n'
-           """McRetroTS='{dir_pipe}bin/run_McRetroTS.sh {DIR_MATLAB}'\n"""
+           """McRetroTS='{dir_pipe}/bin/run_McRetroTS.sh {DIR_MATLAB}'\n"""
            'EOF\n\n'.format(
                 ID=ID, 
                 cmd=cmd,
