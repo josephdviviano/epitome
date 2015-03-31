@@ -58,4 +58,4 @@ This computes detrended nuisance time series, fits each run with a computed nois
 
 Prerequisites: init_epi, linreg_calc_afni/fsl, linreg_FS2epi_afni/fsl.
 
-Outputs: set of masks, regressors in PARAMS/, detrend (detrended, before regression model, mean per voxel removed), noise (fit of regression model), filtered (residuals of regression model, mean added back in).
+Outputs: set of masks, regressors in PARAMS/, detrend (detrended, before regression model, mean per voxel removed), mean, std (standard deviation), noise (fit of regression model), filtered (residuals of regression model, mean added back in).

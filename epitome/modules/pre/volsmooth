@@ -13,7 +13,7 @@ cat<<"EOF"
 echo '************************************************************************'
 echo '                        Spatially smooth data.'
 echo ''
-echo '    - Smooths data in volumetric space.
+echo '    - Smooths data in volumetric space.'
 echo '    - Anything labeled zero in the mask will become zeroed in the output.'
 
 
@@ -26,7 +26,7 @@ if [ ${MODE} -eq 'normal' ]; then
 echo '    - Iteratively blurs data to some FWHM within a mask.'
 echo '    - Ideally uses the noise model from the filter module to estimate'
 echo '      smoothness, otherwise, detrends input and uses that.'
-echo '    - But if you didn't use filter before, this detrends the input'
+echo '    - But if you didnt use filter before, this detrends the input'
 echo '      and uses that.'
 echo '    - NB: Assumes these images are in register!!! Use before going to'
 echo '      MNI space!'

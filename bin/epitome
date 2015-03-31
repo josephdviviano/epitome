@@ -122,9 +122,11 @@ def print_help(module):
 
     import textwrap
 
+    dir_pipe = epi.config.find_epitome()
+
     print('')
     if module != None:
-        helpfile = open(os.path.join(DIR_PIPE, 'doc/' + module + '.md'), 'rb')
+        helpfile = open(os.path.join(dir_pipe, 'doc/' + module + '.md'), 'rb')
         helpfile = helpfile.readlines()
 
         for line in helpfile:

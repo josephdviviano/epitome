@@ -173,17 +173,17 @@ for SESS in ${DIR_SESS}; do
             
             # compute mean, standard deviation
             3dTstat \
-                -prefix ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
                 -mean ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
             3dTstat \
-                -prefix ${SESS}/func_tmp_stdev.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_stdev.${ID}.${NUM}.nii.gz \
                 -stdev ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
             
             # compute temporal SNR (pre anything)
             3dcalc \
-                -a ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
-                -b ${SESS}/func_tmp_stdev.${ID}.${NUM}.nii.gz \
+                -a ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
+                -b ${SESS}/func_stdev.${ID}.${NUM}.nii.gz \
                 -expr 'a/b' \
                 -prefix ${SESS}/func_tSNR.${ID}.${NUM}.nii.gz
 
@@ -388,7 +388,7 @@ for SESS in ${DIR_SESS}; do
                 -float \
                 -a ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
                 -b ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
-                -c ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
+                -c ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
                 -expr 'a-b+c' \
                 -prefix ${SESS}/func_filtered.${ID}.${NUM}.nii.gz
 
