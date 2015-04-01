@@ -59,7 +59,6 @@ def get_mode(expt):
     Prints the available image modalities. Optionally prompts the user to 
     select one.
     """
-
     # get a sorted list of the experiments
     dir_expt = os.path.join(DIR_DATA, expt)
     subj_list = [d for d in os.listdir(dir_expt)
@@ -350,15 +349,13 @@ def writer(p_list, line, filename, f, output, bkup, mode):
 
     return p_list, output
 
-def mangle_string(string):
+def print_list(lst):
     """
-    Turns an arbitrary string into a decent filename (no underscores allowed)!
+    Prints all the items in a list (nicely).
     """
-    string = string.replace(' ', '-')
-    string = string.strip(",./;'[]\|_=+<>?:{}!@#$%^&*()`~")
-    string = string.strip('"')
-
-    return string
+    for item in lst:
+        print('    + ' + str(item))
+    print('')
 
 # The Cleanup Pipeline
 ###############################################################################
@@ -421,7 +418,6 @@ def run_cleanup():
                 DIR_AFNI=DIR_AFNI))
     f.write(txt)
 
-
     # get the subjects
     print('\nWould you like to cleanup all subjects, or just some?')
     flag = 0
@@ -450,11 +446,8 @@ def run_cleanup():
                 print('Invalid subject, please try again.')
 
             print('\nThe following subjects are slated for cleanup:\n')
-            for subj in subjects:
-                print(subj)
-            print('')
+            print_list(subjects)
             response = raw_input("""Type 'stop' to stop, else continue: """)
-
             if response == 'stop':
                 flag = 1
 
@@ -462,9 +455,7 @@ def run_cleanup():
     elif decision == 'all':
         subjects = epi.utilities.get_subj(os.path.join(DIR_DATA, expt))
         print('\nThe following subjects are slated for cleanup:\n')
-        for subj in subjects:
-            print(subj)
-        print('')
+        print_list(subjects)
 
     # print these subjects to the script
     f.write('export SUBJECTS="')
@@ -547,7 +538,7 @@ def main():
     if ID == '***NEW***':
         print('\nInput unique identifier for this pipeline (alphanumeric):')
         ID = raw_input('ID: ')
-        ID = mangle_string(ID)
+        ID = epi.utilities.mangle_string(ID)
         localpath = '/home/{user}/epitome/{ID}'.format(user=user, ID=ID)
         
         print('\nReplicating the current pipeline in ~/epitome/' +str(ID) + '.')
@@ -672,11 +663,8 @@ def main():
 
         # print the current pipeline configuration, ask to continue
         print('\nCurrent pre-processing pipeline:')
-        for pipe in p_list:
-            print('    ' + str(pipe))
-        print('')
+        print_list(p_list)
         response = raw_input("""Type 'stop' to stop, else continue: """)
-        # breaks us out of the pipeline constructor loop
         if response == 'stop':
             flag = 1
 
@@ -711,16 +699,13 @@ def main():
 
         # print the current pipeline configuration, ask to continue
         print('\nThe QC pipeline currently looks like this:')
-        for pipe in p_list:
-            print pipe
-        print('')
+        print_list(p_list)
         response = raw_input("""Type 'stop' to stop, else continue: """)
-        # breaks us out of the pipeline constructor loop
         if response == 'stop':
             flag = 1
 
-    print('\nSaving master script & generating subject-specific scripts.')
     # close the file, make executable by owner + group, and execute
+    print('\nSaving master script & generating subject-specific scripts.')
     f.write('\n')
     f.close()
     os.chmod(os.path.join(DIR_DATA, expt, master), 0750)

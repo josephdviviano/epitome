@@ -152,6 +152,29 @@ def check_os():
               """)
         sys.exit()
 
+def mangle_string(string):
+    """
+    Turns an arbitrary string into a decent foldername/filename 
+    (no underscores allowed)!
+    """
+    string = string.replace(' ', '-')
+    string = string.strip(",./;'[]\|_=+<>?:{}!@#$%^&*()`~")
+    string = string.strip('"')
+
+    return string
+
+def print_dirs(in_dir):
+    """
+    Prints the directories found within the input directory.
+    """
+    dir_list = [d for d in os.listdir(in_dir) if
+                           os.path.isdir(os.path.join(in_dir, d)) == True]
+    dir_list.sort()
+    for d in dir_list:
+        print('    + ' + d)
+    if len(dir_list) == 0:
+        print('None found.')
+
 def init_shell(path, expt):
     """
     Gets all of the subjects and prints them as a BASH friendly variable.
