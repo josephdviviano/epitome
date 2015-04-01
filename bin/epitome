@@ -187,7 +187,7 @@ def check_environment(mode='verbose'):
        print('ERROR: Manditory package FSL is not on your path.')
        sys.exit()
 
-    if find_ninet == False:
+    if epi.config.find_ninet == False:
         print('ERROR: Manditory package ninet is not on your pythonpath.')
         sys.exit()
     
