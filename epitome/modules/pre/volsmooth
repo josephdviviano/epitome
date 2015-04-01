@@ -1,10 +1,10 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=func_${1}
-export MASK=anat_${2}
-export FWHM=${3}
-export MODE=${4}
+export INPUT=$(echo func_${1})
+export MASK=$(echo anat_${2})
+export FWHM=$(echo ${3})
+export MODE=$(echo ${4})
 
 EOF
 

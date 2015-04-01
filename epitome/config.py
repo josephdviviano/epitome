@@ -32,6 +32,15 @@ def find_epitome():
 
     return dir_epitome
 
+def find_ninet():
+    """
+    Returns True if ninet is on the path.
+    """
+    if ninet in os.environ['PYTHONPATH'].split('/'):
+        return True
+    else:
+        return False
+
 def find_matlab():
     """
     Returns the path of the matlab folder, or None if unavailable.
