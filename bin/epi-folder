@@ -11,19 +11,7 @@ epifolder: Generating your epitome folder directories since 2014.
 
 import os, sys
 import epitome as epi
-
-def print_dirs(in_dir):
-    """
-    Prints the directories found within the input directory.
-    """
-
-    dir_list = [d for d in os.listdir(in_dir) if
-                           os.path.isdir(os.path.join(in_dir, d)) == True]
-    dir_list.sort()
-    for d in dir_list:
-        print(d)
-    if len(dir_list) == 0:
-        print('None found.')
+from copy import copy
 
 def edit_mode(mode):
     """
@@ -32,7 +20,7 @@ def edit_mode(mode):
     
     # print options
     print('\nCurrent sessions: ')
-    print_dirs(mode)
+    epi.utilities.print_dirs(mode)
 
     # move onto mode/run loop
     print('\nHow many sessions should there be?')
@@ -68,7 +56,7 @@ def edit_subject(subject):
     
     # print options
     print('\nCurrent image modalities:')
-    print_dirs(subject)
+    epi.utilities.print_dirs(subject)
 
     # move onto modality loop
     flag = 0
@@ -99,10 +87,9 @@ def edit_subject(subject):
 
 def main():
     """
-    A CLI for creating experiment directories for EPItome-XL.
+    CLI for creating epitome directory strctures.
     """
-
-    dir_data, dir_pipe, dir_afni, cores = epi.config.return_paths()
+    dir_data = epi.config.find_data()
 
     # make sure we have the appropriate permissions for the top directory
     if epi.utilities.has_permissions(dir_data) == False:
@@ -110,36 +97,38 @@ def main():
 
     # print a welcome message
     print('##################################################################')
-    print('EPIfolder: Generating your EPItome folder directories since 2014.')
+    print('epi-folder: Generating your epitome folder directories since 2014.')
     print('##################################################################')
 
     # make experiment directory
-    print('\nCurrent experiments:')
-    print_dirs(dir_data)
-
     print('\nWhich experiment would you like to edit? ')
-    expt_name = raw_input('Experiment: ')
-    expt = os.path.join(dir_data, expt_name)
+    data_list = [d for d in os.listdir(dir_data) if 
+                            os.path.isdir(os.path.join(dir_data, d)) == True]
+    data_list.append('***NEW***')
+    selection = epi.utilities.selector_list(data_list)
 
-    if os.path.isdir(expt) == True:
-        print('\nAlready exists! Adding to existing experiment.')
-    else:
-        # try to make the new directory
+    if selection == '***NEW***':
         try:
-            os.system('mkdir ' + os.path.join(expt))
+            print('Input new experiment name:')
+            name = raw_input('Name: ')
+            name = epi.utilities.mangle_string(name)
+            os.system('mkdir ' + os.path.join(dir_data, name))
+            print('Making experiment folder: ' + name)
         except:
-            pass
+            print('ERROR: You need permission to write to the data directory.')
+            sys.exit()
+    else:
+        name = copy(selection)
 
-    # ensure we have the appropriate permissions for the experiment directory
+    expt = os.path.join(dir_data, name)
+
+    # ensure we have the appropriate permissions (might be redundant)
     if epi.utilities.has_permissions(expt) == False:
         sys.exit()
 
     # print a list of the subject, if they exist
-    if os.listdir(expt) == []:
-        pass
-    else:
-        print('Current participants: ')
-        print_dirs(expt)
+    print('Current subjects: ')
+    epi.utilities.print_dirs(expt)
 
     # move on to a subject loop
     flag = 0
@@ -148,12 +137,12 @@ def main():
         print('\nInput subject name:')
 
         subject = raw_input('Subject: ')
+        subject = epi.utilities.mangle_string(subject)
+        print('Editing subject ' + str(subject))
 
         # make the subject folder, if it does not exist
         if os.path.isdir(os.path.join(expt, subject)) == False:
             os.system('mkdir ' + os.path.join(expt, subject))
-        else:
-            print('Editing existing subject ' + str(subject))
 
         # edit subject, and check for the escape flag
         edit_subject(os.path.join(expt, subject))
@@ -166,7 +155,7 @@ def main():
         else:
             flag = 1
 
-    print('Thanks for editing ' + str(expt_name) + '!')
+    print('Thanks for editing ' + str(name) + ' :D !')
 
 # this is the command-line usage bit
 if __name__ == "__main__":
@@ -177,4 +166,4 @@ if __name__ == "__main__":
 
     # return the usage if the user does a silly thing
     else:
-        print __doc__
+        print(__doc__)
