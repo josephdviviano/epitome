@@ -1,0 +1,19 @@
+#!/bin/bash
+
+cat<<"EOF"
+
+echo '************************************************************************'
+echo '                      Removes all temporary files'
+echo '************************************************************************'
+
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+
+    rm ${SESS}/anat_EPI_tmp*.nii.gz >& /dev/null
+    rm ${SESS}/func_tmp*.nii.gz >& /dev/null
+    rm ${SESS}/PARAMS/tmp*.1D >& /dev/null
+
+done
+
+EOF

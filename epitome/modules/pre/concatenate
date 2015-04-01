@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
+export INPUT=func_${1}
 
 EOF
 
@@ -14,8 +14,6 @@ echo '   - Concatenates '${INPUT}' data.'
 echo '   - This only makes sense if they are in alignment.'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 # create concatenated runs in order
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_concat.nii.gz ]; then

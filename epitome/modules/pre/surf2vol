@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
+export INPUT=func_${1}
 
 EOF
 
@@ -12,8 +12,6 @@ echo '           Projects surface data back into single subject space'
 echo '    - Assumes we are in single subject space, will not work on MNI etc.'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -59,10 +57,6 @@ for SESS in ${DIR_SESS}; do
               -expr 'a+b'
         fi
     done
-
-    rm ${SESS}/func_tmp*.nii.gz >& /dev/null
 done
-
-cd ${DIR_PIPE}
 
 EOF

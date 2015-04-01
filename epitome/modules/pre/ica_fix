@@ -1,24 +1,20 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
-export TRAINDATA=`echo ${2}`
-export THRESHOLD=`echo ${3}`
+export INPUT=func_${1}
+export TRAINDATA=${2}
+export THRESHOLD=${3}
 
 EOF
 
 cat <<"EOF"
 
 echo '************************************************************************'
-echo '                MELODIC-based component regression using FIX'
-echo ''
-echo '                                 LOL :D                                 '
+echo '              MELODIC-based component regression using FIX'
 echo ''
 echo '   - Runs FSL fix on MELODIC outputs using '${TRAINDATA}'.'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 # find the FSL FIX folder
 DIR_FIX=`which fix`

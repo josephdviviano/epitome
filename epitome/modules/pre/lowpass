@@ -1,10 +1,10 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
-export MASK=`echo 'anat_'${2}`
-export FILTER=`echo ${3}`
-export CUTOFF=`echo ${4}`
+export INPUT=func_${1}
+export MASK=anat_${2}
+export FILTER=${3}
+export CUTOFF=${4}
 
 EOF
 
@@ -16,8 +16,6 @@ echo ''
 echo '   - Low-passes masked functional data using a '${FILTER}' filter.'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -43,7 +41,5 @@ for SESS in ${DIR_SESS}; do
         fi
     done
 done
-
-cd ${DIR_PIPE}
 
 EOF

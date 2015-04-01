@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
+export INPUT=func_${1}
 
 EOF
 
@@ -15,8 +15,6 @@ echo '     space. NB: Does not work on MNI data!'
 echo ''
 echo '************************************************************************'
 
-cd /tmp
-
 ## calculate global correlation for each run
 for SESS in `ls -d ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`; do
     for FILE in `ls ${SESS}/${INPUT}.${ID}.*.nii.gz`; do
@@ -28,8 +26,7 @@ for SESS in `ls -d ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`; do
                 -mask ${SESS}/anat_EPI_mask.nii.gz \
                 > ${SESS}/${PARAMS}/${FNAME}.gcorr
         fi
-    done # file
-done # session
-cd ${DIR_PIPE}
+    done
+done
 
 EOF
