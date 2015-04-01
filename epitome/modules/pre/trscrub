@@ -1,11 +1,11 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=$(echo 'func_'${1})
-export HEAD=$(echo ${2})
-export FD=$(echo ${3})
-export DV=$(echo ${4})
-export MODE=$(echo ${5})
+export INPUT=func_${1}
+export HEAD=${2}
+export FD=${3}
+export DV=${4}
+export MODE=${5}
 
 EOF
 
@@ -22,8 +22,6 @@ echo '   - We also remove TRs 1 back and 2 forward from the disturbance to'
 echo '     control for spin-echo effects (appropriate according to Dr. Power).'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -45,7 +43,5 @@ for SESS in ${DIR_SESS}; do
         fi
     done
 done
-
-cd ${DIR_PIPE}
 
 EOF

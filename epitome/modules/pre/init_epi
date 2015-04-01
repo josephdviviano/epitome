@@ -1,12 +1,12 @@
 #!/bin/bash
 
 cat <<EOF
-export DATA_QUALITY=`echo ${1}`
-export DELTR=`echo ${2}`
-export DESPIKE=`echo ${3}`
-export TPATTERN=`echo ${4}`
-export NORMALIZE=`echo ${5}`
-export MASKING=`echo ${6}`
+export DATA_QUALITY=${1}
+export DELTR=${2}
+export DESPIKE=${3}
+export TPATTERN=${4}
+export NORMALIZE=${5}
+export MASKING=${6}
 
 EOF
 
@@ -27,8 +27,6 @@ echo '   - Creates deskulled template EPI and '${MASKING}' whole-brain mask,'
 echo '   - Scales each voxel using '${NORMALIZE}','
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 # loop through sessions
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -332,10 +330,6 @@ for SESS in ${DIR_SESS}; do
 
         fi
     done
-    rm ${SESS}/anat_EPI_tmp*.nii.gz >& /dev/null
-    rm ${SESS}/func_tmp*.nii.gz >& /dev/null
-    rm ${SESS}/PARAMS/tmp*.1D >& /dev/null
 done
-cd ${DIR_PIPE}
 
 EOF

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 cat <<EOF
-export DATA_QUALITY=`echo ${1}`
-export COST=`echo ${2}`
-export REG_DOF=`echo ${3}`
+export DATA_QUALITY=${1}
+export COST=${2}
+export REG_DOF=${3}
 
 EOF
 
@@ -19,8 +19,6 @@ echo '   - Degrees of freedom preset '${REG_DOF}','
 echo '   - Generates EPI template registered to T1 & vice-versa (sessionwise),'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then
@@ -114,12 +112,6 @@ for SESS in `basename ${DIR_SESS}`; do
             -concat ${DIR}/${SESS}/mat_T1_to_EPI.mat \
                     ${DIR}/${SESS}/mat_TAL_to_T1.mat
     fi
-
-    # Clean up leftovers in /tmp
-    rm anat_*
-    rm __tt*
-    rm template*
-    rm pre.*
 done
 cd ${DIR_PIPE}
 

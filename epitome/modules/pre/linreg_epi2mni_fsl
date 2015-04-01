@@ -1,8 +1,8 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_${1}'`
-export DIMS=`echo ${2}`
+export INPUT=func_${1}
+export DIMS=${2}
 
 EOF
 
@@ -16,8 +16,6 @@ echo '   - Transforms whole-brain masks to MNI space,'
 echo '   - Creates 1 concatenated run per participant in run order.'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in `basename ${DIR_SESS}`; do
@@ -61,7 +59,5 @@ for SESS in `basename ${DIR_SESS}`; do
             -out ${DIR}/${SESS}/anat_EPI_mask_MNI-linreg.nii.gz
     fi
 done
-
-cd ${DIR_PIPE}
 
 EOF

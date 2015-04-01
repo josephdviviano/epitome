@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
+export INPUT=func_${1}
 
 EOF
 
@@ -11,9 +11,6 @@ echo '************************************************************************'
 echo '            Projects functional data onto a cortical surface'
 echo ''
 echo '************************************************************************'
-
-
-cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -39,6 +36,8 @@ for SESS in ${DIR_SESS}; do
             ${DIR_T1}/anat_T1_brain.nii.gz \
             ${DIR_FS}/SUMA/anat_T1_brain+orig.
 
+        # note: we have to cd to this directory for the pipeline to work
+        # this is an usly 
         cd ${DIR_FS}/SUMA
         @SUMA_AlignToExperiment \
             -exp_anat anat_T1_brain+orig.\
@@ -79,7 +78,5 @@ for SESS in ${DIR_SESS}; do
         fi
     done
 done
-
-cd ${DIR_PIPE}
 
 EOF

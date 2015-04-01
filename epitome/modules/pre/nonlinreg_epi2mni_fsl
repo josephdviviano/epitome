@@ -1,8 +1,8 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
-export DIMS=`echo ${2}`
+export INPUT=func_${1}
+export DIMS=${2}
 
 EOF
 
@@ -19,8 +19,6 @@ echo '             DO NOT RUN LINREG_EPI2MNI_FSL BEFORE THIS!!!'
 echo '                    This does that part for you :)'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in `basename ${DIR_SESS}`; do
@@ -70,7 +68,5 @@ for SESS in `basename ${DIR_SESS}`; do
             --out=${DIR}/anat_EPI_mask_MNI-nonlin.nii.gz
     fi
 done
-
-cd ${DIR_PIPE}
 
 EOF

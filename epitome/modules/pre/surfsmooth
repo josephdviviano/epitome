@@ -1,8 +1,8 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=`echo 'func_'${1}`
-export FWHM=`echo ${2}`
+export INPUT=func_${1}
+export FWHM=${2}
 
 EOF
 
@@ -13,8 +13,6 @@ echo '               Smooths functional data on a cortical surface'
 echo '    - Uses a gaussian kernel with FWHM of '${FWHM}' mm.'
 echo ''
 echo '************************************************************************'
-
-cd /tmp
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -51,6 +49,5 @@ for SESS in ${DIR_SESS}; do
         fi
     done
 done
-cd ${DIR_PIPE}
 
 EOF
