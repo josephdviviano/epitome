@@ -1,8 +1,8 @@
 #!/bin/bash
 
 cat <<EOF
-export INPUT=func_${1}
-export MASK=anat_${2}
+export INPUT=$(echo func_${1})
+export MASK=$(echo anat_${2})
 
 EOF
 

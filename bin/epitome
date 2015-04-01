@@ -186,6 +186,10 @@ def check_environment(mode='verbose'):
     if dir_fsl == None:
        print('ERROR: Manditory package FSL is not on your path.')
        sys.exit()
+
+    if find_ninet == False:
+        print('ERROR: Manditory package ninet is not on your pythonpath.')
+        sys.exit()
     
     if dir_freesurfer == None:
         print('ERROR: Manditory package Freesurfer is not on your path.')
