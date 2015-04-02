@@ -10,9 +10,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="2543.0005"
-   height="1052.9916"
-   viewBox="12.95 3.112 83.372248 32.364708"
+   width="1024"
+   height="400"
+   viewBox="12.95 3.112 33.571831 12.294384"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r"
@@ -20,7 +20,7 @@
    inkscape:export-filename="/projects/jdv/code/epitome/assets/overview.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
-   enable-background="new">
+   style="enable-background:new">
   <metadata
      id="metadata216">
     <rdf:RDF>
@@ -29,7 +29,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -80,7 +80,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3721"
-         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 z"
+         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -88,7 +88,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3711"
-         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 z"
+         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -96,7 +96,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3701"
-         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 z"
+         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -104,7 +104,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3691"
-         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 z"
+         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -112,7 +112,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3681"
-         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 z"
+         d="m 72,57.6 97.04348,0 0,104.72727 -97.04348,0 L 72,57.6 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -424,7 +424,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3249"
-         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 z"
+         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -432,7 +432,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3239"
-         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 z"
+         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -440,7 +440,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3231"
-         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 z"
+         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -448,7 +448,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3221"
-         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 z"
+         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <clipPath
@@ -456,7 +456,7 @@
        clipPathUnits="userSpaceOnUse">
       <path
          id="path3211"
-         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 z"
+         d="m 72,413.67273 97.04348,0 0,104.72727 L 72,518.4 72,413.67273 Z"
          inkscape:connector-curvature="0" />
     </clipPath>
     <mask
@@ -1833,8 +1833,8 @@
      id="namedview212"
      showgrid="false"
      inkscape:zoom="0.71154422"
-     inkscape:cx="596.5871"
-     inkscape:cy="479.29059"
+     inkscape:cx="587.31251"
+     inkscape:cy="346.08557"
      inkscape:window-x="0"
      inkscape:window-y="21"
      inkscape:window-maximized="1"
@@ -1849,16 +1849,25 @@
        position="31.081828,46.610573"
        orientation="0,1"
        id="guide6358" />
+    <sodipodi:guide
+       position="15.435403,6.0474589"
+       orientation="0,1"
+       id="guide4561" />
+    <sodipodi:guide
+       position="17.001982,4.0172405"
+       orientation="1,0"
+       id="guide4563" />
   </sodipodi:namedview>
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Layer 2"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(0,-21.408323)">
     <g
        style="opacity:0.55"
        id="g3351"
-       transform="matrix(0.04098124,0,0,-0.04098124,14.180969,40.907246)"
+       transform="matrix(0.04098124,0,0,-0.04098124,8.5668052,49.716586)"
        inkscape:export-filename="/home/jdv/code/epitome/assets/overview.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
@@ -1875,7 +1884,7 @@
     <g
        style="opacity:0.55"
        id="g3649"
-       transform="matrix(0.04098124,0,0,-0.04098124,22.942953,33.594078)"
+       transform="matrix(0.04098124,0,0,-0.04098124,17.328789,42.403418)"
        inkscape:export-filename="/home/jdv/code/epitome/assets/overview.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
@@ -1894,11 +1903,12 @@
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="Layer 3"
-     style="display:inline;opacity:1;">
+     style="display:inline;opacity:1"
+     transform="translate(0,-21.408323)">
     <g
        style="display:inline;opacity:0.55"
        id="g4352-9"
-       transform="matrix(0.08104148,0,0,-0.08157425,26.526111,31.050891)"
+       transform="matrix(0.08104148,0,0,-0.08157425,20.911947,39.860231)"
        inkscape:export-filename="/home/jdv/code/epitome/assets/overview.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
@@ -1927,18 +1937,19 @@
      inkscape:groupmode="layer"
      id="layer5"
      inkscape:label="Layer 4"
-     style="display:inline;opacity:1">
+     style="display:inline;opacity:1"
+     transform="translate(0,-21.408323)">
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:1.31139958px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="28.978804"
-       y="22.679895"
+       x="23.364637"
+       y="31.489227"
        id="text6440"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan6442"
-         x="28.978804"
-         y="22.679895"
+         x="23.364637"
+         y="31.489227"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.95064902px;font-family:'DejaVu Sans Mono';-inkscape-font-specification:'DejaVu Sans Mono'">epitome</tspan></text>
   </g>
 </svg>
