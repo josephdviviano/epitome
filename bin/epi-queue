@@ -59,7 +59,7 @@ def main(input_file, queue):
                                                  queue=queue, name=fsexportname)
             
         # preprocessing
-        elif line.beginswith('cmd'):
+        elif line.startswith('cmd'):
             cmdname = 'epi-cmd_' + name
             log = cmdname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
