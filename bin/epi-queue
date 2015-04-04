@@ -41,7 +41,7 @@ def main(input_file, queue):
         name = (line.replace('/', ' ').split(' ')[-1][0:-3] + '_' + str(i))
 
         # freesurfer recon-alls
-        if line[0:9] == 'recon-all':
+        if line.startswith('recon-all') == True:
             fsname = 'epi-fs_' + u_id + '_' + str(i)
             log = fsname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
@@ -49,8 +49,11 @@ def main(input_file, queue):
                   """.format(line=line, log=log, queue=queue, name=fsname)
             fslist.append(fsname)
 
+        elif line == '':
+            continue
+
         # freesurfer exports
-        elif line.find('epi-fsexport') >= 0:
+        elif line.startswith('epi-fsexport') == True:
             fsexportname = 'epi-fsexport_' + u_id
             log = fsexportname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
@@ -59,7 +62,7 @@ def main(input_file, queue):
                                                  queue=queue, name=fsexportname)
 
         # preprocessing
-        elif line.split('/')[-1].startswith('cmd'):
+        elif line.split('/')[-1].startswith('cmd') == True:
             cmdname = 'epi-cmd_' + name
             log = cmdname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
@@ -69,13 +72,17 @@ def main(input_file, queue):
             sublist.append(cmdname)
 
         # qc
-        else:
+        elif line.startswith('epi-qc') == True:
             qcname = 'epi-qc_' + u_id + '_' + str(i)
             log = qcname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid {hold} -cwd -N {name} -j y \
                   """.format(line=line, log=log, hold=",".join(sublist),
                                                  queue=queue, name=qcname)
+
+        else:
+            print('Failed to parse ' + line)
+            continue
 
         # open a subprocess, print the result to the console
         pipe = subprocess.Popen(cmd, shell=True,
