@@ -15,15 +15,12 @@ import string
 import subprocess
 import epitome as epi
 
-
-def init(input_file, queue):
+def main(input_file, queue):
     """
     Opens the input file, and generates a unique string for each run.
-    This keeps jobs submitted by multiple users distinct.
-    """
-    # replace proclist with cmd for identifying subject-wise scripts
-    command_file = 'cmd_' + input_file[9:]
+    Parses the submitted proclist and generates a set of qsub commands.
 
+    """
     f = open(input_file)
     f = f.read()
 
@@ -31,14 +28,9 @@ def init(input_file, queue):
     u_id = ''.join(random.choice(string.ascii_uppercase + 
                                  string.digits) for _ in range(6))
 
-    submit_jobs(f, u_id, queue, command_file)
-
-def submit_jobs(f, u_id, queue, command_file):
-    """
-    Parses the submitted proclist and generates a set of qsub commands.
-    """
     sublist = []
     fslist = []
+
     for i, line in enumerate(f.split('\n')):
 
         # skip empty entries
@@ -50,7 +42,7 @@ def submit_jobs(f, u_id, queue, command_file):
 
         # freesurfer recon-alls
         if line[0:9] == 'recon-all':
-            fsname = 'epitome_fs_' + u_id + '_' + str(i)
+            fsname = 'epi-fs_' + u_id + '_' + str(i)
             log = fsname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -cwd -N {name} -l mem_free=6G,virtual_free=6G -j y \
@@ -59,26 +51,26 @@ def submit_jobs(f, u_id, queue, command_file):
 
         # freesurfer exports
         elif line.find('epi-fsexport') >= 0:
-            fsexportname = 'epitome_fsexport_' + u_id
+            fsexportname = 'epi-fsexport_' + u_id
             log = fsexportname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid {hold} -cwd -N {name} -j y \
                   """.format(line=line, log=log, hold=",".join(fslist),
                                                  queue=queue, name=fsexportname)
-            
+
         # preprocessing
-        elif line.find(command_file) >= 0:
-            cmdname = 'epitome_' + name
+        elif line.split('/')[-1].startswith('cmd'):
+            cmdname = 'epi-cmd_' + name
             log = cmdname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid {hold} -cwd -N {name} -j y \
                   """.format(line=line, log=log, hold=fsexportname,
                                                  queue=queue, name=cmdname)
             sublist.append(cmdname)
-            
+
         # qc
         else:
-            qcname = 'epitome_qc_' + u_id + '_' + str(i)
+            qcname = 'epi-qc_' + u_id + '_' + str(i)
             log = qcname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
                      -hold_jid {hold} -cwd -N {name} -j y \
@@ -102,5 +94,4 @@ if __name__ == "__main__":
         sys.exit()
 
     else:
-      init(sys.argv[1], sys.argv[2])
-
+      main(sys.argv[1], sys.argv[2])
