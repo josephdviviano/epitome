@@ -37,7 +37,7 @@ for SESS in ${DIR_SESS}; do
 
             # add mean back into detrended data
             3dcalc \
-                -prefix ${SESS}/func_detrend.${ID}.${NUM}.nii.gz
+                -prefix ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
                 -a ${SESS}/func_tmp_detrend.${ID}.${NUM}.nii.gz \
                 -b ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
                 -expr 'a+b'
