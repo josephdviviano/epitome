@@ -57,9 +57,9 @@ def main(input_file, queue):
                      -hold_jid {hold} -cwd -N {name} -j y \
                   """.format(line=line, log=log, hold=",".join(fslist),
                                                  queue=queue, name=fsexportname)
-            
+
         # preprocessing
-        elif line.startswith('cmd'):
+        elif line.split('/')[-1].startswith('cmd'):
             cmdname = 'epi-cmd_' + name
             log = cmdname + '.log'
             cmd = """echo {line} | qsub -o {log} -S /bin/bash -V -q {queue} \
@@ -67,7 +67,7 @@ def main(input_file, queue):
                   """.format(line=line, log=log, hold=fsexportname,
                                                  queue=queue, name=cmdname)
             sublist.append(cmdname)
-            
+
         # qc
         else:
             qcname = 'epi-qc_' + u_id + '_' + str(i)
