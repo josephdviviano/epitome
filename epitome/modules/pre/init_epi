@@ -7,6 +7,7 @@ export DESPIKE=${3}
 export TPATTERN=${4}
 export NORMALIZE=${5}
 export MASKING=${6}
+export MASK_METHOD=${7}
 
 EOF
 
@@ -24,6 +25,7 @@ echo '   - Corrects for slice timing using the pattern '${TPATTERN}','
 echo '   - Deobliques the data,'
 echo '   - Motion correction (also outputs motion parameters + 1st lag),'
 echo '   - Creates deskulled template EPI and '${MASKING}' whole-brain mask,'
+echo '   - Masks using '${MASK_METHOD}','
 echo '   - Scales each voxel using '${NORMALIZE}','
 echo ''
 echo '************************************************************************'
@@ -234,34 +236,73 @@ for SESS in ${DIR_SESS}; do
         3dTstat \
             -prefix ${SESS}/anat_EPI_tmp_vol.nii.gz \
             ${SESS}/anat_EPI_tmp_mean.nii.gz
+
+        # options for AFNI method
+        if [ ${MASK_METHOD} == 'AFNI' ]; then
         
-        # set masking variables given each preset
-        if [ ${MASKING} == 'loosest' ]; then
-            CLFRAC=0.15
-            PEELS=1
+            # set masking variables given each preset
+            if [ ${MASKING} == 'loosest' ]; then
+                CLFRAC=0.15
+                PEELS=1
+            fi
+
+            if [ ${MASKING} == 'loose' ]; then
+                CLFRAC=0.2
+                PEELS=1
+            fi
+
+            if [ ${MASKING} == 'normal' ]; then
+                CLFRAC=0.3
+                PEELS=3
+            fi
+
+            if [ ${MASKING} == 'tight' ]; then
+                CLFRAC=0.5
+                PEELS=3
+            fi
+
+            # compute the mask
+            3dAutomask \
+                -prefix ${SESS}/anat_EPI_mask.nii.gz \
+                -clfrac ${CLFRAC} \
+                -peels ${PEELS} \
+                ${SESS}/anat_EPI_tmp_vol.nii.gz
         fi
 
-        if [ ${MASKING} == 'loose' ]; then
-            CLFRAC=0.3
-            PEELS=1
-        fi
+        # options for FSL method
+        if [ ${MASK_METHOD} == 'FSL' ]; then
+        
+            # set masking variables given each preset
+            if [ ${MASKING} == 'loosest' ]; then
+                FI=0.15
+                VG=0.4
+            fi
 
-        if [ ${MASKING} == 'normal' ]; then
-            CLFRAC=0.5
-            PEELS=3
-        fi
+            if [ ${MASKING} == 'loose' ]; then
+                FI=0.2
+                VG=0
+            fi
 
-        if [ ${MASKING} == 'tight' ]; then
-            CLFRAC=0.7
-            PEELS=3
-        fi
+            if [ ${MASKING} == 'normal' ]; then
+                FI=0.3
+                VG=0
+            fi
 
-        # compute the mask
-        3dAutomask \
-            -prefix ${SESS}/anat_EPI_mask.nii.gz \
-            -clfrac ${CLFRAC} \
-            -peels ${PEELS} \
-            ${SESS}/anat_EPI_tmp_vol.nii.gz
+            if [ ${MASKING} == 'tight' ]; then
+                FI=0.5
+                VG=0
+            fi
+
+            # compute the mask using robust BET
+            bet \
+                ${SESS}/anat_EPI_tmp_vol.nii.gz \
+                ${SESS}/anat_EPI_mask.nii.gz \
+                -R -n -m \
+                -f ${FI} \
+                -g ${VG}
+            rm ${SESS}/anat_EPI_mask.nii.gz
+            mv ${SESS}/anat_EPI_mask_mask.nii.gz ${SESS}/anat_EPI_mask.nii.gz
+        fi
         
         3dcalc \
             -prefix ${SESS}/anat_EPI_brain.nii.gz \

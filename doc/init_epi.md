@@ -1,6 +1,6 @@
 init_epi
 --------
-Usage: init_epi <data_quality> <del_tr> <t_pattern> <normalization> <masking>
+Usage: init_epi <data_quality> <del_tr> <t_pattern> <normalization> <masking> <mask_method>
 
 + data_quality -- 'low' for poor internal contrast, otherwise 'high'.
 + del_tr -- number of TRs to remove from the beginning of the run.
@@ -8,6 +8,7 @@ Usage: init_epi <data_quality> <del_tr> <t_pattern> <normalization> <masking>
 + t_pattern -- optional slice-timing at acquisition (from AFNI's 3dTshift).
 + normalization -- voxel wise time series normalization. One of 'zscore', 'pct', 'demean'.
 + masking -- EPI brain masking tolerance. One of 'loosest', 'loose', 'normal', or 'tight'.
++ mask_method -- FSL == 'bet', AFNI == '3dAutomask'.
 
 Works from the raw data in each RUN folder. It performs general pre-processing for all fMRI data:
 
@@ -27,4 +28,3 @@ Masking options are provided to improve masking performance across various acqui
 Prerequisites: None.
 
 Outputs: tshift (before deobliquing), ob (before motion-correction), scaled (final).
-

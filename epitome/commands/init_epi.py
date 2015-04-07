@@ -10,8 +10,7 @@ def run():
     try:
         # get the data-quality option
         print('\nSelect data quality:')
-        data_quality = ['low', 'high']
-        quality = epi.utilities.selector_list(data_quality)
+        quality = epi.utilities.selector_list(['low', 'high'])
 
         # get the number of TRs to delete
         print('\nNumber of TRs to delete:')
@@ -19,8 +18,7 @@ def run():
         
         # turn on/off despiking 
         print('\nSelect despike option:')
-        despike_list = ['on', 'off']
-        despike = epi.utilities.selector_list(despike_list)
+        despike = epi.utilities.selector_list(['on', 'off'])
 
         # get the slice timing
         print('\nSlice-timing pattern: (see AFNI 3dTshift for more help)')
@@ -45,6 +43,10 @@ def run():
         mask_list = ['loosest', 'loose', 'normal', 'tight']
         masking = epi.utilities.selector_list(mask_list)
 
+        # mask method
+        print('\nEPI masking: method')
+        mask_method = epi.utilities.selector_list(['FSL', 'AFNI'])
+
     # if we messed any of these up, we return None
     except ValueError as ve:
         return '', None
@@ -56,5 +58,6 @@ def run():
                                       str(despike) + ' ' +
                                       str(slice_timing) + ' ' +
                                       str(normalization) + ' ' +
-                                      str(masking))
+                                      str(masking) + ' ' + 
+                                      str(mask_method))
     return line, output
