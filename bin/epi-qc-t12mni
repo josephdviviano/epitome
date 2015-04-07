@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+epi-qc-epi2t1 <path> <expt> <mode>
+
+Usage:
+
+    path -- data path for epitome
+    expt -- experiment to QC
+    mode -- datatype to QC
+"""
 
 import os, sys
 import datetime
@@ -26,7 +35,7 @@ def reorient_to_radiological(image):
     return image
 
 
-def reg_check_T12MNI(path, expt, mode):
+def main(path, expt, mode):
     """
     Prints the central slice of the T1 and co-registered + deskulled EPI, 
     including an edge-detected version of the T1 (requires AFNI).
@@ -159,4 +168,7 @@ def reg_check_T12MNI(path, expt, mode):
     pdf.close()
 
 if __name__ == "__main__":
-	reg_check_T12MNI(sys.argv[1], sys.argv[2], sys.argv[3])
+    if len(sys.argv) == 4:
+	    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    else
+        print(__doc__)

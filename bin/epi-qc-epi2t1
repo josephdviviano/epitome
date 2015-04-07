@@ -1,4 +1,16 @@
 #!/usr/bin/env python
+"""
+epi-qc-epi2t1 <path> <expt> <mode>
+
+For each subject, prints the central slice of the T1 and co-registered + 
+deskulled EPI, including an edge-detected version of the T1 (requires AFNI).
+
+Usage:
+
+    path -- data path for epitome
+    expt -- experiment to QC
+    mode -- datatype to QC
+"""
 
 import os, sys
 import datetime
@@ -25,13 +37,113 @@ def reorient_to_radiological(image):
 
     return image
 
+def process_subject(path, expt, mode, subj, pdf):
+    """
+    Generates edge image, reorients data, and prints overlays to a PDF page.
+    """
+    edge = os.path.join(path, expt, subj, 
+                                   'T1/SESS01/anat_T1_edge.nii.gz')
+    anat = os.path.join(path, expt, subj, 
+                                   'T1/SESS01/anat_T1_brain.nii.gz')
+    reg = os.path.join(path, expt, subj, mode, 
+                                        'SESS01/reg_EPI_to_T1.nii.gz')
 
-def reg_check(path, expt, mode):
+    # create edge dataset if it doesn't exist
+    print 'working on subject ' + str(subj)
+    if os.path.isfile(edge) == False:
+        os.system('3dedge3 -input ' + anat + ' -prefix ' + edge)
+
+    # load in data
+    edge = nib.load(edge).get_data()
+    anat = nib.load(anat).get_data()
+    reg = nib.load(reg).get_data()
+
+    # reorient the data to radiological
+    edge = reorient_to_radiological(edge)
+    anat = reorient_to_radiological(anat)
+    reg = reorient_to_radiological(reg)
+
+    # get size ratio between over + underlay
+    dsfactor = [a/float(r) for a,r in zip(anat.shape, reg.shape)]
+
+    # match over + underlay dimensions
+    reg_to_anat = nd.interpolation.zoom(reg, zoom=dsfactor)
+    
+    # set small values in overlay to be transparent
+    reg_to_anat = np.ma.masked_where(reg_to_anat < 50, reg_to_anat)
+    cmap = plt.cm.Reds
+    cmap.set_bad('g', 0)
+
+    # generate the overlay image
+    plt.subplot(2,3,1)
+    mid = np.round(anat.shape[0] / 2)
+    plt.imshow(anat[mid, :, :], cmap=plt.cm.gray,
+                                interpolation='nearest')
+    plt.imshow(reg_to_anat[mid, :, :], cmap=cmap,
+                                       interpolation='nearest',
+                                       alpha=0.5)
+    plt.axis('off')
+
+    plt.subplot(2,3,2)
+    mid = np.round(anat.shape[1] / 2)
+    plt.imshow(anat[:, mid, :], cmap=plt.cm.gray,
+                                interpolation='nearest')
+    plt.imshow(reg_to_anat[:, mid, :], cmap=cmap,
+                                       interpolation='nearest',
+                                       alpha=0.5)
+    plt.axis('off')
+
+    plt.subplot(2,3,3)
+    mid = np.round(anat.shape[2] / 2)
+    plt.imshow(anat[:, :, mid], cmap=plt.cm.gray,
+                                interpolation='nearest')
+    plt.imshow(reg_to_anat[:, :, mid], cmap=cmap,
+                                       interpolation='nearest',
+                                       alpha=0.5)
+    plt.axis('off')
+
+    # set zeros in edge to be transparent
+    edge = np.ma.masked_where(edge == 0, edge)
+    cmap = plt.cm.winter
+    cmap.set_bad('g', 0)
+
+    # generate the edge image
+    plt.subplot(2,3,4)
+    mid = np.round(edge.shape[0] / 2)
+    plt.imshow(reg_to_anat[mid, :, :], cmap=plt.cm.gray,
+                                       interpolation='nearest')
+    plt.imshow(edge[mid, :, :], cmap=cmap,
+                                interpolation='nearest')
+    plt.axis('off')
+
+    plt.subplot(2,3,5)
+    mid = np.round(edge.shape[1] / 2)
+    plt.imshow(reg_to_anat[:, mid, :], cmap=plt.cm.gray,
+                                       interpolation='nearest')
+    plt.imshow(edge[:, mid, :], cmap=cmap,
+                                interpolation='nearest')
+    plt.axis('off')
+
+    plt.subplot(2,3,6)
+    mid = np.round(edge.shape[2] / 2)
+    plt.imshow(reg_to_anat[:, :, mid], cmap=plt.cm.gray,
+                                       interpolation='nearest')
+    plt.imshow(edge[:, :, mid], cmap=cmap,
+                                interpolation='nearest')
+    plt.axis('off')
+
+    plt.suptitle(str(expt) + ' ' + str(mode) + ': ' + str(subj))
+    plt.tight_layout()
+    plt.savefig(pdf, format='pdf')
+    plt.close()
+
+    return pdf
+
+def main(path, expt, mode):
     """
     Prints the central slice of the T1 and co-registered + deskulled EPI, 
     including an edge-detected version of the T1 (requires AFNI).
     """
-
     # get subject numbers
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
@@ -40,104 +152,11 @@ def reg_check(path, expt, mode):
     for subj in subjects:
 
         try:
-            edge = os.path.join(path, expt, subj, 
-                                           'T1/SESS01/anat_T1_edge.nii.gz')
-            anat = os.path.join(path, expt, subj, 
-                                           'T1/SESS01/anat_T1_brain.nii.gz')
-            reg = os.path.join(path, expt, subj, mode, 
-                                                'SESS01/reg_EPI_to_T1.nii.gz')
+            pdf = process_subject(path, expt, mode, subj, pdf)
+
         except:
-            print('ERROR: No data found for ' + subj + ', skipping.')
+            print('ERROR: invalid data found for ' + subj + ', skipping.')
             continue
-
-        # create edge dataset if it doesn't exist
-        print 'working on subject ' + str(subj)
-        if os.path.isfile(edge) == False:
-            os.system('3dedge3 -input ' + anat + ' -prefix ' + edge)
-
-        # load in data
-        edge = nib.load(edge).get_data()
-        anat = nib.load(anat).get_data()
-        reg = nib.load(reg).get_data()
-
-        # reorient the data to radiological
-        edge = reorient_to_radiological(edge)
-        anat = reorient_to_radiological(anat)
-        reg = reorient_to_radiological(reg)
-
-        # get size ratio between over + underlay
-        dsfactor = [a/float(r) for a,r in zip(anat.shape, reg.shape)]
-
-        # match over + underlay dimensions
-        reg_to_anat = nd.interpolation.zoom(reg, zoom=dsfactor)
-        
-        # set small values in overlay to be transparent
-        reg_to_anat = np.ma.masked_where(reg_to_anat < 50, reg_to_anat)
-        cmap = plt.cm.Reds
-        cmap.set_bad('g', 0)
-
-        # generate the overlay image
-        plt.subplot(2,3,1)
-        mid = np.round(anat.shape[0] / 2)
-        plt.imshow(anat[mid, :, :], cmap=plt.cm.gray,
-                                    interpolation='nearest')
-        plt.imshow(reg_to_anat[mid, :, :], cmap=cmap,
-                                           interpolation='nearest',
-                                           alpha=0.5)
-        plt.axis('off')
-
-        plt.subplot(2,3,2)
-        mid = np.round(anat.shape[1] / 2)
-        plt.imshow(anat[:, mid, :], cmap=plt.cm.gray,
-                                    interpolation='nearest')
-        plt.imshow(reg_to_anat[:, mid, :], cmap=cmap,
-                                           interpolation='nearest',
-                                           alpha=0.5)
-        plt.axis('off')
-
-        plt.subplot(2,3,3)
-        mid = np.round(anat.shape[2] / 2)
-        plt.imshow(anat[:, :, mid], cmap=plt.cm.gray,
-                                    interpolation='nearest')
-        plt.imshow(reg_to_anat[:, :, mid], cmap=cmap,
-                                           interpolation='nearest',
-                                           alpha=0.5)
-        plt.axis('off')
-
-        # set zeros in edge to be transparent
-        edge = np.ma.masked_where(edge == 0, edge)
-        cmap = plt.cm.winter
-        cmap.set_bad('g', 0)
-
-        # generate the edge image
-        plt.subplot(2,3,4)
-        mid = np.round(edge.shape[0] / 2)
-        plt.imshow(reg_to_anat[mid, :, :], cmap=plt.cm.gray,
-                                           interpolation='nearest')
-        plt.imshow(edge[mid, :, :], cmap=cmap,
-                                    interpolation='nearest')
-        plt.axis('off')
-
-        plt.subplot(2,3,5)
-        mid = np.round(edge.shape[1] / 2)
-        plt.imshow(reg_to_anat[:, mid, :], cmap=plt.cm.gray,
-                                           interpolation='nearest')
-        plt.imshow(edge[:, mid, :], cmap=cmap,
-                                    interpolation='nearest')
-        plt.axis('off')
-
-        plt.subplot(2,3,6)
-        mid = np.round(edge.shape[2] / 2)
-        plt.imshow(reg_to_anat[:, :, mid], cmap=plt.cm.gray,
-                                           interpolation='nearest')
-        plt.imshow(edge[:, :, mid], cmap=cmap,
-                                    interpolation='nearest')
-        plt.axis('off')
-
-        plt.suptitle(str(expt) + ' ' + str(mode) + ': ' + str(subj))
-        plt.tight_layout()
-        plt.savefig(pdf, format='pdf')
-        plt.close()
 
     # Add some metadata and close the PDF object
     d = pdf.infodict()
@@ -150,4 +169,7 @@ def reg_check(path, expt, mode):
     pdf.close()
 
 if __name__ == "__main__":
-	reg_check(sys.argv[1], sys.argv[2], sys.argv[3])
+    if len(sys.argv) == 4:
+	   main(sys.argv[1], sys.argv[2], sys.argv[3])
+    else:
+        print(__doc__)
