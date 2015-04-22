@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import epitome as epi
+import ninet as nn
 
 def main(path, expt, mode):
     """

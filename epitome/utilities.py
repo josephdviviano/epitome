@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A collection of utilities for the EPItome-xl pipeline. Mostly for getting 
+A collection of utilities for the epitome pipeline. Mostly for getting 
 subject numbers/names, checking paths, gathering inforamtion, etc.
 """
 

@@ -19,11 +19,13 @@ for SUB in ${SUBJECTS}; do
         
         # remove per-session files
         rm -r ${SESS}/PARAMS >& /dev/null
+        rm -r ${SESS}/fake.* >& /dev/null
+        rm -r ${SESS}/MELODIC* >& /dev/null
         rm ${SESS}/anat_* >& /dev/null
         rm ${SESS}/func_* >& /dev/null
         rm ${SESS}/mat_* >& /dev/null
         rm ${SESS}/reg_* >& /dev/null
-        
+
     done
 
     DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/`

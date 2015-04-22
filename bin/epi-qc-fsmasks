@@ -32,12 +32,12 @@ def mask_check(path, expt, mode, subj, pdf):
 
     # resample T1 image to has EPI dimensions
     modedir = os.path.join(path, expt, subj, mode)
-    EPI = modedir + '/SESS01/anat_EPI_brain.nii.gz')
-    T1 = modedir + '/SESS01/reg_T1_to_EPI.nii.gz')
-    wm = modedir + '/SESS01/anat_wm_ero.nii.gz')
-    dv = modedir + '/SESS01/anat_dv_ero.nii.gz')
-    gm = modedir + '/SESS01/anat_gm.nii.gz')
-    vent = modedir + '/SESS01/anat_vent_ero.nii.gz')
+    EPI = modedir + '/SESS01/anat_EPI_brain.nii.gz'
+    T1 = modedir + '/SESS01/reg_T1_to_EPI.nii.gz'
+    wm = modedir + '/SESS01/anat_wm_ero.nii.gz'
+    dv = modedir + '/SESS01/anat_dv_ero.nii.gz'
+    gm = modedir + '/SESS01/anat_gm.nii.gz'
+    vent = modedir + '/SESS01/anat_vent_ero.nii.gz'
 
     # load in data
     EPI = nib.load(EPI).get_data()

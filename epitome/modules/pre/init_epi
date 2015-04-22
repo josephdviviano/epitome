@@ -261,12 +261,18 @@ for SESS in ${DIR_SESS}; do
                 PEELS=3
             fi
 
-            # compute the mask
+            # compute the mask using 3dAutomask, dilate
             3dAutomask \
-                -prefix ${SESS}/anat_EPI_mask.nii.gz \
+                -prefix ${SESS}/anat_EPI_tmp_mask.nii.gz \
                 -clfrac ${CLFRAC} \
                 -peels ${PEELS} \
                 ${SESS}/anat_EPI_tmp_vol.nii.gz
+            3dcalc \
+                -prefix ${SESS}/anat_EPI_mask.nii.gz \
+                -a ${SESS}/anat_EPI_tmp_mask.nii.gz \
+                -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
+                -expr 'amongst(1,a,b,c,d,e,f,g)'
+            rm ${SESS}/anat_EPI_tmp_mask.nii.gz
         fi
 
         # options for FSL method
@@ -293,15 +299,20 @@ for SESS in ${DIR_SESS}; do
                 VG=0
             fi
 
-            # compute the mask using robust BET
+            # compute the mask using robust BET, dilate
             bet \
                 ${SESS}/anat_EPI_tmp_vol.nii.gz \
                 ${SESS}/anat_EPI_mask.nii.gz \
                 -R -n -m \
                 -f ${FI} \
                 -g ${VG}
+            fslmaths \
+                ${SESS}/anat_EPI_mask_mask.nii.gz \
+                -dilD \
+                ${SESS}/anat_EPI_mask_mask_dil.nii.gz
             rm ${SESS}/anat_EPI_mask.nii.gz
-            mv ${SESS}/anat_EPI_mask_mask.nii.gz ${SESS}/anat_EPI_mask.nii.gz
+            rm ${SESS}/anat_EPI_mask_mask.nii.gz
+            mv ${SESS}/anat_EPI_mask_mask_dil.nii.gz ${SESS}/anat_EPI_mask.nii.gz
         fi
         
         3dcalc \
