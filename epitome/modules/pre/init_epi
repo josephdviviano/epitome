@@ -192,6 +192,14 @@ for SESS in ${DIR_SESS}; do
                     ${SESS}/PARAMS/lag.motion.${ID}.${NUM}.1D
             fi
 
+            # create derivative of motion regressors
+            if [ ! -f ${SESS}/PARAMS/dif.motion.${ID}.${NUM}.1D ]; then
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.motion.${ID}.${NUM}.1D
+            fi
+
             # make a registration volume for low-quality data if required
             if [ ${DATA_QUALITY} = 'low' ] && [ ${NUM} = 01 ]; then
                 # deoblique registration volume
@@ -331,6 +339,7 @@ for SESS in ${DIR_SESS}; do
 
     fi
 
+    echo 'Normalizing data.'
     DIR_RUNS=`ls -d -- ${SESS}/RUN*`
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`

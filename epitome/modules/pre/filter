@@ -2,13 +2,14 @@
 
 cat <<EOF
 export INPUT=$(echo func_${1})
-export POLORT=${2}
-export STD=${3}
-export GM=${4}
-export ANATICOR=${5}
-export COMPCOR=${6}
-export COMPNUM=${7}
-export DV=${8}
+export POLORT='${2}'
+export DIFF='${3}'
+export SQ='${4}'
+export STD='${5}'
+export GM='${6}'
+export DV='${7}'
+export ANATICOR='${8}'
+export COMPCOR='${9}'
 
 EOF
 
@@ -17,33 +18,27 @@ cat <<"EOF"
 echo '************************************************************************'
 echo '                    Time series filtering of fMRI data'
 echo ''
-echo '   - Creates a set of regressors from '${INPUT}' functional data and'
-echo '     a freesurfer segmentation. Outputs:'
+echo '   - Fits a defined regression model to '${INPUT}' data and retains the '
+echo '     residuals. Also outputs a set of tSNR maps. Relies on freesurfer.'
 echo ''
-echo '         - MASKS:'
-echo '             - white matter + eroded mask,'
-echo '             - ventricles + eroded mask,'
-echo '             - grey matter mask,'
-echo '             - brain stem mask,'
-echo '             - dialated brain mask,'
-echo '             - draining vessels mask,'
+echo '   - MASKS:'
+echo '       - white matter + eroded mask,'
+echo '       - ventricles + eroded mask,'
+echo '       - grey matter mask,'
+echo '       - brain stem mask,'
+echo '       - dialated brain mask,'
+echo '       - draining vessels mask,'
 echo ''
-echo '         - REGRESSORS:'
-echo '             - white matter: local (15mm sphere) and average, + lags'
-echo '             - ventricles averaged + lagged,'
-echo '             - draining vessel averaged + lagged.'
-echo ''
-echo '   - Calculates global mean & DVARS (Power et al., 2012).'
-echo '   - Detrends input with legrende polynomials up to order '${POLORT}','
-echo '   - Computes temporal signal to noise ratio of input,'
-echo '   - Computes nusiance time series from physio, motion paramaters, and:'
-echo '         - Standard regressors: '${STD}','
-echo '         - Global mean regression: '${GM}','
-echo '         - ANATICOR local white matter regression: '${ANATICOR}','
-echo '         - COMPCOR principal component regression: '${COMPCOR}','
-echo '         - Draining vessel regression: '${DV}','
-echo '   - Computes fit of run with nusiances via least squares regression,'
-echo '   - Subtracts noise model from each voxel, retaining the mean.'
+echo '   - REGRESSORS:'
+echo '       - n-term polynomial'
+echo '       - Physiological regressors, if they exist'
+echo '       - DIFF: if on, also use the first derivative'
+echo '       - SQ: if on, also use the square of the regressors'
+echo '       - STD: 6-term motion paramaters, mean white matter, mean csf'
+echo '       - GM: global mean'
+echo '       - DV: draining vessels'
+echo '       - ANATICOR: local white matter (15mm sphere) + 1st lag'
+echo '       - COMPCOR: PCA regression of n components from wm and csf,'
 echo ''
 echo '************************************************************************'
 
@@ -166,7 +161,7 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        # detrend functional data and motion paramaters (and calculate tsnr)
+        # detrend functional data and motion paramaters, calculate tSNR
         if [ ! -f ${SESS}/func_detrend.${ID}.${NUM}.nii.gz ]; then
             
             # compute mean, standard deviation
@@ -185,13 +180,13 @@ for SESS in ${DIR_SESS}; do
                 -expr 'a/b' \
                 -prefix ${SESS}/func_tSNR.${ID}.${NUM}.nii.gz
 
-            # detrend input data (before calculating regressors...)
+            # input data detrend (before calculating regressors...)
             3dDetrend \
                 -prefix ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
                 -polort ${POLORT} \
                 ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
-            # detrend motion paramaters
+            # motion paramaters, detrend, lag, dif, sq 
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
@@ -205,7 +200,52 @@ for SESS in ${DIR_SESS}; do
                 -polort ${POLORT} \
                 ${SESS}/PARAMS/lag.motion.${ID}.${NUM}.1D\' > \
                 ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D
-            
+
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort ${POLORT} \
+                ${SESS}/PARAMS/dif.motion.${ID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D
+
+            1deval \
+                -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[0] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[1] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[2] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[3] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[4] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[5] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D
+
+            1deval \
+                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[0] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.1.det.dif.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[1] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.2.det.dif.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[2] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.3.det.dif.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[3] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.4.det.dif.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[4] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.5.det.dif.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[5] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.6.det.dif.motion.${ID}.${NUM}.1D
+
             # detrend physiological regressors, if they exist
             if [ -f ${SESS}/PARAMS/phys.${ID}.${NUM}.1D ]; then
                 3dDetrend \
@@ -216,7 +256,7 @@ for SESS in ${DIR_SESS}; do
                     ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D
             fi
 
-            # % signal change DVARS (+ lag) (Power et. al Neuroimage 2012)
+            # DVARS (Power et. al Neuroimage 2012)
             3dcalc \
                 -a ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
                 -b 'a[0,0,0,-1]' \
@@ -230,21 +270,18 @@ for SESS in ${DIR_SESS}; do
             
             1deval \
                 -a ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D \
-                -expr 'sqrt(a)' \
-                > ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D
+                -expr 'sqrt(a)' > ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D
         fi 
 
         # initialize filter command
         if [ ! -f ${SESS}/func_filtered.${ID}.${NUM}.nii.gz ]; then
             
-            # start with the standard motion-parameter regressors
             CMD=`echo 3dTfitter \
                           -prefix ${SESS}/func_noise_betas.${ID}.${NUM}.nii.gz \
                           -fitts ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
                           -polort 0 \
                           -RHS ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
-                          -LHS ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D \
-                               ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D `
+                          -LHS `
 
             # add the physio regressors if they exist
             if [ -f ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D ]; then
@@ -253,58 +290,157 @@ for SESS in ${DIR_SESS}; do
 
             if [ `echo ${STD}` = 'on' ]; then
 
-                # white matter mean (+ lag)
+                # white matter mean, lag, dif, sq
                 3dmaskave \
                     -q -mask ${SESS}/anat_wm_ero.nii.gz \
                     ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
                     ${SESS}/PARAMS/wm.${ID}.${NUM}.1D
-                
                 1dcat \
                     ${SESS}/PARAMS/wm.${ID}.${NUM}.1D'{0}' > \
                     ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
-                
                 1dcat \
                     ${SESS}/PARAMS/wm.${ID}.${NUM}.1D'{0..$}' >> \
                     ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/wm.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/wm.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.dif.wm.${ID}.${NUM}.1D
 
-                # ventricle mean (+ lag)
+                # ventricle mean, lag, dif, sq
                 3dmaskave \
                     -q -mask ${SESS}/anat_vent_ero.nii.gz \
                     ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
                     ${SESS}/PARAMS/vent.${ID}.${NUM}.1D
-                
                 1dcat \
                     ${SESS}/PARAMS/vent.${ID}.${NUM}.1D'{0}' > \
                     ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
-                
                 1dcat \
                     ${SESS}/PARAMS/vent.${ID}.${NUM}.1D'{0..$}' >> \
                     ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/vent.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/vent.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.dif.vent.${ID}.${NUM}.1D
 
+                CMD=`echo ${CMD} ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D`
                 CMD=`echo ${CMD} ${SESS}/PARAMS/vent.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D`
                 CMD=`echo ${CMD} ${SESS}/PARAMS/wm.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D`
+
+                if [ `echo ${SQ}` = 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D`
+                fi
+
+                if [ `echo ${DIFF}` = 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D` 
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D`
+
+                    if [ `echo ${SQ}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.1.det.dif.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.2.det.dif.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.3.det.dif.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.4.det.dif.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.5.det.dif.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.6.det.dif.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.vent.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.wm.${ID}.${NUM}.1D`                        
+                    fi
+                fi
             fi
 
             if [ `echo ${GM}` = 'on' ]; then
 
-                # global mean (+ lag)
+                # global mean, lag, dif, sq
                 3dmaskave \
                     -mask ${SESS}/anat_EPI_mask.nii.gz \
                     -quiet ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
                     > ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D
-
                 1dcat \
                     ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0}' > \
                     ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
-                
                 1dcat \
                     ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0..$}' >> \
                     ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.dif.global_mean.${ID}.${NUM}.1D
    
                 CMD=`echo ${CMD} ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D`
+                if [ `echo ${SQ}` = 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D`
+                fi
+
+                if [ `echo ${DIFF}` = 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D`
+                    
+                    if [ `echo ${SQ}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.global_mean.${ID}.${NUM}.1D`
+                    fi
+                fi
+            fi
+
+            if [ `echo ${DV}` = 'on' ]; then
+
+                # draining vessel mean, lag, dif, sq
+                3dmaskave \
+                    -q -mask ${SESS}/anat_dv_ero.nii.gz \
+                    ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
+                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D
+                1dcat \
+                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0}' > \
+                    ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
+                1dcat \
+                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0..$}' >> \
+                    ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/dv.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/dv.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.dif.dv.${ID}.${NUM}.1D
+   
+                CMD=`echo ${CMD} ${SESS}/PARAMS/dv.${ID}.${NUM}.1D`
+                if [ `echo ${SQ}` = 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D`
+                fi
+
+                if [ `echo ${DIFF}` = 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D`
+                    
+                    if [ `echo ${SQ}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.dv.${ID}.${NUM}.1D`
+                    fi
+                fi
             fi
 
             if [ `echo ${ANATICOR}` = 'on' ]; then
@@ -328,7 +464,7 @@ for SESS in ${DIR_SESS}; do
                 CMD=`echo ${CMD} ${SESS}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz`
             fi
 
-            if [ `echo ${COMPCOR}` = 'on' ]; then
+            if [ ${COMPCOR} -gt 0 ]; then
 
                 # aCompcor regressors for WM and ventricles
                 if [ ! -f ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D ]; then
@@ -352,26 +488,6 @@ for SESS in ${DIR_SESS}; do
                 CMD=`echo ${CMD} ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D`
             fi
 
-            if [ `echo ${DV}` = 'on' ]; then
-
-                # create mean draining vessel time series (+ lagged)
-                3dmaskave \
-                    -q -mask ${SESS}/anat_dv_ero.nii.gz \
-                    ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
-                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D
-                
-                1dcat \
-                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0}' > \
-                    ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
-                
-                1dcat \
-                    ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0..$}' >> \
-                    ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
-
-                CMD=`echo ${CMD} ${SESS}/PARAMS/dv.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D`
-            fi
-
             ####################################################################
 
             # Finally, echo  run the command
@@ -389,9 +505,7 @@ for SESS in ${DIR_SESS}; do
                 -c ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
                 -expr 'a-b+c' \
                 -prefix ${SESS}/func_filtered.${ID}.${NUM}.nii.gz
-
         fi
-
     done
 done
 
