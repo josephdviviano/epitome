@@ -12,13 +12,13 @@ def run(input_name):
         polort = epi.utilities.selector_int()
 
         print('\nDerivative regressors on?:')
-        diff = epi.utilities.selector_list(['off, on'])
+        diff = epi.utilities.selector_list(['off', 'on'])
 
         print('\nLagged regressors on?:')
-        lag = epi.utilities.selector_list(['off, on'])
+        lag = epi.utilities.selector_list(['off', 'on'])
 
         print('\nSquared regressors on?:')
-        sq = epi.utilities.selector_list(['off, on'])
+        sq = epi.utilities.selector_list(['off', 'on'])
 
         print('\nStandard regressors on? (motion, white matter, csf):')
         std = epi.utilities.selector_list(['off', 'on'])

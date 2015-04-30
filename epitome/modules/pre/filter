@@ -333,6 +333,9 @@ for SESS in ${DIR_SESS}; do
                     -a ${SESS}/PARAMS/wm.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D
                 1deval \
+                    -a ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.lag.wm.${ID}.${NUM}.1D
+                1deval \
                     -a ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.dif.wm.${ID}.${NUM}.1D
 
@@ -354,6 +357,9 @@ for SESS in ${DIR_SESS}; do
                 1deval \
                     -a ${SESS}/PARAMS/vent.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.lag.vent.${ID}.${NUM}.1D
                 1deval \
                     -a ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.dif.vent.${ID}.${NUM}.1D
@@ -390,7 +396,7 @@ for SESS in ${DIR_SESS}; do
                     fi
                 fi
 
-                if [ `echo ${LAG} == 'on' ]; then
+                if [ `echo ${LAG}` == 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D` 
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D`
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D`
@@ -428,6 +434,9 @@ for SESS in ${DIR_SESS}; do
                 1deval \
                     -a ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D
                 1deval \
                     -a ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.dif.global_mean.${ID}.${NUM}.1D
@@ -475,6 +484,9 @@ for SESS in ${DIR_SESS}; do
                 1deval \
                     -a ${SESS}/PARAMS/dv.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D
+                1deval \
+                    -a ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D \
+                    -expr 'a^2' > ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D
                 1deval \
                     -a ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.dif.dv.${ID}.${NUM}.1D
@@ -531,7 +543,7 @@ for SESS in ${DIR_SESS}; do
                         ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
                         ${SESS}/anat_vent_ero.nii.gz \
                         ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D \
-                        ${COMPNUM}
+                        ${COMPCOR}
                 fi
 
                 if [ ! -f ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D ]; then
@@ -539,7 +551,7 @@ for SESS in ${DIR_SESS}; do
                         ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
                         ${SESS}/anat_wm_ero.nii.gz \
                         ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D \
-                        ${COMPNUM}
+                        ${COMPCOR}
                 fi
 
                 # https://www.youtube.com/watch?v=oavMtUWDBTM
