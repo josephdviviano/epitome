@@ -14,6 +14,9 @@ def run(input_name):
         print('\nDerivative regressors on?:')
         diff = epi.utilities.selector_list(['off, on'])
 
+        print('\nLagged regressors on?:')
+        lag = epi.utilities.selector_list(['off, on'])
+
         print('\nSquared regressors on?:')
         sq = epi.utilities.selector_list(['off, on'])
 
@@ -42,10 +45,9 @@ def run(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${{DIR_PIPE}}/epitome/modules/pre/filter {input_name} {polort} '
-               '{std} {gm} {anaticor} {compcor} {compnum} {dv}').format(
-                         input_name=str(input_name), polort=str(polort),
-                                diff=diff, sq=sq, std=std, gm=gm, dv=dv,
-                                     anaticor=anaticor, compcor=compcor)
+    line = ('. ${{DIR_PIPE}}/epitome/modules/pre/filter ' 
+                          '{} {} {} {} {} {} {} {} {} {}').format(
+                           str(input_name), str(polort), diff, lag, 
+                                sq, std, gm, dv, anaticor, compcor)
 
     return line, output

@@ -4,12 +4,13 @@ cat <<EOF
 export INPUT=$(echo func_${1})
 export POLORT='${2}'
 export DIFF='${3}'
-export SQ='${4}'
-export STD='${5}'
-export GM='${6}'
-export DV='${7}'
-export ANATICOR='${8}'
-export COMPCOR='${9}'
+export LAG='${4}'
+export SQ='${5}'
+export STD='${6}'
+export GM='${7}'
+export DV='${8}'
+export ANATICOR='${9}'
+export COMPCOR='${10}'
 
 EOF
 
@@ -33,6 +34,7 @@ echo '   - REGRESSORS:'
 echo '       - n-term polynomial'
 echo '       - Physiological regressors, if they exist'
 echo '       - DIFF: if on, also use the first derivative'
+echo '       - LAG: if on, also use the first lag'
 echo '       - SQ: if on, also use the square of the regressors'
 echo '       - STD: 6-term motion paramaters, mean white matter, mean csf'
 echo '       - GM: global mean'
@@ -208,6 +210,7 @@ for SESS in ${DIR_SESS}; do
                 ${SESS}/PARAMS/dif.motion.${ID}.${NUM}.1D\' > \
                 ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D
 
+            # squares of detrended head motion
             1deval \
                 -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[0] \
                 -expr 'a^2' > ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D
@@ -227,6 +230,27 @@ for SESS in ${DIR_SESS}; do
                 -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[5] \
                 -expr 'a^2' > ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D
 
+            # squares of detrended + lagged head motion
+            1deval \
+                -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[0] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.1.det.lag.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[1] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.2.det.lag.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[2] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.3.det.lag.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[3] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.4.det.lag.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[4] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.5.det.lag.motion.${ID}.${NUM}.1D
+            1deval \
+                -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[5] \
+                -expr 'a^2' > ${SESS}/PARAMS/sq.6.det.lag.motion.${ID}.${NUM}.1D
+
+            # squares of detrended + 1st diff head motion
             1deval \
                 -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[0] \
                 -expr 'a^2' > ${SESS}/PARAMS/sq.1.det.dif.motion.${ID}.${NUM}.1D
@@ -362,7 +386,24 @@ for SESS in ${DIR_SESS}; do
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.5.det.dif.motion.${ID}.${NUM}.1D`
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.6.det.dif.motion.${ID}.${NUM}.1D`
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.vent.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.wm.${ID}.${NUM}.1D`                        
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.wm.${ID}.${NUM}.1D`
+                    fi
+                fi
+
+                if [ `echo ${LAG} == 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D` 
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D`
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D`
+
+                    if [ `echo ${SQ}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.1.det.lag.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.2.det.lag.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.3.det.lag.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.4.det.lag.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.5.det.lag.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.6.det.lag.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.vent.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.wm.${ID}.${NUM}.1D`
                     fi
                 fi
             fi
@@ -403,6 +444,15 @@ for SESS in ${DIR_SESS}; do
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.global_mean.${ID}.${NUM}.1D`
                     fi
                 fi
+
+                if [ `echo ${LAG}` = 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D`
+                    
+                    if [ `echo ${SQ}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D`
+                    fi
+                fi
+
             fi
 
             if [ `echo ${DV}` = 'on' ]; then
@@ -441,6 +491,15 @@ for SESS in ${DIR_SESS}; do
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.dv.${ID}.${NUM}.1D`
                     fi
                 fi
+
+                if [ `echo ${LAG}` = 'on' ]; then
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D`
+                    
+                    if [ `echo ${SQ}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D`
+                    fi
+                fi
+
             fi
 
             if [ `echo ${ANATICOR}` = 'on' ]; then

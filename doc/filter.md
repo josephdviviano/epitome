@@ -5,6 +5,7 @@ Usage: filter <func_prefix> <det> <std> <gm> <anaticor> <compcor> <compnum> <dv>
 + func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
 + det -- polynomial order to detrend each voxel against. 
 + diff -- if == on, regresses first differences of regressors from data as well.
++ lag -- if == on, regress the first lags of regressors from data as well.
 + sq -- if == on, regresses squares of regressors from data as well.
 + std -- if == on, does standard basic time-series filtering (6 paramater head motion, mean white matter, csf regression).
 + gm -- if == on, regress mean global signal from each voxel (careful...). 
@@ -54,7 +55,7 @@ Combined with std, gm, dv, and/or diff above to additionall regress the squares 
 
 anaticor
 --------
-An AFNI method for dealing with artifacts in your data using 15mm local white matter regressors + 1 temporal lag. Tends to be conservative. Good at dealing with distance-dependnet motion artifacts, but less so at dealing with physiological noise [3].
+An AFNI method for dealing with artifacts in your data using 15mm local white matter regressors + 1 temporal lag. Tends to be conservative. Good at dealing with distance-dependnet motion artifacts, but less so at dealing with physiological noise [3]. NB: Currently does not interact with the DET, LAG, or SQ options. This will only produce the local WM regressor and the first lag.
 
 compcor
 -------
