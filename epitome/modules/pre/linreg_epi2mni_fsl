@@ -42,7 +42,7 @@ for SESS in `basename ${DIR_SESS}`; do
                 -in ${DIR}/${INPUT}.${ID}.${NUM}.nii.gz \
                 -ref ${DIR}/anat_EPI_reg_target.nii.gz \
                 -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
-                -out ${DIR}/func_MNI.${ID}.${NUM}.nii.gz
+                -out ${DIR}/func_MNI.${ID}.${NUM}.nii.gz \
                 -interp sinc \
                 -sincwidth 7 \
                 -sincwindow blackman
