@@ -250,25 +250,31 @@ for SESS in ${DIR_SESS}; do
                 -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[5] \
                 -expr 'a^2' > ${SESS}/PARAMS/sq.6.det.lag.motion.${ID}.${NUM}.1D
 
-            # squares of detrended + 1st diff head motion
-            1deval \
-                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[0] \
-                -expr 'a^2' > ${SESS}/PARAMS/sq.1.det.dif.motion.${ID}.${NUM}.1D
-            1deval \
-                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[1] \
-                -expr 'a^2' > ${SESS}/PARAMS/sq.2.det.dif.motion.${ID}.${NUM}.1D
-            1deval \
-                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[2] \
-                -expr 'a^2' > ${SESS}/PARAMS/sq.3.det.dif.motion.${ID}.${NUM}.1D
-            1deval \
-                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[3] \
-                -expr 'a^2' > ${SESS}/PARAMS/sq.4.det.dif.motion.${ID}.${NUM}.1D
-            1deval \
-                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[4] \
-                -expr 'a^2' > ${SESS}/PARAMS/sq.5.det.dif.motion.${ID}.${NUM}.1D
-            1deval \
-                -a ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D[5] \
-                -expr 'a^2' > ${SESS}/PARAMS/sq.6.det.dif.motion.${ID}.${NUM}.1D
+            # diff of detrended + squared head motion
+            1d_tool.py \
+                -infile ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D \
+                -backward_diff \
+                -write ${SESS}/PARAMS/dif.sq.1.det.motion.${ID}.${NUM}.1D
+            1d_tool.py \
+                -infile ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D \
+                -backward_diff \
+                -write ${SESS}/PARAMS/dif.sq.2.det.motion.${ID}.${NUM}.1D
+            1d_tool.py \
+                -infile ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D \
+                -backward_diff \
+                -write ${SESS}/PARAMS/dif.sq.3.det.motion.${ID}.${NUM}.1D
+            1d_tool.py \
+                -infile ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D \
+                -backward_diff \
+                -write ${SESS}/PARAMS/dif.sq.4.det.motion.${ID}.${NUM}.1D
+            1d_tool.py \
+                -infile ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D \
+                -backward_diff \
+                -write ${SESS}/PARAMS/dif.sq.5.det.motion.${ID}.${NUM}.1D
+            1d_tool.py \
+                -infile ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D \
+                -backward_diff \
+                -write ${SESS}/PARAMS/dif.sq.6.det.motion.${ID}.${NUM}.1D
 
             # detrend physiological regressors, if they exist
             if [ -f ${SESS}/PARAMS/phys.${ID}.${NUM}.1D ]; then
@@ -335,9 +341,10 @@ for SESS in ${DIR_SESS}; do
                 1deval \
                     -a ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.lag.wm.${ID}.${NUM}.1D
-                1deval \
-                    -a ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D \
-                    -expr 'a^2' > ${SESS}/PARAMS/sq.dif.wm.${ID}.${NUM}.1D
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.sq.wm.${ID}.${NUM}.1D
 
                 # ventricle mean, lag, dif, sq
                 3dmaskave \
@@ -360,9 +367,10 @@ for SESS in ${DIR_SESS}; do
                 1deval \
                     -a ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.lag.vent.${ID}.${NUM}.1D
-                1deval \
-                    -a ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D \
-                    -expr 'a^2' > ${SESS}/PARAMS/sq.dif.vent.${ID}.${NUM}.1D
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.sq.vent.${ID}.${NUM}.1D
 
                 CMD=`echo ${CMD} ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D`
                 CMD=`echo ${CMD} ${SESS}/PARAMS/vent.${ID}.${NUM}.1D`
@@ -377,25 +385,29 @@ for SESS in ${DIR_SESS}; do
                     CMD=`echo ${CMD} ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D`
                     CMD=`echo ${CMD} ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D`
                     CMD=`echo ${CMD} ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D`
+
+                    if [ `echo ${DIFF}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.1.det.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.2.det.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.3.det.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.4.det.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.5.det.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.6.det.motion.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.vent.${ID}.${NUM}.1D`
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.wm.${ID}.${NUM}.1D`
+                    fi
+
                 fi
 
                 if [ `echo ${DIFF}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D` 
                     CMD=`echo ${CMD} ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D`
                     CMD=`echo ${CMD} ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D`
-
-                    if [ `echo ${SQ}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.1.det.dif.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.2.det.dif.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.3.det.dif.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.4.det.dif.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.5.det.dif.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.6.det.dif.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.vent.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.wm.${ID}.${NUM}.1D`
-                    fi
                 fi
 
+                # note the difference in the order of operations from the diff method,
+                # above. It isn't clear to me if there is a meaningful difference in the
+                # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` == 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D` 
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D`
@@ -437,23 +449,27 @@ for SESS in ${DIR_SESS}; do
                 1deval \
                     -a ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D
-                1deval \
-                    -a ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D \
-                    -expr 'a^2' > ${SESS}/PARAMS/sq.dif.global_mean.${ID}.${NUM}.1D
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D
    
                 CMD=`echo ${CMD} ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D`
                 if [ `echo ${SQ}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D`
+                   
+                    if [ `echo ${DIFF}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D`
+                    fi
                 fi
 
                 if [ `echo ${DIFF}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D`
-                    
-                    if [ `echo ${SQ}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.global_mean.${ID}.${NUM}.1D`
-                    fi
                 fi
 
+                # note the difference in the order of operations from the diff method,
+                # above. It isn't clear to me if there is a meaningful difference in the
+                # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D`
                     
@@ -461,7 +477,6 @@ for SESS in ${DIR_SESS}; do
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D`
                     fi
                 fi
-
             fi
 
             if [ `echo ${DV}` = 'on' ]; then
@@ -487,23 +502,27 @@ for SESS in ${DIR_SESS}; do
                 1deval \
                     -a ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D \
                     -expr 'a^2' > ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D
-                1deval \
-                    -a ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D \
-                    -expr 'a^2' > ${SESS}/PARAMS/sq.dif.dv.${ID}.${NUM}.1D
+                1d_tool.py \
+                    -infile ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D \
+                    -backward_diff \
+                    -write ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D
    
                 CMD=`echo ${CMD} ${SESS}/PARAMS/dv.${ID}.${NUM}.1D`
                 if [ `echo ${SQ}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D`
+                    
+                    if [ `echo ${DIFF}` = 'on' ]; then
+                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D`
+                    fi
                 fi
 
                 if [ `echo ${DIFF}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D`
-                    
-                    if [ `echo ${SQ}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dif.dv.${ID}.${NUM}.1D`
-                    fi
                 fi
 
+                # note the difference in the order of operations from the diff method,
+                # above. It isn't clear to me if there is a meaningful difference in the
+                # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D`
                     
@@ -511,7 +530,6 @@ for SESS in ${DIR_SESS}; do
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D`
                     fi
                 fi
-
             fi
 
             if [ `echo ${ANATICOR}` = 'on' ]; then

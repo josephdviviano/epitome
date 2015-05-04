@@ -4,9 +4,9 @@ Usage: filter <func_prefix> <det> <std> <gm> <anaticor> <compcor> <compnum> <dv>
 
 + func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
 + det -- polynomial order to detrend each voxel against. 
-+ diff -- if == on, regresses first differences of regressors from data as well.
++ diff -- if == on, regresses first differences of regressors from data as well. If `sq` is also on, this takes the derivative of the squares.
 + lag -- if == on, regress the first lags of regressors from data as well.
-+ sq -- if == on, regresses squares of regressors from data as well.
++ sq -- if == on, regresses squares of regressors from data as well. Does NOT take the squares of the derivatives.
 + std -- if == on, does standard basic time-series filtering (6 paramater head motion, mean white matter, csf regression).
 + gm -- if == on, regress mean global signal from each voxel (careful...). 
 + dv -- if == on, regress mean draining vessel signal from each voxel.
