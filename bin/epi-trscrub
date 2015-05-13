@@ -156,15 +156,16 @@ def drop(data, idx):
 
     idx_retained = np.setdiff1d(np.arange(ntrs), idx)
     data = data[:, idx_retained]
+    ntrs = len(idx_retained)
 
-    return data
+    return data, ntrs
 
-def TR_drop(func, out, motion, DVARS=None, report=None, head=50, 
+def main(func, out, motion, DVARS=None, report=None, head=50, 
                                                         FD_t=0.3, 
                                                         DV_t=0.3,
                                                         mode='drop'):
     # convert/confirm variable types
-    print('\n TR_drop: ' + func)
+    print('\n epi-trscrub: ' + func)
     print('             FD = ' + str(FD_t) + ' mm,')
     print('          DVARS = ' + str(DV_t) + ' %,')
     print('    Head Radius = ' + str(head) + ' mm.\n')
@@ -200,34 +201,35 @@ def TR_drop(func, out, motion, DVARS=None, report=None, head=50,
     # remove censor idx < 1 and > length of run -1 (always keep 1st and last tr)
     idx = idx[idx > 1]
     idx = idx[idx < dims[3]-1]
+
+    # record number of removed datapoints
+    n_removed = dims[3]-len(idx)
     
     # find all the kosher TRs and scrub data
     if mode == 'drop':
-        data = drop(data, idx)
+        data, dims[3] = drop(data, idx)
     elif mode == 'interp':
         data = interp(data, idx)
 
-    # keep track of the number of retained TRs
-    print('TRs: ' + str(dims[3]-len(idx)) + ', Run: ' + os.path.basename(func))
-
     # reshape data, header
-    #outH.set_data_shape((dims[0], dims[1], dims[2], dims[3]))
     data = np.reshape(data, (dims[0], dims[1], dims[2], dims[3]))
-    
-    # removed header as this interferes with downstream AFNI calls 
-    #data = nib.nifti1.Nifti1Image(data, outA, outH)
-    data = nib.nifti1.Nifti1Image(data, outA)
 
+    # removed header as this interferes with downstream AFNI calls 
+    data = nib.nifti1.Nifti1Image(data, outA)
     data.update_header()
     data.header_class(extensions=())
 
     # write 4D output,
     data.to_filename(out)
-    
+
     # if we specify a report, wrtie it out yo
+    print('TRs: {}, Run: {}'.format(str(n_removed), os.path.basename(func)))
     if report != None:
         f = open(report, 'wb')
-        f.write(str(dims[3]))
+        if mode == 'drop':
+            f.write(str(dims[3]))
+        elif mode == 'interp':
+            f.write(str(dims[3]-n_removed))
         f.close()
 
 if __name__ == "__main__":
@@ -261,4 +263,4 @@ if __name__ == "__main__":
     else:
         mode = str(sys.argv[9]).lower()
 
-    TR_drop(func, output, motion, DVARS, report, head_mm, FD_t, DV_t, mode)
+    main(func, output, motion, DVARS, report, head_mm, FD_t, DV_t, mode)
