@@ -1,11 +1,11 @@
 """
-The epitome pipeline. If called from the command line, /bin/epitome is
-run. This code will generate a large number of scripts to be submitted to
-the queuing system running on your computer.
-
-I'll add more here later, promise.
+The epitome package is a set of tools for generating MRI pre-processing pipelines
+and analyzing fMRI data.
 """
 
 from . import config
 from . import utilities
+from . import stats
+from . import signal
+from . import plot
 #from commands import *

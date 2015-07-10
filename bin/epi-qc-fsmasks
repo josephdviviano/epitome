@@ -26,7 +26,6 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import epitome as epi
-import ninet as nn
 
 def mask_check(path, expt, mode, subj, pdf):
 
@@ -48,12 +47,12 @@ def mask_check(path, expt, mode, subj, pdf):
     vent = nib.load(vent).get_data()
 
     # reorient all data to radiological
-    EPI = nn.plot.reorient_to_radiological(EPI)
-    T1 = nn.plot.reorient_to_radiological(T1)
-    wm = nn.plot.reorient_to_radiological(wm)
-    dv = nn.plot.reorient_to_radiological(dv)
-    gm = nn.plot.reorient_to_radiological(gm)
-    vent = nn.plot.reorient_to_radiological(vent)
+    EPI = epi.plot.reorient_to_radiological(EPI)
+    T1 = epi.plot.reorient_to_radiological(T1)
+    wm = epi.plot.reorient_to_radiological(wm)
+    dv = epi.plot.reorient_to_radiological(dv)
+    gm = epi.plot.reorient_to_radiological(gm)
+    vent = epi.plot.reorient_to_radiological(vent)
 
     # get size ratio between over + underlay (EPI & T1 in same space)
     dsfactor = [a/float(r) for a,r in zip(EPI.shape, wm.shape)]
@@ -91,14 +90,10 @@ def mask_check(path, expt, mode, subj, pdf):
     
     # plot bg, white matter, grey matter, draining vessels, ventricles
     plt.imshow(EPI[mid, :, :], cmap=cmap_bg, interpolation='nearest')
-    plt.imshow(wm_to_EPI[mid, :, :], cmap=cmap_wm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(gm_to_EPI[mid, :, :], cmap=cmap_gm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(dv_to_EPI[mid, :, :], cmap=cmap_dv, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(vn_to_EPI[mid, :, :], cmap=cmap_vn, interpolation='nearest',
-                                                                 alpha=0.5)
+    plt.imshow(wm_to_EPI[mid, :, :], cmap=cmap_wm, interpolation='nearest', alpha=0.5)
+    plt.imshow(gm_to_EPI[mid, :, :], cmap=cmap_gm, interpolation='nearest', alpha=0.5)
+    plt.imshow(dv_to_EPI[mid, :, :], cmap=cmap_dv, interpolation='nearest', alpha=0.5)
+    plt.imshow(vn_to_EPI[mid, :, :], cmap=cmap_vn, interpolation='nearest', alpha=0.5)
     plt.axis('off')
 
     plt.subplot(2,3,2)
@@ -106,14 +101,10 @@ def mask_check(path, expt, mode, subj, pdf):
 
     # plot bg, white matter, grey matter, draining vessels, ventricles
     plt.imshow(EPI[:, mid, :], cmap=cmap_bg, interpolation='nearest')
-    plt.imshow(wm_to_EPI[:, mid, :], cmap=cmap_wm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(gm_to_EPI[:, mid, :], cmap=cmap_gm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(dv_to_EPI[:, mid, :], cmap=cmap_dv, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(vn_to_EPI[:, mid, :], cmap=cmap_vn, interpolation='nearest',
-                                                                 alpha=0.5)
+    plt.imshow(wm_to_EPI[:, mid, :], cmap=cmap_wm, interpolation='nearest', alpha=0.5)
+    plt.imshow(gm_to_EPI[:, mid, :], cmap=cmap_gm, interpolation='nearest', alpha=0.5)
+    plt.imshow(dv_to_EPI[:, mid, :], cmap=cmap_dv, interpolation='nearest', alpha=0.5)
+    plt.imshow(vn_to_EPI[:, mid, :], cmap=cmap_vn, interpolation='nearest', alpha=0.5)
     plt.axis('off')
 
     plt.subplot(2,3,3)
@@ -121,14 +112,10 @@ def mask_check(path, expt, mode, subj, pdf):
 
     # plot bg, white matter, grey matter, draining vessels, ventricles
     plt.imshow(EPI[:, :, mid], cmap=cmap_bg, interpolation='nearest')
-    plt.imshow(wm_to_EPI[:, :, mid], cmap=cmap_wm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(gm_to_EPI[:, :, mid], cmap=cmap_gm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(dv_to_EPI[:, :, mid], cmap=cmap_dv, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(vn_to_EPI[:, :, mid], cmap=cmap_vn, interpolation='nearest',
-                                                                 alpha=0.5)
+    plt.imshow(wm_to_EPI[:, :, mid], cmap=cmap_wm, interpolation='nearest', alpha=0.5)
+    plt.imshow(gm_to_EPI[:, :, mid], cmap=cmap_gm, interpolation='nearest', alpha=0.5)
+    plt.imshow(dv_to_EPI[:, :, mid], cmap=cmap_dv, interpolation='nearest', alpha=0.5)
+    plt.imshow(vn_to_EPI[:, :, mid], cmap=cmap_vn, interpolation='nearest', alpha=0.5)
     plt.axis('off')
 
     #######################################################################
@@ -139,14 +126,10 @@ def mask_check(path, expt, mode, subj, pdf):
     
     # plot bg, white matter, grey matter, draining vessels, ventricles
     plt.imshow(T1[mid, :, :], cmap=cmap_bg, interpolation='nearest')
-    plt.imshow(wm_to_EPI[mid, :, :], cmap=cmap_wm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(gm_to_EPI[mid, :, :], cmap=cmap_gm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(dv_to_EPI[mid, :, :], cmap=cmap_dv, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(vn_to_EPI[mid, :, :], cmap=cmap_vn, interpolation='nearest',
-                                                                 alpha=0.5)
+    plt.imshow(wm_to_EPI[mid, :, :], cmap=cmap_wm, interpolation='nearest', alpha=0.5)
+    plt.imshow(gm_to_EPI[mid, :, :], cmap=cmap_gm, interpolation='nearest', alpha=0.5)
+    plt.imshow(dv_to_EPI[mid, :, :], cmap=cmap_dv, interpolation='nearest', alpha=0.5)
+    plt.imshow(vn_to_EPI[mid, :, :], cmap=cmap_vn, interpolation='nearest', alpha=0.5)
     plt.axis('off')
 
     plt.subplot(2,3,5)
@@ -154,14 +137,10 @@ def mask_check(path, expt, mode, subj, pdf):
 
     # plot bg, white matter, grey matter, draining vessels, ventricles
     plt.imshow(T1[:, mid, :], cmap=cmap_bg, interpolation='nearest')
-    plt.imshow(wm_to_EPI[:, mid, :], cmap=cmap_wm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(gm_to_EPI[:, mid, :], cmap=cmap_gm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(dv_to_EPI[:, mid, :], cmap=cmap_dv, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(vn_to_EPI[:, mid, :], cmap=cmap_vn, interpolation='nearest',
-                                                                 alpha=0.5)
+    plt.imshow(wm_to_EPI[:, mid, :], cmap=cmap_wm, interpolation='nearest', alpha=0.5)
+    plt.imshow(gm_to_EPI[:, mid, :], cmap=cmap_gm, interpolation='nearest', alpha=0.5)
+    plt.imshow(dv_to_EPI[:, mid, :], cmap=cmap_dv, interpolation='nearest', alpha=0.5)
+    plt.imshow(vn_to_EPI[:, mid, :], cmap=cmap_vn, interpolation='nearest', alpha=0.5)
     plt.axis('off')
 
     plt.subplot(2,3,6)
@@ -169,14 +148,10 @@ def mask_check(path, expt, mode, subj, pdf):
 
     # plot bg, white matter, grey matter, draining vessels, ventricles
     plt.imshow(T1[:, :, mid], cmap=cmap_bg, interpolation='nearest')
-    plt.imshow(wm_to_EPI[:, :, mid], cmap=cmap_wm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(gm_to_EPI[:, :, mid], cmap=cmap_gm, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(dv_to_EPI[:, :, mid], cmap=cmap_dv, interpolation='nearest',
-                                                                 alpha=0.5)
-    plt.imshow(vn_to_EPI[:, :, mid], cmap=cmap_vn, interpolation='nearest',
-                                                                 alpha=0.5)
+    plt.imshow(wm_to_EPI[:, :, mid], cmap=cmap_wm, interpolation='nearest', alpha=0.5)
+    plt.imshow(gm_to_EPI[:, :, mid], cmap=cmap_gm, interpolation='nearest', alpha=0.5)
+    plt.imshow(dv_to_EPI[:, :, mid], cmap=cmap_dv, interpolation='nearest', alpha=0.5)
+    plt.imshow(vn_to_EPI[:, :, mid], cmap=cmap_vn, interpolation='nearest', alpha=0.5)
     plt.axis('off')
 
     plt.suptitle(str(expt) + ' ' + str(mode) + ': ' + str(subj))
@@ -192,14 +167,14 @@ def main(path, expt, mode):
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
     # loop through all subjects
-    pdf = PdfPages(os.path.join(path, expt, 'qc_masks_' + mode + '.pdf'))
+    pdf = PdfPages(os.path.join(path, expt, 'qc_masks_{}.pdf'.format(mode)))
     for subj in subjects:
 
         try:
             pdf = mask_check(path, expt, mode, subj, pdf)
 
         except:
-            print('ERROR: data error for ' + subj + ', skipping.')
+            print('ERROR: data error for {}, skipping.',format(subj))
             continue
 
     # Add some metadata and close the PDF object

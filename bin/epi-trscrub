@@ -32,7 +32,6 @@ import fnmatch
 import numpy as np
 import scipy as sp
 import nibabel as nib
-import ninet as nn
 
 from scipy.interpolate import interp1d
 
@@ -171,7 +170,7 @@ def main(func, out, motion, DVARS=None, report=None, head=50,
     print('    Head Radius = ' + str(head) + ' mm.\n')
 
     # load data, affine, header, get image dimensions
-    data, outA, outH, dims = nn.utilities.loadnii(func)
+    data, outA, outH, dims = epi.utilities.loadnii(func)
 
     # load motion parameters
     FD = np.genfromtxt(motion)

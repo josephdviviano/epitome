@@ -22,7 +22,7 @@ import numpy as np
 import scipy as sp
 import scipy.signal as sig
 import nibabel as nib
-import ninet as nn
+import epitome as epi
 
 def get_samp_nyq(TR):
     """
@@ -44,9 +44,9 @@ def median_filter(func, mask, kernel_size=5):
     The default kernel size is extremely conservative, but does a nice job.
     """
     # load in everything
-    func, func_aff, func_head, func_dims  = nn.utilities.loadnii(func)
-    mask, mask_aff, mask_head, mask_dims  = nn.utilities.loadnii(mask)
-    tmp, idx = nn.utilities.maskdata(func, mask)
+    func, func_aff, func_head, func_dims  = epi.utilities.loadnii(func)
+    mask, mask_aff, mask_head, mask_dims  = epi.utilities.loadnii(mask)
+    tmp, idx = epi.utilities.maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
@@ -72,16 +72,16 @@ def mean_filter(func, mask, kernel_size=5):
     The default kernel size is extremely conservative, but does a nice job.
     """
     # load in everything
-    func, func_aff, func_head, func_dims  = nn.utilities.loadnii(func)
-    mask, mask_aff, mask_head, mask_dims  = nn.utilities.loadnii(mask)
-    tmp, idx = nn.utilities.maskdata(func, mask)
+    func, func_aff, func_head, func_dims  = epi.utilities.loadnii(func)
+    mask, mask_aff, mask_head, mask_dims  = epi.utilities.loadnii(mask)
+    tmp, idx = epi.utilities.maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
 
     # filter data
     for x in np.arange(tmp.shape[0]):
-        filt[x, :] = nn.signal.moving_average(tmp[x, :], N=kernel_size)
+        filt[x, :] = epi.signal.moving_average(tmp[x, :], N=kernel_size)
 
     # create a 4D output array
     output = np.zeros(func.shape)
@@ -101,9 +101,9 @@ def kaiser_filter(func, mask, cutoff=0.1):
     The default cutoff is the traditional resting-state cutoff.
     """
     # load in everything
-    func, func_aff, func_head, func_dims  = nn.utilities.loadnii(func)
-    mask, mask_aff, mask_head, mask_dims  = nn.utilities.loadnii(mask)
-    tmp, idx = nn.utilities.maskdata(func, mask)
+    func, func_aff, func_head, func_dims  = epi.utilities.loadnii(func)
+    mask, mask_aff, mask_head, mask_dims  = epi.utilities.loadnii(mask)
+    tmp, idx = epi.utilities.maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)
@@ -146,9 +146,9 @@ def butterworth_filter(func, mask, cutoff=0.1):
     The default cutoff is the traditional resting-state cutoff.
     """
     # load in everything
-    func, func_aff, func_head, func_dims  = nn.utilities.loadnii(func)
-    mask, mask_aff, mask_head, mask_dims  = nn.utilities.loadnii(mask)
-    tmp, idx = nn.utilities.maskdata(func, mask)
+    func, func_aff, func_head, func_dims  = epi.utilities.loadnii(func)
+    mask, mask_aff, mask_head, mask_dims  = epi.utilities.loadnii(mask)
+    tmp, idx = epi.utilities.maskdata(func, mask)
 
     # init output array
     filt = np.zeros(tmp.shape)

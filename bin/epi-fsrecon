@@ -3,7 +3,6 @@
 import os, sys
 import fnmatch
 import subprocess
-
 import epitome as epi
 
 def add_t1s(path, sess, cmd):

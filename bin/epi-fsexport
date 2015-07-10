@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 
-# Freesurfer T1 Export
-# takes the processed T1 from freesurfer to use as a standard anatomical
-# this is slow, but provides the highest-quality registration target.
-# this also allows us to take advantage of the high-quality freesurfer
-# segmentations for nuisance time series regression, if desired
+"""
+epi-fsexport
+
+Takes the processed T1 from freesurfer to use as a standard anatomical this is 
+slow, but provides the highest-quality registration target. This also allows us 
+to take advantage of the high-quality freesurfer segmentations for nuisance time
+series regression, if desired.
+"""
 
 import os, sys
 import fnmatch
 import subprocess
 import shlex
-
 import epitome as epi
 
 def bash_command(cmd):

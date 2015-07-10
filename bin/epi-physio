@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
-###############################################################################
-epiphysio: Parses BIOPACK MP150 files from the York University, TO, MRI. 
+epi-physio: Parses BIOPACK MP150 files from the York University, TO, MRI. 
 
     This outputs one set of cardiac waveform data, respiratory waveform data,
     and heart rate data from each contiguous blocks of TTL pulses from the
@@ -18,8 +17,6 @@ epiphysio: Parses BIOPACK MP150 files from the York University, TO, MRI.
 
         A set of {card.X.phys, resp.X.phys, card_rate.X.phys} in the current
         directory.
-
-###############################################################################
 """
 
 import os, sys, csv

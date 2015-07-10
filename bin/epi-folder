@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 """
-###############################################################################
-epifolder: Generating your epitome folder directories since 2014.
+epi-folder
 
-    Allows you to interactively generate an appropriate folder structure for
-    your epitome experiments.
-
-###############################################################################
+Allows you to interactively generate an appropriate folder structure for your 
+epitome experiments.
 """
 
 import os, sys
