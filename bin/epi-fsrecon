@@ -1,9 +1,23 @@
 #!/usr/bin/env python
+"""
+Takes a epitome proclist, determines which T1s need to be 
+analyzed, and adds their recon-all commands to the proclist.
+
+Usage:
+    epi-fsrecon <root> <expt> <mode> <proclist>
+
+Arguements:
+    <root>          EPITOME_DATA directory
+    <expt>          epitome experiment to analyze.
+    <mode>          image modality to analyze.
+    <proclist>      proclist to modify.
+"""
 
 import os, sys
 import fnmatch
 import subprocess
 import epitome as epi
+from epitome.docopt import docopt
 
 def add_t1s(path, sess, cmd):
     """
@@ -52,25 +66,14 @@ def generate_stack(root, expt):
     
     return stack
 
-def FS_recon(root, expt, mode, proc):
+def main():
+    arguments = docopt(__doc__)
+    root = arguments['<root>']
+    expt = arguments['<expt>']
+    mode = arguments['<mode>']
+    proc = arguments['<proclist>']
 
     stack = generate_stack(root, expt)
-
-    # This would per
-    # # run multiple instances of Freesurfer in parallel
-    # processes = set()
-    # for cmd in stack:
-    #     processes.add(subprocess.Popen(cmd, shell=True))
-    #     if len(processes) >= core:
-    #         os.wait()
-    #         processes.difference_update(
-    #             p for p in processes if p.poll() is not None)
-
-    # #Check if all the child processes were closed
-    # for p in processes:
-    #     if p.poll() is None:
-    #         p.wait();
-
     f = open(proc, 'wb')
 
     for cmd in stack:
@@ -80,11 +83,4 @@ def FS_recon(root, expt, mode, proc):
     f.close()
 
 if __name__ == "__main__":
-    # check input types
-    root = str(sys.argv[1])
-    expt = str(sys.argv[2])
-    mode = str(sys.argv[3])
-    proc = str(sys.argv[4])
-
-    # submit arguments to the program
-    FS_recon(root, expt, mode, proc)
+    main()

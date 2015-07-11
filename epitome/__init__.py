@@ -8,4 +8,5 @@ from . import utilities
 from . import stats
 from . import signal
 from . import plot
+from . import docopt
 #from commands import *
