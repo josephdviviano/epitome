@@ -57,6 +57,7 @@ Optional:
 + [Grid Engine](http://gridscheduler.sourceforge.net/) or [PBS](http://www.adaptivecomputing.com/products/open-source/torque/)
 + [FSL FIX 1.61](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX)
 + [Bioread 0.9.3](https://pypi.python.org/pypi/bioread/0.9.3)
+
 Introduction
 ------------
 epitome is a program designed for the flexible construction of MRI pre-processing pipelines, with a focus on functional MRI images and their associated problems. Its primary function is to take BASH modules and chain them together in any way the user desires to create a set of batch-processing scripts for an MRI experiment. These modules are not necessarily dependent on one another, allowing users of this package to easily extend the functionality of epitome by simply depositing a shell script into the appropriate module folder and writing the associated python wrapper command (and documentation!)
