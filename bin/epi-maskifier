@@ -1,9 +1,36 @@
 #!/usr/bin/env python
 
+"""
+Takes an input mask in volume space and projects it on to a CIVET surface.
+
+Usage:
+    epi-maskifier [options] <mask> <civetdir> <keeptmp>
+
+Arguements:
+
+    <mask>          Input mask file.
+    <civetdir>      Civet output directory.
+
+Options:
+
+    --keeptmp       If 1, keep intermediate files
+
+DETAILS
+
+    This will take any NIFTI (.nii.gz), MNI space mask, and project it to a 
+    civet surface file inside of the supplied CIVET folder. This will allow you 
+    to do ROI analysis using the cortical thickness outputs of CIVET, among 
+    other kewl things.
+
+    If you pass 'True' or 1 to keep_tmp, then this program will not delete any 
+    intermediate files.
+"""
+
 import sys, os
 import string
 import random
 import numpy as np
+from epitome.docopt import docopt
 
 def module_load():
     """
@@ -40,19 +67,12 @@ def check_inputs(mask, dir_civet):
     # if these are ok, return True
     return True
 
-def mask2obj(mask, dir_civet, keep_tmp=0):
-    """
-    Usage:
-        epi-maskifier <mask_file.nii.gz> <civet_folder/> <keep_tmp>
+def main():
+    arguments  = docopt(__doc__)
+    mask       = arguments['<mask>']
+    dir_civet  = arguments['<civetdir>']
+    keep_tmp   = arguments['--keeptmp']
 
-    This will take any NIFTI (.nii.gz), MNI space mask, and project it to a 
-    civet surface file inside of the supplied CIVET folder. This will allow you 
-    to do ROI analysis using the cortical thickness outputs of CIVET, among 
-    other kewl things.
-
-    If you pass 'True' to keep_tmp, then this program will not delete any 
-    intermediate files.
-    """
     # set path
     module_load()
 
@@ -76,12 +96,12 @@ def mask2obj(mask, dir_civet, keep_tmp=0):
     os.system('cp {} {}/mask.nii.gz'.format(mask, dir_tmp))
 
     # get surfaces from civet folder
-    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*white_surface_rsl_left*81920.obj  -o_fs {dir_tmp}/surf_wm_L.asc  -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp)
-    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*white_surface_rsl_right*81920.obj -o_fs {dir_tmp}/surf_wm_R.asc  -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp)
-    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*mid_surface_rsl_left*81920.obj    -o_fs {dir_tmp}/surf_mid_L.asc -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp)
-    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*mid_surface_rsl_right*81920.obj   -o_fs {dir_tmp}/surf_mid_R.asc -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp)
-    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*gray_surface_rsl_left*81920.obj   -o_fs {dir_tmp}/surf_gm_L.asc  -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp)
-    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*gray_surface_rsl_right*81920.obj  -o_fs {dir_tmp}/surf_gm_R.asc  -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp)
+    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*white_surface_rsl_left*81920.obj  -o_fs {dir_tmp}/surf_wm_L.asc  -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp))
+    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*white_surface_rsl_right*81920.obj -o_fs {dir_tmp}/surf_wm_R.asc  -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp))
+    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*mid_surface_rsl_left*81920.obj    -o_fs {dir_tmp}/surf_mid_L.asc -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp))
+    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*mid_surface_rsl_right*81920.obj   -o_fs {dir_tmp}/surf_mid_R.asc -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp))
+    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*gray_surface_rsl_left*81920.obj   -o_fs {dir_tmp}/surf_gm_L.asc  -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp))
+    os.system('ConvertSurface -i_mni {dir_civet}/surfaces/*gray_surface_rsl_right*81920.obj  -o_fs {dir_tmp}/surf_gm_R.asc  -sv {dir_tmp}/anat_T1_brain_MNI.nii'.format(dir_civet=dir_civet, dir_tmp=dir_tmp))
     
     # make SUMA 'spec' file
     os.system('quickspec -tn FS ' + dir_tmp + '/surf_wm_L.asc ' +
@@ -149,17 +169,4 @@ def mask2obj(mask, dir_civet, keep_tmp=0):
     sys.exit()
 
 if __name__ == '__main__':
-
-    # :D
-
-    # if we didn't define the tmp folder option
-    if len(sys.argv) == 3:
-        mask2obj(sys.argv[1], sys.argv[2])
-
-    # if we recieve a tmp folder option
-    elif len(sys.argv) == 4:
-        mask2obj(sys.argv[1], sys.argv[2], sys.argv[3])
-
-    # if the user needs help
-    else:
-        print(mask2obj.__doc__)
+    main()

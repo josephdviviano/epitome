@@ -35,12 +35,11 @@ import nibabel as nib
 from epitome.docopt import docopt
 
 def main():
-
     arguments = docopt(__doc__)
     data = arguments['<4d-input>']
     seed = arguments['<seeds>']
     mask = arguments['<brain-mask>']
-    stat = arguements['--stat']
+    stat = arguments['--stat']
 
     # determine the filenames
     if data[-7:] == '.nii.gz':
