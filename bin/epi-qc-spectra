@@ -1,4 +1,16 @@
 #!/usr/bin/env python
+"""
+Plots the spectra of regressors used during the filter module.
+
+Usage:
+    epi-qc-spectra <path> <expt> <mode> <uid>
+
+Arguement:
+    <path>          path to epitome data directory
+    <expt>          experiment name
+    <mode>          image modaility
+    <uid>           unique identifier for a given run
+"""
 
 import os, sys
 import datetime
@@ -6,16 +18,15 @@ import datetime
 import numpy as np
 import scipy as sp
 import scipy.signal as sig
-
 import nibabel as nib
 
 import matplotlib
 matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import epitome as epi
+from epitome.docopt import docopt
 
 def load_PSD(array, fs):
     """
@@ -213,10 +224,12 @@ def plotter(raw, noise, signal, dv, vent, gm, n, freq):
 
     return fig, ax
 
-def regressor_spectra(path, expt, mode, uid):
-    """
-    :D
-    """
+def main():
+    arguments = docopt(__doc__)
+    path      = arguments['<path>']
+    expt      = arguments['<expt>']
+    mode      = arguments['<mode>']
+    uid       = arguments['<uid>']
 
     # get subject numbers
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
@@ -363,4 +376,4 @@ def regressor_spectra(path, expt, mode, uid):
     pdf.close()
 
 if __name__ == "__main__":
-    regressor_spectra(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    main()
