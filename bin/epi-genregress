@@ -4,18 +4,15 @@ Takes an input NIFTI and ROI mask to produce n PC component time series that
 best explain the variance within the ROI.
 
 Usage:
-
     epi-genregress <data> <mask> <output> <n>
 
 Arguements:
-
     <data>          Input data (4D NIFTI).
     <mask>          ROI mask (brain or otherwise).
     <output>        Output filename.
     <n>             Number of PCs to extract.
 
 DETAILS
-
     This will mean-centre and variance normalize each time series before
     estimating PCs within the ROI mask.
 
