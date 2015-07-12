@@ -1,22 +1,26 @@
 #!/usr/bin/env python
 """
-epi-physio: Parses BIOPACK MP150 files from the York University, TO, MRI. 
+Parses BIOPACK MP150 files from the York University, TO, Neuroimaging Unit.
 
-    This outputs one set of cardiac waveform data, respiratory waveform data,
-    and heart rate data from each contiguous blocks of TTL pulses from the
-    MRI. The corresponding files should be placed in the RUN folder for
-    functional EPI data that you would like to undergo physiological noise
-    regression, and EPItome will look for and use *.phys files in each
-    RUN directory automatically.
+Usage:
+    epi-physio <input>
 
-    Usage:
+Arguments:
+    <input>         Input biopack file.
 
-        epiphysio <input_file>
+DETAILS:
 
-    Returns:
+    This outputs one set of cardiac waveform data, respiratory waveform data,  
+    and heart rate data from each contiguous blocks of TTL pulses from the MRI.
+    the corresponding files should be placed in the RUN folder for functional  
+    EPI data that you would like to undergo physiological noise regression, and  
+    epitome will look for and use *.phys files in each RUN directory 
+    automatically.
 
-        A set of {card.X.phys, resp.X.phys, card_rate.X.phys} in the current
-        directory.
+    Returns a set of {card.X.phys, resp.X.phys, card_rate.X.phys} in the current 
+    directory.
+
+    Requires the bioread python package (currently not included in epitome).
 """
 
 import os, sys, csv
@@ -24,6 +28,7 @@ import numpy as np
 import scipy.signal as sig
 import bioread as bio
 import matplotlib.pyplot as plt
+from epitome.docopt import docopt
 
 def find_transitions(ttl_dat):
     """
@@ -57,39 +62,25 @@ def find_transitions(ttl_dat):
 
     return ttl_out
 
-def main(input_file):
-    """
-    Reads in the specified biopack file and writes out a set of
-    physiological regressors in the current directory for use with 
-    McRetroTS.
-    """
+def main():
+    arguments = docopt(__doc__)
+    infile     = arguments['<input>']
 
-    # print a welcome message
-    print('##################################################################')
-    print('epiphysio: Parses BIOPACK physiological data collected at the York')
-    print('           University, TO, MRI suite into their individual modal- ')
-    print('           ities and runs. Place these outputs into the correct   ')
-    print('           RUN directories!                                       ')
-    print('##################################################################')
-    print('\nWorking on ' + str(input_file))
-
-    # attempt to import data
-    if os.path.isfile(input_file) == True:
+    if os.path.isfile(infile) == True:
         try:
             # read in ttl data, return transitions, create transition index
-            data = bio.read_file(input_file)
+            data = bio.read_file(infile)
             ttl_dat = data.named_channels['TTL pulse'].data
             ttl_out = find_transitions(ttl_dat)
             ttl_idx = np.where(ttl_out == 1)[0]
-            print('File ' + str(input_file) + ' imported successfully!')
         
         except:
             # print a warning & exit if the input file confuses bioread
-            print('Import failed. Is this the correct file type?')
+            print('ERROR: Bioread import failed. Correct file type?')
             sys.exit()
     else:
         # print a warning & exit if the input filename does not exist
-        print('Input files does not exist! Exiting.')
+        print('ERROR: Input files does not exist! Exiting.')
         sys.exit()
 
     # split data into start and end points
@@ -106,14 +97,9 @@ def main(input_file):
         else:
             stops.append(ttl_idx[iteration])
 
-    # print number of runs for zee user
-    print('Found ' + str(len(starts)) + 'runs.')
-
     # write out data
     for run in np.arange(len(starts)):
-
         num = run + 1 # file number start at 1
-        print('Parsing run ' + str(num))
 
         # heart rate data -- 1/2 sampling rate
         tmp = data.named_channels['Pulse Rate'].data
@@ -130,7 +116,7 @@ def main(input_file):
             writer = csv.writer(csvfile, delimiter=' ')
             writer.writerow(tmp) # write the data
             csvfile.close()
-            
+
         # pulse waveform data
         tmp = data.named_channels['pulse waveform'].data
         tmp = tmp[starts[run]:stops[run]]
@@ -139,12 +125,8 @@ def main(input_file):
             writer.writerow(tmp) # write the data
             csvfile.close()
 
-    print('Finished, exiting epiphysio.')
+    print('MSG: Processed {} runs from {}'.format(str(len(starts)), infile))
+    print('MSG: Place these outputs into the corresponding RUN folders.')
 
 if __name__ == "__main__":
-    
-    # try to find the input file, if it exists, run EPIphysio
-    if os.path.isfile(str(sys.argv[1])) == True:
-        main(str(sys.argv[1]))
-    else:
-        print(str(sys.argv[1]) + ' is not a file!')
+    main()

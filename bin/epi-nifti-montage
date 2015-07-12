@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 """
-epi-nifti-montage: hates on minc montage.
+Creates a montage of images displaying a label set on top of a grayscale image.
+Also, hates on minc montage.
+
+Usage: 
+    epi-nifti-montage [options] <image> <label>
+
+Arguments:
+    <image>      background image file name
+    <label>      label set file name
+
+Options:
+    --alpha      opacity of overlay (1 = full, 0 = none) [default: 0.75]
+    --steps      number of images in the montage [default: 10]
+    --ori        orientation: 'coronal', 'saggital', 'axial'. [default: coronal]
 """
 
 import sys
@@ -8,6 +21,7 @@ import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
 from scipy import ndimage as nd
+from epitome.docopt import docopt
 
 def bounding_box(filename):
     """
@@ -63,34 +77,17 @@ def bounding_box(filename):
 
     return box
 
-def montage(image, label, box=None, alpha=0.75, steps=10, ori='coronal'):
-    """
-    Creates a montage of images displaying a label set on top of a grayscale 
-    image.
-
-    Usage:
-        montage(image, label, box=None, alpha=0.75, steps=10, ori='coronal')
-
-        image -- background image file name
-        label -- label set file name
-        alpha -- set transparency of overlay (1 = opaque, 0 = invisible)
-        steps -- number of images in the montage
-        ori   -- orientation of the images. 
-                 could be 'coronal', 'saggital', or 'axial'
-    """
-
-    # input checks
-    image = str(image)
-    label = str(label)
-    alpha = float(alpha)
-    steps = int(steps)
-    ori = str(ori)
+def main():
+    arguments = docopt(__doc__)
+    image     = arguments['<image>']
+    label     = arguments['<label>']
+    alpha     = arguments['--alpha']
+    steps     = arguments['--steps']
+    ori       = arguments['--ori']
 
     if ori not in ['coronal', 'axial', 'saggital']:
-        print(""" *** Invalid orientation given!          *** """)
-        print(""" *** Valid options:                      *** """)
-        print(""" ***     'coronal', 'axial', 'saggital'. *** """)
-        raise ValueError
+        print('ERROR: Invalid orientation. Valid: coronal, axial, saggital.') 
+        sys.exit()
 
     # load in the daterbytes
     output = str(label)
@@ -107,12 +104,12 @@ def montage(image, label, box=None, alpha=0.75, steps=10, ori='coronal'):
     dsfactor = [a/float(r) for a,r in zip(image.shape, label.shape)]
     label = nd.interpolation.zoom(label, zoom=dsfactor)
 
-    if box == None: # if we didn't get a submitted bounding box
-        box = bounding_box(label) # get the label bounds
-    elif box.shape != (3,2): # if we did, ensure it is the right shape
-        print('*** Submitted bounding box is not the correct shape! ***')
-        print('***     It should be (3,2).                          ***')
-        raise ValueError
+    # if box == None: # if we didn't get a submitted bounding box
+    box = bounding_box(label) # get the label bounds
+    # elif box.shape != (3,2): # if we did, ensure it is the right shape
+    #     print('*** Submitted bounding box is not the correct shape! ***')
+    #     print('***     It should be (3,2).                          ***')
+    #     raise ValueError
 
     # crop data to bounded size
     image = image[box[0,0]:box[0,1], box[1,0]:box[1,1], box[2,0]:box[2,1]]
@@ -164,5 +161,4 @@ def montage(image, label, box=None, alpha=0.75, steps=10, ori='coronal'):
     plt.savefig(output + '_montage.pdf', format='pdf')
 
 if __name__ == "__main__":
-
-    montage(str(sys.argv[1]), str(sys.argv[2]))
+    main()

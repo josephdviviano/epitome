@@ -6,13 +6,11 @@ Takes an input mask in volume space and projects it on to a CIVET surface.
 Usage:
     epi-maskifier [options] <mask> <civetdir> <keeptmp>
 
-Arguements:
-
+Arguments:
     <mask>          Input mask file.
     <civetdir>      Civet output directory.
 
 Options:
-
     --keeptmp       If 1, keep intermediate files
 
 DETAILS

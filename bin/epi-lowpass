@@ -5,10 +5,9 @@ voxel. To save on computation time, this requires a mask input. All values > 0
 in the mask survive.
 
 Usage: 
-
     epi-lowpass <filter_type> <func_name> <mask_name> <cutoff> <path> <run_number>
 
-Arguements:
+Arguments:
     <filter_type>    'median', 'average', 'kaiser', or 'butterworth'.
     <func_name>      full path of input functional data.
     <mask_name>      full path of input mask data. 
