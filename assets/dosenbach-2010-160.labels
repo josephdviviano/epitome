@@ -7,6 +7,9 @@
 //      Table S6 (pg 29): 'Region strengths (sum of feature weights) 
 //                         for 160 ROIs sorted by MNI coordinates.'
 //
+// Turn into an MNI-space ROI volume with something like:
+//   3dUndump -master MNI.nii.gz -xyz -srad 6 -prefix MNI_rois.nii.gz dosenbach-2010-160.labels
+//
 // x y z // ROI network
 6 64 3 // vmPFC default
 29 57 18 // aPFC fronto-parietal
