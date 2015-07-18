@@ -2,31 +2,23 @@
 """
 Takes a proclist created using epitome run and submits it to the scheduler 
 installed on SHARCnet.
-"""
 
+Usage:
+    epi-sharc <proclist>
+
+Arguments:    
+    <proclist>      input proclist
+
+DETAILS:
+    Opens the input file, and generates a unique string for each run.
+    This keeps jobs submitted by multiple users distinct.
+"""
 import os, sys
 import random
 import string
 import shlex
 import subprocess
-
-def init(input_file):
-    """
-    Opens the input file, and generates a unique string for each run.
-    This keeps jobs submitted by multiple users distinct.
-    """
-
-    # replace proclist with cmd for identifying subject-wise scripts
-    command_file = 'cmd_' + input_file[9:]
-
-    f = open(input_file)
-    f = f.read()
-
-    # used to keep freesurfer + qc jobs distinct
-    u_id = ''.join(random.choice(string.ascii_uppercase + 
-                                 string.digits) for _ in range(6))
-
-    submit_jobs(f, u_id, command_file)
+from epitome.docopt import docopt
 
 def submit_jobs(f, u_id, command_file):
     """
@@ -89,12 +81,21 @@ def submit_jobs(f, u_id, command_file):
         result = out.decode()
         print(result)
 
-if __name__ == "__main__":
-    
-    if len(sys.argv) != 2:
-        print('episharc requires one proclist input file')
-        sys.exit()
+def main():
+    arguments  = docopt(__doc__)
+    input_file = arguments['<proclist>']
 
-    else:
-      input_file = str(sys.argv[1])
-      init(input_file)
+    # replace proclist with cmd for identifying subject-wise scripts
+    command_file = 'cmd_' + input_file[9:]
+
+    f = open(input_file)
+    f = f.read()
+
+    # used to keep freesurfer + qc jobs distinct
+    u_id = ''.join(random.choice(string.ascii_uppercase + 
+                                 string.digits) for _ in range(6))
+
+    submit_jobs(f, u_id, command_file)
+
+if __name__ == "__main__":
+    main()

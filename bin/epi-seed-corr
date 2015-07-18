@@ -1,26 +1,34 @@
 #!/usr/bin/env python
+"""
+Produces a correlation map of the mean time series within the seed with
+every voxel in the supplied mask. This function assumes all supplied
+images are the same size.
+
+Usage:
+    epi-seed-corr <func> <seed> <mask>
+
+Arguments:    
+    <func>          functional data
+    <seed>          seed mask
+    <mask>          brain mask
+
+DETAILS:
+    At the moment, the seed mask only works with a single seed (all nonzero
+    voxels will be pooled.) This outputs a single image with the r-values.
+"""
 
 import sys
 import numpy as np
 import scipy as sp
 import nibabel as nib
 
-def seed_corr(func, seed, mask):
-    """
-    seed-corr
-    ---------
+from epitome.docopt import docopt
 
-    Produces a correlation map of the mean time series within the seed with
-    every voxel in the supplied mask. This function assumes all supplied
-    images are the same size.
-
-    Usage:
-
-        seed-corr functional.nii.gz seed-mask.nii.gz brian-mask.nii.gz
-
-    At the moment, the seed mask only works with a single seed (all nonzero
-    voxels will be pooled.) This outputs a single image with the r-values.
-    """
+def main():
+    arguments = docopt(__doc__)
+    func = arguments['<func>']
+    seed = arguments['<seed>']
+    mask = arguments['<mask>']
 
     # determine the filenames
     if func[-7:] == '.nii.gz':
@@ -34,8 +42,6 @@ def seed_corr(func, seed, mask):
         seedname = seed[:-4]
 
     filename = 'corr_' + seedname + '_' + funcname + '.nii.gz'
-
-
 
     # import template, store the output paramaters
     seed = nib.load(seed)
@@ -78,15 +84,5 @@ def seed_corr(func, seed, mask):
     out.to_filename(filename)
     print('*** Completed ' + filename + '***')
 
-
 if __name__ == '__main__':
-    
-    # check if the user needs help
-    if len(sys.argv) == 4:
-        seed_corr(sys.argv[1], sys.argv[2], sys.argv[3])
-
-    elif sys.argv[1] == '-h' or sys.argv[1] == '--help':
-        print seed_corr.__doc__
-
-    else:
-        print('seed-corr -h or --help for help.')
+    main()

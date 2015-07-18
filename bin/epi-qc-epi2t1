@@ -1,15 +1,19 @@
 #!/usr/bin/env python
 """
-epi-qc-epi2t1 <path> <expt> <mode>
-
-For each subject, prints the central slice of the T1 and co-registered + 
-deskulled EPI, including an edge-detected version of the T1 (requires AFNI).
+Shows the quality of EPI to T1 registration.
 
 Usage:
+    epi-qc-epi2t1 <path> <expt> <mode>
 
-    path -- data path for epitome
-    expt -- experiment to QC
-    mode -- datatype to QC
+Arguments:
+    <path>          data path for epitome
+    <expt>          experiment to QC
+    <mode>          datatype to QC
+
+DETAILS:
+
+    For each subject, prints the central slice of the T1 and co-registered + 
+    deskulled EPI, including an edge-detected version of the T1 (requires AFNI).   
 """
 
 import os, sys
@@ -26,6 +30,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import epitome as epi
+from epitome.docopt import docopt
 
 def reorient_to_radiological(image):
     """
@@ -139,11 +144,12 @@ def process_subject(path, expt, mode, subj, pdf):
 
     return pdf
 
-def main(path, expt, mode):
-    """
-    Prints the central slice of the T1 and co-registered + deskulled EPI, 
-    including an edge-detected version of the T1 (requires AFNI).
-    """
+def main():
+    arguments = docopt(__doc__)
+    path      = arguments['<path>']
+    expt      = arguments['<expt>']
+    mode      = arguments['<mode>']
+
     # get subject numbers
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
 
@@ -169,7 +175,4 @@ def main(path, expt, mode):
     pdf.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
-	   main(sys.argv[1], sys.argv[2], sys.argv[3])
-    else:
-        print(__doc__)
+    main()

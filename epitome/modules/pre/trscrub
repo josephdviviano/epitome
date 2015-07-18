@@ -34,12 +34,12 @@ for SESS in ${DIR_SESS}; do
                 ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
                 ${SESS}/func_scrubbed.${ID}.${NUM}.nii.gz \
                 ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
-                ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D \
-                ${SESS}/PARAMS/retained_TRs.${ID}.${NUM}.1D \
-                ${HEAD} \
-                ${FD} \
-                ${DV} \
-                ${MODE}
+                --DVARS ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D \
+                --report ${SESS}/PARAMS/retained_TRs.${ID}.${NUM}.1D \
+                --head ${HEAD} \
+                --FD ${FD} \
+                --DV ${DV} \
+                --mode ${MODE}
         fi
     done
 done

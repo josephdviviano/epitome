@@ -1,28 +1,32 @@
 #!/usr/bin/env python
 """
-epi-trdrop <func> <output> <motion> <DVARS> <report> <head_mm> <FD> <DV> <mode>
-
-Removes motion-corrupted TRs from data, without interpolation. If called
-from the command line, this will batch process all runs in all sessions 
+Removes motion-corrupted TRs from data, with or without interpolation. If 
+called from the command line, this will batch process all runs in all sessions 
 for a given subject.
 
-Runs in two modes. In mode one, high-motion TRs are cropped out of the data.
-This is really only appropriate with resting state data. In mode two, a linear
-interpolate is constructed between the deleted TRs, which is more appropriate
-for task-based fMRI (and maybe resting state).
+Usage:
+    epi-trscrub [options] <func> <output> <motion>
 
-func   = full path to input nifti file.
-out    = full path to output nifti file.
-motion = full path to AFNI motion parameters.
-DVARS  = full path to DVARS calculation.
-report = full path to report on TRs scrubbed per subject.
-head   = head radius in mm (default 50 mm).
-FD     = censor TRs with instantaneous motion > x mm (default 0.3 mm).
-DV     = censor TRs with instantaneous GS fluctuation > x % (def. 0.3 %).
-mode   = 'drop' -- deletes TRs, 'interp' -- interpolates over TRs.
+Arguments:
+    <func>          full path to input nifti file.
+    <output>        full path to output nifti file.
+    <motion>        full path to AFNI motion parameters.
 
-Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to
-change.
+Options:
+    --DVARS         full path to DVARS calculation [default: None]
+    --report        full path to report on TRs scrubbed per subject [default: None]
+    --head          head radius in mm [default: 50].
+    --FD            censor TRs with instantaneous motion > x mm [default: 0.3]
+    --DV            censor TRs with instantaneous GS fluctuation > x % [default: 0.3]
+    --mode          'drop': deletes TRs. 'interp': interpolates over TRs. [default: drop]
+
+DETAILS:
+    Runs in two modes. In mode one, high-motion TRs are cropped out of the data.
+    This is really only appropriate with resting state data. In mode two, a linear
+    interpolate is constructed between the deleted TRs, which is more appropriate
+    for task-based fMRI (and maybe resting state).
+
+    Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to change.
 
 """
 import os, sys
@@ -34,6 +38,7 @@ import scipy as sp
 import nibabel as nib
 
 from scipy.interpolate import interp1d
+from epitome.docopt import docopt
 
 def interp(data, idx, threshold=0.5):
     """
@@ -159,15 +164,26 @@ def drop(data, idx):
 
     return data, ntrs
 
-def main(func, out, motion, DVARS=None, report=None, head=50, 
-                                                        FD_t=0.3, 
-                                                        DV_t=0.3,
-                                                        mode='drop'):
-    # convert/confirm variable types
-    print('\n epi-trscrub: ' + func)
-    print('             FD = ' + str(FD_t) + ' mm,')
-    print('          DVARS = ' + str(DV_t) + ' %,')
-    print('    Head Radius = ' + str(head) + ' mm.\n')
+def main():
+    arguments  = docopt(__doc__)
+    func = arguments['<func>']
+    output = arguments['<output>']
+    motion = arguments['<motion>']
+    DVARS = arguments['--DVARS']
+    report = arguments['--report']
+    head = arguments['--head']
+    FD_t = arguments['--FD']
+    DV_t = arguments['--DV']
+    mode = arguments['--mode']
+
+    if mode.lower() not in ['drop', 'interp']:
+        print('Mode: {} invalid, using mode = drop.'.format(mode))
+        mode = 'drop'
+
+    print('\n epi-trscrub: {}'.format(func) + func)
+    print('           FD = {} mm,'.format(FD_t))
+    print('        DVARS = {} %,'.format(DV_t))
+    print('  Head Radius = {} mm.\n'.format(head))
 
     # load data, affine, header, get image dimensions
     data, outA, outH, dims = epi.utilities.loadnii(func)
@@ -232,34 +248,4 @@ def main(func, out, motion, DVARS=None, report=None, head=50,
         f.close()
 
 if __name__ == "__main__":
-
-    if len(sys.argv) != 10:
-        print(__doc__)
-        sys.exit()
-
-    # check inputs
-    func = str(sys.argv[1])
-    output = str(sys.argv[2])
-    motion = str(sys.argv[3])
-
-    if str(sys.argv[4]).lower() != 'none':
-        DVARS = str(sys.argv[4])
-    else:
-        DVARS = None
-
-    if str(sys.argv[5]).lower() != 'none':
-        report = str(sys.argv[5])
-    else:
-        report = None
-
-    head_mm = float(sys.argv[6])
-    FD_t = float(sys.argv[7])
-    DV_t = float(sys.argv[8])
-
-    if str(sys.argv[9]).lower() not in ['drop', 'interp']:
-        print('Mode: ' + str(sys.argv[9]) + ' invalid, using mode = drop.')
-        mode = 'drop'
-    else:
-        mode = str(sys.argv[9]).lower()
-
-    main(func, output, motion, DVARS, report, head_mm, FD_t, DV_t, mode)
+    main()
