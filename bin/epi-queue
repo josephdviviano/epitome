@@ -27,7 +27,7 @@ def main():
     proclist  = arguments['<proclist>']
     queue     = arguments['<queue>']
 
-    f = open(input_file)
+    f = open(proclist)
     f = f.read()
 
     # used to keep freesurfer + qc jobs distinct
