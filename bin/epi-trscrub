@@ -188,16 +188,7 @@ def main():
     # load data, affine, header, get image dimensions
     data, outA, outH, dims = epi.utilities.loadnii(func)
 
-    # load motion parameters
-    FD = np.genfromtxt(motion)
-
-    FD[:,0] = np.radians(FD[:,0])*head # roll
-    FD[:,1] = np.radians(FD[:,1])*head # pitch
-    FD[:,2] = np.radians(FD[:,2])*head # yaw
-
-    # sum over absolute derivative for the 6 motion parameters
-    FD = np.sum(np.abs(np.diff(FD, n=1, axis=0)), axis=1)
-    FD = np.insert(FD, 0, 0) # align FD & DVARS
+    FD = epi.stats.FD(motion, head)
     idx_FD = np.where(FD >= FD_t)[0]
 
     if DVARS != None:
@@ -208,10 +199,8 @@ def main():
     else:
         idx = idx_FD
     
-    # mask TRs 1 back and 2 forward from threshold
-    idx = np.union1d(
-          np.union1d(
-          np.union1d(idx-1, idx), idx+1), idx+2)
+    # mask TRs 1 back and 1 forward from threshold
+    idx = np.union1d(np.union1d(idx-1, idx), idx+1)
 
     # remove censor idx < 1 and > length of run -1 (always keep 1st and last tr)
     idx = idx[idx > 1]

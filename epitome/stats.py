@@ -1,12 +1,29 @@
 #!/usr/bin/env python
 
 """
-A collection of statistical routines useful for large data sets.
+A collection of statistical routines for MRI analysis.
 """
 
 import os, sys
 import numpy as np
 import sklearn as sk
+
+def FD(motion, head_radius):
+    """
+    Loads motion parameters and uses head radius to calculate 
+    framewise displacement.
+    """
+    # load motion parameters
+    FD = np.genfromtxt(motion)
+    FD[:,0] = np.radians(FD[:,0])*head_radius # roll
+    FD[:,1] = np.radians(FD[:,1])*head_radius # pitch
+    FD[:,2] = np.radians(FD[:,2])*head_radius # yaw
+
+    # sum over absolute derivative for the 6 motion parameters
+    FD = np.sum(np.abs(np.diff(FD, n=1, axis=0)), axis=1)
+    FD = np.insert(FD, 0, 0) # align FD with original run & DVARS
+
+    return FD
 
 def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
 
