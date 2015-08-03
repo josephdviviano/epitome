@@ -7,15 +7,6 @@ threshold for that TR.
 
 Outputs the run mean & standard deviation, and a samples-per-TR vector.
 
-This is useful if you have multiple runs of a participant performing the
-exact same task, or viewing the exact same stimulus, and would like to
-minimize the influence of head motion on the resulting mean.
-
-For periodic experimental designs, it is sometimes desirable to look at the mean
-cycle. To do this, give --cycles the number of periods per run in your design.
-
-At the moment, this program req. a good deal of RAM. Rec. 16 GB.
-
 Usage: 
     epi-censormean [options] --input <input>... --output <output>
 
@@ -30,7 +21,24 @@ Options:
     -q --qc=<qc>           output text vector of number of runs retained per TR [default: None]
 
 DETAILS:
-    Kewl :D :D :D lweK
+    
+    Useful if you have multiple runs of a participant performing the exact same 
+    task, or viewing the exact same stimulus, and would like to minimize the 
+    influence of head motion on the resulting mean.
+
+    For periodic experimental designs, it is sometimes desirable to look at the 
+    mean cycle. To do this, give --cycles the number of periods per run in your 
+    design. At the moment, the number of cycles should be integral with the 
+    length of the run, as no interpolation is currently performed on the data.
+
+    If a particular TR has no candidate runs (due to excessive head motion), 
+    those TRs will currently be returned having the value 0 (due to how numpy 
+    handles division by 0).
+
+    Method based on that described in: 
+    
+    Interhemispheric interactions of the human thalamic reticular nucleus.
+    Viviano JD, Schneider KA. J Neurosci. 2015 Feb 4;35(5):2026-32.
 """
 
 import os, sys
