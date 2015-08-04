@@ -100,7 +100,7 @@ def calculate_spectra(ts, samp, olap=0, nseg=3, wtype='tukey', norm=True):
         print('INVALID: olap = ' + str(olap) + ', should be a % (1-99)')
 
     # calculate the length of each window, accounting for nseg and olap
-    ntrs = len(ts)
+    ntrs = ts.shape[-1]
     nperseg = ntrs / nseg * (1 + olap/100.0)
 
     while np.remainder(nperseg, 1) != 0:
@@ -109,12 +109,13 @@ def calculate_spectra(ts, samp, olap=0, nseg=3, wtype='tukey', norm=True):
 
     olap = olap * nperseg
 
-    print('Calculating spectra using ' + str(nperseg) + ' points per sample.')
+    print('MSG: Calculating spectra using {} pts/window.'.format(nperseg))
 
     if wtype == 'tukey':
         window = tukeywin(nperseg, alpha=0.5)
         spectra = signal.welch(ts, fs=samp, window=window,
                                             noverlap=olap,
+                                            nperseg=nperseg,
                                             return_onesided=True,
                                             scaling='spectrum')
 
