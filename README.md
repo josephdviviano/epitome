@@ -1,6 +1,8 @@
-![epitome -- an MRI metapipeline](assets/overview.png "epitome -- an MRI metapipeline")
+![epitome -- an MRI metapipeline](assets/logo.png "epitome -- a MRI metapipeline and analysis suite")
 
 epitome is a MRI pipeline for generating pipelines out of BASH 'modules'. It is intended to produce highly-portable BASH analysis scripts out of small code chunks that non-programmers can contribute, while exposing the underbelly of the system for more experienced programmers to work on.
+
+epitome is also a package of tools for conducting network analysis (and other types analysis) on fMRI data. These features are intended to eventually play nicely with [NetworkX](https://networkx.github.io/) and replicate at least the base functionality of the [BCT (brain connectivity toolbox)](https://sites.google.com/site/bctnet/) in the Python environment.
 
 Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 
@@ -8,6 +10,8 @@ Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 > -- Santiago Ramón y Cajal
 
 *Current under active development at the TIGRLab (CAMH), and is regularly updated with modules to meet the demands of this site.*
+
+**The majority of the ninet features are as of yet undocumented save their docstrings, for the brave.**
 
 **Shortcuts:**
 
@@ -46,12 +50,13 @@ Currently, epitome requires the user to have installed and configured the follow
 + [Scipy](http://www.scipy.org/)
 + [MatPlotLib](http://matplotlib.org/)
 + [NiBabel](http://nipy.org/nibabel/)
-+ [NiNet](https://github.com/josephdviviano/ninet)
++ [Scikit Learn](http://scikit-learn.org/stable/)
 
 Optional:
 
 + [Grid Engine](http://gridscheduler.sourceforge.net/) or [PBS](http://www.adaptivecomputing.com/products/open-source/torque/)
 + [FSL FIX 1.61](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX)
++ [Bioread 0.9.3](https://pypi.python.org/pypi/bioread/0.9.3)
 
 Introduction
 ------------

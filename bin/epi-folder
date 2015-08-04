@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 """
-###############################################################################
-epifolder: Generating your epitome folder directories since 2014.
+Allows you to interactively generate an appropriate folder structure for your 
+epitome experiments.
 
-    Allows you to interactively generate an appropriate folder structure for
-    your epitome experiments.
+Usage: 
+    epi-folder
 
-###############################################################################
+DETAILS
+
+    This is a CLI for creating epitome folder structures. You can use this to
+    generate a template subject directory that can be copied around.
+
+    epi-folder -h or --help prints this message.
 """
 
 import os, sys
 import epitome as epi
+from epitome.docopt import docopt
 from copy import copy
 
 def edit_mode(mode):
@@ -51,7 +57,7 @@ def edit_mode(mode):
 
 def edit_subject(subject):
     """
-    A function that generates subject directories for use with EPItome. 
+    generates subject directories. 
     """
     
     # print options
@@ -86,19 +92,14 @@ def edit_subject(subject):
             flag = 1
 
 def main():
-    """
-    CLI for creating epitome directory strctures.
-    """
+
+    arguments = docopt(__doc__)
+
     dir_data = epi.config.find_data()
 
     # make sure we have the appropriate permissions for the top directory
     if epi.utilities.has_permissions(dir_data) == False:
         sys.exit()
-
-    # print a welcome message
-    print('##################################################################')
-    print('epi-folder: Generating your epitome folder directories since 2014.')
-    print('##################################################################')
 
     # make experiment directory
     print('\nWhich experiment would you like to edit? ')
@@ -155,15 +156,5 @@ def main():
         else:
             flag = 1
 
-    print('Thanks for editing ' + str(name) + ' :D !')
-
-# this is the command-line usage bit
 if __name__ == "__main__":
-    
-    # listing available modules and associated help
-    if len(sys.argv) == 1:
-        main()
-
-    # return the usage if the user does a silly thing
-    else:
-        print(__doc__)
+    main()

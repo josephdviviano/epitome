@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 """
-epi-qc-epi2t1 <path> <expt> <mode>
+Prints the central slice of the T1 and co-registered + deskulled EPI, 
+including an edge-detected version of the T1 (requires AFNI).
 
 Usage:
+    epi-qc-epi2t1 <path> <expt> <mode>
 
-    path -- data path for epitome
-    expt -- experiment to QC
-    mode -- datatype to QC
+Arguement:
+    <path>          path to epitome data directory
+    <expt>          experiment name
+    <mode>          image modaility
 """
-
 import os, sys
 import datetime
 
@@ -23,13 +25,13 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import epitome as epi
-import ninet as nn
+from epitome.docopt import docopt
 
-def main(path, expt, mode):
-    """
-    Prints the central slice of the T1 and co-registered + deskulled EPI, 
-    including an edge-detected version of the T1 (requires AFNI).
-    """
+def main():
+    arguments = docopt(__doc__)
+    path      = arguments['<path>']
+    expt      = arguments['<expt>']
+    mode      = arguments['<mode>']
 
     # get subject numbers
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
@@ -47,8 +49,8 @@ def main(path, expt, mode):
     anat = nib.load(anat).get_data()
 
     # reorient MNI data to radiological
-    #edge = nn.plot.reorient_to_radiological(edge)
-    anat = nn.plot.reorient_to_radiological(anat)
+    #edge = epi.plot.reorient_to_radiological(edge)
+    anat = epi.plot.reorient_to_radiological(anat)
 
     # set zeros in copy of anat to NaN
     anat_masked = np.ma.masked_where(anat == 0, anat)
@@ -69,7 +71,7 @@ def main(path, expt, mode):
         reg = nib.load(reg).get_data()
 
         # reorient the data to radiological
-        reg = nn.plot.reorient_to_radiological(reg)
+        reg = epi.plot.reorient_to_radiological(reg)
 
         # get size ratio between over + underlay
         dsfactor = [a/float(r) for a,r in zip(anat.shape, reg.shape)]
@@ -158,7 +160,4 @@ def main(path, expt, mode):
     pdf.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
-	    main(sys.argv[1], sys.argv[2], sys.argv[3])
-    else:
-        print(__doc__)
+    main()

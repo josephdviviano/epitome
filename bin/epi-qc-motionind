@@ -1,10 +1,18 @@
 #!/usr/bin/env python
 """
-epi-qc-motionind
+This plots a trace of the framewise displacement measure and DVARS measure 
+for each participant (Power et al. 2012). Participants are sorted in the 
+plot from best to worst behaved, and thresholds are printed to facilitate 
+qualitative participant rejection, if that's how you roll.
 
 Usage:
-
     epi-qc-motionind <path> <expt> <mode> <uid>
+
+Arguement:
+    <path>          path to epitome data directory
+    <expt>          experiment name
+    <mode>          image modaility
+    <uid>           unique identifier for a given run
 """
 
 import os, sys
@@ -24,6 +32,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 import epitome as epi
+from epitome.docopt import docopt
 
 ## Options: will eventually be set at command line
 head_r = 50   # head diameter in mm
@@ -39,28 +48,6 @@ def factors(n):
     
     return set(reduce(list.__add__, 
                 ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
-
-def compute_FD(f, head_radius):
-    """
-    Computes FD vector from AFNI 3dVolreg 6-param .1D file read using
-    numpy's genfromtxt.
-
-    f is a string pointing to the .1D file.
-    head_radius is an integer in mm.
-
-    1) Convert degrees (roll, pitch, yaw) to mm using head radius
-    2) Takes the same of the absoloute first difference
-    Returns a vector of mm/TR.
-    
-    """
-    f = np.genfromtxt(f)
-    f[:,0] = np.radians(f[:,0]) * head_radius
-    f[:,1] = np.radians(f[:,1]) * head_radius
-    f[:,2] = np.radians(f[:,2]) * head_radius
-    f = np.abs(np.diff(f, n=1, axis=0))
-    f = np.sum(f, axis=1)
-    
-    return f
 
 def square_factors(fac, num):
     """
@@ -96,13 +83,12 @@ def figure_quality(q):
     
     return size, dpi 
 
-def main(path, expt, mode, uid):
-    """
-    This plots a trace of the framewise displacement measure and DVARS measure 
-    for each participant (Power et al. 2012). Participants are sorted in the 
-    plot from best to worst behaved, and thresholds are printed to facilitate 
-    qualitative participant rejection, if that's how you roll.
-    """
+def main():
+    arguments = docopt(__doc__)
+    path      = arguments['<path>']
+    expt      = arguments['<expt>']
+    mode      = arguments['<mode>']
+    uid       = arguments['<uid>']
 
     # initialize variables
     ax_x = 0
@@ -121,10 +107,7 @@ def main(path, expt, mode, uid):
         for session in os.walk(os.path.join(path, expt, subj, mode)).next()[1]:
             d = os.path.join(path, expt, subj, mode, session)
             for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
-                f = compute_FD(os.path.join(d, 'PARAMS/motion.' +
-                                               str(uid) + '.' +
-                                               '%02d' % run + 
-                                               '.1D'), head_r)      
+                f = epi.stats.FD(os.path.join(d, 'PARAMS/motion.{}.{}.1D'.format(uid, '%02d' % run)), head_r)      
                 FD = np.append(FD, f)
             
             #take total FD over all runs      
@@ -151,16 +134,12 @@ def main(path, expt, mode, uid):
     # init figure
     figure_size, figure_dpi = figure_quality(quality)
 
-    fig_FD, ax_FD = plt.subplots(nrows=factor[0], 
-                                 ncols=factor[1], 
+    fig_FD, ax_FD = plt.subplots(nrows=factor[0], ncols=factor[1], 
                                  figsize=(figure_size, figure_size), 
-                                 dpi=figure_dpi, 
-                                 facecolor='white')
-    fig_DV, ax_DV = plt.subplots(nrows=factor[0], 
-                                 ncols=factor[1], 
+                                 dpi=figure_dpi, facecolor='white')
+    fig_DV, ax_DV = plt.subplots(nrows=factor[0], ncols=factor[1], 
                                  figsize=(figure_size, figure_size), 
-                                 dpi=figure_dpi, 
-                                 facecolor='white')
+                                 dpi=figure_dpi, facecolor='white')
 
     for subj in subjects:
         
@@ -175,18 +154,14 @@ def main(path, expt, mode, uid):
                 d = os.path.join(path, expt, subj[0], mode, session)
                 for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
                     # framewise displacement
-                    f = compute_FD(os.path.join(d, 'PARAMS/motion.' +
-                                                   str(uid) + '.' +
-                                                   '%02d' % run +'.1D'), head_r)         
+                    f = epi.stats.FD(os.path.join(d, 'PARAMS/motion.{}.{}.1D'.format(uid, '%02d' % run)), head_r)
                     FD = np.append(FD, f, axis=1) # per subject
                     FD_all= np.append(FD_all, f) # across all subjects
                     run_length = len(FD)
                     breaks = np.append(breaks, run_length) # list of run breaks
 
                     # DVARS
-                    f = np.genfromtxt(os.path.join(d, 'PARAMS/DVARS.' + 
-                                                      str(uid) + '.' +
-                                                      '%02d' % run + '.1D'))
+                    f = np.genfromtxt(os.path.join(d, 'PARAMS/DVARS.{}.{}.1D'.format(uid, '%02d' % run)))
                     f = f[1:] / 10 # remove leading 0, conv. to % signal
                     DV = np.append(DV, f) # per subject 
                     DV_all = np.append(DV_all, f) # across all subjects
@@ -248,16 +223,10 @@ def main(path, expt, mode, uid):
             # add in x line at bottom
             xmin, xmax = ax_FD[ax_y][ax_x].get_xaxis().get_view_interval()
             ymin, ymax = ax_FD[ax_y][ax_x].get_yaxis().get_view_interval()
-            ax_FD[ax_y][ax_x].add_artist(plt.Line2D((xmin, xmax), 
-                                                    (ymin, ymin), 
-                                                     color='black', 
-                                                     linewidth=1))
+            ax_FD[ax_y][ax_x].add_artist(plt.Line2D((xmin, xmax), (ymin, ymin), color='black', linewidth=1))
             xmin, xmax = ax_DV[ax_y][ax_x].get_xaxis().get_view_interval()
             ymin, ymax = ax_DV[ax_y][ax_x].get_yaxis().get_view_interval()
-            ax_DV[ax_y][ax_x].add_artist(plt.Line2D((xmin, xmax), 
-                                                    (ymin, ymin), 
-                                                     color='black', 
-                                                     linewidth=1))
+            ax_DV[ax_y][ax_x].add_artist(plt.Line2D((xmin, xmax), (ymin, ymin), color='black', linewidth=1))
         # delete empty plots
         if subj >= len(subjects):
             ax_FD[ax_y][ax_x].axis('off')
@@ -269,17 +238,14 @@ def main(path, expt, mode, uid):
             ax_x = 0
             ax_y = ax_y + 1
 
-    fig_FD.suptitle('Framewise Displacement (mm/TR), threshold = ' +
-                                                     str(FD_t) + ' mm/TR')
-    fig_DV.suptitle('DVARS (% signal change/TR), line = ' +
-                                                     str(DV_t) + '%/TR')
+    fig_FD.suptitle('Framewise Displacement (mm/TR), threshold = {} mm/TR'.format(FD_t))
+    fig_DV.suptitle('DVARS (% signal change/TR), line = {}%/TR'.format(DV_t))
     
     fig_FD.subplots_adjust(hspace=0.7) # add some breathing room
     fig_DV.subplots_adjust(hspace=0.7)
 
     # export PDF
-    pdf = PdfPages(os.path.join(path, expt, 
-                  'qc_' + str(uid) + '_motion_individual_' + mode + '.pdf'))
+    pdf = PdfPages(os.path.join(path, expt, 'qc_{}_motion_individual_{}.pdf'.format(uid, mode))
     fig_FD.savefig(pdf, format='pdf')
     fig_DV.savefig(pdf, format='pdf')
 
@@ -293,17 +259,7 @@ def main(path, expt, mode, uid):
     d['ModDate'] = datetime.datetime.today()
     pdf.close()
 
-    print('Printed plots to ' + str(os.path.join(path, expt)) + '.')
+    print('Printed plots to {}.'.format(os.path.join(path, expt)))
 
 if __name__ == "__main__":
-
-    if len(sys.argv) == 5:
-        path = str(sys.argv[1])
-        expt = str(sys.argv[2])
-        mode = str(sys.argv[3])
-        uid = str(sys.argv[4])
-
-        main(path, expt, mode, uid)
-    else:
-        print(__doc__)
-
+    main()

@@ -1,6 +1,16 @@
 #!/bin/bash
-DIR_DATA=`echo ${1}`
-DIR_EXPT=`echo ${2}`
+
+if [ $# -ne 2 ]; then
+    echo 'Returns x, y, z, and t sizes for all data in EXPT.'
+    echo ''
+    echo 'Usage:'
+    echo '    epi-qc-runs <dir-data> <dir-expt>'
+    echo ''
+    exit
+done
+
+DIR_DATA=${1}
+DIR_EXPT=${2}
 
 # report raw data's file dimensions (4D)
 echo 'Generating 4D file dimensions for '${DIR_EXPT}

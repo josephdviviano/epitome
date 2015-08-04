@@ -4,9 +4,15 @@ Takes a proclist created using epitome run and submits it to the installed
 Oracle Sun Grid Engine using qsub.
 
 Usage:
+    epi-queue <proclist> <queue>
 
-    epi-queue proclist.sh queue.q
+Arguement:
+    <proclist>      Name of the epitome proclist to submit
+    <queue>         Name of the queue to submit to
 
+DETAILS:
+    Opens the input file, and generates a unique string for each run.
+    Parses the submitted proclist and generates a set of qsub commands.
 """
 
 import os, sys
@@ -14,20 +20,19 @@ import random
 import string
 import subprocess
 import epitome as epi
+from epitome.docopt import docopt
 
-def main(input_file, queue):
-    """
-    Opens the input file, and generates a unique string for each run.
-    Parses the submitted proclist and generates a set of qsub commands.
+def main():
+    arguments = docopt(__doc__)
+    proclist  = arguments['<proclist>']
+    queue     = arguments['<queue>']
 
-    """
-    f = open(input_file)
+    f = open(proclist)
     f = f.read()
 
     # used to keep freesurfer + qc jobs distinct
     u_id = ''.join(random.choice(string.ascii_uppercase + 
                                  string.digits) for _ in range(6))
-
     sublist = []
     fslist = []
 
@@ -94,11 +99,4 @@ def main(input_file, queue):
         print(result)
 
 if __name__ == "__main__":
-    
-    if len(sys.argv) != 3:
-        print('epi-queue requires one input proclist and a queue name')
-        print(__doc__)
-        sys.exit()
-
-    else:
-      main(sys.argv[1], sys.argv[2])
+    main()

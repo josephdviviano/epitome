@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-     _  _  . |_  _   _   _  | a mri metapipeline
+     _  _  . |_  _   _   _  | a platform for mri analysis pipeline development
     (- |_) | |_ (_) ||| (-  | github.com/josephdviviano/epitome
        |                    | 
                        
@@ -167,40 +167,36 @@ def check_environment(mode='verbose'):
 
     # checks for manditory software
     if DIR_DATA == None:
-        print('ERROR: Manditory EPITOME_DATA variable is not set.')
+        print('ERROR: Mandatory EPITOME_DATA variable is not set.')
         sys.exit()
     
     if os.path.isdir(DIR_DATA) == False:
-        print('ERROR: Manditory epitome data directory does not exist: ' 
+        print('ERROR: Mandatory epitome data directory does not exist: ' 
                                                         + str(DIR_DATA))
         sys.exit()
 
     if dir_pipe == None:
-        print('ERROR: Manditory package epitome is not on your path??')
+        print('ERROR: Mandatory package epitome is not on your path??')
         sys.exit()
 
     if DIR_AFNI == None:
-        print('ERROR: Manditory package AFNI is not on your path.')
+        print('ERROR: Mandatory package AFNI is not on your path.')
         sys.exit()
 
     if dir_fsl == None:
-       print('ERROR: Manditory package FSL is not on your path.')
+       print('ERROR: Mandatory package FSL is not on your path.')
        sys.exit()
-
-    if epi.config.find_ninet == False:
-        print('ERROR: Manditory package ninet is not on your pythonpath.')
-        sys.exit()
     
     if dir_freesurfer == None:
-        print('ERROR: Manditory package Freesurfer is not on your path.')
+        print('ERROR: Mandatory package Freesurfer is not on your path.')
         sys.exit()
 
     if dir_freesurfer_data == None:
-        print('ERROR: Manditory variable SUBJECTS_DIR is not set.')
+        print('ERROR: Mandatory variable SUBJECTS_DIR is not set.')
         sys.exit()
 
     if os.path.isdir(dir_freesurfer_data) == False:
-        print('ERROR: Manditory Freesurfer data directory does not exist: ' 
+        print('ERROR: Mandatory Freesurfer data directory does not exist: ' 
                                                            + str(DIR_DATA))
         sys.exit()
 
