@@ -17,8 +17,7 @@ for SESS in ${DIR_SESS}; do
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
 
     # retrieve the MNI target brain
-    3dcopy \
-        ${DIR_AFNI}/MNI_avg152T1+tlrc template
+    3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template
 
     # calculate the nonlinear warp between the reg_T1_to_TAL and the MNI brain.
     if [ ! -f ${DIR_T1}/anat_T1_nlinreg_WARP.nii.gz ]; then
@@ -42,7 +41,6 @@ for SESS in ${DIR_SESS}; do
         3dcopy \
             ${DIR}/${SESS}/reg_nlin_TAL_WARP+tlrc \
             ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz
-
     fi
 done
 

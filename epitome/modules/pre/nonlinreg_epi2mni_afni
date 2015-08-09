@@ -16,9 +16,6 @@ echo '   - Transforms whole-brain masks to MNI space,'
 echo ''
 echo '************************************************************************'
 
-
-cd /tmp
-
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     DIR_RUNS=`ls -d -- ${SESS}/RUN*`
@@ -32,8 +29,7 @@ for SESS in ${DIR_SESS}; do
                 -source ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
                 -master WARP \
                 -dxyz ${DIMS} \
-                -nwarp ${SESS}/reg_nlin_TAL_WARP.nii.gz \
-                       ${SESS}/mat_EPI_to_TAL.aff12.1D
+                -nwarp ${SESS}/reg_nlin_TAL_WARP.nii.gz ${SESS}/mat_EPI_to_TAL.aff12.1D
         fi
     done
     
@@ -45,8 +41,7 @@ for SESS in ${DIR_SESS}; do
             -master WARP \
             -dxyz ${DIMS} \
             -ainterp NN \
-            -nwarp ${SESS}/reg_nlin_TAL_WARP.nii.gz \
-                   ${SESS}/mat_EPI_to_TAL.aff12.1D
+            -nwarp ${SESS}/reg_nlin_TAL_WARP.nii.gz ${SESS}/mat_EPI_to_TAL.aff12.1D
     fi
 done
 
@@ -60,9 +55,6 @@ done
     -a ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
     -expr 'step(a-0.999)' \
     -prefix ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI-nonlin_group.nii.gz
-
 rm ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz
-
-cd ${DIR_PIPE}
 
 EOF

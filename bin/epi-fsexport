@@ -105,6 +105,9 @@ def main():
     # get directory of sessions
     for subj in subjects:
         directory = os.path.join(path, expt, subj, 'T1')
+
+        if os.path.isdir(directory) == False:
+          continue
         
         # get all sessions
         for session in os.listdir(directory):

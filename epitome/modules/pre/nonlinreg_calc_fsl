@@ -39,6 +39,5 @@ for SESS in `basename ${DIR_SESS}`; do
         # --refmask='a mask of the MNI-space brain'
     fi
 done
-cd ${DIR_PIPE}
 
 EOF

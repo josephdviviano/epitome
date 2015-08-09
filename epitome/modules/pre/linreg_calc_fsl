@@ -113,6 +113,5 @@ for SESS in `basename ${DIR_SESS}`; do
                     ${DIR}/${SESS}/mat_TAL_to_T1.mat
     fi
 done
-cd ${DIR_PIPE}
 
 EOF

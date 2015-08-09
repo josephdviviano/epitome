@@ -18,8 +18,6 @@ echo ''
 echo '************************************************************************'
 
 
-cd /tmp
-
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     DIR_RUNS=`ls -d -- ${SESS}/RUN*`
@@ -64,7 +62,5 @@ done
     -prefix ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI-lin_group.nii.gz
 
 rm ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz
-
-cd ${DIR_PIPE}
 
 EOF

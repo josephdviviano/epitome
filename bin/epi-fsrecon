@@ -46,6 +46,9 @@ def generate_stack(root, expt):
     for subj in subjects:
         path = os.path.join(root, expt, subj, 'T1')
 
+        if os.path.isdir(path) == False:
+          continue
+
         for sess in os.listdir(path):
             if os.path.isdir(os.path.join(path, sess)) == True:
 
