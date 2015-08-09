@@ -4,7 +4,6 @@ cat <<EOF
 export DATA_QUALITY=`echo ${1}`
 export COST=`echo ${2}`
 export REG_DOF=`echo ${3}`
-export 
 
 EOF
 
