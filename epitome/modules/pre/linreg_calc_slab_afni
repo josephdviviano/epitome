@@ -82,7 +82,7 @@ for SESS in ${DIR_SESS}; do
     fi
 
     # register session EPI to WHEPI
-    if [ ! -f ${DIR}/${SESS}/mat_EPI_to_WHEPI.aff12.1D ]; then
+    if [ ! -f ${DIR}/${SESS}/reg_EPI_to_WHEPI.nii.gz ]; then
         align_epi_anat.py \
             -anat anat_WHEPI_brain.nii.gz \
             -epi anat_EPI_brain.nii.gz \
@@ -99,18 +99,18 @@ for SESS in ${DIR_SESS}; do
 
     if [ ! -f mat_WHEPI_to_T1.aff12.1D ]; then
         
-        # Copy EPI and MNI brain into ${DIR}/${SESS} as AFNI BRIKs.
-        3dcopy ${DIR}/${SESS}/anat_WHEPI_brain.nii.gz anat_WHEPI_brain
-        3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template
-
-        # If we have a T1 for each session, we register to the session T1. 
-        # Otherwise, we go to the first session.
-        if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
-            3dcopy \
-                ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz anat_T1_brain
-        else
-            3dcopy \
-                ${DIR_T1}/SESS01/anat_T1_brain.nii.gz anat_T1_brain
+        # Copy EPI and MNI brain into ${DIR}/${SESS} as AFNI BRIKs
+        if [ ! -f anat_WHEPI_brain+orig* ]; then 3dcopy ${DIR}/${SESS}/anat_WHEPI_brain.nii.gz anat_WHEPI_brain; fi
+        if [ ! -f template* ]; then 3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template; fi
+        if [ ! -f anat_T1_brain+orig* ]; then
+            # copy the session T1 registration if exists, else, use the first session.
+            if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
+                3dcopy \
+                    ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz anat_T1_brain
+            else
+                3dcopy \
+                    ${DIR_T1}/SESS01/anat_T1_brain.nii.gz anat_T1_brain
+            fi
         fi
 
         # Talarac individual brain, turning off skullstrip.
@@ -146,12 +146,8 @@ for SESS in ${DIR_SESS}; do
             ${DIR}/${SESS}/mat_WHEPI_to_TAL.aff12.1D > \
             ${DIR}/${SESS}/mat_T1_to_TAL.aff12.1D
         
-        3dcopy \
-            anat_T1_brain+tlrc ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
-
-        3dcopy \
-            anat_WHEPI_brainWHEPI_to_T1+orig \
-            ${DIR}/${SESS}/reg_WHEPI_to_T1.nii.gz
+        if [ ! -f ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz ]; then 3dcopy anat_T1_brain+tlrc ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz; fi
+        if [ ! -f ${DIR}/${SESS}/reg_WHEPI_to_T1.nii.gz ]; then 3dcopy anat_WHEPI_brainWHEPI_to_T1+orig ${DIR}/${SESS}/reg_WHEPI_to_T1.nii.gz; fi
 
         # create EPI_to_T1 and EPI_to_MNI transforms
         cat_matvec \
