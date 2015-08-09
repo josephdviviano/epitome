@@ -16,9 +16,10 @@ for SESS in ${DIR_SESS}; do
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
 
+    cd ${DIR}/${SESS}
+
     # retrieve the MNI target brain
-    3dcopy \
-        ${DIR_AFNI}/MNI_avg152T1+tlrc template
+    if [ ! -f template* ]; then 3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template; fi
 
     # calculate the nonlinear warp between the reg_T1_to_TAL and the MNI brain.
     if [ ! -f ${DIR_T1}/anat_T1_nlinreg_WARP.nii.gz ]; then
@@ -31,18 +32,9 @@ for SESS in ${DIR_SESS}; do
             -source ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
 
         # copy outputs to NIFTI format
-        3dcopy \
-            ${DIR}/${SESS}/reg_nlin_TAL+tlrc \
-            ${DIR}/${SESS}/reg_nlin_TAL.nii.gz
-
-        3dcopy \
-            ${DIR}/${SESS}/reg_nlin_TAL_WARPINV+tlrc \
-            ${DIR}/${SESS}/reg_nlin_TAL_WARPINV.nii.gz
-
-        3dcopy \
-            ${DIR}/${SESS}/reg_nlin_TAL_WARP+tlrc \
-            ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz
-
+        if [ ! -f ${DIR}/${SESS}/reg_nlin_TAL.nii.gz ]; then 3dcopy ${DIR}/${SESS}/reg_nlin_TAL+tlrc ${DIR}/${SESS}/reg_nlin_TAL.nii.gz; fi
+        if [ ! -f ${DIR}/${SESS}/reg_nlin_TAL_WARPINV.nii.gz ]; then 3dcopy ${DIR}/${SESS}/reg_nlin_TAL_WARPINV+tlrc ${DIR}/${SESS}/reg_nlin_TAL_WARPINV.nii.gz; fi
+        if [ ! -f ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz ]; then 3dcopy ${DIR}/${SESS}/reg_nlin_TAL_WARP+tlrc ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz; fi 
     fi
 done
 

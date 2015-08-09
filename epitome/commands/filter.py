@@ -40,14 +40,19 @@ def run(input_name):
         else:
             compcor = 0
 
+        print('\nInput mask prefix (default = EPI_mask):')
+        mask_prefix = raw_input('Mask Prefix: ')
+        if mask_prefix == '':
+            mask_prefix = 'EPI_mask'
+
     # if we messed any of these up, we return None
     except ValueError as ve:
         return '', None
 
     # otherwise we print the command and return it
     line = ('. ${{DIR_PIPE}}/epitome/modules/pre/filter ' 
-                          '{} {} {} {} {} {} {} {} {} {}').format(
+                          '{} {} {} {} {} {} {} {} {} {} {}').format(
                            str(input_name), str(polort), diff, lag, 
-                                sq, std, gm, dv, anaticor, compcor)
+                                sq, std, gm, dv, anaticor, compcor, mask_prefix)
 
     return line, output

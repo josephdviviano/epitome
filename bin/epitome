@@ -60,13 +60,17 @@ def get_mode(expt):
     select one.
     """
     # get a sorted list of the experiments
-    dir_expt = os.path.join(DIR_DATA, expt)
-    subj_list = [d for d in os.listdir(dir_expt)
-                         if os.path.isdir(os.path.join(dir_expt, d))]
-    dir_subj = os.path.join(dir_expt, subj_list[0])
-    mode_list = [d for d in os.listdir(dir_subj)
-                         if os.path.isdir(os.path.join(dir_subj, d))]
+    expt = os.path.join(DIR_DATA, expt)
+    subjects = [d for d in os.listdir(expt)
+                        if os.path.isdir(os.path.join(expt, d))]
 
+    mode_list = []
+    for subj in subjects:
+        subjdir = os.path.join(expt, subj)
+        modes = [d for d in os.listdir(subjdir) if os.path.isdir(os.path.join(subjdir, d))]
+        mode_list.extend(modes)
+
+    mode_list = list(set(mode_list)) # keep unique entries
     try:
         selection = epi.utilities.selector_list(mode_list)
         return selection
@@ -502,8 +506,6 @@ def main():
     check_environment('quiet')
     datetime, user, f_id = get_date_user()
     dir_pipe = epi.config.find_epitome()
-
-
     print('Running epitome. Select experiment.')
 
     # make sure we have permissions to access the experiment directory.
@@ -597,6 +599,8 @@ def main():
            '## Begin Pipeline\n'
            'for SUB in ${{SUBJECTS}}; do\n\n'
            'cat > ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/${{CMD}} << EOF\n'
+           '#!/bin/bash\n'
+           'set -e\n\n'
            'export DIR_PIPE=${{DIR_PIPE}}\n'
            'export DIR_DATA=${{DIR_DATA}}\n'
            'export DIR_AFNI=${{DIR_AFNI}}\n'

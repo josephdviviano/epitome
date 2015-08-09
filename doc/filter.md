@@ -12,6 +12,7 @@ Usage: filter <func_prefix> <det> <std> <gm> <anaticor> <compcor> <compnum> <dv>
 + dv -- if == on, regress mean draining vessel signal from each voxel.
 + anaticor -- if == on, regress 15mm local white matter signal from data.
 + compcor -- if > 0, regress top n PCA regressors from the white matter and csf. 0 == off.
++ mask -- prefix for the EPI brain mask used [default: EPI_mask]
 
 Creates a series of regressors from fMRI data and a freesurfer segmentation: 
 
@@ -22,6 +23,8 @@ Creates a series of regressors from fMRI data and a freesurfer segmentation:
 + dialated whole-brain mask
 + draining vessels mask
 + DVARS (for 'scrubbing' -- calculated here because we need detrended data) [1].
+
+All regressors are constrained within the supplied EPI mask (for partial acquisitions in particular).
 
 The regressors calculated depend on the method(s) used to filter the data:
 

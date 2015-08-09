@@ -22,8 +22,7 @@ echo '************************************************************************'
 
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then
-    3dcopy \
-        ${DIR_AFNI}/MNI_avg152T1+tlrc ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
 fi
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -41,21 +40,16 @@ for SESS in ${DIR_SESS}; do
 
     if [ ! -f ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz ]; then
         
-        # Copy EPI and MNI brain into /tmp.
-        3dcopy \
-            ${EPI_BRAIN} anat_EPI_brain
-        3dcopy \
-            ${DIR_AFNI}/MNI_avg152T1+tlrc template
-
-        # If we have a T1 for each session, we register to the session T1. 
-        # Otherwise, we go to the first session.
-        if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
-             `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
-            3dcopy \
-                ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz anat_T1_brain
-        else
-            3dcopy \
-                ${DIR_T1}/SESS01/anat_T1_brain.nii.gz anat_T1_brain
+        # Copy of EPI and MNI brain for @auto_tlrc.
+        if [ ! -f anat_EPI_brain+orig* ]; then 3dcopy ${EPI_BRAIN} anat_EPI_brain; fi
+        if [ ! -f template* ]; then 3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template; fi
+        if [ ! -f anat_T1_brain+orig* ]; then
+            # register to the session T1 if exists, else, use the first session.
+            if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
+                3dcopy ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz anat_T1_brain
+            else
+                3dcopy ${DIR_T1}/SESS01/anat_T1_brain.nii.gz anat_T1_brain
+            fi
         fi
 
         # Talarac individual brain, turning off skullstrip.
@@ -81,12 +75,9 @@ for SESS in ${DIR_SESS}; do
             -cost ${COST}
 
         # Move outputs from /tmp back into data folders folders.
-        mv anat_EPI_brainEPI_to_T1_tlrc_mat.aff12.1D \
-           ${DIR}/${SESS}/mat_EPI_to_TAL.aff12.1D
-        mv anat_EPI_brainEPI_to_T1_mat.aff12.1D \
-           ${DIR}/${SESS}/mat_EPI_to_T1.aff12.1D
-        mv anat_T1_brainEPI_to_T1_mat.aff12.1D \
-           ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D
+        mv anat_EPI_brainEPI_to_T1_tlrc_mat.aff12.1D ${DIR}/${SESS}/mat_EPI_to_TAL.aff12.1D
+        mv anat_EPI_brainEPI_to_T1_mat.aff12.1D ${DIR}/${SESS}/mat_EPI_to_T1.aff12.1D
+        mv anat_T1_brainEPI_to_T1_mat.aff12.1D ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D
 
         # create T1 to TAL pathway
         cat_matvec \
@@ -94,35 +85,24 @@ for SESS in ${DIR_SESS}; do
             ${DIR}/${SESS}/mat_EPI_to_TAL.aff12.1D > \
             ${DIR}/${SESS}/mat_T1_to_TAL.aff12.1D
         
-        3dcopy \
-            anat_T1_brain+tlrc ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
-        
-        # If we have a T1 for each session, we register to the session T1. 
-        # Otherwise, we go to the first session.
-        if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
-             `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
-            3dcopy \
-                anat_EPI_brainEPI_to_T1+orig \
-                ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz
-        else
-            3dcopy \
-                anat_EPI_brainEPI_to_T1+orig \
-                ${DIR}/SESS01/reg_EPI_to_T1.nii.gz
+        if [ ! -f ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz ]; then
+            3dcopy anat_T1_brain+tlrc ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
         fi
-
-        # Clean up leftovers in /tmp
-        rm anat_* >& /dev/null
-        rm __tt* >& /dev/null
-        rm template* >& /dev/null
-        rm pre.* >& /dev/null
+        
+        if [ ! -f ${DIR}/SESS01/reg_EPI_to_T1.nii.gz ]; then
+            # copy the session T1 registration if exists, else, use the first session.
+            if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
+                3dcopy anat_EPI_brainEPI_to_T1+orig ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz
+            else
+                3dcopy anat_EPI_brainEPI_to_T1+orig ${DIR}/SESS01/reg_EPI_to_T1.nii.gz
+            fi
+        fi
     fi
 
     # Create reg_T1_to_EPI
     if [ ! -f ${DIR}/${SESS}/reg_T1_to_EPI.nii.gz ]; then
-        # If we have a T1 for each session, we register to the session T1. 
-        # Otherwise, we go to the first session.
-        if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
-             `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
+        # generate EPI_to_T1
+        if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
             3dAllineate \
                 -prefix ${DIR}/${SESS}/reg_T1_to_EPI.nii.gz \
                 -input ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
@@ -141,6 +121,5 @@ for SESS in ${DIR_SESS}; do
         fi                
     fi
 done
-cd ${DIR_PIPE}
 
 EOF

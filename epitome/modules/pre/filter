@@ -11,6 +11,7 @@ export GM='${7}'
 export DV='${8}'
 export ANATICOR='${9}'
 export COMPCOR='${10}'
+export MASK=$(echo anat_${11})
 
 EOF
 
@@ -21,6 +22,7 @@ echo '                    Time series filtering of fMRI data'
 echo ''
 echo '   - Fits a defined regression model to '${INPUT}' data and retains the '
 echo '     residuals. Also outputs a set of tSNR maps. Relies on freesurfer.'
+echo '     Regressors taken from within EPI mask (for partial acquisitions).'
 echo ''
 echo '   - MASKS:'
 echo '       - white matter + eroded mask,'
@@ -47,7 +49,6 @@ echo '************************************************************************'
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
 
-    ## Make Masks ##
     # eroded white matter mask
     if [ ! -f ${SESS}/anat_wm_ero.nii.gz ]; then
         3dcalc \
@@ -66,7 +67,8 @@ for SESS in ${DIR_SESS}; do
         3dcalc \
             -a ${SESS}/anat_wm.nii.gz \
             -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
-            -expr 'a*(1-amongst(0,b,c,d,e,f,g))' \
+            -h ${SESS}/${MASK}.nii.gz \
+            -expr 'a*(1-amongst(0,b,c,d,e,f,g))*h' \
             -prefix ${SESS}/anat_wm_ero.nii.gz
     fi
 
@@ -96,7 +98,8 @@ for SESS in ${DIR_SESS}; do
         3dcalc \
             -a ${SESS}/anat_vent.nii.gz \
             -b ${SESS}/anat_tmp_nonvent_dia.nii.gz \
-            -expr 'a-step(a*b)' \
+            -c ${SESS}/${MASK}.nii.gz \
+            -expr 'a-step(a*b)*c' \
             -prefix ${SESS}/anat_vent_ero.nii.gz
     fi
 
@@ -112,7 +115,7 @@ for SESS in ${DIR_SESS}; do
     # dialated brain mask
     if [ ! -f ${SESS}/anat_EPI_mask_dia.nii.gz ]; then
         3dcalc \
-            -a ${SESS}/anat_EPI_mask.nii.gz \
+            -a ${SESS}/${MASK}.nii.gz \
             -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
             -expr 'amongst(1,a,b,c,d,e,f,g)' \
             -prefix ${SESS}/anat_EPI_mask_dia.nii.gz
@@ -122,28 +125,30 @@ for SESS in ${DIR_SESS}; do
     if [ ! -f ${SESS}/anat_bstem.nii.gz ]; then
         3dcalc \
             -a ${SESS}/anat_aparc_reg.nii.gz \
-            -expr "equals(a,8)  + \
-                   equals(a,47) + \
-                   equals(a,16) + \
-                   equals(a,12) + \
-                   equals(a,13) + \
-                   equals(a,26) + \
-                   equals(a,51) + \
-                   equals(a,52) + \
-                   equals(a,17) + \
-                   equals(a,18) + \
-                   equals(a,53) + \
-                   equals(a,54) + \
-                   equals(a,58) + \
-                   equals(a,28) + \
-                   equals(a,60)" \
+            -b ${SESS}/${MASK}.nii.gz \
+            -expr "equals(a,8)*b  + \
+                   equals(a,47)*b + \
+                   equals(a,16)*b + \
+                   equals(a,12)*b + \
+                   equals(a,13)*b + \
+                   equals(a,26)*b + \
+                   equals(a,51)*b + \
+                   equals(a,52)*b + \
+                   equals(a,17)*b + \
+                   equals(a,18)*b + \
+                   equals(a,53)*b + \
+                   equals(a,54)*b + \
+                   equals(a,58)*b + \
+                   equals(a,28)*b + \
+                   equals(a,60)*b" \
             -prefix ${SESS}/anat_bstem.nii.gz
+          
     fi
 
     # eroded draining vessel mask
     if [ ! -f ${SESS}/anat_dv_ero.nii.gz ]; then
         3dcalc \
-            -a ${SESS}/anat_EPI_mask.nii.gz \
+            -a ${SESS}/${MASK}.nii.gz \
             -b ${SESS}/anat_gm.nii.gz \
             -c ${SESS}/anat_wm.nii.gz \
             -d ${SESS}/anat_vent.nii.gz \

@@ -30,20 +30,17 @@ for SESS in ${DIR_SESS}; do
     fi
 
     # Align experimental T1 to FS-exported T1 (might not be required)
-    if [ ! -f ${DIR_FS}/SUMA/${FS_NAME}_SurfVol_Alnd_Exp+orig.BRIK ];
-    then
-        3dcopy \
-            ${DIR_T1}/anat_T1_brain.nii.gz \
-            ${DIR_FS}/SUMA/anat_T1_brain+orig.
+    if [ ! -f ${DIR_FS}/SUMA/${FS_NAME}_SurfVol_Alnd_Exp+orig.BRIK ]; then
+        
+        if [ ! -f ${DIR_FS}/SUMA/anat_T1_brain+orig ]; then 3dcopy ${DIR_T1}/anat_T1_brain.nii.gz ${DIR_FS}/SUMA/anat_T1_brain+orig.; fi
 
         # note: we have to cd to this directory for the pipeline to work
-        # this is an usly 
         cd ${DIR_FS}/SUMA
         @SUMA_AlignToExperiment \
             -exp_anat anat_T1_brain+orig.\
             -align_centers \
             -surf_anat ${FS_NAME}_SurfVol+orig.
-        cd /tmp
+        cd ${DIR}
     fi
 
     for RUN in ${DIR_RUNS}; do

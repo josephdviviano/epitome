@@ -22,8 +22,7 @@ echo '************************************************************************'
 
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then
-    3dcopy \
-        ${DIR_AFNI}/MNI_avg152T1+tlrc ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
 fi
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -113,6 +112,5 @@ for SESS in `basename ${DIR_SESS}`; do
                     ${DIR}/${SESS}/mat_TAL_to_T1.mat
     fi
 done
-cd ${DIR_PIPE}
 
 EOF

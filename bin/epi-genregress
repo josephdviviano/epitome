@@ -36,6 +36,8 @@ def main():
     output = arguments['<output>']
     n = arguments['<n>']
 
+    n = int(n) # check type
+
     data, _, _, _ = epi.utilities.loadnii(data)
     mask, _, _, _ = epi.utilities.loadnii(mask)
     data, idx = epi.utilities.maskdata(data, mask)

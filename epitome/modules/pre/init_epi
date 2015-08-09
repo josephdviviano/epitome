@@ -35,7 +35,9 @@ DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     
     # make the output folder for the paramaters
-    mkdir ${SESS}/PARAMS
+    if [ ! -d ${SESS}/PARAMS ]; then
+        mkdir ${SESS}/PARAMS
+    fi
 
     # loop through runs
     DIR_RUNS=`ls -d -- ${SESS}/RUN*`
@@ -51,9 +53,8 @@ for SESS in ${DIR_SESS}; do
                 -axial \
                 ${FILE} 
             
-            # retain 1st TR from 1st run
+            # retain 1st TR from 1st run (prestabilization)
             if [ ${DATA_QUALITY} = 'low' ] && [ ${NUM} = 01 ]; then
-                # strip off the pre-stabilization TR
                 3dcalc \
                     -prefix ${SESS}/anat_EPI_tmp_initTR.nii.gz \
                     -a ${SESS}/func_tmp_RAI.${ID}.${NUM}.nii.gz[0] \
@@ -65,19 +66,15 @@ for SESS in ${DIR_SESS}; do
                 
                 # get x, y, z, t dims, and TR length
                 X=`fslhd ${RUN}/*.nii.gz | sed -n 6p | cut -c 5-`
-
                 Y=`fslhd ${RUN}/*.nii.gz | sed -n 7p | cut -c 5-`
-
                 Z=`fslhd ${RUN}/*.nii.gz | sed -n 8p | cut -c 5-`
-
                 NTRS=`fslhd ${RUN}/*.nii.gz | sed -n 9p | cut -c 5-`
-
                 TR=`fslhd ${RUN}/*.nii.gz | sed -n 22p | cut -c 9-`
                 
                 # find the smallest dimension in x, y, z 
                 XYZ=($X $Y $Z)
                 SLICE=`echo ${XYZ[*]} | python -c \
-                      "print sorted(map(int,raw_input().split(' ')))[0]"`
+                      "print sorted(map(int, raw_input().split(' ')))[0]"`
 
                 # get the number of samples in physio logs
                 SAMP=`cat ${RUN}/resp.*.phys | wc -w`
@@ -174,8 +171,9 @@ for SESS in ${DIR_SESS}; do
                 -twopass \
                 -twoblur 3 \
                 -twodup \
+                -coarse 10 3 \
                 -Fourier \
-                -zpad 2 \
+                -zpad 10 \
                 -float \
                 -1Dfile ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
                 -1Dmatrix_save ${SESS}/PARAMS/3dvolreg.${ID}.${NUM}.aff12.1D \

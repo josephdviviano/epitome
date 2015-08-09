@@ -16,8 +16,6 @@ echo '   - Transforms whole-brain masks to MNI space.'
 echo ''
 echo '************************************************************************'
 
-cd /tmp
-
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     DIR_RUNS=`ls -d -- ${SESS}/RUN*`
@@ -49,7 +47,5 @@ for SESS in ${DIR_SESS}; do
             -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
     fi
 done
-
-cd ${DIR_PIPE}
 
 EOF
