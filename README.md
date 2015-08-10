@@ -11,8 +11,6 @@ Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 
 *Current under active development at the TIGRLab (CAMH), and is regularly updated with modules to meet the demands of this site.*
 
-**The majority of the ninet features are as of yet undocumented save their docstrings, for the brave.**
-
 **Shortcuts:**
 
 + [Setup](#setup)
@@ -37,7 +35,10 @@ Quickstart:
 + Add epitome to your PYTHONPATH.
 + Set `EPITOME_DATA` to point to your MRI data folder.
 + Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
-+ Check your work using `epitome check <experiment>`.
++ Check your work using `epitome check`.
++ Create an experiment and some subjects using `epi-folder`.
++ Put some NIFTI data into these subject's RUN folders.
++ Check your work using `epitome verify <experiment>`
 + Generate some pre-processing scripts using `epitome run`.
 
 Currently, epitome requires the user to have installed and configured the following packages to be in their path:
@@ -127,21 +128,25 @@ epitome contains a set of helper subroutines and two main functions: `run' and `
 
 **epitome run**
 
-This is the heart and soul of epitome. This command line interface will walk you through the construction of a pipeline for a single image modality within a single experiment. Every run of epitome begins with a lengthly run of Freesurfer on all T1s, and `init_epi`, which does the most basic kinds of MRI pre-processing. Following that, you are free to chain together modules as you see fit.
+This walks you through the construction of a pipeline for a single image modality within a single experiment. Every run of epitome begins with a run of Freesurfer on all T1s, and `init_epi`, which does the most basic kinds of MRI pre-processing. Following that, you are free to chain together modules as you see fit.
 
-Each pipeline is generated from a local copy of the epitome repo in `~/epitome`. This is to prevent software updates from interfering with any ongoing project (which currently are happening quite frequently relative to the length of a typical project). This also means you can make local hacks to a copy of the pipeline and not disturb your other projects, or other users. Ideally, some of these hacks will end up being integrated back into the main branch of epitome. Before each run of the pipeline, you will be required to pick between an old branch of the pipeline (so try to name them reasonably), or `***NEW***`, which will work from a copy of the master epitome repo.
+Each pipeline is generated from a local copy of the epitome repo in `~/epitome`. This is to prevent software updates from interfering with any ongoing project. This also means you can make local hacks to a copy of the pipeline and not disturb your other projects, or other users. Ideally, some of these hacks will end up being integrated back into the main branch of epitome. Before each run of the pipeline, you will be required to pick between an old branch of the pipeline (so try to name them reasonably), or `***NEW***`, which will work from a copy of the master epitome repo.
 
 In order to retain the modular and easily-customized structure of epitome, this program allows you to shoot yourself in the foot. In fact, if you aren't clear on what to do, you are more likely to make a malformed pipeline than you are to making a good one. Therefore, I recommend reading the Pipeline section of this manual at least once, and perhaps skimming the Presets section following, to get a sense of reasonable usage.
 
-The pipeline will allow you to chain together various modules in order until you give it the stop command, when it will switch over to asking you to submit a set of desired QC outputs. Internally, this program is simply looking through the /qc module directory instead of the /pre module directory. These QC outputs will only properly work once all of your subjects are pre-processed, as they output single PDFs detailing some feature of the entire experiment.
+The pipeline will allow you to chain together various modules in order until you give it the stop command, when it will switch over to asking you to submit a set of desired QC outputs. Internally, this program is simply looking through the `epitome/modules/qc` directory instead of `epitome/modules/pre`. These QC outputs will only properly work once all of your subjects are pre-processed, as they output single PDFs detailing some feature of the entire experiment.
 
-Finally, a few outputs will be deposited in your experiment directory: a master script, a proclist script, and a set of cmd scripts. A copy of all the current modules at the time of running will be deposited in an epitome directory in your home folder. The master script generates everything else from these copied modules, and can be edited by-hand to produce new pipelines. In fact, those who know what they are doing can generate new pipelines directly from an old master script, instead of interacting with the command line interface again. The cmd scripts are the actual set of commands run on each participant. These are essentially the module script files concatenated in the way defined by the user with the appropriate variables filled in. These files are meant to be well-commented, and should be easily edited by-hand for those adventurous types who would like to tweak various settings, try new methods, or debug beguiling problems, on a subject wise basis. Alternatively, the modules in your home folder can be edited, the master script re-run, and the changes will be applied to every subject's cmd script. The proclist is simply a set of calls to these various scripts in order. It can be called directly, to run the subjects serially, or submitted to a batch queuing system to be analyzed in a cluster environment.
+Finally, a few outputs will be deposited in your experiment directory: a `master` script, a `proclist` script, and a set of `cmd` scripts. A copy of all the current modules at the time of running will be deposited in an epitome directory in your home folder. The master script generates everything else from these copied modules, and can be edited by-hand to produce new pipelines. In fact, those who know what they are doing can generate new pipelines directly from an old master script, instead of interacting with the command line interface again. The cmd scripts are the actual set of commands run on each participant. These are essentially the module script files concatenated in the way defined by the user with the appropriate variables filled in. These files are meant to be well-commented, and should be easily edited by-hand for those adventurous types who would like to tweak various settings, try new methods, or debug beguiling problems, on a subject-wise basis. Alternatively, the modules in your home folder can be edited, the master script re-run, and the changes will be applied to every subject's cmd script. The proclist is simply a set of calls to these various scripts in order. It can be called directly, to run the subjects serially, or submitted to a batch queuing system to be analyzed in a cluster environment.
 
 epitome scripts are written to never re-do done work. Therefore, to replace a bad set of outputs with good ones, one must first delete the bad outputs. This can be done by hand, or via a set of helper cleanup scripts, detailed below.
 
 **epitome clean**
 
-This program works similarly to run, but produces scripts for deleting intermediate files. Generally, it is good practice to inspect the outputs of epitome first, and if problems are identified, to work backwards through the pipeline until the problem arises to determine the origin of the issue. After the outputs have been vetted, these cleanup scripts will go a long way to keeping your hard drives and system administrators happy.
+Produces scripts for deleting files from subject's `SESS` folders. Generally, it is good practice to inspect the outputs of epitome first, and if problems are identified, to work backwards through the pipeline until the problem arises to determine the origin of the issue. After the outputs have been vetted, use these cleanup scripts to remove unnessicary files.
+
+**epitome help**
+
+Prints the help for the selected module (stored as markdown files in `doc/`).
 
 **epi-folder**
 
@@ -153,17 +158,20 @@ epitome will automatically regress physiological noise out of your data, if you 
 
 **epi-queue**
 
-epitome eventually generates a `proclist', a set of commands that must be executed in order to generate the desired outputs. This proclist can be run manually, if desired, but can also be submitted to the sun-grid queuing system by using epi-queue. This is generally preferred, as multiple users attempting to run proclists simultaneously might overload the system.
+epitome eventually generates a `proclist`, a set of commands that must be executed in order to generate the desired outputs. This proclist can be run manually, if desired, but can also be submitted to the sun-grid queuing system by using epi-queue. This is generally preferred, as multiple users attempting to run proclists simultaneously might overload the system.
+
+**everything else**
+
+For the usage of all other epitome command-line tools, run the appropriate program with the `--help` flag (e.g., `epi-fft --help`).
+
 
 Modules
 -------
-Modules can be easily chained together manually, or by using the command-line interface included with the pipeline. New modules are simply bash scripts which call various programs, including FSL, Freesurfer, AFNI, and custom python program. Any script found in the modules directories will be added to the command line interface automatically, but will not work properly unless a matching python wrappper function is added to epitome/commands.
-
-For specific documentation on each module, use the `epitome help` command.
+Modules can be easily chained together manually, or by using the command-line interface included with the pipeline. New modules are simply bash scripts which call various programs, including FSL, Freesurfer, AFNI, and custom python program. Any script found in the modules directories will be added to the command line interface automatically, but will not work properly unless a matching python wrappper function is added to `epitome/commands`.
 
 **freesurfer**
 
-Right now, the default `freesurfer recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
+Right now, freesurfer's `recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
 
 **pre-processing**
 
@@ -183,7 +191,7 @@ epitome give you the ability to chain modular BASH scripts together to generate 
 
 **basic: GLM, PLS, etc.**
 
-Here, we are interested in doing a set of basic tasks before running a GLM analysis on some task-based MRI design. We've already placed the anatomical and functional NIFTI (and .phys files, if appropriate) into their RUN folders and have run epitome run. Every run begins with init_epi 
+Here, we are interested in doing a set of basic tasks before running a GLM analysis on some task-based MRI design. We've already placed the anatomical and functional NIFTI (and .phys files, if appropriate) into their RUN folders and have run epitome run. Every run begins with `init_epi`. 
 
     init_epi high 0 on alt+z off normal 
 
@@ -197,10 +205,6 @@ Here we are calculating all of our registration pathways, from epi space, to sin
 
 This will put all of our Freesurfer-derived segmentations in single-subject epi space, which we can use to generate regressors. 
 
-    gen_regressors scaled 
-
-This will generate a set of regressors from the aforementioned Freesurfer atlases and the input data scaled, which was generated by init_epi. In this case, these regressors will be applied during the GLM as baselines. Note that it will always generate all regressors, but they need not all be used. 
-
     volsmooth scaled epi_mask 6.0 
 
 This will smooth the epi data within the defined mask (anat_epi_mask.nii.gz in this case) using a full-width half-maximum (FWHM) of 6 mm. The input data is still scaled, since this is the first actual manipulation of the outputs from init_epi. 
@@ -209,29 +213,27 @@ This will smooth the epi data within the defined mask (anat_epi_mask.nii.gz in t
 
 Finally, this will transform each smoothed run up into MNI space with a isotropic voxel resolution of 3 mm^2. 
 
-
 **functional connectivity**
 
-Functional connectivity analysis benefits from the application of tissue-based regressors pre-analysis, unlike in a GLM where one can inset these regressors at the same time. For this reason, connectivity analysis will require a slightly modified pipeline: 
+Functional connectivity analysis benefits from the application of tissue-based regressors pre-analysis. Here we generate the mean, mean derivative, and mean square, of the white matter & ventricle time series, along with the motion paramaters.
 
     init_epi high 0 on alt+z off normal 
     linreg_calc_AFNI high lpc giant_move 
     linreg_FS2epi_AFNI 
-    gen_regressors scaled 
 
-    filter scaled 4 off on on on on 
+    filter scaled 4 on off on on off off off off EPI_mask
 
 *Optional:* In some cases it may be advantageous to remove motion-corrupted TRs from your data, especially if you are comparing two groups you suspect move in different ways. This can be done with the TR drop module. We're just going to use the default settings here.
 
-    trdrop 50 0.5 100000
+    trscrub 50 0.5 100000
 
 Here, we are detrending the scaled data against the head motion parameters, Legendre polynomials up to the 4th order, the mean white matter signal, the local white matter signal, the mean cerebral spinal fluid signal, and the mean draining vessel signal. For all of these signals, we also regress against the 1st temporal lag. 
 
-    lowpass filtered epi_mask average 3 
+    lowpass filtered EPI_mask average 3 
 
 Next, we low-pass the data using a moving-average filter of span 3. Most of the information in BOLD data is of fairly low frequency, so the hope is that low-passing the data will remove some high-frequency noise from the signals. There are multiple options that could be used here, but no one ever got fired for using a moving average filter, so I suggest it here as a fair default.
 
-    volsmooth lowpass epi_mask 6.0 
+    volsmooth lowpass EPI_mask 6.0 
     linreg_epi2MNI_AFNI volsmooth 3.0 
 
 **surface analysis / smoothing for volume analysis**
@@ -241,12 +243,10 @@ When studying the cortex, it is often desirable to look at the data on a surface
     init_epi high 0 on alt+z off normal 
     linreg_calc_AFNI high lpc giant_move 
     linreg_FS2epi_AFNI 
-    gen_regressors scaled 
 
-    vol2surf scaled 
+    vol2surf scaled
 
 This will projects the epi data contained within the white-matter boundaries of the Freesurfer segmentation to a AFNI-based surface space. This must be run on epi data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter! 
-
 
     surfsmooth surface 10.0 
 
