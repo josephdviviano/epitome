@@ -22,6 +22,7 @@ for SESS in ${DIR_SESS}; do
             -blur 0 -3 \
             -iwarp \
             -allineate \
+            -quiet \
             -base template+tlrc \
             -source ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
 

@@ -62,6 +62,7 @@ for SESS in ${DIR_SESS}; do
             -tshift off \
             -${REG_DOF} \
             -tlrc_apar anat_T1_brain+tlrc \
+            -ex_mode quiet \
             -cost ${COST}
 
         # Move outputs from /tmp back into data folders folders.
@@ -98,7 +99,7 @@ for SESS in ${DIR_SESS}; do
                 -input ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz \
                 -1Dmatrix_apply ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D \
                 -master ${EPI_BRAIN} \
-                -float \
+                -float -quiet \
                 -final quintic
         else
             3dAllineate \
@@ -106,7 +107,7 @@ for SESS in ${DIR_SESS}; do
                 -input ${DIR_T1}/SESS01/anat_T1_brain.nii.gz \
                 -1Dmatrix_apply ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D \
                 -master ${EPI_BRAIN} \
-                -float \
+                -float -quiet \
                 -final quintic
         fi                
     fi

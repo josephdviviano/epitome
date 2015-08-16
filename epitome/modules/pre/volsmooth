@@ -31,20 +31,18 @@ for SESS in ${DIR_SESS}; do
 
             # use 3dBlurToFWHM
             if [ ${MODE} == 'normal' ]; then
-
                 # If already run filter, use noise model from it as blurmaster
                 if [ -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
-
                     3dBlurToFWHM \
+                        -quiet \
                         -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
                         -mask ${SESS}/anat_smoothmask.nii.gz \
                         -FWHM ${FWHM} \
                         -blurmaster ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
                         -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
-
                 else
-
                     3dBlurToFWHM \
+                        -quiet \
                         -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
                         -mask ${SESS}/anat_smoothmask.nii.gz \
                         -FWHM ${FWHM} \
@@ -53,11 +51,11 @@ for SESS in ${DIR_SESS}; do
 
             # use 3dBlurInMask
             elif [ ${MODE} == 'multimask' ]; then
-                
                 3dBlurInMask \
                     -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
                     -Mmask ${SESS}/anat_smoothmask.nii.gz \
                     -FWHM ${FWHM} \
+                    -quiet -float \
                     -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
             fi
         fi

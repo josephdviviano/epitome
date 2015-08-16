@@ -22,7 +22,7 @@ for SESS in ${DIR_SESS}; do
                 -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
                 -1Dmatrix_apply ${SESS}/mat_EPI_to_T1.aff12.1D \
                 -master ${SESS}/reg_EPI_to_T1.nii.gz \
-                -float \
+                -float quiet \
                 -final wsinc5 \
                 -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
         fi
@@ -35,7 +35,7 @@ for SESS in ${DIR_SESS}; do
             -input ${SESS}/anat_EPI_mask.nii.gz \
             -1Dmatrix_apply ${SESS}/mat_EPI_to_T1.aff12.1D \
             -master ${SESS}/reg_EPI_to_T1.nii.gz \
-            -float \
+            -float -quiet \
             -final NN \
             -mast_dxyz ${DIMS} ${DIMS} ${DIMS}
     fi
