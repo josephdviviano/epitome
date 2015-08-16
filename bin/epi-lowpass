@@ -165,8 +165,9 @@ def butterworth_filter(func, mask, cutoff=0.1):
     b, a = sig.butter(3, cutoff/nyq)
     a = [1.0]
 
+    padlen = len(tmp[0, :])-1 # defined explicitly else we lose the last TRs...
     for x in np.arange(tmp.shape[0]):
-        filt[x, :] = sig.filtfilt(b, a, tmp[x, :], axis=0, padtype=None)
+        filt[x, :] = sig.filtfilt(b, a, tmp[x, :], axis=0, padlen=padlen)
 
     # create a 4D output array
     output = np.zeros(func.shape)
