@@ -6,11 +6,7 @@ export INPUT=$(echo func_${1})
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '            Projects functional data onto a cortical surface'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: vol2surf. Projects functional data onto a cortical surface. *'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do

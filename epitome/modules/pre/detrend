@@ -7,14 +7,7 @@ export POLORT=${2}
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                            Detrending of fMRI data'
-echo ''
-echo '   - Detrends '${INPUT}' with polort ${POLORT}'.
-echo ''
-echo '************************************************************************'
-
+echo '*** MODULE: detrend. Detrends all inputs to order n, retaining the mean.*'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do

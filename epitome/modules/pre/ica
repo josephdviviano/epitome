@@ -7,15 +7,7 @@ export MASK=$(echo anat_${2})
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                MELODIC-based ICA decomposition per run'
-echo ''
-echo '   - Computes the independent components of '${INPUT}' inside '${MASK}'.'
-echo ''
-echo '************************************************************************'
-
-cd /tmp
+echo '*** MODULE: ica. Runs MELODIC on each run. ******************************'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do

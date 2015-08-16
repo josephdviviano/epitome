@@ -5,17 +5,16 @@ voxel. To save on computation time, this requires a mask input. All values > 0
 in the mask survive.
 
 Usage: 
-    epi-lowpass <filter_type> <func_name> <mask_name> <cutoff> <path> <run_number>
+    epi-lowpass [options] <func> <mask> <output>
 
 Arguments:
-    <filter_type>    'median', 'average', 'kaiser', or 'butterworth'.
-    <func_name>      full path of input functional data.
-    <mask_name>      full path of input mask data. 
-    <cutoff>         median & average: width of the time-domain filter (odd integer).
-                     kaiser & average: lowpass cutoff in Hz of the frequency-domain filter.
-    <path>           full path of the output directory.
-    <uid>            unique identifier for a given run.
-    <run_number>     a string denoting the zero-padded run number.
+    <func>           input functional nifti.
+    <mask>           input brain mask nifti (same grid as func).
+    <output>         output nifti.
+
+Options:
+    -t --type=<type>      median, average, kaiser, or butterworth [default: butterworth].
+    -c --cutoff=<cutoff>  width of the time-domain filter, cutoff frequency (Hz) for frequency domain filter.
 
 DETAILS:
 
@@ -137,8 +136,9 @@ def kaiser_filter(func, mask, cutoff=0.1):
     b = sig.firwin(numtap, cutoff/nyq, window=('kaiser', beta))
     a = [1.0]
 
+    padlen = len(tmp[0, :])-1 # defined explicitly else we lose the last TRs...
     for x in np.arange(tmp.shape[0]):
-        filt[x, :] = sig.filtfilt(b, a, tmp[x, :], axis=0)
+        filt[x, :] = sig.filtfilt(b, a, tmp[x, :], axis=0, padlen=padlen)
 
     # create a 4D output array
     output = np.zeros(func.shape)
@@ -166,7 +166,7 @@ def butterworth_filter(func, mask, cutoff=0.1):
     a = [1.0]
 
     for x in np.arange(tmp.shape[0]):
-        filt[x, :] = sig.filtfilt(b, a, tmp[x, :], axis=0)
+        filt[x, :] = sig.filtfilt(b, a, tmp[x, :], axis=0, padtype=None)
 
     # create a 4D output array
     output = np.zeros(func.shape)
@@ -182,43 +182,52 @@ def write_output(path, uid, num, out, aff, head):
     Writes a NIFTI file to the specified path with the specified run number.
     """
     #out = nib.nifti1.Nifti1Image(out, aff, head)    
-    out = nib.nifti1.Nifti1Image(out, aff)
-    out.update_header()
-    out.header_class(extensions=())
-
-    out.to_filename(os.path.join(path, 'func_lowpass.' + 
-                                              str(uid) + '.' + 
-                                              str(num) + '.nii.gz'))
-
-    print('Run ' + str(num) + ' low pass filtered successfully.')
 
 def main():
     arguments   = docopt(__doc__)
-    filter_type = arguments['<filter_type>']
-    func_name   = arguments['<func_name>']
-    mask_name   = arguments['<mask_name>']
-    cutoff      = arguments['<cutoff>']
-    path        = arguments['<path>']
-    uid         = arguments['<uid>']
-    run_number  = arguments['<run_number>']
+    func        = arguments['<func>']
+    mask        = arguments['<mask>']
+    output      = arguments['<output>']
+    filtertype  = arguments['--type']
+    cutoff      = arguments['--cutoff']
 
-    if filter_type == 'median':
-        o, a, h = median_filter(func_name, mask_name, cutoff)
-        write_output(path, uid, run_number, o, a, h)
-    
-    elif filter_type == 'average':
-        o, a, h = mean_filter(func_name, mask_name, cutoff)
-        write_output(path, uid, run_number, o, a, h)
-    
-    elif filter_type == 'kaiser':
-        o, a, h = kaiser_filter(func_name, mask_name, cutoff)
-        write_output(path, uid, run_number, o, a, h)
-    
-    elif filter_type == 'butterworth':
-        o, a, h = butterworth_filter(func_name, mask_name, cutoff)
-        write_output(path, uid, run_number, o, a, h)
+    # check cutoff for reasonable inputs, otherwise revert to default
+    if not cutoff:
+        if filtertype == 'median': cutoff = 5
+        elif filtertype == 'average': cutoff = 5
+        elif filtertype == 'kaiser': cutoff = 0.1
+        elif filtertype == 'butterworth': cutoff = 0.1
+
+    if cutoff:
+        if filtertype in ['median', 'average']:
+            cutoff = int(cutoff) 
+            if cutoff == 0: cutoff = 5 # time domain filter default
+            if cutoff % 2 == 0: cutoff = cutoff + 1 # time domain filter is odd
+        if filtertype in  ['kaiser', 'butterworth']:
+            cutoff = float(cutoff)
+            if cutoff == 0: cutoff = 0.1 # frequency domain filter default
+
+    print('MSG: Lowpass {} with filter {}, cutoff = {}.'.format(func, filtertype, cutoff))
+
+    if filtertype == 'median':
+        cutoff = int(cutoff)
+        out, aff, hdr = median_filter(func, mask, cutoff)
+    elif filtertype == 'average':
+        cutoff = int(cutoff)
+        out, aff, hdr = mean_filter(func, mask, cutoff)
+    elif filtertype == 'kaiser':
+        cutoff = float(cutoff)
+        out, aff, hdr = kaiser_filter(func, mask, cutoff)
+    elif filtertype == 'butterworth':
+        cutoff = float(cutoff)
+        out, aff, hdr = butterworth_filter(func, mask, cutoff)    
     else:
         print(__doc__)
+        sys.exit()
+
+    out = nib.nifti1.Nifti1Image(out, aff, header=hdr)
+    out.header_class(extensions=())
+    out.to_filename(output)
 
 if __name__ == "__main__":
     main()

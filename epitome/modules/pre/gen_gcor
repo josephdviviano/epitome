@@ -6,16 +6,9 @@ export INPUT=$(echo func_${1})
 EOF
 
 cat <<"EOF"
+echo '*** MODULE: gen_gcor. calculates global correlation in native space. ****'
 
-echo '************************************************************************'
-echo '                    Global correlation calculator'
-echo ''
-echo '   - Calculates global correlation value of each run in single-subject'
-echo '     space. NB: Does not work on MNI data!'
-echo ''
-echo '************************************************************************'
-
-## calculate global correlation for each run
+## calculate global correlation for each run. NB: does not work on MNI data!!!
 for SESS in `ls -d ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`; do
     for FILE in `ls ${SESS}/${INPUT}.${ID}.*.nii.gz`; do
         FNAME=`basename ${FILE}`

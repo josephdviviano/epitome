@@ -9,33 +9,8 @@ export MODE=$(echo ${4})
 EOF
 
 cat<<"EOF"
+echo '*** MODULE: volsmooth. Spatially smooths volume data. *******************'
 
-echo '************************************************************************'
-echo '                        Spatially smooth data.'
-echo ''
-echo '    - Smooths data in volumetric space.'
-echo '    - Anything labeled zero in the mask will become zeroed in the output.'
-
-
-if [ ${MODE} == 'multimask' ]; then
-echo '    - Obeys mask label boundaries.'
-echo '    - Uses simpler blurring (iterative on input dataset).'
-fi
-
-if [ ${MODE} == 'normal' ]; then
-echo '    - Iteratively blurs data to some FWHM within a mask.'
-echo '    - Ideally uses the noise model from the filter module to estimate'
-echo '      smoothness, otherwise, detrends input and uses that.'
-echo '    - But if you didnt use filter before, this detrends the input'
-echo '      and uses that.'
-echo '    - NB: Assumes these images are in register!!! Use before going to'
-echo '      MNI space!'
-fi
-
-echo ''
-echo '************************************************************************'
-
-# Loop through sessions, runs
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     DIR_RUNS=`ls -d -- ${SESS}/RUN*`

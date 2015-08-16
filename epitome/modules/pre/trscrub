@@ -10,18 +10,7 @@ export MODE=${5}
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                        Motion Scrubbing Module'
-echo ''
-echo '   - Computes framewise displacement and DVARS measure (Power 2012),'
-echo '   - Removes TRs from each run corrupted by instantaneous displacement,'
-echo '     over '${FD}' mm / TR, and/or '${DV}' % signal change / TR.'
-echo '   - Calculations are preformed assuming a head size of '${HEAD}' mm.'
-echo '   - We also remove TRs 1 back and 2 forward from the disturbance to'
-echo '     control for spin-echo effects (appropriate according to Dr. Power).'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: trscrub. Removes TRs corrupted by motion. *******************'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do

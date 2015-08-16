@@ -8,19 +8,7 @@ export REG_DOF=`echo ${3}`
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '      AFNI: Linear registration pathway calculator for slab EPI data'
-echo ''
-echo '   Calculates EPI <--> WHEPI <--> T1 <--> MNI152 (from AFNI distribution)'
-echo '   Each session must have a matching WHEPI!'
-echo '   - Pre-processes WHEPI'
-echo '   - Uses data quality: '${DATA_QUALITY}','
-echo '   - Cost function: '${COST}','
-echo '   - Degrees of freedom preset '${REG_DOF}','
-echo '   - Generates EPI template registered to T1 & vice-versa (sessionwise),'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: linreg_calc_slab_afni. Calcs EPI <-> WHEPI <-> T1 <-> MNI. **'
 
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then

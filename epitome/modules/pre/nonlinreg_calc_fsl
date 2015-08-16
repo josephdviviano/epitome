@@ -1,16 +1,9 @@
 #!/bin/bash
 
 cat <<"EOF"
+echo '*** MODULE: nonlinreg_calc_fsl. Calcs MNI warp from linreg outputs. *****'
 
-echo '************************************************************************'
-echo '               FSL: Nonlinear registration pathway calculator'
-echo ''
-echo '   Calculates MNI linreg --> MNI nonlinreg using FSL FNIRT'
-echo ''
-echo '   - Generates T1 template warped to MNI and associated transforms,'
-echo ''
-echo '************************************************************************'
-
+# NB: Requires a successful run of linreg_calc to work properly!
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then
     3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz

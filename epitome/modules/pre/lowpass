@@ -9,13 +9,7 @@ export CUTOFF=${4}
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                          Low-Pass Module'
-echo ''
-echo '   - Low-passes masked functional data using a '${FILTER}' filter.'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: lowpass. Lowpasses functional data. *************************'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -24,20 +18,12 @@ for SESS in ${DIR_SESS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         if [ ! -f ${SESS}/func_lowpass.${ID}.${NUM}.nii.gz ]; then
-            
-            # set input paths
-            FUNC=`echo ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz`
-            ANAT=`echo ${SESS}/${MASK}.nii.gz`
-
-            # lowpass data
             epi-lowpass \
-                ${FILTER} \
-                ${FUNC} \
-                ${ANAT} \
-                ${CUTOFF} \
-                ${SESS} \
-                ${ID} \
-                ${NUM}
+                ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
+                ${SESS}/${MASK}.nii.gz \
+                ${SESS}/func_lowpass.${ID}.${NUM}.nii.gz \
+                --type ${FILTER} \
+                --cutoff ${CUTOFF}
         fi
     done
 done

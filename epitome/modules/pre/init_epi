@@ -12,23 +12,7 @@ export MASK_METHOD=${7}
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                  General pre-processing for all fMRI data'
-echo ''
-echo '   Running on experiment '${DIR_EXPT}', image modality '${DATA_TYPE}'.'
-echo '   - Using data quality: '${DATA_QUALITY}','
-echo '   - Orients data to RAI,'
-echo '   - Deletes '${DELTR}' TRs from the beginning of each run,'
-echo '   - Optionally removes time-series outliers, '${DESPIKE}','
-echo '   - Corrects for slice timing using the pattern '${TPATTERN}','
-echo '   - Deobliques the data,'
-echo '   - Motion correction (also outputs motion parameters + 1st lag),'
-echo '   - Creates deskulled template EPI and '${MASKING}' whole-brain mask,'
-echo '   - Masks using '${MASK_METHOD}','
-echo '   - Scales each voxel using '${NORMALIZE}','
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: init_epi. Standard pre-processing for standard fMRI data. ***'
 
 # loop through sessions
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
