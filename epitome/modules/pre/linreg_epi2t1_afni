@@ -7,14 +7,7 @@ export DIMS=`echo ${2}`
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                       AFNI T1-transform data'
-echo ''
-echo '   - Resamples '${INPUT}' data to T1 space at '${DIMS}'^3mm,'
-echo '   - Transforms whole-brain masks to T1 space.'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: linreg_epi2t1_afni. T1-transforms functional data. **********'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do

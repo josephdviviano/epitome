@@ -7,15 +7,7 @@ export DIMS=${2}
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                       FSL MNI-transform data'
-echo ''
-echo '   - Resamples '${INPUT}' data to MNI space at '${DIMS}'^3mm,'
-echo '   - Transforms whole-brain masks to MNI space,'
-echo '   - Creates 1 concatenated run per participant in run order.'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: linreg_epi2mni_fsl. MNI-transforms functional data. *********'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in `basename ${DIR_SESS}`; do

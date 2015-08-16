@@ -8,17 +8,7 @@ export REG_DOF=${3}
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '               FSL: Linear registration pathway calculator'
-echo ''
-echo '   Calculates EPI <--> T1 <--> MNI152 (included in AFNI distribution)'
-echo '   - Using data quality: '${DATA_QUALITY}','
-echo '   - Cost function: '${COST}','
-echo '   - Degrees of freedom preset '${REG_DOF}','
-echo '   - Generates EPI template registered to T1 & vice-versa (sessionwise),'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: linreg_calc_fsl. Calculates EPI <--> T1 <--> MNI152. ********'
 
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then

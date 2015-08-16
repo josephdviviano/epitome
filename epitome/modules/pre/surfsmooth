@@ -7,12 +7,7 @@ export FWHM=${2}
 EOF
 
 cat<<"EOF"
-
-echo '************************************************************************'
-echo '               Smooths functional data on a cortical surface'
-echo '    - Uses a gaussian kernel with FWHM of '${FWHM}' mm.'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: surfsmooth. Smooths functional data on a cortical surface ***'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do

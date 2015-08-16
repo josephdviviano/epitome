@@ -16,35 +16,7 @@ export MASK=$(echo anat_${11})
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                    Time series filtering of fMRI data'
-echo ''
-echo '   - Fits a defined regression model to '${INPUT}' data and retains the '
-echo '     residuals. Also outputs a set of tSNR maps. Relies on freesurfer.'
-echo '     Regressors taken from within EPI mask (for partial acquisitions).'
-echo ''
-echo '   - MASKS:'
-echo '       - white matter + eroded mask,'
-echo '       - ventricles + eroded mask,'
-echo '       - grey matter mask,'
-echo '       - brain stem mask,'
-echo '       - dialated brain mask,'
-echo '       - draining vessels mask,'
-echo ''
-echo '   - REGRESSORS:'
-echo '       - n-term polynomial'
-echo '       - Physiological regressors, if they exist'
-echo '       - DIFF: if on, also use the first derivative'
-echo '       - LAG: if on, also use the first lag'
-echo '       - SQ: if on, also use the square of the regressors'
-echo '       - STD: 6-term motion paramaters, mean white matter, mean csf'
-echo '       - GM: global mean'
-echo '       - DV: draining vessels'
-echo '       - ANATICOR: local white matter (15mm sphere) + 1st lag'
-echo '       - COMPCOR: PCA regression of n components from wm and csf,'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: filter. Applies regression models of noise sources. *********'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do

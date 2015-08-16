@@ -1,15 +1,9 @@
 #!/bin/bash
 
 cat <<"EOF"
+echo '*** MODULE: nonlinreg_calc_afni. Calcs MNI warp from linreg outputs. ****'
 
-echo '************************************************************************'
-echo '             AFNI: NonLinear registration pathway calculator'
-echo ''
-echo '   Calculates MNI152 warp from the linreg outputs'
-echo '   - Requires a successful run of linreg_calc to work properly!'
-echo ''
-echo '************************************************************************'
-
+# NB: Requires a successful run of linreg_calc to work properly!
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     SESS=`basename ${SESS}`

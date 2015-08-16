@@ -7,14 +7,7 @@ export DIMS=`echo ${2}`
 EOF
 
 cat <<"EOF"
-
-echo '************************************************************************'
-echo '                  Nonlinear: AFNI MNI-transform data'
-echo ''
-echo '   - Resamples '${INPUT}' data to MNI space at '${DIMS}'^3mm,'
-echo '   - Transforms whole-brain masks to MNI space,'
-echo ''
-echo '************************************************************************'
+echo '*** MODULE: nonlinreg_epi2mni_afni. Warps EPI data to MNI space. ********'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
