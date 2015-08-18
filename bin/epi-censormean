@@ -16,9 +16,9 @@ Options:
     -o --output <output>   output nifti of mean. 
     -f --fd=<fd>           framewise displacement threshold in mm/TR [default: 0.5]
     -r --rad=<rad>         radius of head in mm [default: 50]
-    -c --cycles=<cycles>   number of cycles to fold over (for periodic designs) [default: None]
-    -v --var=<var>         output nifti of standard deviation [default: None]
-    -q --qc=<qc>           output text vector of number of runs retained per TR [default: None]
+    -c --cycles=<cycles>   number of cycles to fold over (for periodic designs)
+    -v --var=<var>         output nifti of standard deviation
+    -q --qc=<qc>           output text vector of number of runs retained per TR
 
 DETAILS:
     
@@ -101,12 +101,7 @@ def main():
     # cast types
     fd = float(fd)
     rad = float(rad)
-    
-    if cycles == 'None': cycles = None
-    else: cycles = int(cycles)
-
-    if var == 'None': var = None
-    if qc == 'None': qc = None
+    if cycles: cycles = int(cycles)
 
     # checks inputs
     if len(inputs) <= 1:
@@ -131,8 +126,7 @@ def main():
         print('ERROR: Inputs must be 4D')
         sys.exit()
 
-    if cycles == 1:
-        cycles = None
+    if cycles == 1: cycles = None
 
     if cycles and dims[3] % cycles != 0:
         print('ERROR: Cycles are not integral with the length of the run.')
@@ -176,7 +170,7 @@ def main():
 
             if cycles:
                 data = np.reshape(data, (nvox, dims[3]/cycles, cycles))
-                
+
                 # does some footwork to map from run to cycles to properly calculate SD
                 for cyc in np.arange(cycles):
                     cycidx = np.arange(cyc*dims[3]/cycles,(cyc+1)*dims[3]/cycles)
@@ -184,7 +178,7 @@ def main():
                     cycidx = cycidx - (cyc*dims[3]/cycles) # set to start at 0
                     std[:, cycidx] = std[:, cycidx] + (data[:, cycidx, cyc] - mean[:, cycidx])**2
                     trcount[cycidx] = trcount[cycidx] + 1
-            
+
             else:
                 std[:, idx] = std[:, idx] + (data[:, idx] - mean[:, idx])**2
                 trcount[idx] = trcount[idx] + 1

@@ -15,14 +15,14 @@ for SESS in `basename ${DIR_SESS}`; do
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
 
-
-    if [ ! -f ${DIR}/anat_EPI_reg_target.nii.gz ]; then
-        # create registration dummy for FSL
-        3dresample \
-            -dxyz ${DIMS} ${DIMS} ${DIMS} \
-            -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
-            -inset ${DIR_T1}/anat_T1_brain.nii.gz
+    # create registration dummy for FSL
+    if [ -f ${DIR}/anat_EPI_reg_target.nii.gz ]; then
+        rm ${DIR}/anat_EPI_reg_target.nii.gz 
     fi
+    3dresample \
+        -dxyz ${DIMS} ${DIMS} ${DIMS} \
+        -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
+        -inset ${DIR_T1}/anat_T1_brain.nii.gz
 
     DIR_RUNS=`ls -d -- ${DIR}/RUN*`
     for RUN in ${DIR_RUNS}; do
@@ -44,11 +44,11 @@ for SESS in `basename ${DIR_SESS}`; do
     # register session masks with MNI
     if [ ! -f ${DIR}/${SESS}/anat_EPI_mask_MNI-linreg.nii.gz ]; then
         flirt \
-            -in ${DIR}/${SESS}/anat_EPI_mask.nii.gz \
-            -ref ${DIR}/${SESS}/anat_EPI_reg_target.nii.gz \
-            -applyxfm -init ${DIR}/${SESS}/mat_EPI_to_TAL.mat \
+            -in ${DIR}/anat_EPI_mask.nii.gz \
+            -ref ${DIR}/anat_EPI_reg_target.nii.gz \
+            -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
             -interp nearestneighbour \
-            -out ${DIR}/${SESS}/anat_EPI_mask_MNI-linreg.nii.gz
+            -out ${DIR}/anat_EPI_mask_MNI-linreg.nii.gz
     fi
 done
 

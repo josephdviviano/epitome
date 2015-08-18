@@ -16,9 +16,11 @@ for SESS in `basename ${DIR_SESS}`; do
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
 
     # create registration dummy for FSL
-    3dresample -dxyz ${DIMS} ${DIMS} ${DIMS} \
-               -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
-               -inset ${DIR}/reg_nlin_TAL.nii.gz
+    if [ ! -f ${DIR}/anat_EPI_reg_target.nii.gz ]; then
+        3dresample -dxyz ${DIMS} ${DIMS} ${DIMS} \
+                   -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
+                   -inset ${DIR}/reg_nlin_TAL.nii.gz
+    fi
 
     DIR_RUNS=`ls -d -- ${DIR}/RUN*`
     for RUN in ${DIR_RUNS}; do
