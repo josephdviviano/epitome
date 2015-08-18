@@ -19,7 +19,7 @@ for SESS in ${DIR_SESS}; do
 
 
         # take intersection of this mask and the EPI mask
-        3dCalc \
+        3dcalc \
             -prefix ${DIR}/anat_THAL_mask.nii.gz \
             -a ${DIR}/anat_tmp_THAL_mask.nii.gz \
             -b ${DIR}/anat_EPI_mask.nii.gz \
