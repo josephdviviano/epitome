@@ -39,6 +39,10 @@ for SESS in ${DIR_SESS}; do
 done
 
 # create group EPI mask in MNI space
+if [ -f ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI-nonlin_group.nii.gz ]; then
+    rm ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI-nonlin_group.nii.gz
+fi 
+
 3dMean \
     -datum short \
     -prefix ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \

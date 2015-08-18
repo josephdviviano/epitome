@@ -105,6 +105,7 @@ for SESS in ${DIR_SESS}; do
                 3dDespike \
                     -prefix ${SESS}/func_tmp_despike.${ID}.${NUM}.nii.gz \
                     -ssave ${SESS}/PARAMS/spikes.${ID}.${NUM}.nii.gz \
+                    -quiet \
                      ${SESS}/func_tmp_del.${ID}.${NUM}.nii.gz
             else
                 cp ${SESS}/func_tmp_del.${ID}.${NUM}.nii.gz \
@@ -145,7 +146,8 @@ for SESS in ${DIR_SESS}; do
                 -quintic \
                 -verb \
                 -gridset ${SESS}/func_tshift.${ID}.01.nii.gz \
-                ${SESS}/func_tshift.${ID}.${NUM}.nii.gz
+                ${SESS}/func_tshift.${ID}.${NUM}.nii.gz > \
+                ${SESS}/PARAMS/deoblique.${ID}.${NUM}.1D
 
             # motion correct to 9th sub-brick of 1st run
             3dvolreg \

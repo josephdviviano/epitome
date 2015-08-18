@@ -556,12 +556,7 @@ for SESS in ${DIR_SESS}; do
             fi
 
             ####################################################################
-
-            # Finally, echo  run the command
-            echo '****************************'
-            echo 'Filtering time series using:'
-            echo ${CMD}
-            echo '****************************'
+            # Finally, run the command
             ${CMD}
 
             # subtracts nuisances from inputs, retaining the mean
