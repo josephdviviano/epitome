@@ -177,7 +177,6 @@ def print_dirs(in_dir):
     if len(dir_list) == 0:
         print('None found.')
 
-
 def loadnii(filename):
     """
     Usage:

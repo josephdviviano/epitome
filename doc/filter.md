@@ -1,6 +1,6 @@
 filter
 ------
-Usage: filter <func_prefix> <det> <std> <gm> <anaticor> <compcor> <compnum> <dv>
+Usage: filter <func_prefix> <det> <diff> <lag> <sq> <std> <gm> <dv> <anaticor> <compcor> <mask>
 
 + func_prefix -- functional data prefix (eg.,smooth in func_smooth). 
 + det -- polynomial order to detrend each voxel against. 
