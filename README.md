@@ -16,6 +16,7 @@ Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
 + [Setup](#setup)
 + [Introduction](#introduction)
 + [Dependencies](#dependencies)
++ [Bundled Files](#bundled-files)
 + [Overview](#overview)
 + [Usage](#usage)
 + [Modules](#modules)
@@ -76,6 +77,17 @@ epitome contains a small number of programs that actually manipulate data, but a
 epitome comes packaged with AFNI's [McRetroTS](http://afni.nimh.nih.gov/sscc/dglen/McRetroTS) scripts in bin/. Version downloaded: 2012.12.17.1431   McRetroTS_linux64pkg.zip on Nov 5th 2014.
 
 The program itself was built and tested on the Ubuntu 12.04/14.04 OS. I imagine it will work well in any Linux environment. It should run on Mac OS X as well, but this remains unverified. There will be no support for Windows.
+
+Bundled Files
+-------------
+epitome comes with some bundled files under `assets/`. Some of these files are used by the pipeline directly, and others are files that the user might find useful at the analysis stage (for example, whole brain atlases). A full list follows, with indication as to whether the database interacts directly with these files, or whether they are only there for convienience.
+
++ .labels files -- files containing MNI coordinates for ROI-based analysis. Can be used with AFNI's `3dUndump` to create 3D ROI mask NIFTIs.
++ MNI152_T1_1mm_brain.nii.gz -- the epitome pipeline's MNI brain (from FSL 5.0.7) [used by epitome].
++ MNI152_T1_1mm_brain_mask_dil.nii.gz -- the dialated MNI brain mask (from FSL 5.0.7) [used by epitome].
++ MNI152_T1_1mm.nii.gz -- a copy of the MNI brain with the skull intact (from FSL 5.0.7).
++ MNI_avg152T1.nii.gz -- a copy of the MNI brain from AFNI (downloaded November 2014), used in previous versions of epitome.
++ shen_?mm_268_parcellation.nii.gz -- a 264 ROI brain atlas in MNI space (equally-sized ROIs, covers entire cortex, subcortex).
 
 Overview
 --------
@@ -171,7 +183,7 @@ Modules can be easily chained together manually, or by using the command-line in
 
 **freesurfer**
 
-Right now, freesurfer's `recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors. 
+Right now, freesurfer's `recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors.
 
 **pre-processing**
 
@@ -183,7 +195,7 @@ These programs run experiment-wide, and therefore are run after all /pre modules
 
 **cleanup**
 
-These programs are run separately using epitome clean. They generally provide the ability to eliminate faulty outputs or intermediate files from experiments. Due to their destructive nature, these scripts must be executed by hand and each step must be manually confirmed. They are therefore not amiable to unattended scripting, although one could easily write their own with some know-how. 
+These programs are run separately using epitome clean. They generally provide the ability to eliminate faulty outputs or intermediate files from experiments. Due to their destructive nature, these scripts must be executed by hand and each step must be manually confirmed. They are therefore not amiable to unattended scripting, although one could easily write their own with some know-how.
 
 Workflows
 ---------
@@ -191,35 +203,35 @@ epitome give you the ability to chain modular BASH scripts together to generate 
 
 **basic: GLM, PLS, etc.**
 
-Here, we are interested in doing a set of basic tasks before running a GLM analysis on some task-based MRI design. We've already placed the anatomical and functional NIFTI (and .phys files, if appropriate) into their RUN folders and have run epitome run. Every run begins with `init_epi`. 
+Here, we are interested in doing a set of basic tasks before running a GLM analysis on some task-based MRI design. We've already placed the anatomical and functional NIFTI (and .phys files, if appropriate) into their RUN folders and have run epitome run. Every run begins with `init_epi`.
 
-    init_epi high 0 on alt+z off normal 
+    init_epi high 0 on alt+z off normal
 
-Here, we are telling epitome that we are working with high contrast data, want to remove 0 TRs from the beginning of each run, use despiking, have acquired our data in the alternating plus direction, we are turning off time series normalization, and would like a brain mask of normal tightness, which is a reasonable default. 
+Here, we are telling epitome that we are working with high contrast data, want to remove 0 TRs from the beginning of each run, use despiking, have acquired our data in the alternating plus direction, we are turning off time series normalization, and would like a brain mask of normal tightness, which is a reasonable default.
 
-    linreg_calc_AFNI high lpc giant_move 
+    linreg_calc_AFNI high lpc giant_move
 
-Here we are calculating all of our registration pathways, from epi space, to single-subject T1 space (and therefore, Freesurfer space), and finally group-level MNI space, using linear registrations. Some reference images and transformation pathways are output, but we haven't actually moved the data yet. 
+Here we are calculating all of our registration pathways, from epi space, to single-subject T1 space (and therefore, Freesurfer space), and finally group-level MNI space, using linear registrations. Some reference images and transformation pathways are output, but we haven't actually moved the data yet.
 
-    linreg_FS2epi_AFNI 
+    linreg_FS2epi_AFNI
 
-This will put all of our Freesurfer-derived segmentations in single-subject epi space, which we can use to generate regressors. 
+This will put all of our Freesurfer-derived segmentations in single-subject epi space, which we can use to generate regressors.
 
-    volsmooth scaled epi_mask 6.0 
+    volsmooth scaled epi_mask 6.0
 
-This will smooth the epi data within the defined mask (anat_epi_mask.nii.gz in this case) using a full-width half-maximum (FWHM) of 6 mm. The input data is still scaled, since this is the first actual manipulation of the outputs from init_epi. 
+This will smooth the epi data within the defined mask (anat_epi_mask.nii.gz in this case) using a full-width half-maximum (FWHM) of 6 mm. The input data is still scaled, since this is the first actual manipulation of the outputs from init_epi.
 
-    linreg_epi2MNI_AFNI volsmooth 3.0 
+    linreg_epi2MNI_AFNI volsmooth 3.0
 
-Finally, this will transform each smoothed run up into MNI space with a isotropic voxel resolution of 3 mm^2. 
+Finally, this will transform each smoothed run up into MNI space with a isotropic voxel resolution of 3 mm^2.
 
 **functional connectivity**
 
 Functional connectivity analysis benefits from the application of tissue-based regressors pre-analysis. Here we generate the mean, mean derivative, and mean square, of the white matter & ventricle time series, along with the motion paramaters.
 
-    init_epi high 0 on alt+z off normal 
-    linreg_calc_AFNI high lpc giant_move 
-    linreg_FS2epi_AFNI 
+    init_epi high 0 on alt+z off normal
+    linreg_calc_AFNI high lpc giant_move
+    linreg_FS2epi_AFNI
 
     filter scaled 4 on off on on off off off off EPI_mask
 
@@ -227,32 +239,32 @@ Functional connectivity analysis benefits from the application of tissue-based r
 
     trscrub 50 0.5 100000
 
-Here, we are detrending the scaled data against the head motion parameters, Legendre polynomials up to the 4th order, the mean white matter signal, the local white matter signal, the mean cerebral spinal fluid signal, and the mean draining vessel signal. For all of these signals, we also regress against the 1st temporal lag. 
+Here, we are detrending the scaled data against the head motion parameters, Legendre polynomials up to the 4th order, the mean white matter signal, the local white matter signal, the mean cerebral spinal fluid signal, and the mean draining vessel signal. For all of these signals, we also regress against the 1st temporal lag.
 
-    lowpass filtered EPI_mask average 3 
+    lowpass filtered EPI_mask average 3
 
 Next, we low-pass the data using a moving-average filter of span 3. Most of the information in BOLD data is of fairly low frequency, so the hope is that low-passing the data will remove some high-frequency noise from the signals. There are multiple options that could be used here, but no one ever got fired for using a moving average filter, so I suggest it here as a fair default.
 
-    volsmooth lowpass EPI_mask 6.0 
-    linreg_epi2MNI_AFNI volsmooth 3.0 
+    volsmooth lowpass EPI_mask 6.0
+    linreg_epi2MNI_AFNI volsmooth 3.0
 
 **surface analysis / smoothing for volume analysis**
 
-When studying the cortex, it is often desirable to look at the data on a surface. This prevents the blurring of signals between sulci and gyri, allows for finer localization of function, and permits some interesting co-registration methods. For simplicity, we will do this to data intended for a simple GLM analysis. 
+When studying the cortex, it is often desirable to look at the data on a surface. This prevents the blurring of signals between sulci and gyri, allows for finer localization of function, and permits some interesting co-registration methods. For simplicity, we will do this to data intended for a simple GLM analysis.
 
-    init_epi high 0 on alt+z off normal 
-    linreg_calc_AFNI high lpc giant_move 
-    linreg_FS2epi_AFNI 
+    init_epi high 0 on alt+z off normal
+    linreg_calc_AFNI high lpc giant_move
+    linreg_FS2epi_AFNI
 
     vol2surf scaled
 
-This will projects the epi data contained within the white-matter boundaries of the Freesurfer segmentation to a AFNI-based surface space. This must be run on epi data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter! 
+This will projects the epi data contained within the white-matter boundaries of the Freesurfer segmentation to a AFNI-based surface space. This must be run on epi data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter!
 
-    surfsmooth surface 10.0 
+    surfsmooth surface 10.0
 
-This will smooth along the cortical surface with a FWHM of 10mm. Generally, surface-smoothed data can be subjected to larger smoothing kernels, as they do not mix signals coming from cortically-distant regions as readily in this format. 
+This will smooth along the cortical surface with a FWHM of 10mm. Generally, surface-smoothed data can be subjected to larger smoothing kernels, as they do not mix signals coming from cortically-distant regions as readily in this format.
 
-    surf2vol smooth scaled 
+    surf2vol smooth scaled
 
 This will project the surface data in smooth back into volume format in the same space as the scaled data, from whence it came. Many of the spatial-specificity advantages of surface-based analysis are now available in volume space, ensuring compatibility with many traditional analysis programs.
 
@@ -262,7 +274,7 @@ epitome, as it stands, has very few novel features over traditional pipelining p
 
 Modules take the form of either BASH scripts, or stand alone programs (such is the case with most QC modules at the moment) with a few stylistic conventions. They are `active' so long as they are kept in a .../epitome/modules/XXX directory, and will be accessed by the pipeline according to their type. `freesurfer' and `pre' modules are accessed first by epitome run, followed by those in `qc'. At the moment, the two freesurfer modules are not optional.
 
-The modules themselves use a [here-doc trick](http://tldp.org/LDP/abs/html/here-docs.html) to set variables defined on the command line first, and then `cat` the remaining script to STDOUT. Therefore, running a properly formatted module should not run anything, but should simply print it's contents out to the command line. There are a few reserved variables used in most, if not all, modules. 
+The modules themselves use a [here-doc trick](http://tldp.org/LDP/abs/html/here-docs.html) to set variables defined on the command line first, and then `cat` the remaining script to STDOUT. Therefore, running a properly formatted module should not run anything, but should simply print it's contents out to the command line. There are a few reserved variables used in most, if not all, modules.
 
 + DIR_SESS: A listing of all the sessions within a image modality.
 + SESS: A variable denoting the current session.
@@ -271,19 +283,19 @@ The modules themselves use a [here-doc trick](http://tldp.org/LDP/abs/html/here-
 + NUM: The run number.
 + ID: The unique identifier of a epitome run, defined globally.
 
-A module will typically loop through sessions, and then runs, taking an input file prefix (such as func_scaled), performing a number of operations on that file (producing intermediate files worth keeping, or in other cases, temporary files that will be removed by the module's end), and sometimes outputting a single functional file with a new prefix (such as func_lowpass). The anatomy of a call to an output file follows the convention 
+A module will typically loop through sessions, and then runs, taking an input file prefix (such as func_scaled), performing a number of operations on that file (producing intermediate files worth keeping, or in other cases, temporary files that will be removed by the module's end), and sometimes outputting a single functional file with a new prefix (such as func_lowpass). The anatomy of a call to an output file follows the convention
 
-    filename.ID.NUM.extension. 
+    filename.ID.NUM.extension.
 
 For NIFTI files, filename is typically func_prefix or anat_prefix, for 4D and 3D files, respectively. Regressors, QC metrics, and other parameter files are typically stored in a special PARAMS folder. Registrations are stored with the reg_X_to_Y convention, and the extension appropriate to the program that generated them (be it AFNI or FSL).
 
-A well-written module will never try to do anything that has already been done. Therefore, blocks of code are wrapped in an 
+A well-written module will never try to do anything that has already been done. Therefore, blocks of code are wrapped in an
 
-    if [ -f filename.ID.NUM.extension ]; then; commands; fi 
+    if [ -f filename.ID.NUM.extension ]; then; commands; fi
 
-loop. This is not mandatory, but highly recommended. It allows one to re-run the pipeline with a few tweaks, and the code will only act on files missing from the output structure. 
+loop. This is not mandatory, but highly recommended. It allows one to re-run the pipeline with a few tweaks, and the code will only act on files missing from the output structure.
 
-Finally, variables can be defined within the module to allow the user to set them before running the module via the command line. Each command-line argument should correspond to a variable at the top of the module, which is then referenced in the appropriate locations throughout the script. Since the variables are defined before each module, the name-space between modules does not need to be maintained. However, for consistency, it is best to select variable names that are specific and unlikely to have shared meanings in other areas of the pipeline. 
+Finally, variables can be defined within the module to allow the user to set them before running the module via the command line. Each command-line argument should correspond to a variable at the top of the module, which is then referenced in the appropriate locations throughout the script. Since the variables are defined before each module, the name-space between modules does not need to be maintained. However, for consistency, it is best to select variable names that are specific and unlikely to have shared meanings in other areas of the pipeline.
 
 **python wrapper**
 
@@ -299,7 +311,7 @@ This set of questions should be wrapped in a try-except loop, checking for `Valu
 
 The following is a code block demonstrating this structure (from the function `epitome/commands/surfsmooth.py`):
 
-    def surfsmooth(input_name):    
+    def surfsmooth(input_name):
         output = 'smooth'
 
         print('\nSmoothing functional data on a cortical surface.')

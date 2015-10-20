@@ -12,7 +12,8 @@ echo '*** MODULE: linreg_calc_slab_afni. Calcs EPI <-> WHEPI <-> T1 <-> MNI. **'
 
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then
-    3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    cp ${DIR_PIPE}/assets/MNI152_T1_1mm_brain.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    cp ${DIR_PIPE}/assets/MNI152_T1_1mm_brain_mask_dil.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI_mask.nii.gz
 fi
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -51,7 +52,7 @@ for SESS in ${DIR_SESS}; do
         bet \
             ${DIR_WHEPI}/${SESS}/anat_WHEPI_tmp_vol.nii.gz \
             ${DIR_WHEPI}/${SESS}/anat_WHEPI_tmp.nii.gz \
-            -R -n -m -f 0.3 
+            -R -n -m -f 0.3
         fslmaths \
             ${DIR_WHEPI}/${SESS}/anat_WHEPI_tmp_mask.nii.gz \
             -dilD \
@@ -81,11 +82,11 @@ for SESS in ${DIR_SESS}; do
 
         mv ${DIR}/${SESS}/anat_EPI_brainEPI_to_WHEPI_mat.aff12.1D ${DIR}/${SESS}/mat_EPI_to_WHEPI.aff12.1D
         mv ${DIR}/${SESS}/anat_WHEPI_brainEPI_to_WHEPI_mat.aff12.1D ${DIR}/${SESS}/mat_WHEPI_to_EPI.aff12.1D
-        3dcopy ${DIR}/${SESS}/anat_EPI_brainEPI_to_WHEPI+orig ${DIR}/${SESS}/reg_EPI_to_WHEPI.nii.gz  
+        3dcopy ${DIR}/${SESS}/anat_EPI_brainEPI_to_WHEPI+orig ${DIR}/${SESS}/reg_EPI_to_WHEPI.nii.gz
     fi
 
     if [ ! -f mat_WHEPI_to_T1.aff12.1D ]; then
-        
+
         # Copy EPI and MNI brain into ${DIR}/${SESS} as AFNI BRIKs
         if [ ! -f anat_WHEPI_brain+orig* ]; then 3dcopy ${DIR}/${SESS}/anat_WHEPI_brain.nii.gz anat_WHEPI_brain; fi
         if [ ! -f template* ]; then 3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template; fi
@@ -131,7 +132,7 @@ for SESS in ${DIR_SESS}; do
             ${DIR}/${SESS}/mat_T1_to_WHEPI.aff12.1D \
             ${DIR}/${SESS}/mat_WHEPI_to_TAL.aff12.1D > \
             ${DIR}/${SESS}/mat_T1_to_TAL.aff12.1D
-        
+
         if [ ! -f ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz ]; then 3dcopy anat_T1_brain+tlrc ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz; fi
         if [ ! -f ${DIR}/${SESS}/reg_WHEPI_to_T1.nii.gz ]; then 3dcopy anat_WHEPI_brainWHEPI_to_T1+orig ${DIR}/${SESS}/reg_WHEPI_to_T1.nii.gz; fi
 
@@ -148,7 +149,7 @@ for SESS in ${DIR_SESS}; do
 
     # Create mat_T1_to_WHEPI and mat_EPI_to_T1
     if [ ! -f ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D ]; then
-        # If we have a T1 for each session, we register to the session T1. 
+        # If we have a T1 for each session, we register to the session T1.
         # Otherwise, we go to the first session.
         if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
             3dAllineate \
