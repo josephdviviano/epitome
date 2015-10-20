@@ -89,7 +89,7 @@ for SESS in ${DIR_SESS}; do
 
         # Copy EPI and MNI brain into ${DIR}/${SESS} as AFNI BRIKs
         if [ ! -f anat_WHEPI_brain+orig* ]; then 3dcopy ${DIR}/${SESS}/anat_WHEPI_brain.nii.gz anat_WHEPI_brain; fi
-        if [ ! -f template* ]; then 3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template; fi
+        if [ ! -f template* ]; then 3dcopy ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz template; fi
         if [ ! -f anat_T1_brain+orig* ]; then
             # copy the session T1 registration if exists, else, use the first session.
             if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then

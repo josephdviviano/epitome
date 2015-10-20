@@ -33,7 +33,7 @@ for SESS in ${DIR_SESS}; do
 
         # Copy of EPI and MNI brain for @auto_tlrc.
         if [ ! -f anat_EPI_brain+orig* ]; then 3dcopy ${EPI_BRAIN} anat_EPI_brain; fi
-        if [ ! -f template* ]; then 3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template; fi
+        if [ ! -f template* ]; then 3dcopy ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz template; fi
         if [ ! -f anat_T1_brain+orig* ]; then
             # register to the session T1 if exists, else, use the first session.
             if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then

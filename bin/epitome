@@ -401,7 +401,6 @@ def run_cleanup():
            '## Setup\n'
            'export dir_pipe={dir_pipe}\n'
            'export DIR_DATA={DIR_DATA}\n'
-           'export DIR_AFNI={DIR_AFNI}\n'
            'export DIR_EXPT={expt}\n'
            'export DATA_TYPE={mode}\n'
            'export AFNI_DECONFLICT=OVERWRITE\n'.format(
@@ -410,8 +409,7 @@ def run_cleanup():
                 user=user,
                 datetime=datetime,
                 dir_pipe=dir_pipe,
-                DIR_DATA=DIR_DATA,
-                DIR_AFNI=DIR_AFNI))
+                DIR_DATA=DIR_DATA))
     f.write(txt)
 
     # get the subjects
@@ -572,7 +570,6 @@ def main():
            '## Setup\n'
            'export DIR_PIPE={dir_pipe}\n'
            'export DIR_DATA={DIR_DATA}\n'
-           'export DIR_AFNI={DIR_AFNI}\n'
            'export DIR_EXPT={expt}\n'
            'export DATA_TYPE={mode}\n'
            'export ID={ID}\n\n'
@@ -592,7 +589,6 @@ def main():
            'set -e\n\n'
            'export DIR_PIPE=${{DIR_PIPE}}\n'
            'export DIR_DATA=${{DIR_DATA}}\n'
-           'export DIR_AFNI=${{DIR_AFNI}}\n'
            'export DIR_EXPT=${{DIR_EXPT}}\n'
            'export DATA_TYPE=${{DATA_TYPE}}\n'
            'export ID=${{ID}}\n'
@@ -608,7 +604,6 @@ def main():
                 datetime=datetime,
                 dir_pipe=dir_pipe,
                 DIR_DATA=DIR_DATA,
-                DIR_AFNI=DIR_AFNI,
                 DIR_MATLAB=DIR_MATLAB))
     f.write(txt)
 
