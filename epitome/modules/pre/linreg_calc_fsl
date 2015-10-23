@@ -12,7 +12,8 @@ echo '*** MODULE: linreg_calc_fsl. Calculates EPI <--> T1 <--> MNI152. ********'
 
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then
-    3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    cp ${DIR_PIPE}/assets/MNI152_T1_1mm_brain.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    cp ${DIR_PIPE}/assets/MNI152_T1_1mm_brain_mask_dil.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI_mask.nii.gz
 fi
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -20,7 +21,7 @@ for SESS in `basename ${DIR_SESS}`; do
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
 
-    # If we have a T1 for each session, we register to the session T1. 
+    # If we have a T1 for each session, we register to the session T1.
     # Otherwise, we go to the first session.
     if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
          `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
@@ -94,7 +95,7 @@ for SESS in `basename ${DIR_SESS}`; do
         convert_xfm \
             -omat ${DIR}/${SESS}/mat_EPI_to_TAL.mat \
             -concat ${DIR}/${SESS}/mat_T1_to_TAL.mat \
-                    ${DIR}/${SESS}/mat_EPI_to_T1.mat 
+                    ${DIR}/${SESS}/mat_EPI_to_T1.mat
 
         convert_xfm \
             -omat ${DIR}/${SESS}/mat_TAL_to_EPI.mat \

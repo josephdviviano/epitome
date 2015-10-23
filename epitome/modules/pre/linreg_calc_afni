@@ -12,7 +12,8 @@ echo '*** MODULE: linreg_calc_afni. Calculates EPI <--> T1 <--> MNI152. *******'
 
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then
-    3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    cp ${DIR_PIPE}/assets/MNI152_T1_1mm_brain.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    cp ${DIR_PIPE}/assets/MNI152_T1_1mm_brain_mask_dil.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI_mask.nii.gz
 fi
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -29,10 +30,10 @@ for SESS in ${DIR_SESS}; do
     fi
 
     if [ ! -f ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz ]; then
-        
+
         # Copy of EPI and MNI brain for @auto_tlrc.
         if [ ! -f anat_EPI_brain+orig* ]; then 3dcopy ${EPI_BRAIN} anat_EPI_brain; fi
-        if [ ! -f template* ]; then 3dcopy ${DIR_AFNI}/MNI_avg152T1+tlrc template; fi
+        if [ ! -f template* ]; then 3dcopy ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz template; fi
         if [ ! -f anat_T1_brain+orig* ]; then
             # register to the session T1 if exists, else, use the first session.
             if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
@@ -75,11 +76,11 @@ for SESS in ${DIR_SESS}; do
             ${DIR}/${SESS}/mat_T1_to_EPI.aff12.1D \
             ${DIR}/${SESS}/mat_EPI_to_TAL.aff12.1D > \
             ${DIR}/${SESS}/mat_T1_to_TAL.aff12.1D
-        
+
         if [ ! -f ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz ]; then
             3dcopy anat_T1_brain+tlrc ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
         fi
-        
+
         if [ ! -f ${DIR}/SESS01/reg_EPI_to_T1.nii.gz ]; then
             # copy the session T1 registration if exists, else, use the first session.
             if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
@@ -109,7 +110,7 @@ for SESS in ${DIR_SESS}; do
                 -master ${EPI_BRAIN} \
                 -float -quiet \
                 -final quintic
-        fi                
+        fi
     fi
 done
 
