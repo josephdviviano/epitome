@@ -275,11 +275,11 @@ def check_mode(expt, subj, mode):
 
             if n_files == 0:
                 print('subject {}, {}, sess {}, run {} contains no NIFTI file.'.format(
-                    str(subj), str(mode), str(sess), run=str(run)))
+                    str(subj), str(mode), str(sess), str(run)))
 
             if n_files > 1:
                 print('subject {}, {}, sess {}, run {} contains {} NIFTI files.'.format(
-                    str(subj), str(mode), sess=str(sess), run=str(run), str(n_files)))
+                    str(subj), str(mode), str(sess), str(run), str(n_files)))
     return n_runs
 
 def check_directories(expt):
