@@ -15,7 +15,7 @@ for SESS in `basename ${DIR_SESS}`; do
 
         # fnirt --iout=highres2standard_head --in=highres_head --aff=highres2standard.mat --cout=highres2standard_warp --iout=highres2standard --jout=highres2highres_jac --con+
         fnirt \
-            --ref=${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz \
+            --ref=${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz \
             --refmask=${DIR_DATA}/${DIR_EXPT}/anat_MNI_brain.nii.gz \
             --in=${DIR}/${SESS}/reg_T1_to_TAL.nii.gz \
             --config=T1_2_MNI152_1mm \
