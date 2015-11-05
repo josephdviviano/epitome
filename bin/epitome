@@ -538,6 +538,7 @@ def main():
         os.system('cp -r {}/bin {}'.format(dir_pipe, localpath))
         os.system('cp -r {}/doc {}'.format(dir_pipe, localpath))
         os.system('cp -r {}/epitome {}'.format(dir_pipe, localpath))
+        os.system('cp -r {}/assets {}'.format(dir_pipe, localpath))
 
     else:
         localpath = '/home/{}/epitome/{}'.format(user, ID)
