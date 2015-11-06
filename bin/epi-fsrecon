@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Takes a epitome proclist, determines which T1s need to be 
+Takes a epitome proclist, determines which T1s need to be
 analyzed, and adds their recon-all commands to the proclist.
 
 Usage:
@@ -26,7 +26,7 @@ def add_t1s(path, sess, cmd):
     for run in os.listdir(os.path.join(path, sess)):
         if os.path.isdir(os.path.join(path, sess, run)) == True:
             for f in os.listdir(os.path.join(path, sess, run)):
-                
+
                 # add all available files to the inputs
                 if f.endswith(".nii") == True or f.endswith(".nii.gz") == True:
                     cmd = cmd + ' -i ' + os.path.join(path, sess, run, f)
@@ -53,20 +53,20 @@ def generate_stack(root, expt):
             if os.path.isdir(os.path.join(path, sess)) == True:
 
                 fs_dir = os.environ['SUBJECTS_DIR']
-                fs_subj = '{expt}_{subj}_{sess}'.format(expt=expt, 
-                                                        subj=subj, 
+                fs_subj = '{expt}_{subj}_{sess}'.format(expt=expt,
+                                                        subj=subj,
                                                         sess=sess)
-    
+
                 if os.path.isdir(os.path.join(fs_dir, fs_subj)) == True:
                     continue
 
                 # construct the command with all available T1s per session
-                cmd = 'recon-all -all -notal-check -cw256 -subjid ' + fs_subj
-                cmd = add_t1s(path, sess, cmd)                
+                cmd = 'recon-all -all -subjid ' + fs_subj
+                cmd = add_t1s(path, sess, cmd)
                 cmd = cmd + ' -qcache' # for cortical thickness analysis
-                
+
                 stack.append(cmd)
-    
+
     return stack
 
 def main():
