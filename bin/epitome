@@ -230,7 +230,7 @@ def check_environment(mode='verbose'):
                '    freesurfer      -- {dir_freesurfer}\n'
                '    freesurfer data -- {dir_freesurfer_data}\n'
                '    afni            -- {DIR_AFNI}\n'
-               '    fsl             -- {dir_fsl}\n'
+               '    fsl             -- {dir_fsl}\n'r
                '    fsl fix         -- {dir_fix}\n'
                '    matlab          -- {DIR_MATLAB}\n'
                '    hcp data        -- {hcp_data}\n'
