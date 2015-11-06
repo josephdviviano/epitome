@@ -4,12 +4,11 @@ Takes a epitome proclist, determines which T1s need to be
 analyzed, and adds their recon-all commands to the proclist.
 
 Usage:
-    epi-fsrecon <root> <expt> <mode> <proclist>
+    epi-fsrecon <root> <expt> <proclist>
 
 Arguements:
     <root>          EPITOME_DATA directory
     <expt>          epitome experiment to analyze.
-    <mode>          image modality to analyze.
     <proclist>      proclist to modify.
 """
 
@@ -73,7 +72,6 @@ def main():
     arguments = docopt(__doc__)
     root = arguments['<root>']
     expt = arguments['<expt>']
-    mode = arguments['<mode>']
     proc = arguments['<proclist>']
 
     stack = generate_stack(root, expt)
