@@ -1,0 +1,52 @@
+#!/bin/bash
+
+cat <<"EOF"
+echo '*** MODULE: t12mni_fsl_export. Copies T1 <--> MNI152 from HCP_DATA. ********'
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in `basename ${DIR_SESS}`; do
+
+    DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
+    DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
+
+    # If we have a T1 for each session, we register to the session T1.
+    # Otherwise, we go to the first session.
+    if [ `ls -l ${DIR} | grep ^d | wc -l` -eq \
+         `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
+        ANAT_T1=`echo ${DIR_T1}/${SESS}/anat_T1_brain.nii.gz`
+        HCPSUBDIR="${HCP_DATA}/"${DIR_EXPT}_${SUB}_{SESS}/MNINonLinear/xfms/"
+    else
+        ANAT_T1=`echo ${DIR_T1}/SESS01/anat_T1_brain.nii.gz`
+        HCPSUBDIR="${HCP_DATA}/"${DIR_EXPT}_${SUB}_SESS01/MNINonLinear/xfms"
+    fi
+
+    # calculate registration of T1 to reg_T1_to_TAL
+    if [ ! -f ${DIR}/${SESS}/mat_TAL_to_T1.mat ]; then
+      cp ${HCPSUBDIR}/acpc2MNILinear.mat ${DIR}/${SESS}/mat_T1_to_TAL.mat
+      cp ${HCPSUBDIR}/T1w_to_MNILinear.nii.gz  ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
+      # invert flirt transform
+      convert_xfm \
+          -omat ${DIR}/${SESS}/mat_TAL_to_T1.mat \
+          -inverse \
+          ${DIR}/${SESS}/mat_T1_to_TAL.mat
+    fi
+
+
+    # calculate registration of EPI to T1
+    if [ ! -f ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz ]; then
+      cp
+        # fnirt --iout=highres2standard_head --in=highres_head --aff=highres2standard.mat --cout=highres2standard_warp --iout=highres2standard --jout=highres2highres_jac --con+
+        fnirt \
+            --ref=${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz \
+            --refmask=${DIR_DATA}/${DIR_EXPT}/anat_MNI_brain.nii.gz \
+            --in=${DIR}/${SESS}/reg_T1_to_TAL.nii.gz \
+            --config=T1_2_MNI152_1mm \
+            --iout=${DIR}/${SESS}/reg_nlin_TAL.nii.gz \
+            --fout=${DIR}/${SESS}/reg_nlin_TAL_FIELD.nii.gz \
+            --cout=${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz \
+            --intout=${DIR}/${SESS}/reg_nlin_TAL_INTOUT.nii.gz \
+            --interp=spline
+    fi
+done
+
+EOF
