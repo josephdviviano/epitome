@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 """
-Takes a epitome proclist, determines which T1s need to be
-analyzed, and adds their recon-all and fs2hcp-export commands to the proclist.
+Takes a epitome proclist, determines which T1s that are in the proclist,
+and adds fs2hcp-export commands to the proclist.
 
 Usage:
-    epi-fsrecon <root> <expt> <mode> <proclist>
+    epi-fsrecon2hcp <root> <expt> <proclist>
 
 Arguements:
     <root>          EPITOME_DATA directory
     <expt>          epitome experiment to analyze.
-    <mode>          image modality to analyze.
     <proclist>      proclist to modify.
 """
 
@@ -32,7 +31,7 @@ def add_t1s(path, sess, cmd):
                     cmd = cmd + ' -i ' + os.path.join(path, sess, run, f)
 
     return cmd
-n
+
 def generate_stack(root, expt):
     """
     Returns a stack of all the freesurfer recon-all commands to run.
@@ -74,7 +73,6 @@ def main():
     arguments = docopt(__doc__)
     root = arguments['<root>']
     expt = arguments['<expt>']
-    mode = arguments['<mode>']
     proc = arguments['<proclist>']
 
 
