@@ -169,7 +169,7 @@ def check_environment(mode='verbose'):
     dir_fsl = epi.config.find_fsl()
     dir_pipe = epi.config.find_epitome()
     dir_hcp_data = epi.config.find_hcp_data()
-    dir_hcptools = epi.config.find_hcp_tools()
+    dir_hcp_tools = epi.config.find_hcp_tools()
     dir_workbench = epi.config.find_workbench()
 
     # checks for manditory software
@@ -230,7 +230,7 @@ def check_environment(mode='verbose'):
                '    freesurfer      -- {dir_freesurfer}\n'
                '    freesurfer data -- {dir_freesurfer_data}\n'
                '    afni            -- {DIR_AFNI}\n'
-               '    fsl             -- {dir_fsl}\n'r
+               '    fsl             -- {dir_fsl}\n'
                '    fsl fix         -- {dir_fix}\n'
                '    matlab          -- {DIR_MATLAB}\n'
                '    hcp data        -- {hcp_data}\n'
@@ -246,7 +246,7 @@ def check_environment(mode='verbose'):
                     DIR_MATLAB=DIR_MATLAB,
                     hcp_data=dir_hcp_data,
                     hcp_tools=dir_hcp_tools,
-                    wb_command=workbence)
+                    wb_command=workbence))
         print(txt)
 
 def check_run(expt, subj, mode, sess, run):
@@ -518,7 +518,7 @@ def main():
 
     ### Figure out if this is set up for hcp tools
     dir_hcp_data = epi.config.find_hcp_data()
-    dir_hcptools = epi.config.find_hcp_tools()
+    dir_hcp_tools = epi.config.find_hcp_tools()
     dir_workbench = epi.config.find_workbench()
 
     if not all([dir_hcp_data, dir_hcp_tools, dir_workbench]) :
@@ -621,21 +621,21 @@ def main():
     f.write(txt)
     if HCPMODE :
         txt = ('## Freesurfer\n'
-            'epi-fsrecon ${{DIR_DATA}} ${{DIR_EXPT}} ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'
+            'epi-fsrecon ${DIR_DATA} ${DIR_EXPT} ${DIR_DATA}/${DIR_EXPT}/${PROC}\n'
             '## Freesurfer to HCP conversion\n'
-            'epi-fsrecon2hcp ${{DIR_DATA}} ${{DIR_EXPT}} ${{DATA_TYPE}} ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'
+            'epi-fsrecon2hcp ${DIR_DATA} ${DIR_EXPT} ${DIR_DATA}/${DIR_EXPT}/${PROC}\n'
             '. ${{DIR_PIPE}}/epitome/modules/hcp/hcpexport '
-            '${{DIR_DATA}} ${{DIR_EXPT}} >> ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n\n')
+            '${DIR_DATA} ${DIR_EXPT} >> ${DIR_DATA}/${DIR_EXPT}/${PROC}\n\n')
         f.write(txt)
     else :
         ## if hcp pipe enviroment has been defined, then run hcp-export
         txt = ('## Freesurfer\n'
-            'epi-fsrecon ${{DIR_DATA}} ${{DIR_EXPT}} ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'
+            'epi-fsrecon ${DIR_DATA} ${DIR_EXPT} ${DIR_DATA}/${DIR_EXPT}/${PROC}\n'
             '. ${{DIR_PIPE}}/epitome/modules/freesurfer/fsexport '
-            '${{DIR_DATA}} ${{DIR_EXPT}} >> ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n\n')
+            '${DIR_DATA} ${DIR_EXPT} >> ${DIR_DATA}/${DIR_EXPT}/${PROC}\n\n')
         f.write(txt)
 
-           '## Begin Pipeline\n'
+    txt = ('## Begin Pipeline\n'
            'for SUB in ${{SUBJECTS}}; do\n\n'
            'cat > ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/${{CMD}} << EOF\n'
            '#!/bin/bash\n'

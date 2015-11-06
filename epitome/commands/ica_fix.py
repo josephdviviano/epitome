@@ -36,5 +36,5 @@ def run(input_name):
                                       str(train_data) + ' ' +
                                       str(threshold) + ' ' +
                                       str(motionregress) + ' ' +
-                                      str(fixcleanup) + ' ' +)
+                                      str(fixcleanup))
     return line, output
