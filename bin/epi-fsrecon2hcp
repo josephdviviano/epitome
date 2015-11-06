@@ -62,8 +62,8 @@ def generate_stack(root, expt):
 
                 # construct the command with all available T1s per session
                 cmd = 'fs2hcp --FSpath=' + fs_dir + \
-                    '--HCPpath=' + hcp_dir +\
-                    '--subject=' + fs_subj
+                    ' --HCPpath=' + hcp_dir +\
+                    ' --subject=' + fs_subj
 
                 stack.append(cmd)
 

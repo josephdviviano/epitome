@@ -624,14 +624,14 @@ def main():
             'epi-fsrecon ${DIR_DATA} ${DIR_EXPT} ${DIR_DATA}/${DIR_EXPT}/${PROC}\n'
             '## Freesurfer to HCP conversion\n'
             'epi-fsrecon2hcp ${DIR_DATA} ${DIR_EXPT} ${DIR_DATA}/${DIR_EXPT}/${PROC}\n'
-            '. ${{DIR_PIPE}}/epitome/modules/hcp/hcpexport '
+            '. ${DIR_PIPE}/epitome/modules/hcp/hcpexport '
             '${DIR_DATA} ${DIR_EXPT} >> ${DIR_DATA}/${DIR_EXPT}/${PROC}\n\n')
         f.write(txt)
     else :
         ## if hcp pipe enviroment has been defined, then run hcp-export
         txt = ('## Freesurfer\n'
             'epi-fsrecon ${DIR_DATA} ${DIR_EXPT} ${DIR_DATA}/${DIR_EXPT}/${PROC}\n'
-            '. ${{DIR_PIPE}}/epitome/modules/freesurfer/fsexport '
+            '. ${DIR_PIPE}/epitome/modules/freesurfer/fsexport '
             '${DIR_DATA} ${DIR_EXPT} >> ${DIR_DATA}/${DIR_EXPT}/${PROC}\n\n')
         f.write(txt)
 
