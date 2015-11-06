@@ -22,8 +22,8 @@ for SESS in `basename ${DIR_SESS}`; do
 
     # calculate registration of T1 to reg_T1_to_TAL
     if [ ! -f ${DIR}/${SESS}/mat_TAL_to_T1.mat ]; then
-      cp ${HCPSUBDIR}/acpc2MNILinear.mat ${DIR}/${SESS}/mat_T1_to_TAL.mat
-      cp ${HCPSUBDIR}/T1w_to_MNILinear.nii.gz  ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
+      cp ${HCPSUBDIR}/xfms/acpc2MNILinear.mat ${DIR}/${SESS}/mat_T1_to_TAL.mat
+      cp ${HCPSUBDIR}/xfms/T1w_to_MNILinear.nii.gz  ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
       # invert flirt transform
       convert_xfm \
           -omat ${DIR}/${SESS}/mat_TAL_to_T1.mat \
@@ -31,21 +31,10 @@ for SESS in `basename ${DIR_SESS}`; do
           ${DIR}/${SESS}/mat_T1_to_TAL.mat
     fi
 
-
     # calculate registration of EPI to T1
     if [ ! -f ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz ]; then
-      cp
-        # fnirt --iout=highres2standard_head --in=highres_head --aff=highres2standard.mat --cout=highres2standard_warp --iout=highres2standard --jout=highres2highres_jac --con+
-        fnirt \
-            --ref=${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz \
-            --refmask=${DIR_DATA}/${DIR_EXPT}/anat_MNI_brain.nii.gz \
-            --in=${DIR}/${SESS}/reg_T1_to_TAL.nii.gz \
-            --config=T1_2_MNI152_1mm \
-            --iout=${DIR}/${SESS}/reg_nlin_TAL.nii.gz \
-            --fout=${DIR}/${SESS}/reg_nlin_TAL_FIELD.nii.gz \
-            --cout=${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz \
-            --intout=${DIR}/${SESS}/reg_nlin_TAL_INTOUT.nii.gz \
-            --interp=spline
+      cp ${HCPSUBDIR}/T1w.nii.gz ${DIR}/${SESS}/reg_nlin_TAL.nii.gz
+      cp ${HCPSUBDIR}/xfms/acpc2standard_warp_noaffine.nii.gz ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz
     fi
 done
 
