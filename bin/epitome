@@ -168,6 +168,9 @@ def check_environment(mode='verbose'):
     dir_fix = epi.config.find_fix()
     dir_fsl = epi.config.find_fsl()
     dir_pipe = epi.config.find_epitome()
+    dir_hcp_data = epi.config.find_hcp_data()
+    dir_hcptools = epi.config.find_hcp_tools()
+    dir_workbench = epi.config.find_workbench()
 
     # checks for manditory software
     if DIR_DATA == None:
@@ -208,6 +211,15 @@ def check_environment(mode='verbose'):
                'http://afni.nimh.nih.gov/sscc/dglen/McRetroTS\n')
         print(txt)
 
+    if dir_hcp_data == None:
+        print('WARNING: HCP_DATA is not set. HCP modules will not work.')
+
+    if dir_hcp_tools == None:
+        print('WARNING: HCPPIPEDIR is not set.  HCP modules will not work.')
+
+    if dir_workbench == None:
+        print('WARNING: wb_command is unavailable. HCP modules will not work.')
+
     if dir_fix == None:
         print('WARNING: FSL FIX is unavailable. Some modules will not work.')
 
@@ -220,7 +232,10 @@ def check_environment(mode='verbose'):
                '    afni            -- {DIR_AFNI}\n'
                '    fsl             -- {dir_fsl}\n'
                '    fsl fix         -- {dir_fix}\n'
-               '    matlab          -- {DIR_MATLAB}\n'.format(
+               '    matlab          -- {DIR_MATLAB}\n'
+               '    hcp data        -- {hcp_data}\n'
+               '    hcp tools       -- {hcp_tools}\n'
+               '    wb_command      -- {wb_command}\n'.format(
                     DIR_DATA=DIR_DATA,
                     dir_pipe=dir_pipe,
                     dir_freesurfer=dir_freesurfer,
@@ -228,7 +243,10 @@ def check_environment(mode='verbose'):
                     DIR_AFNI=DIR_AFNI,
                     dir_fsl=dir_fsl,
                     dir_fix=dir_fix,
-                    DIR_MATLAB=DIR_MATLAB))
+                    DIR_MATLAB=DIR_MATLAB,
+                    hcp_data=dir_hcp_data,
+                    hcp_tools=dir_hcp_tools,
+                    wb_command=workbence)
         print(txt)
 
 def check_run(expt, subj, mode, sess, run):
@@ -500,7 +518,7 @@ def main():
 
     # make sure we have permissions to access the experiment directory.
     if epi.utilities.has_permissions(DIR_DATA) == False:
-        sys.exit()
+        sys.exit("You do not have permission to write in {}".format(DIR_DATA))
 
     # get the experiment
     flag = 0
@@ -579,9 +597,28 @@ def main():
            'export SUBJECTS=$(python ${{DIR_PIPE}}/epitome/utilities.py '
            '${{DIR_DATA}} ${{DIR_EXPT}})\n\n'
            '## Freesurfer\n'
-           'epi-fsrecon ${{DIR_DATA}} ${{DIR_EXPT}} ${{DATA_TYPE}} ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'
-           '. ${{DIR_PIPE}}/epitome/modules/freesurfer/fsexport '
-           '${{DIR_DATA}} ${{DIR_EXPT}} >> ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n\n'
+           'epi-fsrecon ${{DIR_DATA}} ${{DIR_EXPT}} ${{DATA_TYPE}} ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'.format(
+                                    ID=ID,
+                                    cmd=cmd,
+                                    expt=expt,
+                                    mode=mode,
+                                    proc=proc,
+                                    user=user,
+                                    datetime=datetime,
+                                    dir_pipe=dir_pipe,
+                                    DIR_DATA=DIR_DATA,
+                                    DIR_MATLAB=DIR_MATLAB))
+    f.write(txt)
+    if HCPMODE :
+        txt = ('epi-fs2hcp-export ${{DIR_DATA}} ${{DIR_EXPT}} ${{DATA_TYPE}} ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'
+        )
+        f.write(txt)
+    else :
+        ## if hcp pipe enviroment has been defined, then run hcp-export
+        txt = ('. ${{DIR_PIPE}}/epitome/modules/freesurfer/fsexport '
+               '${{DIR_DATA}} ${{DIR_EXPT}} >> ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n\n')
+        f.write(txt)
+
            '## Begin Pipeline\n'
            'for SUB in ${{SUBJECTS}}; do\n\n'
            'cat > ${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/${{CMD}} << EOF\n'
@@ -731,4 +768,3 @@ if __name__ == "__main__":
     # return the usage if the user does a silly thing
     else:
         print(__doc__)
-
