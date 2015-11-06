@@ -20,7 +20,7 @@ for SESS in `basename ${DIR_SESS}`; do
         HCPSUBDIR="${HCP_DATA}/"${DIR_EXPT}_${SUB}_SESS01/MNINonLinear/xfms"
     fi
 
-    # calculate registration of T1 to reg_T1_to_TAL
+    # copy registration of T1 to reg_T1_to_TAL
     if [ ! -f ${DIR}/${SESS}/mat_TAL_to_T1.mat ]; then
       cp ${HCPSUBDIR}/xfms/acpc2MNILinear.mat ${DIR}/${SESS}/mat_T1_to_TAL.mat
       cp ${HCPSUBDIR}/xfms/T1w_to_MNILinear.nii.gz  ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
@@ -31,7 +31,7 @@ for SESS in `basename ${DIR_SESS}`; do
           ${DIR}/${SESS}/mat_T1_to_TAL.mat
     fi
 
-    # calculate registration of EPI to T1
+    # copy non-linear registration  T1 to MNI
     if [ ! -f ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz ]; then
       cp ${HCPSUBDIR}/T1w.nii.gz ${DIR}/${SESS}/reg_nlin_TAL.nii.gz
       cp ${HCPSUBDIR}/xfms/acpc2standard_warp_noaffine.nii.gz ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz
