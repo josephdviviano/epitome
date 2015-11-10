@@ -216,7 +216,7 @@ done
 fslmaths "$T1wFolder"/wmparc.nii.gz -bin -dilD -dilD -dilD -ero -ero "$T1wFolder"/"$T1wImageBrainMask".nii.gz
 ${CARET7DIR}/wb_command -volume-fill-holes "$T1wFolder"/"$T1wImageBrainMask".nii.gz "$T1wFolder"/"$T1wImageBrainMask".nii.gz
 fslmaths "$T1wFolder"/"$T1wImageBrainMask".nii.gz -bin "$T1wFolder"/"$T1wImageBrainMask".nii.gz
-applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$T1wImageBrainMask".nii.gz
+#applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$T1wImageBrainMask".nii.gz
 applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w "$AtlasTransform"_warp -o "$AtlasSpaceFolder"/"$T1wImageBrainMask".nii.gz
 
 
