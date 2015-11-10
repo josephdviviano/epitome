@@ -35,6 +35,7 @@ Quickstart:
 + Add epitome/bin to your PATH.
 + Add epitome to your PYTHONPATH.
 + Set `EPITOME_DATA` to point to your MRI data folder.
++ Set `EPITOME_CLONE` to point to a directoy that will contain copies of epitome.
 + Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
 + Check your work using `epitome check`.
 + Create an experiment and some subjects using `epi-folder`.
@@ -142,7 +143,9 @@ epitome contains a set of helper subroutines and two main functions: `run' and `
 
 This walks you through the construction of a pipeline for a single image modality within a single experiment. Every run of epitome begins with a run of Freesurfer on all T1s, and `init_epi`, which does the most basic kinds of MRI pre-processing. Following that, you are free to chain together modules as you see fit.
 
-Each pipeline is generated from a local copy of the epitome repo in `~/epitome`. This is to prevent software updates from interfering with any ongoing project. This also means you can make local hacks to a copy of the pipeline and not disturb your other projects, or other users. Ideally, some of these hacks will end up being integrated back into the main branch of epitome. Before each run of the pipeline, you will be required to pick between an old branch of the pipeline (so try to name them reasonably), or `***NEW***`, which will work from a copy of the master epitome repo.
+Each pipeline is generated from a local copy of the epitome repo in the `EPITOME_CLONE` directory (if undefined, this will be `~/epitome`). This is to prevent software updates from interfering with any ongoing project. This also means you can make local hacks to a copy of the pipeline and not disturb your other projects, or other users. Ideally, some of these hacks will end up being integrated back into the main branch of epitome. Before each run of the pipeline, you will be required to pick between an old branch of the pipeline (so try to name them reasonably), or `***NEW***`, which will work from a copy of the master epitome repo.
+
+IMPORTANT for cluster users: the `EPITOME_CLONE` folder should be available to every node of the queue that will be used to process your data, otherwise certian calls made by the `cmd` scripts will fail.
 
 In order to retain the modular and easily-customized structure of epitome, this program allows you to shoot yourself in the foot. In fact, if you aren't clear on what to do, you are more likely to make a malformed pipeline than you are to making a good one. Therefore, I recommend reading the Pipeline section of this manual at least once, and perhaps skimming the Presets section following, to get a sense of reasonable usage.
 
