@@ -4,6 +4,7 @@ These functions search the environment for software depenencies and configuratio
 """
 
 import os
+from epitome.utilities import get_date_user
 import subprocess
 import multiprocessing as mp
 
@@ -19,6 +20,17 @@ def find_afni():
         dir_afni = None
 
     return dir_afni
+
+def find_clone():
+    """
+    Returns path of the epitome clone directory, which defaults to ~/epitome.
+    """
+    dir_clone = os.getenv('EPITOME_CLONE')
+    if dir_clone == None:
+        datetime, user, f_id = get_date_user()
+        dir_clone = '/home/{}/epitome'.format(user)
+
+    return dir_clone
 
 def find_epitome():
     """

@@ -154,6 +154,20 @@ def check_os():
               """)
         sys.exit()
 
+def get_date_user():
+    """
+    Returns a eyeball-friendly timestamp, the current user's name,
+    and a filename-friendly timestamp.
+    """
+    import time
+    import getpass
+
+    datetime = time.strftime("%Y/%m/%d -- %H:%M:%S")
+    user = getpass.getuser()
+    f_id = time.strftime("%y%m%d_%H%M%S")
+
+    return datetime, user, f_id
+
 def mangle_string(string):
     """
     Turns an arbitrary string into a decent foldername/filename 
