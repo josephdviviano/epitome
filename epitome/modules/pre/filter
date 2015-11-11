@@ -114,7 +114,7 @@ for SESS in ${DIR_SESS}; do
                    equals(a,28)*b + \
                    equals(a,60)*b" \
             -prefix ${SESS}/anat_bstem.nii.gz
-          
+
     fi
 
     # eroded draining vessel mask
@@ -128,7 +128,7 @@ for SESS in ${DIR_SESS}; do
             -f ${SESS}/anat_bstem.nii.gz \
             -expr '(a-b-c-d-e-f)' \
             -prefix ${SESS}/anat_dv.nii.gz
-        
+
         3dcalc \
             -a ${SESS}/anat_dv.nii.gz \
             -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
@@ -141,8 +141,8 @@ for SESS in ${DIR_SESS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
         # detrend functional data and motion paramaters, calculate tSNR
-        if [ ! -f ${SESS}/func_detrend.${ID}.${NUM}.nii.gz ]; then
-            
+        if [ ! -f ${SESS}/func_det.${ID}.${NUM}.nii.gz ]; then
+
             # compute mean, standard deviation
             3dTstat \
                 -prefix ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
@@ -151,7 +151,7 @@ for SESS in ${DIR_SESS}; do
             3dTstat \
                 -prefix ${SESS}/func_stdev.${ID}.${NUM}.nii.gz \
                 -stdev ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
-            
+
             # compute temporal SNR (pre anything)
             3dcalc \
                 -a ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
@@ -161,11 +161,11 @@ for SESS in ${DIR_SESS}; do
 
             # input data detrend (before calculating regressors...)
             3dDetrend \
-                -prefix ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_det.${ID}.${NUM}.nii.gz \
                 -polort ${POLORT} \
                 ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
-            # motion paramaters, detrend, lag, dif, sq 
+            # motion paramaters, detrend, lag, dif, sq
             3dDetrend \
                 -prefix - \
                 -DAFNI_1D_TRANOUT=YES \
@@ -265,30 +265,30 @@ for SESS in ${DIR_SESS}; do
 
             # DVARS (Power et. al Neuroimage 2012)
             3dcalc \
-                -a ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                -a ${SESS}/func_det.${ID}.${NUM}.nii.gz \
                 -b 'a[0,0,0,-1]' \
                 -expr '(a - b)^2' \
                 -prefix ${SESS}/func_tmp_backdif.${ID}.${NUM}.nii.gz
-           
+
             3dmaskave \
                 -mask ${SESS}/anat_EPI_mask.nii.gz \
                 -quiet ${SESS}/func_tmp_backdif.${ID}.${NUM}.nii.gz \
                 > ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D
-            
+
             1deval \
                 -a ${SESS}/PARAMS/tmp_backdif.${ID}.${NUM}.1D \
                 -expr 'sqrt(a)' > ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D
-        fi 
+        fi
 
         # initialize filter command
         if [ ! -f ${SESS}/func_filtered.${ID}.${NUM}.nii.gz ]; then
-            
+
             CMD=`echo 3dTfitter \
                           -prefix ${SESS}/func_noise_betas.${ID}.${NUM}.nii.gz \
                           -fitts ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
                           -polort 0 \
                           -quiet \
-                          -RHS ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                          -RHS ${SESS}/func_det.${ID}.${NUM}.nii.gz \
                           -LHS `
 
             # add the physio regressors if they exist
@@ -378,7 +378,7 @@ for SESS in ${DIR_SESS}; do
                 fi
 
                 if [ `echo ${DIFF}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D` 
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D`
                     CMD=`echo ${CMD} ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D`
                     CMD=`echo ${CMD} ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D`
                 fi
@@ -387,7 +387,7 @@ for SESS in ${DIR_SESS}; do
                 # above. It isn't clear to me if there is a meaningful difference in the
                 # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` == 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D` 
+                    CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D`
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D`
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D`
 
@@ -409,7 +409,7 @@ for SESS in ${DIR_SESS}; do
                 # global mean, lag, dif, sq
                 3dmaskave \
                     -mask ${SESS}/anat_EPI_mask.nii.gz \
-                    -quiet ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                    -quiet ${SESS}/func_det.${ID}.${NUM}.nii.gz \
                     > ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D
                 1dcat \
                     ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0}' > \
@@ -431,11 +431,11 @@ for SESS in ${DIR_SESS}; do
                     -infile ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D \
                     -backward_diff \
                     -write ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D
-   
+
                 CMD=`echo ${CMD} ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D`
                 if [ `echo ${SQ}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D`
-                   
+
                     if [ `echo ${DIFF}` = 'on' ]; then
                         CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D`
                     fi
@@ -450,7 +450,7 @@ for SESS in ${DIR_SESS}; do
                 # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D`
-                    
+
                     if [ `echo ${SQ}` = 'on' ]; then
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D`
                     fi
@@ -484,11 +484,11 @@ for SESS in ${DIR_SESS}; do
                     -infile ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D \
                     -backward_diff \
                     -write ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D
-   
+
                 CMD=`echo ${CMD} ${SESS}/PARAMS/dv.${ID}.${NUM}.1D`
                 if [ `echo ${SQ}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D`
-                    
+
                     if [ `echo ${DIFF}` = 'on' ]; then
                         CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D`
                     fi
@@ -503,7 +503,7 @@ for SESS in ${DIR_SESS}; do
                 # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` = 'on' ]; then
                     CMD=`echo ${CMD} ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D`
-                    
+
                     if [ `echo ${SQ}` = 'on' ]; then
                         CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D`
                     fi
@@ -511,7 +511,7 @@ for SESS in ${DIR_SESS}; do
             fi
 
             if [ `echo ${ANATICOR}` = 'on' ]; then
-                
+
                 # local white matter (+ lag)
                 if [ ! -f ${SESS}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz ]; then
                     3dLocalstat \
@@ -536,7 +536,7 @@ for SESS in ${DIR_SESS}; do
                 # aCompcor regressors for WM and ventricles
                 if [ ! -f ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D ]; then
                     epi-genregress \
-                        ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                        ${SESS}/func_det.${ID}.${NUM}.nii.gz \
                         ${SESS}/anat_vent_ero.nii.gz \
                         ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D \
                         ${COMPCOR}
@@ -544,7 +544,7 @@ for SESS in ${DIR_SESS}; do
 
                 if [ ! -f ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D ]; then
                     epi-genregress \
-                        ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                        ${SESS}/func_det.${ID}.${NUM}.nii.gz \
                         ${SESS}/anat_wm_ero.nii.gz \
                         ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D \
                         ${COMPCOR}
@@ -562,7 +562,7 @@ for SESS in ${DIR_SESS}; do
             # subtracts nuisances from inputs, retaining the mean
             3dcalc \
                 -float \
-                -a ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                -a ${SESS}/func_det.${ID}.${NUM}.nii.gz \
                 -b ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
                 -c ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
                 -expr 'a-b+c' \
