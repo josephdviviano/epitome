@@ -3,7 +3,7 @@
 Mash good and bad ica output pics together into on html page of sanity check qc.
 
 Usage:
-  ica_labels_viewer.py [options] <input.ica> <labelname1> <labelname2>
+  ica_comparelabels_viewer.py [options] <input.ica> <labelname1> <labelname2>
 
 Arguments:
     <input.ica>        Top directory for the output file structure
@@ -53,9 +53,9 @@ def write_html_section(htmlhandle, IClist,SectionTitle):
 
 
 def get_SignalandNoise(inputlabelfile, numICs) :
-    labelpath = os.path.join(inputdir,icalabels)
+    labelpath = os.path.join(inputdir,inputlabelfile)
     if os.path.isfile(labelpath):
-        a=open('file.txt','rb')
+        a=open(labelpath,'rb')
         lines = a.readlines()
         if lines:
             first_line = lines[:1]
