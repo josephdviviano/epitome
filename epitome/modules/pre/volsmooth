@@ -36,7 +36,7 @@ for SESS in ${DIR_SESS}; do
             if [ ${MODE} == 'normal' ]; then
                 # If already run filter, use noise model from it as blurmaster
                 if [ -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
-                    echo 'MSG: func_noise found. ensure that the filter module was run in the same space as volsmooth, or this command will fail and complain about grid spacing!'
+                    echo 'MSG: func_noise found. ensure that the filter module was run in the same space as volsmooth, or this command will fail and complain about grid spacing of the BLURMASTER!'
                     3dBlurToFWHM \
                         -quiet \
                         -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
