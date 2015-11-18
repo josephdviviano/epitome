@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-Removes motion-corrupted TRs from data, with or without interpolation. If 
-called from the command line, this will batch process all runs in all sessions 
+Removes motion-corrupted TRs from data, with or without interpolation. If
+called from the command line, this will batch process all runs in all sessions
 for a given subject.
 
 Usage:
@@ -13,12 +13,12 @@ Arguments:
     <motion>        full path to AFNI motion parameters.
 
 Options:
-    --DVARS         full path to DVARS calculation [default: None]
-    --report        full path to report on TRs scrubbed per subject [default: None]
-    --head          head radius in mm [default: 50].
-    --FD            censor TRs with instantaneous motion > x mm [default: 0.3]
-    --DV            censor TRs with instantaneous GS fluctuation > x % [default: 0.3]
-    --mode          'drop': deletes TRs. 'interp': interpolates over TRs. [default: drop]
+    --DVARS=<DVARS>   full path to DVARS calculation
+    --report=<report> full path to report on TRs scrubbed per subject
+    --head=<head>     head radius in mm [default: 50].
+    --FD=<FD>         censor TRs with instantaneous motion > x mm [default: 0.3]
+    --DV=<DV>         censor TRs with instantaneous GS fluctuation > x % [default: 0.3]
+    --mode=<mode>     'drop': deletes TRs. 'interp': interpolates over TRs. [default: drop]
 
 DETAILS:
     Runs in two modes. In mode one, high-motion TRs are cropped out of the data.
@@ -33,6 +33,7 @@ import os, sys
 import csv
 import fnmatch
 
+import epitome as epi
 import numpy as np
 import scipy as sp
 import nibabel as nib
@@ -68,16 +69,16 @@ def interp(data, idx, threshold=0.5):
 
     roi = 0
     # for all elements in the censor idx
-    while roi <= len(idx) - 1: 
+    while roi <= len(idx) - 1:
         # if there is room for a sequence
-        while roi <= len(idx) - 2: 
+        while roi <= len(idx) - 2:
             # and we find a sequence
-            if idx[roi] + 1 == idx[roi + 1]: 
+            if idx[roi] + 1 == idx[roi + 1]:
                 # set the lower bound
                 roiLo = idx[roi]
 
                 # find the upper bound
-                while idx[roi] + 1 == idx[roi + 1]: 
+                while idx[roi] + 1 == idx[roi + 1]:
                     roi = roi + 1
                     #if we hit the end of the sequence
                     if idx[roi] == idx[-1]:
@@ -87,24 +88,24 @@ def interp(data, idx, threshold=0.5):
                         break
                 else:
                     # set the upper bound
-                    roiHi = idx[roi] 
+                    roiHi = idx[roi]
                     roi = roi + 1
-        
+
             else:
                 # if this isn't a sequence, upper and lower bounds are equal
-                roiLo = idx[roi] 
+                roiLo = idx[roi]
                 roiHi = idx[roi]
                 roi = roi + 1
-            
+
             for x in np.arange(data.shape[0]):
                 # create interpolate over boundaries
                 if roiHi < ntrs-1 and roiLo > 0:
                     vec = np.array([roiLo - 1, roiHi + 1]) # set the bound idx
-                    fxn = interp1d(np.arange(len(vec)), data[x, vec], 
+                    fxn = interp1d(np.arange(len(vec)), data[x, vec],
                                                       kind='linear')
-                    new = fxn(np.linspace(0, len(vec) - 1, 
+                    new = fxn(np.linspace(0, len(vec) - 1,
                                              len(vec) + 1 + (roiHi - roiLo)))
-                
+
                     # write interp values over dataa
                     new = np.delete(new, [0, len(new)-1])
                     data[x, roiLo:roiHi + 1] = new
@@ -122,9 +123,9 @@ def interp(data, idx, threshold=0.5):
                     data[x, roiLo:ntrs + 1] = new
                     print("***2***")
 
-        # now do the final value [is this still relevant?] ?? ?? ?? 
+        # now do the final value [is this still relevant?] ?? ?? ??
         if roi <= len(idx) - 1:
-            # this isn't a sequence, so these are equal 
+            # this isn't a sequence, so these are equal
             roiLo = idx[roi]
             roiHi = idx[roi]
             roi = roi + 1
@@ -132,14 +133,14 @@ def interp(data, idx, threshold=0.5):
             for x in np.arange(data.shape[0]):
                 # create interpolate over boundaries
                 if roiHi < ntrs:
-                    vec = np.array([roiLo - 1, roiHi + 1]) 
-                    fxn = interp1d(np.arange(len(vec)), data[x, vec], 
+                    vec = np.array([roiLo - 1, roiHi + 1])
+                    fxn = interp1d(np.arange(len(vec)), data[x, vec],
                                                       kind='linear')
-                    new = fxn(np.linspace(0, len(vec) - 1, 
+                    new = fxn(np.linspace(0, len(vec) - 1,
                                              len(vec) + 1 + (roiHi-roiLo)))
-            
+
                     # write interp values over data
-                    new = np.delete(new, [0, len(new) - 1]) 
+                    new = np.delete(new, [0, len(new) - 1])
                     data[x, roiLo:roiHi + 1] = new
                     print("***3***")
 
@@ -166,19 +167,22 @@ def drop(data, idx):
 
 def main():
     arguments  = docopt(__doc__)
-    func = arguments['<func>']
+    func   = arguments['<func>']
     output = arguments['<output>']
     motion = arguments['<motion>']
-    DVARS = arguments['--DVARS']
+    DVARS  = arguments['--DVARS']
     report = arguments['--report']
-    head = arguments['--head']
-    FD_t = arguments['--FD']
-    DV_t = arguments['--DV']
-    mode = arguments['--mode']
+    head   = arguments['--head']
+    FD_t   = arguments['--FD']
+    DV_t   = arguments['--DV']
+    mode   = arguments['--mode']
 
     if mode.lower() not in ['drop', 'interp']:
         print('Mode: {} invalid, using mode = drop.'.format(mode))
         mode = 'drop'
+
+    if len(head) > 1:
+        head = float(head[0])
 
     print('\n epi-trscrub: {}'.format(func) + func)
     print('           FD = {} mm,'.format(FD_t))
@@ -187,18 +191,17 @@ def main():
 
     # load data, affine, header, get image dimensions
     data, outA, outH, dims = epi.utilities.loadnii(func)
-
     FD = epi.stats.FD(motion, head)
     idx_FD = np.where(FD >= FD_t)[0]
 
     if DVARS != None:
         DV = np.genfromtxt(DVARS)
         DV = (DV) / 1000 # convert to % signal change
-        idx_DV = np.where(DV >= DV_t)[0] 
+        idx_DV = np.where(DV >= DV_t)[0]
         idx = np.union1d(idx_FD, idx_DV)
     else:
         idx = idx_FD
-    
+
     # mask TRs 1 back and 1 forward from threshold
     idx = np.union1d(np.union1d(idx-1, idx), idx+1)
 
@@ -208,7 +211,7 @@ def main():
 
     # record number of removed datapoints
     n_retained = dims[3]-len(idx)
-    
+
     # find all the kosher TRs and scrub data
     if mode == 'drop':
         data, dims[3] = drop(data, idx)
@@ -218,15 +221,15 @@ def main():
     # reshape data, header
     data = np.reshape(data, (dims[0], dims[1], dims[2], dims[3]))
 
-    # removed header as this interferes with downstream AFNI calls 
-    data = nib.nifti1.Nifti1Image(data, outA)
-    data.update_header()
-    data.header_class(extensions=())
+    # removed header as this interferes with downstream AFNI calls
+    out = nib.nifti1.Nifti1Image(data, outA)
+    out.update_header()
+    out.header_class(extensions=())
 
-    # write 4D output,
-    data.to_filename(out)
+    # write 4D output
+    out.to_filename(output)
 
-    # if we specify a report, wrtie it out yo
+    # if we specify a report, write it out
     print('TRs: {}, Run: {}'.format(str(n_retained), os.path.basename(func)))
     if report != None:
         f = open(report, 'wb')

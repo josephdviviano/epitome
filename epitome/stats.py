@@ -15,6 +15,12 @@ def FD(motion, head_radius):
     """
     # load motion parameters
     FD = np.genfromtxt(motion)
+
+    # check input head_radius
+    if type(head_radius) != int or type(head_radius) != float:
+        print('Invalid head radius, defaulting to 50 mm')
+        head_radius = 50
+
     FD[:,0] = np.radians(FD[:,0])*head_radius # roll
     FD[:,1] = np.radians(FD[:,1])*head_radius # pitch
     FD[:,2] = np.radians(FD[:,2])*head_radius # yaw
