@@ -181,10 +181,10 @@ def main():
         print('Mode: {} invalid, using mode = drop.'.format(mode))
         mode = 'drop'
 
-    if len(head) > 1:
+    if type(head) == list and len(head) > 1:
         head = float(head[0])
 
-    print('\n epi-trscrub: {}'.format(func) + func)
+    print('\n epi-trscrub: {}'.format(func))
     print('           FD = {} mm,'.format(FD_t))
     print('        DVARS = {} %,'.format(DV_t))
     print('  Head Radius = {} mm.\n'.format(head))
