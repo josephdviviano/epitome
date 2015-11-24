@@ -226,7 +226,7 @@ def loadnii(filename):
     # load in nifti and reshape to 2D
     nifti = nifti.get_data()
     if len(dims) == 3:
-        dims = dims.append(1)
+        dims.append(1)
     nifti = nifti.reshape(dims[0]*dims[1]*dims[2], dims[3])
 
     return nifti, affine, header, dims
