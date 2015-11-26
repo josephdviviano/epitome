@@ -40,8 +40,8 @@ def docmd(cmdlist):
     if not DRYRUN: subprocess.call(cmdlist)
 
 def write_html_section(htmlhandle, IClist,SectionTitle):
-    htmlpage.write('<h1><font color="white">'+SectionTitle+' components for '+ inputdir +'</font></h1>')
 
+    htmlpage.write('<h2><font color="white">'+SectionTitle+'</font></h2>')
     for IC in IClist:
         pic = os.path.join(inputdir,'filtered_func_data.ica','report','IC_'+ str(IC) +'_thresh.png')
         icreport = os.path.join(inputdir,'filtered_func_data.ica','report','IC_'+ str(IC) +'.html')
@@ -98,6 +98,7 @@ htmltitle="Comparing ICA labels from {} and {}".format(stem1, stem2)
 htmlpage = open(os.path.join(inputdir,htmlfilename),'w')
 htmlpage.write('<HTML><TITLE>'+htmltitle+'</TITLE>')
 htmlpage.write('<BODY BGCOLOR=#333333>\n')
+htmlpage.write('<h1><font color="white">Components for '+ inputdir +'</font></h1>')
 
 ## signal in 1, noise in 2
 write_html_section(htmlpage, list(set(signal1).intersection(noise2)),
