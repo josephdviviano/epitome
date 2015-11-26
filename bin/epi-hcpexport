@@ -15,6 +15,7 @@ Arguements:
      <experiment>   Name of the epitome experiment.
 
 Options:
+      --non-epi-subid          Subject ID in the HCP_DATA does not have experiment and session in it
       --debug                  Debug logging in Erin's very verbose style
       -n,--dry-run             Dry run
       --help                   prints this message.
@@ -38,7 +39,10 @@ def docmd(cmdlist):
 
 def run_commands(path, directory, expt, subj, session):
 
-    subjID = str(expt) + '_' + str(subj) + '_' + str(session)
+    if SUBIDNOTEPI:
+        subjID = str(subj)
+    else:
+        subjID = str(expt) + '_' + str(subj) + '_' + str(session)
     dir_i = os.path.join(os.environ['HCP_DATA'], subjID)
     dir_o = os.path.join(directory, session)
 
@@ -105,11 +109,13 @@ def run_commands(path, directory, expt, subj, session):
 def main():
     global DEBUG
     global DRYRUN
+    global SUBIDNOTEPI
     arguments = docopt(__doc__)
     path = arguments['<path>']
     expt = arguments['<experiment>']
     DEBUG = arguments['--debug']
     DRYRUN = arguments['--dry-run']
+    SUBIDNOTEPI = arguments['--non-epi-subid']
 
     print(arguments)
     # get subject numbers
