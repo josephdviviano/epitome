@@ -12,6 +12,7 @@ Arguments:
 
 Options:
   --presmooth FMHM         Run AFNI volume smoothing on the timeseries file before computing correlations
+  --brainmask NIFTI        Brainmask to apply to all masks before running, also required for smoothing
   -v,--verbose             Verbose logging
   --debug                  Debug logging in Erin's very verbose style
   -n,--dry-run             Dry run
@@ -43,6 +44,7 @@ arguments       = docopt(__doc__)
 ts_nii          = arguments['<timeseries.nii.gz>']
 souce_roi_nii   = arguments['<roi_tsmask.nii.gz>']
 target_roi_nii  = arguments['<roi_search.nii.gz>']
+brainmask_nii   = arguments['--brainmask']
 presmoothFWHM   = arguments['--presmooth']
 VERBOSE         = arguments['--verbose']
 DEBUG           = arguments['--debug']
@@ -61,24 +63,52 @@ def docmd(cmdlist):
                 #     -FWHM ${FWHM} \
                 #     -quiet -float \
                 #     -input ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
+if presmoothFWHM==None:
+    smoothts_niifile = ts_nii
+else:
+    if brainmask==None:
+        sys.exit("Need to specify a brainmask to do smoothing")
+    smoothts_niifile = os.path.join(tmpdir,'ts_sm.nii.gz')
+    docmd('3dBlurInMask',
+        '-prefix', smoothts_niifile,
+        '-Mmask', brainmask,
+        '-FWHM', presmoothFWHM,
+        'quiet','float',
+        '-input', ts_nii)
 
-## use wm_commad to get the cross correlation - if not done
-sub_dconn = inputfile.replace('.dtseries.nii','Z.dconn.nii')
-if os.path.exists(sub_dconn)==False:
-    '''
-    if the dconn file does not exists - make  it with wb_command
-    # wb_command -cifti-correlation -fisher-z <cifti-in> <cifti-out>
-    '''
-    docmd(['wb_command', '-cifti-correlation', '-mem-limit', '1.5', '-fisher-z', inputfile, sub_dconn])
 
 ## read in the dconn file
-img1 = nib.load(sub_dconn)
-sub_corrmat = img1.get_data()
-fc_df = pd.DataFrame(sub_corrmat[0,0,0,0,:,:])
+smoothts_meta = nib.load(smoothts_niifile)
+smoothts_data = smoothts_meta.get_data()
+dims = smoothts_data.shape
+#fc_df = pd.DataFrame(sub_corrmat[0,0,0,0,:,:])
 
 ## also read in template
-img2 = nib.load(ROItemplate)
-ROInet = img2.get_data()
+source_roi_meta = nib.load(source_roi_nii)
+source_roi_data = source_roi_meta.get_data()
+
+## also read in template
+target_roi_meta = nib.load(target_roi_nii)
+target_roi_data = target_roi_meta.get_data()
+
+## load the brainmask if given
+if brainmask!=None:
+    ## load brainmask if it exists
+    brainmask_meta = nib.load(brainmask)
+    brainmask_data = brainmask_meta.get_data()
+
+    ## masks all three other inputs with the brainmask
+    smoothts_data = np.multiply(smoothts_data, brainmask_data)
+    source_roi_data = np.multiply(source_roi_data, brainmask_data)
+    target_roi_data = np.multiply(target_roi_data, brainmask_data)
+
+## calculate weighted meants for source
+# get the seed time series
+
+smoothts_rdata = smoothts_data.reshape((dims[0]*dims[1]*dims[2], dims[3]))
+smoothts_rdata = smoothts_data.reshape((dims[0]*dims[1]*dims[2], dims[3]))
+src_ts = np.mean(data[idx, :], axis=0)
+
 roi_df = pd.DataFrame(ROInet[0,0,0,0,:,:],index=range(1,ROInet.shape[4]+1))
 
 
