@@ -326,9 +326,7 @@ The following is a code block demonstrating this structure (from the function `e
         except ValueError as ve:
             return '', None
 
-        line = ('. ${DIR_PIPE/epitome/modules/pre/surfsmooth ' +
-                                          str(input_name) + ' ' +
-                                          str(fwhm))
+        line = '. ${DIR_PIPE/epitome/modules/pre/surfsmooth {} {}'.format(input_name, fwhm)
         return line, output
 
 **documentation**
