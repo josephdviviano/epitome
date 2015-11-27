@@ -7,6 +7,6 @@ Usage: detrend <func_prefix> <det>
 
 Detrends data with specified polynomial, retaining the mean.
 
-Prerequisites: init_epi.
+Prerequisites: init_*.
 
 Outputs: detrend, mean. 

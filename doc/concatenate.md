@@ -6,7 +6,6 @@ Usage: concatenate <func_prefix>
 
 Concatenates all runs in order of a particular type from a particular run of the pipeline (i.e., they will only be drawn from those with the same unique identifier).
 
-Prerequisites: init_epi.
+Prerequisites: init_*.
 
-Outputs: concat
-
+Outputs: concat.

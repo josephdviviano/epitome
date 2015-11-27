@@ -602,13 +602,14 @@ def main():
         # -- THIS IS WHERE I WILL ADD THE PATHWAY OPTIONS:
         #       --> DTI, HCP, fMRI, etc...
         #       --> current 'PRE' pipeline becomes 'fMRI'
+        #       --> there should be an init folder that contains all of the 
+        #           init scripts
         #
-        #
-        # add init_EPI, check for mistakes, break the loop if flawless
-        line, output = epi.commands.init_epi.run()
+        # add init_basic, check for mistakes, break the loop if flawless
+        line, output = epi.commands.init_basic.run()
         p_list, output = writer(p_list, line, '${CMD}', f, output, None, 'sub')
         if output != None:
-            used = ['init_epi'] # start the 'used module' list
+            used = ['init_basic'] # start the 'used module' list
             flag = 1 # breaks us out of the loop
 
     # add user-defined modules
