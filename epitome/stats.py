@@ -10,11 +10,17 @@ import sklearn as sk
 
 def FD(motion, head_radius):
     """
-    Loads motion parameters and uses head radius to calculate 
+    Loads motion parameters and uses head radius to calculate
     framewise displacement.
     """
     # load motion parameters
     FD = np.genfromtxt(motion)
+
+    # check input head_radius
+    if type(head_radius) != int or type(head_radius) != float:
+        print('Invalid head radius, defaulting to 50 mm')
+        head_radius = 50
+
     FD[:,0] = np.radians(FD[:,0])*head_radius # roll
     FD[:,1] = np.radians(FD[:,1])*head_radius # pitch
     FD[:,2] = np.radians(FD[:,2])*head_radius # yaw
@@ -28,7 +34,7 @@ def FD(motion, head_radius):
 def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
 
     """
-    Calculates the Benjamini & Hochberg (1995) correction for multiple 
+    Calculates the Benjamini & Hochberg (1995) correction for multiple
     hypothesis testing from a list of p-values, and creates a binary mask
     where p-values are significant. Also optionally reports the critical
     p-value. Requires numpy.
@@ -64,9 +70,9 @@ def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
     idx = np.argsort(p) # sort p values for test
     dat = p[idx]
     del(idx)
-    
+
     # find threshold
-    vec = np.arange(size) + float(1)
+    vec = np.arange(size) + 1.0
     if iid == 'yes':
         threshold = vec / size * q
     if iid == 'no':
@@ -78,12 +84,11 @@ def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
     try:
         crit_p = np.max(dat[H0_rej])
     except:
-        print('Nothing is significant')
-        crit_p = 0
+        crit_p = 0.0
     del(dat, threshold)
 
     # create & reshape binary output mask
-    mask = np.zeros(size) 
+    mask = np.zeros(size)
     if crit_p > 0:
         mask[p <= crit_p] = 1
 
@@ -95,13 +100,13 @@ def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
 
     if crit == 'yes':
         return (mask, crit_p)
-    else: 
+    else:
         return mask
 
 def FDR_threshold(p=[], q=0.05, iid='yes'):
 
     """
-    Calculates the Benjamini & Hochberg (1995) correction for multiple 
+    Calculates the Benjamini & Hochberg (1995) correction for multiple
     hypothesis testing from a list of p-values, and returns the threshold only.
     NaNs are ignored for the calculation.
 
@@ -139,7 +144,7 @@ def FDR_threshold(p=[], q=0.05, iid='yes'):
     idx = np.argsort(p) # sort p values for test
     dat = p[idx]
     del(idx)
-    
+
     # find threshold
     vec = np.arange(size) + float(1)
     if iid == 'yes':
@@ -152,10 +157,8 @@ def FDR_threshold(p=[], q=0.05, iid='yes'):
     H0_rej = dat <= threshold
     try:
         crit_p = np.max(dat[H0_rej])
-        print('p-threshold = ' + str(crit_p))
     except:
         crit_p = 0
-        print('the only thing significant here is how much you stink!')
     del(dat, threshold)
 
     return crit_p
@@ -197,7 +200,7 @@ def pca_reduce(data, n=None, copy=True, whiten=False, cutoff=1000):
           = int -- return int components
         copy = if False, do pca in place.
         whiten = pre-whiten (decorrelate) data.
-        cutoff = maximum number of input features before we move to an 
+        cutoff = maximum number of input features before we move to an
                  efficient method.
 
     This mean-centers and auto-scales the data (in-place).
@@ -211,7 +214,7 @@ def pca_reduce(data, n=None, copy=True, whiten=False, cutoff=1000):
     normal -- standard PCA
     random -- randomized PCA (for large matricies [1])
 
-    [1] Halko, N., Martinsson, P. G., Shkolnisky, Y., & Tygert, M. (2010). 
+    [1] Halko, N., Martinsson, P. G., Shkolnisky, Y., & Tygert, M. (2010).
         An algorithm for the principal component analysis of large data sets.
     """
 
@@ -237,6 +240,6 @@ def pca_reduce(data, n=None, copy=True, whiten=False, cutoff=1000):
     pcmodel.fit(data)
     data = pcmodel.transform(data)
     #components = pcmodel.components_
-    exp_var = pcmodel.explained_variance_ratio_ 
+    exp_var = pcmodel.explained_variance_ratio_
 
     return data, exp_var

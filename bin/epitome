@@ -104,20 +104,6 @@ def get_experiments(check=None):
         print('Invalid selection')
         sys.exit()
 
-def get_date_user():
-    """
-    Returns a eyeball-friendly timestamp, the current user's name,
-    and a filename-friendly timestamp.
-    """
-    import time
-    import getpass
-
-    datetime = time.strftime("%Y/%m/%d -- %H:%M:%S")
-    user = getpass.getuser()
-    f_id = time.strftime("%y%m%d_%H%M%S")
-
-    return datetime, user, f_id
-
 def print_help(module):
     """
     Prints the contents of the markdown file line by line, wrapping long sections.
@@ -171,6 +157,7 @@ def check_environment(mode='verbose'):
     dir_hcp_data = epi.config.find_hcp_data()
     dir_hcp_tools = epi.config.find_hcp_tools()
     dir_workbench = epi.config.find_workbench()
+    dir_clone = epi.config.find_clone()
 
     # checks for manditory software
     if DIR_DATA == None:
@@ -206,10 +193,8 @@ def check_environment(mode='verbose'):
         sys.exit()
 
     if DIR_MATLAB == None:
-        txt = ('WARNING: MATLAB / compiler is unavailable. Some \n'
-               'modules will not work. See here for more:, \n'
-               'http://afni.nimh.nih.gov/sscc/dglen/McRetroTS\n')
-        print(txt)
+        print('WARNING: MATLAB / compiler is unavailable. Some modules will not work.\n'
+              'See here for more: http://afni.nimh.nih.gov/sscc/dglen/McRetroTS\n')
 
     if dir_hcp_data == None:
         print('WARNING: HCP_DATA is not set. HCP modules will not work.')
@@ -225,8 +210,9 @@ def check_environment(mode='verbose'):
 
     if mode == 'verbose':
         txt = ('\nCurrent environment configuration:\n\n'
-               '    data            -- {DIR_DATA}\n'
+               '    data directory  -- {DIR_DATA}\n'
                '    epitome         -- {dir_pipe}\n'
+               '    clone directory -- {dir_clone}\n'
                '    freesurfer      -- {dir_freesurfer}\n'
                '    freesurfer data -- {dir_freesurfer_data}\n'
                '    afni            -- {DIR_AFNI}\n'
@@ -238,6 +224,7 @@ def check_environment(mode='verbose'):
                '    wb_command      -- {wb_command}\n'.format(
                     DIR_DATA=DIR_DATA,
                     dir_pipe=dir_pipe,
+                    dir_clone=dir_clone,
                     dir_freesurfer=dir_freesurfer,
                     dir_freesurfer_data=dir_freesurfer_data,
                     DIR_AFNI=DIR_AFNI,
@@ -338,7 +325,7 @@ def check_directories(expt):
     # print out the file counts per image modality
     print('')
     for mode_key in mode_dict:
-        print('    ' + str(mode_dict[mode_key]) + ' NIFTIs in ' + str(mode_key))
+        print('     {} NIFTIs in {}'.format(str(mode_dict[mode_key]), str(mode_key)))
     print('')
 
 def writer(p_list, line, filename, f, output, bkup, mode):
@@ -346,14 +333,13 @@ def writer(p_list, line, filename, f, output, bkup, mode):
     Writes lines to the master script.
     """
     if mode == 'sub':
-        filename = '${DIR_DATA}/${DIR_EXPT}/${SUB}/' + filename
+        filename = '${{DIR_DATA}}/${{DIR_EXPT}}/${{SUB}}/{}'.format(filename)
     elif mode == 'exp':
-        filename = '${DIR_DATA}/${DIR_EXPT}/' + filename
-
+        filename = '${{DIR_DATA}}/${{DIR_EXPT}}/{}'.format(filename)
 
     # output will == None if we made a mistake
     if output != None:
-        out_line = line + ' >> ' + filename + '\n'
+        out_line = '{} >> {}\n'.format(line, filename)
         f.write(out_line)
         p_list.append(line)
 
@@ -405,7 +391,7 @@ def run_cleanup():
             flag = 1
 
     # get the date and time, current user, f_id
-    datetime, user, f_id = get_date_user()
+    datetime, user, f_id = epi.utilities.get_date_user()
 
     # generate the unique filenames for this run
     clean = 'clean_' + f_id + '.sh'
@@ -512,15 +498,14 @@ def main():
     """
     epi.utilities.check_os()
     check_environment('quiet')
-    datetime, user, f_id = get_date_user()
+    datetime, user, f_id = epi.utilities.get_date_user()
     dir_pipe = epi.config.find_epitome()
-
+    dir_clone = epi.config.find_clone()
 
     ### Figure out if this is set up for hcp tools
     dir_hcp_data = epi.config.find_hcp_data()
     dir_hcp_tools = epi.config.find_hcp_tools()
     dir_workbench = epi.config.find_workbench()
-
     if not all([dir_hcp_data, dir_hcp_tools, dir_workbench]) :
         HCPMODE = True
         print('Running epitome - with HCP extras!. Select experiment.')
@@ -546,31 +531,31 @@ def main():
         sys.exit("You do not have permission to write in {}".format(os.path.join(DIR_DATA, expt)))
 
     # make the epitome directory if required
-    if os.path.isdir('/home/' + str(user) + '/epitome') == False:
-        os.system('mkdir /home/' + str(user) + '/epitome')
+    if os.path.isdir(dir_clone) == False:
+        os.system('mkdir -p {}'.format(dir_clone))
 
     # present the user with the curent pipelines
-    pipelist = os.listdir(os.path.join('/home', user, 'epitome'))
-    pipelist = filter(lambda x: os.path.isdir(os.path.join(
-                                        '/home', user, 'epitome', x)), pipelist)
+    pipelist = os.listdir(os.path.join(dir_clone))
+    pipelist = filter(lambda x: os.path.isdir(os.path.join(dir_clone, x)), pipelist)
     pipelist.append('***NEW***')
-    print('\nSelect which replicant you want from ~/epitome:')
+    print('\nSelect which replicant you want from {}:'.format(dir_clone))
     ID = epi.utilities.selector_list(pipelist)
 
     if ID == '***NEW***':
         print('\nInput unique identifier for this pipeline (alphanumeric):')
         ID = raw_input('ID: ')
         ID = epi.utilities.mangle_string(ID)
-        localpath = '/home/{user}/epitome/{ID}'.format(user=user, ID=ID)
+        localpath = '{}/{}'.format(dir_clone, ID)
 
-        print('\nReplicating the current pipeline in ~/epitome/' +str(ID) + '.')
-        os.system('mkdir ' + localpath)
+        print('\nReplicating the current pipeline in {}/{}.'.format(dir_clone, ID))
+        os.system('mkdir -p {}'.format(localpath))
         os.system('cp -r {}/bin {}'.format(dir_pipe, localpath))
         os.system('cp -r {}/doc {}'.format(dir_pipe, localpath))
         os.system('cp -r {}/epitome {}'.format(dir_pipe, localpath))
+        os.system('cp -r {}/assets {}'.format(dir_pipe, localpath))
 
     else:
-        localpath = '/home/{}/epitome/{}'.format(user, ID)
+        localpath = '{}/{}'.format(dir_clone, ID)
 
     # get the date and time, current user, f_id, set dir_pipe to be local
     master = 'master_{}_{}.sh'.format(f_id, ID)

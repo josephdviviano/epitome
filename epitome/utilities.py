@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A collection of utilities for the epitome pipeline. Mostly for getting 
+A collection of utilities for the epitome pipeline. Mostly for getting
 subject numbers/names, checking paths, gathering inforamtion, etc.
 """
 
@@ -19,7 +19,7 @@ def selector_float():
     # ensure response is non-negative
     if option == '':
         option = -1
-    
+
     # check input
     try:
         if float(option) >= float(0):
@@ -27,10 +27,10 @@ def selector_float():
             return response
         else:
             print('*** Input must be positive! ***')
-            raise ValueError    
+            raise ValueError
     except:
         print('*** Input must be a float! ***')
-        raise ValueError    
+        raise ValueError
 
 def selector_int():
     """
@@ -41,7 +41,7 @@ def selector_int():
     # ensure response is non-negative
     if option == '':
         option = -1
-    
+
     # check input
     try:
         if int(option) >= 0:
@@ -94,7 +94,7 @@ def selector_dict(item_dict):
 
     # init list where we store / find the responses
     item_list = []
-    
+
     # generate a sorted list of dict keys
     for item in item_dict:
         item_list.append(item)
@@ -103,7 +103,7 @@ def selector_dict(item_dict):
     # loop through sorted list
     for i, item in enumerate(item_list):
         print(str(i+1) + ': ' + item + ' ' + item_dict[item])
-    
+
     # retrieve the option number
     option = raw_input('option #: ')
 
@@ -154,9 +154,23 @@ def check_os():
               """)
         sys.exit()
 
+def get_date_user():
+    """
+    Returns a eyeball-friendly timestamp, the current user's name,
+    and a filename-friendly timestamp.
+    """
+    import time
+    import getpass
+
+    datetime = time.strftime("%Y/%m/%d -- %H:%M:%S")
+    user = getpass.getuser()
+    f_id = time.strftime("%y%m%d_%H%M%S")
+
+    return datetime, user, f_id
+
 def mangle_string(string):
     """
-    Turns an arbitrary string into a decent foldername/filename 
+    Turns an arbitrary string into a decent foldername/filename
     (no underscores allowed)!
     """
     string = string.replace(' ', '-')
@@ -183,11 +197,11 @@ def loadnii(filename):
         nifti, affine, header, dims = loadnii(filename)
 
     Loads a Nifti file (3 or 4 dimensions).
-    
-    Returns: 
-        a 2D matrix of voxels x timepoints, 
-        the input file affine transform, 
-        the input file header, 
+
+    Returns:
+        a 2D matrix of voxels x timepoints,
+        the input file affine transform,
+        the input file header,
         and input file dimensions.
     """
 
@@ -195,7 +209,7 @@ def loadnii(filename):
     nifti = nib.load(filename)
     affine = nifti.get_affine()
     header = nifti.get_header()
-    dims = nifti.shape
+    dims = list(nifti.shape)
 
     # if smaller than 3D
     if len(dims) < 3:
@@ -208,17 +222,17 @@ def loadnii(filename):
         raise Exception("""
                         Your data is at least a penteract (over 4 dimensions!)
                         """)
-    
+
     # load in nifti and reshape to 2D
     nifti = nifti.get_data()
     if len(dims) == 3:
-        dims = tuple(list(dims) + [1])
+        dims = dims.append(1)
     nifti = nifti.reshape(dims[0]*dims[1]*dims[2], dims[3])
 
     return nifti, affine, header, dims
 
 def check_dims(data, mask):
-    """ 
+    """
     Ensures the input data and mask are on the same grid.
     """
     if np.shape(data)[0] != np.shape(mask)[0]:
@@ -243,7 +257,7 @@ def maskdata(data, mask, rule='>', threshold=[0]):
         data, idx = maskdata(data, mask, rule, threshold)
 
     Extracts voxels of interest from a 2D data matrix, using a threshold rule
-    applied to the mask file, which is assumed to only contain one value per 
+    applied to the mask file, which is assumed to only contain one value per
     voxel.
 
     Valid thresholds:
@@ -261,8 +275,8 @@ def maskdata(data, mask, rule='>', threshold=[0]):
     If it finds voxels like this, it will tell you about them so you can
     investigate.
 
-    Returns: 
-        voxels of interest in data as a collapsed 2D array 
+    Returns:
+        voxels of interest in data as a collapsed 2D array
         and a set of indices relative to the size of the original array.
     """
     check_dims(data, mask)
@@ -347,9 +361,9 @@ def translate(data, factors=[]):
     Usage:
         data = translate(data, factors)
 
-    Scales each time series or data point by a factor or set of factors 
-    of length  equivalent to the number of input voxels. If no factors 
-    are provided, this will demean each input time series (and will do 
+    Scales each time series or data point by a factor or set of factors
+    of length  equivalent to the number of input voxels. If no factors
+    are provided, this will demean each input time series (and will do
     to data that wasn't originally 4D).
 
     Returns:
@@ -383,7 +397,7 @@ def scale_timeseries(ts):
 
     return ts
 
-def IOTA(junk): 
+def IOTA(junk):
     """
     Does stuff to junk and returns things.
     """
