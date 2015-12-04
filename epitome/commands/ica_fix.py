@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import epitome as epi
+import os
 
 def run(input_name):
     output =  'fix'
@@ -13,7 +14,7 @@ def run(input_name):
         train_data = {'Standard.RData' : '= use on "standard" fMRI datasets / analyses: TR=3s, Resolution=3.5x3.5x3.5mm, Session=6mins, 5mm FWHM spatial smoothing)',
                       'HCP_hp2000.RData' : '= use on "minimally-preprocessed" HCP-like datasets, e.g., TR=0.7s, Resolution=2x2x2mm, Session=15mins, no spatial smoothing, minimal (2000s FWHM) highpass temporal filtering',
                       'WhII_MB6.RData' : '= use on multiband x6 EPI acceleration: TR=1.3s, Resolution=2x2x2mm, Session=10mins, no spatial smoothing, 100s FWHM highpass temporal filtering',
-                      'WhII_Standard.RData' : '= use on no EPI acceleration: TR=3s, Resolution=3x3x3mm, Session=10mins, no spatial smoothing, 100s FWHM highpass temporal filtering.'
+                      'WhII_Standard.RData' : '= use on no EPI acceleration: TR=3s, Resolution=3x3x3mm, Session=10mins, no spatial smoothing, 100s FWHM highpass temporal filtering.',
                       'autohawko.RData' : '(in assests) = trained using Colin Hawko (of TIGRLab)\'s labels of noisy real data / TR=3s, Resolution=3x3x3mm, Session~5mins, no spatial smoothing, 100s FWHM highpass temporal filtering.'}
         train_data = epi.utilities.selector_dict(train_data)
 
@@ -37,7 +38,7 @@ def run(input_name):
         train_data_path = os.path.join(epi.config.find_fix(),
                                 'training_files',train_data)
     if train_data in ['autohawko.RData']:
-        train_data_path = os.path.join(find_clone(),
+        train_data_path = os.path.join(epi.config.find_clone(),
                         'assets','fix_training_data',train_data)
 
     # otherwise we print the command and return it
