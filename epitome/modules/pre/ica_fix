@@ -12,10 +12,6 @@ EOF
 cat <<"EOF"
 echo '*** MODULE: ica_fix. runs FSL FIX using MELODIC outputs. ****************'
 
-# find the FSL FIX folder
-DIR_FIX=`which fix`
-DIR_FIX=`dirname ${DIR_FIX}`
-
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in `basename ${DIR_SESS}`; do
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
@@ -76,14 +72,10 @@ for SESS in `basename ${DIR_SESS}`; do
             # https://www.youtube.com/watch?v=uu6DRAvHJVM
             if [ `echo ${MOTIONREGRESS}` == 'on' ];
             then
-              fix \
-                  ${DIR}/${SESS}/fake.${ID}.${NUM}.feat \
-                  ${DIR_FIX}/training_files/${TRAINDATA} \
+              fix ${DIR}/${SESS}/fake.${ID}.${NUM}.feat ${TRAINDATA}\
                   ${THRESHOLD} -m -h 0
             else
-              fix \
-                  ${DIR}/${SESS}/fake.${ID}.${NUM}.feat \
-                  ${DIR_FIX}/training_files/${TRAINDATA} \
+              fix ${DIR}/${SESS}/fake.${ID}.${NUM}.feat ${TRAINDATA} \
                   ${THRESHOLD}
             fi
 
