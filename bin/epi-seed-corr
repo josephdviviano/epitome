@@ -5,12 +5,17 @@ every voxel in the supplied mask. This function assumes all supplied
 images are the same size.
 
 Usage:
-    epi-seed-corr <func> <seed> <mask>
+    epi-seed-corr [options] <func> <seed> <mask>
 
-Arguments:    
+Arguments:
     <func>          functional data
     <seed>          seed mask
     <mask>          brain mask
+
+Options:
+    --weighted         compute weighted average timeseries from the seed map
+    --output-ts        Also output write the from the seed to text
+    --outputname STR   Specify the output filename
 
 DETAILS:
     At the moment, the seed mask only works with a single seed (all nonzero
@@ -29,6 +34,9 @@ def main():
     func = arguments['<func>']
     seed = arguments['<seed>']
     mask = arguments['<mask>']
+    weighted = arguments['--weighted']
+    output_ts = arguments['--output-ts']
+    outbase = arguments['--outputname']
 
     # determine the filenames
     if func[-7:] == '.nii.gz':
@@ -41,12 +49,12 @@ def main():
     elif seed[-4:] == '.nii' or seed[-4:] == '.mnc':
         seedname = seed[:-4]
 
-    filename = 'corr_' + seedname + '_' + funcname + '.nii.gz'
+    if outbase==None:
+        outbase = 'corr_' + seedname + '_' + funcname
 
     # import template, store the output paramaters
     seed = nib.load(seed)
     outA = seed.get_affine()
-    outH = seed.get_header()
 
     # import data
     seed = seed.get_data()
@@ -60,11 +68,17 @@ def main():
     mask = mask.reshape((dims[0]*dims[1]*dims[2], 1))
 
     # get mean seed timeseries
-    idx_seed = np.where(seed >= 1)[0]
     idx_mask = np.where(mask >= 1)[0]
-    idx = np.intersect1d(idx_seed, idx_mask)
-    seed_ts = func[idx, :]
-    seed_ts = np.mean(seed_ts, axis=0)
+    seed[np.where(mask >= 1)[1]]=0
+
+
+    if weighted:
+        seed_ts = np.average(func,
+            axis=0,
+            weights=seed.reshape((dims[0]*dims[1]*dims[2])))
+    else:
+        idx_seed = np.where(seed >= 1)[0]
+        seed_ts = np.mean(func[idx_seed, :], axis=0)
 
     # create correlation vector
     #corr = sp.corrcoef(seed_ts, func[idx_mask, :])
@@ -75,14 +89,18 @@ def main():
     # look through each time series, calculating r + z
     for i in np.arange(len(idx_mask)):
         out[idx_mask[i]] = np.corrcoef(seed_ts,
-                                       func[idx_mask[i], :], rowvar=0)[1,0]\
+                                       func[idx_mask[i], :])[0][1]
 
     # create the 3D volume and export
     out = out.reshape([dims[0], dims[1], dims[2], 1])
-    out = nib.nifti1.Nifti1Image(out, outA, outH)
+    out = nib.nifti1.Nifti1Image(out, outA)
 
-    out.to_filename(filename)
-    print('*** Completed ' + filename + '***')
+    ## write out the ts if asked
+    if output_ts:
+        np.savetxt(outbase + '_ts.txt', seed_ts)
+
+    out.to_filename(outbase + '.nii.gz')
+    print('*** Completed ' + outbase + '***')
 
 if __name__ == '__main__':
     main()
