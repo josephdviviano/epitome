@@ -38,7 +38,7 @@ def run(input_name):
         train_data_path = os.path.join(epi.config.find_fix(),
                                 'training_files',train_data)
     if train_data in ['autohawko.RData']:
-        train_data_path = os.path.join(epi.config.find_clone(),
+        train_data_path = os.path.join(epi.config.find_epitome(),
                         'assets','fix_training_data',train_data)
 
     # otherwise we print the command and return it
