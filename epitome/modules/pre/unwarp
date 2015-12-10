@@ -1,13 +1,14 @@
 #!/bin/bash
 #  Requires FSL (version 5.0.6), HCP-gradunwarp (HCP version 1.0.2)
-MAG=0
-REAL=2
-IMAG=3
-# DELTATE='2.46'   # SIEMENS difference in TEs in ms
-# DELTATE='0.002'  # GE difference in TEs in s
-# DWELL='0.00133'  # SIEMENS
-# DWELL='0.000684' # GE
-UNWARPDIR=z
+
+INPUT=$(echo func_${1})
+METHOD=${2}
+UNWARPDIR=${3}
+DWELL=${4} # default dwell time: SIEMENS=0.00133, GE=0.000684
+DELTATE=${5} # default difference in TEs: SIEMENS 2.46 ms, GE 0.002 seconds
+MAG=${6}
+REAL=${7}
+IMAG=${8}
 
 cat <<EOF
 export INPUT=$(echo func_${1})
