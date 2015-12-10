@@ -5,12 +5,13 @@ every voxel in the supplied mask. This function assumes all supplied
 images are the same size.
 
 Usage:
-    epi-seed-corr <func> <seed> <mask>
+    epi-seed-corr <func> <seed> <mask> <output>
 
-Arguments:    
+Arguments:
     <func>          functional data
     <seed>          seed mask
     <mask>          brain mask
+    <output>        output name
 
 DETAILS:
     At the moment, the seed mask only works with a single seed (all nonzero
@@ -21,27 +22,17 @@ import sys
 import numpy as np
 import scipy as sp
 import nibabel as nib
-
 from epitome.docopt import docopt
 
 def main():
     arguments = docopt(__doc__)
-    func = arguments['<func>']
-    seed = arguments['<seed>']
-    mask = arguments['<mask>']
+    func   = arguments['<func>']
+    seed   = arguments['<seed>']
+    mask   = arguments['<mask>']
+    output = arguments['<output>']
 
-    # determine the filenames
-    if func[-7:] == '.nii.gz':
-        funcname = func[:-7]
-    elif func[-4:] == '.nii' or func[-4:] == '.mnc':
-        funcname = func[:-4]
-
-    if seed[-7:] == '.nii.gz':
-        seedname = seed[:-7]
-    elif seed[-4:] == '.nii' or seed[-4:] == '.mnc':
-        seedname = seed[:-4]
-
-    filename = 'corr_' + seedname + '_' + funcname + '.nii.gz'
+    # check types
+    output = str(output)
 
     # import template, store the output paramaters
     seed = nib.load(seed)
@@ -74,15 +65,15 @@ def main():
 
     # look through each time series, calculating r + z
     for i in np.arange(len(idx_mask)):
-        out[idx_mask[i]] = np.corrcoef(seed_ts,
-                                       func[idx_mask[i], :], rowvar=0)[1,0]\
+        out[idx_mask[i]] = np.corrcoef(seed_ts, func[idx_mask[i], :], rowvar=0)[1,0]
 
     # create the 3D volume and export
     out = out.reshape([dims[0], dims[1], dims[2], 1])
     out = nib.nifti1.Nifti1Image(out, outA, outH)
 
-    out.to_filename(filename)
-    print('*** Completed ' + filename + '***')
+    out.to_filename(output)
+    print('MSG: completed {}'.format(output))
 
 if __name__ == '__main__':
     main()
+
