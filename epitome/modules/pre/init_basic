@@ -12,7 +12,7 @@ echo '*** MODULE: init_basic. Reorients, phys regression, removes init TRs. ***'
 # loop through sessions
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
-    
+
     # make the output folder for the paramaters
     if [ ! -d ${SESS}/PARAMS ]; then
         mkdir ${SESS}/PARAMS
@@ -26,11 +26,10 @@ for SESS in ${DIR_SESS}; do
 
         if [ ! -f ${SESS}/func_del.${ID}.${NUM}.nii.gz ]; then
             # ensure all data is in RAI
-            3daxialize \
-                -prefix ${SESS}/func_tmp_RAI.${ID}.${NUM}.nii.gz \
-                -axial \
-                ${FILE} 
-            
+           fslreorient2std \
+               ${FILE} \
+               ${SESS}/func_tmp_RAI.${ID}.${NUM}.nii.gz
+
             # retain 1st TR from 1st run (prestabilization)
             if [ ${DATA_QUALITY} = 'low' ] && [ ${NUM} = 01 ]; then
                 3dcalc \
@@ -41,15 +40,15 @@ for SESS in ${DIR_SESS}; do
 
             # Generate physiological noise regressors if they exist
             if [ -f ${RUN}/resp.*.phys ] && [ -f ${RUN}/card.*.phys ]; then
-                
+
                 # get x, y, z, t dims, and TR length
                 X=`fslhd ${RUN}/*.nii.gz | sed -n 6p | cut -c 5-`
                 Y=`fslhd ${RUN}/*.nii.gz | sed -n 7p | cut -c 5-`
                 Z=`fslhd ${RUN}/*.nii.gz | sed -n 8p | cut -c 5-`
                 NTRS=`fslhd ${RUN}/*.nii.gz | sed -n 9p | cut -c 5-`
                 TR=`fslhd ${RUN}/*.nii.gz | sed -n 22p | cut -c 9-`
-                
-                # find the smallest dimension in x, y, z 
+
+                # find the smallest dimension in x, y, z
                 XYZ=($X $Y $Z)
                 SLICE=`echo ${XYZ[*]} | python -c \
                       "print sorted(map(int, raw_input().split(' ')))[0]"`
@@ -59,17 +58,17 @@ for SESS in ${DIR_SESS}; do
 
                 # compute sampling rate of physio recording
                 UNITS=`fslhd ${RUN}/*.nii.gz | sed -n 14p | cut -c 11- | xargs`
-                
+
                 # convert ms to seconds, if necessary
                 if [ ${UNITS} = 's' ]; then
                     TIME=`perl -e "print ${NTRS} * ${TR}"`
                 elif [ ${UNITS} = 'ms' ]; then
                     TIME=`perl -e "print ${NTRS} * ${TR} / 1000"`
-                fi 
+                fi
 
                 # get the sampling rate in Hz
                 FS=`perl -e "print ${SAMP} / ${TIME}"`
-                
+
                 # Run McRetroTS -- Respfile Cardfile VolTR Nslices PhysFS Graph
                 # NB! Right now we are NOT using the slice-wise information,
                 # as the slice-wise information assumes alternating+Z! Jeesh!

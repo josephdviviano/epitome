@@ -566,7 +566,7 @@ def main():
            '${{DIR_DATA}} ${{DIR_EXPT}})\n\n'
            '## Freesurfer\n'
            'epi-fsrecon ${{DIR_DATA}} ${{DIR_EXPT}} ${{DATA_TYPE}} ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n'
-           '. ${{DIR_PIPE}}/epitome/modules/freesurfer/fsexport '
+           '. ${{DIR_PIPE}}/epitome/modules/anat/fsexport '
            '${{DIR_DATA}} ${{DIR_EXPT}} >> ${{DIR_DATA}}/${{DIR_EXPT}}/${{PROC}}\n\n'
            '## Begin Pipeline\n'
            'for SUB in ${{SUBJECTS}}; do\n\n'
@@ -602,7 +602,7 @@ def main():
         # -- THIS IS WHERE I WILL ADD THE PATHWAY OPTIONS:
         #       --> DTI, HCP, fMRI, etc...
         #       --> current 'PRE' pipeline becomes 'fMRI'
-        #       --> there should be an init folder that contains all of the 
+        #       --> there should be an init folder that contains all of the
         #           init scripts
         #
         # add init_basic, check for mistakes, break the loop if flawless

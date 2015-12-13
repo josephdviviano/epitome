@@ -90,7 +90,7 @@ for SESS in ${DIR_SESS}; do
                     ${SESS}/anat_EPI_tmp_initTR_ob.nii.gz
             fi
         fi
-        
+
         # create TS mean for each run
         if [ ! -f ${SESS}/anat_EPI_brain.nii.gz ]; then
             3dTstat \
@@ -106,14 +106,14 @@ for SESS in ${DIR_SESS}; do
         3dMean \
             -prefix ${SESS}/anat_EPI_tmp_mean.nii.gz \
             ${SESS}/anat_EPI_tmp_ts_mean.${ID}.*.nii.gz
-        
+
         3dTstat \
             -prefix ${SESS}/anat_EPI_tmp_vol.nii.gz \
             ${SESS}/anat_EPI_tmp_mean.nii.gz
 
         # AFNI
         if [ ${MASK_METHOD} == 'AFNI' ]; then
-        
+
             # set masking variables given each preset
             if [ ${MASKING} == 'loosest' ]; then CLFRAC=0.15; PEELS=1; fi
             if [ ${MASKING} == 'loose' ]; then CLFRAC=0.2; PEELS=1; fi
@@ -136,7 +136,7 @@ for SESS in ${DIR_SESS}; do
 
         # FSL
         if [ ${MASK_METHOD} == 'FSL' ]; then
-        
+
             # set masking variables given each preset
             if [ ${MASKING} == 'loosest' ]; then FI=0.15; VG=0.4; fi
             if [ ${MASKING} == 'loose' ]; then FI=0.2; VG=0; fi
@@ -178,15 +178,21 @@ for SESS in ${DIR_SESS}; do
         fi
     fi
 
-    # deskull functional data
-    if [ ! -f ${SESS}/func_deskull.${ID}.${NUM}.nii.gz ]; then
-        3dcalc \
-            -prefix ${SESS}/func_deskull.${ID}.${NUM}.nii.gz \
-            -datum float \
-            -a ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
-            -b ${SESS}/anat_EPI_mask.nii.gz \
-            -expr "a*b"
-    fi
+    # loop through runs
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        # deskull functional data
+        if [ ! -f ${SESS}/func_deskull.${ID}.${NUM}.nii.gz ]; then
+            3dcalc \
+                -prefix ${SESS}/func_deskull.${ID}.${NUM}.nii.gz \
+                -datum float \
+                -a ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz \
+                -b ${SESS}/anat_EPI_mask.nii.gz \
+                -expr "a*b"
+        fi
+    done
 done
 
 EOF
