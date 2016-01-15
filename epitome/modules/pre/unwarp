@@ -464,3 +464,39 @@ done
 # fslmaths ${T1wImage} -abs -add 1 -bin ${WD}/Jacobian2T1w.nii.gz
 EOF
 
+# from HCP pipeline NEW JAN 15 2016
+#    echo "Registering fieldmap to structural"
+#    if [ $fmapreg = yes ] ; then
+#        # register fmap to structural image
+#    $FSLDIR/bin/flirt -in ${fmapmagbrain} -ref ${vrefbrain} -dof ${dof} -omat ${vout}_fieldmap2str_init.mat
+#    $FSLDIR/bin/flirt -in ${fmapmaghead} -ref ${vrefhead} -dof ${dof} -init ${vout}_fieldmap2str_init.mat -omat ${vout}_fieldmap2str.mat -out ${vout}_fieldmap2str -nosearch
+#    else
+#    $FSLDIR/bin/imcp ${fmapmaghead} ${vout}_fieldmap2str
+#    cp $FSLDIR/etc/flirtsch/ident.mat ${vout}_fieldmap2str.mat
+#    fi
+#    # unmask the fieldmap (necessary to avoid edge effects)
+#    $FSLDIR/bin/fslmaths ${fmapmagbrain} -abs -bin ${vout}_fieldmaprads_mask
+#    $FSLDIR/bin/fslmaths ${fmaprads} -abs -bin -mul ${vout}_fieldmaprads_mask ${vout}_fieldmaprads_mask
+#    $FSLDIR/bin/fugue --loadfmap=${fmaprads} --mask=${vout}_fieldmaprads_mask --unmaskfmap --savefmap=${vout}_fieldmaprads_unmasked --unwarpdir=${fdir}   # the direction here should take into account the initial affine (it needs to be the direction in the EPI)
+#
+#    # the following is a NEW HACK to fix extrapolation when fieldmap is too small
+#    $FSLDIR/bin/applywarp -i ${vout}_fieldmaprads_unmasked -r ${vrefhead} --premat=${vout}_fieldmap2str.mat -o ${vout}_fieldmaprads2str_pad0
+#    $FSLDIR/bin/fslmaths ${vout}_fieldmaprads2str_pad0 -abs -bin ${vout}_fieldmaprads2str_innermask
+#    $FSLDIR/bin/fugue --loadfmap=${vout}_fieldmaprads2str_pad0 --mask=${vout}_fieldmaprads2str_innermask --unmaskfmap --unwarpdir=${fdir} --savefmap=${vout}_fieldmaprads2str_dilated
+#    $FSLDIR/bin/fslmaths ${vout}_fieldmaprads2str_dilated ${vout}_fieldmaprads2str
+#
+#    # run bbr with fieldmap
+#    echo "Running BBR with fieldmap"
+#    if [ $use_weighting = yes ] ; then wopt="-refweight $refweight"; else wopt=""; fi
+#    $FSLDIR/bin/flirt -ref ${vrefhead} -in ${vepi} -dof ${dof} -cost bbr -wmseg ${vout}_fast_wmseg -init ${vout}_init.mat -omat ${vout}.mat -out ${vout}_1vol -schedule ${FSLDIR}/etc/flirtsch/bbr.sch -echospacing ${dwell} -pedir ${pe_dir} -fieldmap ${vout}_fieldmaprads2str $wopt
+#
+#    # make equivalent warp fields
+#    echo "Making warp fields and applying registration to EPI series"
+#    $FSLDIR/bin/convert_xfm -omat ${vout}_inv.mat -inverse ${vout}.mat
+#    $FSLDIR/bin/convert_xfm -omat ${vout}_fieldmaprads2epi.mat -concat ${vout}_inv.mat ${vout}_fieldmap2str.mat
+#    $FSLDIR/bin/applywarp -i ${vout}_fieldmaprads_unmasked -r ${vepi} --premat=${vout}_fieldmaprads2epi.mat -o ${vout}_fieldmaprads2epi
+#    $FSLDIR/bin/fslmaths ${vout}_fieldmaprads2epi -abs -bin ${vout}_fieldmaprads2epi_mask
+#    $FSLDIR/bin/fugue --loadfmap=${vout}_fieldmaprads2epi --mask=${vout}_fieldmaprads2epi_mask --saveshift=${vout}_fieldmaprads2epi_shift --unmaskshift --dwell=${dwell} --unwarpdir=${fdir}
+#    $FSLDIR/bin/convertwarp -r ${vrefhead} -s ${vout}_fieldmaprads2epi_shift --postmat=${vout}.mat -o ${vout}_warp --shiftdir=${fdir} --relout
+#    $FSLDIR/bin/applywarp -i ${vepi} -r ${vrefhead} -o ${vout} -w ${vout}_warp --interp=spline --rel
+
