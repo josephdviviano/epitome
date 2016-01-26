@@ -5,7 +5,7 @@ every voxel in the supplied mask. This function assumes all supplied
 images are the same size.
 
 Usage:
-    epi-seed-corr-cifti.py [options] <func> <seed>
+    epi-seed-corr-cifti [options] <func> <seed>
 
 Arguments:
     <func>          functional data
