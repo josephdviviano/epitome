@@ -46,16 +46,21 @@ def docmd(cmdlist):
 
 def write_html_section(featdir, htmlhandle, IClist,SectionTitle, SectionClass):
     htmlhandle.write('<h2>'+SectionTitle+'</h2>')
-    htmlhandle.write('<p class="{}">'.format(SectionClass))
     for IC in IClist:
-        pic = os.path.join(featdir,'filtered_func_data.ica','report','IC_'+ str(IC) +'_thresh.png')
+        ## determine absolute and relative paths to the web page ica report data
+        pic1 = os.path.join(featdir,'filtered_func_data.ica','report','IC_'+ str(IC) +'_thresh.png')
+        pic2 = os.path.join(featdir,'filtered_func_data.ica','report','t'+ str(IC) +'.png')
         icreport = os.path.join(featdir,'filtered_func_data.ica','report','IC_'+ str(IC) +'.html')
-        picrelpath = os.path.relpath(pic,os.path.dirname(htmlhandle.name))
+        pic1relpath = os.path.relpath(pic1,os.path.dirname(htmlhandle.name))
+        pic2relpath = os.path.relpath(pic2,os.path.dirname(htmlhandle.name))
         icreppath = os.path.relpath(icreport,os.path.dirname(htmlhandle.name))
-        htmlhandle.write('<a href="'+ icreppath + '">')
-        htmlhandle.write('<img src="' + picrelpath + '" > ')
+        ## write it to the html
+        htmlhandle.write('<p class="{}">\n'.format(SectionClass))
+        htmlhandle.write('<a href="{}"><img src="{}">\n'.format(icreppath,pic1relpath))
+        htmlhandle.write()
+        htmlhandle.write('<img src="' + pic2relpath + '" > ')
         htmlhandle.write(icreppath+ '</a><br>\n')
-    htmlhandle.write('</p>\n')
+        htmlhandle.write('</p>\n')
 
 def get_SignalandNoise(inputdir, inputlabelfile, numICs) :
     labelpath = os.path.join(inputdir,inputlabelfile)
