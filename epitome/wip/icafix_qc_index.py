@@ -11,6 +11,7 @@ Arguments:
 Options:
   --html-out FILE          Name [default: qc_icafix.html] (fullpath) to index html file.
   --labelfilename FILE     Name [default: fix4melview_Standard_thr20.txt] of file that contains labels.
+  --csvreport FILE         Name of csv output of summary stats.
   -v,--verbose             Verbose logging
   --debug                  Debug logging in Erin's very verbose style
   -n,--dry-run             Dry run
@@ -20,6 +21,8 @@ DETAILS
 Runs makes an ica qc html page for all specified feat directories.
 Writes an index page with some summary data.
 
+Default name for --csvreport is "ica_fix_report_<labelfilename>.csv"
+
 Written by Erin W Dickie, August 25 2015
 """
 from docopt import docopt
@@ -28,11 +31,13 @@ import subprocess
 import glob
 import sys
 import pandas as pd
+import numpy as np
 
 arguments       = docopt(__doc__)
 featdirs        = arguments['<input.feat>']
 htmlindex       = arguments['--html-out']
 icalabels       = arguments['--labelfilename']
+csvfilename     = arguments['--csvreport']
 VERBOSE         = arguments['--verbose']
 DEBUG           = arguments['--debug']
 DRYRUN          = arguments['--dry-run']
@@ -56,10 +61,8 @@ def write_html_section(featdir, htmlhandle, IClist,SectionTitle, SectionClass):
         icreppath = os.path.relpath(icreport,os.path.dirname(htmlhandle.name))
         ## write it to the html
         htmlhandle.write('<p class="{}">\n'.format(SectionClass))
-        htmlhandle.write('<a href="{}"><img src="{}">\n'.format(icreppath,pic1relpath))
-        htmlhandle.write()
-        htmlhandle.write('<img src="' + pic2relpath + '" > ')
-        htmlhandle.write(icreppath+ '</a><br>\n')
+        htmlhandle.write('<a href="{}"><img src="{}"></a>\n'.format(icreppath,pic1relpath))
+        htmlhandle.write('<a href="{}"><img src="{}">{}</a><br>\n'.format(icreppath,pic2relpath,icreppath))
         htmlhandle.write('</p>\n')
 
 def get_SignalandNoise(inputdir, inputlabelfile, numICs) :
@@ -117,6 +120,7 @@ def write_featdir_html(featdir, htmlpath, signal, noise, htmltitle):
     htmlpage.write('</BODY></HTML>\n')
     htmlpage.close() # you can omit in most cases as the destructor will call it
 
+
 ## Start the index html file
 htmlindex = open(htmlindex,'w')
 htmlindex.write('<HTML><TITLE> ICA FIX qc index </TITLE>\n'
@@ -141,6 +145,19 @@ htmlindex.write('<HTML><TITLE> ICA FIX qc index </TITLE>\n'
 ## naming convention for individual html files from labelname
 labelbasename = os.path.splitext(icalabels)[0]
 htmltitle="{} ICA labels".format(labelbasename)
+
+## check that the csvreport exists
+if not csvfilename:
+    csvfilename = "ica_fix_report_{}.csv".format(labelbasename)
+
+## load the pandas dataframe
+csvreport = pd.DataFrame({ 'featdir' : pd.Categorical(featdirs),
+                           'labelfile' : labelbasename,
+                           'PercentExcluded' : np.empty([len(featdirs)], dtype=int),
+                           'NumSignal' : np.empty([len(featdirs)], dtype=int),
+                           'numICs' : np.empty([len(featdirs)], dtype=int)})
+#csvreport = loadreportcsv(csvfilename,featdirs)
+#csvreport.labelfile = icalabels
 
 ## add the title
 htmlindex.write('<h1>ICA FIX qc index</h1>')
@@ -180,7 +197,17 @@ for featdir in featdirs:
     htmlindex.write("<td>{}</td><td>{}</td><td>{}</td>".format(PercentExcluded,NumSignal,numICs))
     htmlindex.write('</tr>')
 
+    ## write this info to csvreport
+    idx = csvreport[csvreport.featdir == featdir].index[0]
+    csvreport.PercentExcluded[idx] = PercentExcluded
+    csvreport.NumSignal[idx] = NumSignal
+    csvreport.numICs[idx] = numICs
+
+
 ## finish the file
 htmlindex.write('</table>\n')
 htmlindex.write('</BODY></HTML>\n')
 htmlindex.close() # you can omit in most cases as the destructor will call it
+
+## write the results out to a file
+csvreport.to_csv(csvfilename, sep=',', index = False)
