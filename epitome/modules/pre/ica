@@ -22,9 +22,10 @@ for SESS in ${DIR_SESS}; do
                 -o ${SESS}/MELODIC.${ID}.${NUM} \
                 --mask=${SESS}/${MASK}.nii.gz \
                 --dimest=lap \
+                --report \
                 --Oall \
                 --logPower
-        fi 
+        fi
     done
 done
 

@@ -44,6 +44,18 @@ def find_epitome():
 
     return dir_epitome
 
+def find_workbench():
+    """
+    Returns path of the workbench bin/ folder, or None if unavailable.
+    """
+    try:
+        dir_workbench = subprocess.check_output('which wb_command', shell=True)
+        dir_workbench = '/'.join(dir_epitome.split('/')[:-2])
+    except:
+        dir_workbench = None
+
+    return dir_workbench
+
 def find_matlab():
     """
     Returns the path of the matlab folder, or None if unavailable.
@@ -54,7 +66,7 @@ def find_matlab():
 
     except:
         dir_matlab = None
- 
+
     return dir_matlab
 
 def find_fsl():
@@ -90,8 +102,19 @@ def find_freesurfer():
         dir_freesurfer = '/'.join(dir_freesurfer.split('/')[:-1])
     except:
         dir_freesurfer = None
- 
+
     return dir_freesurfer
+
+def find_hcp_tools():
+    """
+    Returns the hcp pipeline tools path defined in the environment.
+    """
+    try:
+        dir_hcp_tools = os.getenv('HCPPIPEDIR')
+    except:
+        dir_hcp_tools = None
+
+    return dir_hcp_tools
 
 def find_data():
     """
@@ -114,3 +137,14 @@ def find_freesurfer_data():
         dir_freesurfer_data = None
 
     return dir_freesurfer_data
+
+def find_hcp_data():
+    """
+    Returns the freesurfer data path defined in the environment.
+    """
+    try:
+        dir_hcp_data = os.getenv('HCP_DATA')
+    except:
+        dir_hcp_data = None
+
+    return dir_hcp_data
