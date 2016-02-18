@@ -43,6 +43,9 @@ Quickstart:
 + Check your work using `epitome verify <experiment>`
 + Generate some pre-processing scripts using `epitome run`.
 
+If you want to run use Human Connectome Project (HCP) Tools, there are some additional steps:
++ Set `HCP_DATA` to point to a directory that will hold data in the HCP folder structure
+
 Currently, epitome requires the user to have installed and configured the following packages to be in their path:
 
 + [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/)
@@ -61,6 +64,8 @@ Optional:
 + [FSL FIX 1.61: ica_fix](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX)
 + [Bioread 0.9.3: epi-physio](https://pypi.python.org/pypi/bioread/0.9.3)
 + [gradunwarp: unwarp](https://github.com/Washington-University/gradunwarp)
++ [Connectome Workbench](http://www.humanconnectome.org/software/connectome-workbench.html) if running in "HCP mode"
++ [HCP Pipeline Scripts and Atlases](http://www.humanconnectome.org/documentation/HCP-pipelines/index.html) if running in "HCP mode"
 
 Introduction
 ------------
@@ -188,6 +193,9 @@ Modules can be easily chained together manually, or by using the command-line in
 **freesurfer**
 
 Right now, freesurfer's `recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors.
+
+**hcp**
+After running, freesurfer's `recon-all` on every participant. The hcpexport module will convert the outputs of freesurfer into a the nifti (for volume) and gifti (for surface) files organized into the folder structure of the Human Connectome Project. This directory structure is useful if using later hcp tools analyze your functional data or other data modalities (i.e. cortical thickness). This step also converts freesurfer derived masks into a format that is easier for epitome to use (nifti format) and does a non-linear (FSL based) registration of all these files into MNI space. These useful files get copied into the T1 directory so that epiotome can use them.
 
 **pre-processing**
 
@@ -338,3 +346,4 @@ The following is a code block demonstrating this structure (based on `epitome/co
 **documentation**
 
 This is a very important part of module-building. Documentation for a given module is supplied in the doc/ folder, in a markdown document sharing the name of the module itself. This will be viewable on both GitHub, any future web-hosted manual location, and will also be used to generate the command-line help. Remember -- epitome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
+
