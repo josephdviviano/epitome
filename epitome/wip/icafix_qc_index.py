@@ -49,7 +49,8 @@ def docmd(cmdlist):
     if DEBUG: print ' '.join(cmdlist)
     if not DRYRUN: subprocess.call(cmdlist)
 
-def write_html_section(featdir, htmlhandle, IClist,SectionTitle, SectionClass):
+def write_html_section(featdir, htmlhandle, IClist,SectionClass):
+    SectionTitle = "{} Components".format(SectionClass)
     htmlhandle.write('<h2>'+SectionTitle+'</h2>')
     for IC in IClist:
         ## determine absolute and relative paths to the web page ica report data
@@ -63,6 +64,12 @@ def write_html_section(featdir, htmlhandle, IClist,SectionTitle, SectionClass):
         htmlhandle.write('<p class="{}">\n'.format(SectionClass))
         htmlhandle.write('<a href="{}"><img src="{}"></a>\n'.format(icreppath,pic1relpath))
         htmlhandle.write('<a href="{}"><img src="{}">{}</a><br>\n'.format(icreppath,pic2relpath,icreppath))
+        htmlhandle.write('<input type="radio" name="IC{}" value="Signal"'.format(IC))
+        if SectionClass == "Signal": htmlhandle.write(' checked="checked"')
+        htmlhandle.write('> Signal')
+        htmlhandle.write('<input type="radio" name="IC{}" value="Noise"'.format(IC))
+        if SectionClass == "Noise": htmlhandle.write(' checked="checked"')
+        htmlhandle.write('> Noise')
         htmlhandle.write('</p>\n')
 
 def get_SignalandNoise(inputdir, inputlabelfile, numICs) :
@@ -93,31 +100,54 @@ def get_SignalandNoise(inputdir, inputlabelfile, numICs) :
 
 def write_featdir_html(featdir, htmlpath, signal, noise, htmltitle):
 
+    handlablefile = os.path.join(featdir, "hand_labels_noise.txt")
+    handlabelrelpath = os.path.relpath(handlablefile,os.path.dirname(htmlpath))
     htmlpage = open(htmlpath,'w')
     htmlpage.write('<HTML><TITLE>'+htmltitle+'</TITLE>')
-    htmlpage.write('<head>\n<style>\n')
+    htmlpage.write('<head>\n')
+    htmlpage.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>')
+    htmlpage.write('<style>\n')
     htmlpage.write('body { background-color:#333333; '
                     'font-family: futura,sans-serif;color:white;\n'
                     'text-align: center;}\n')
-    htmlpage.write('p.goodstuff {background-color:#009999;}\n')
-    htmlpage.write('p.badstuff {background-color:#ff4000;}\n')
+    htmlpage.write('p.Signal {background-color:#009999;}\n')
+    htmlpage.write('p.Noise {background-color:#ff4000;}\n')
     htmlpage.write('img {width:800; display: block;margin-left: auto;margin-right: auto }\n')
     htmlpage.write('h2 {color:white; }\n')
     htmlpage.write('</style></head>\n')
     htmlpage.write('<BODY>\n')
+    htmlpage.write('<form action="{}" method="post" id="main">\n'.format(handlabelrelpath))
     htmlpage.write('<h1>Components for '+ featdir +'</h1>')
 
     ## Signal for both
-    write_html_section(featdir, htmlpage, signal,"Signal Components","goodstuff")
+    write_html_section(featdir, htmlpage, signal,"Signal")
 
     ## add a break
     htmlpage.write('<br>\n')
 
     ## Signal for both
-    write_html_section(featdir, htmlpage, noise,"Noise Components","badstuff")
+    write_html_section(featdir, htmlpage, noise,"Noise")
 
     ## finish the file
-    htmlpage.write('</BODY></HTML>\n')
+    htmlpage.write('<br>\n')
+    htmlpage.write('<input type="submit" name="submit" value="Show/Update Labels"></br>\n</form>\n')
+    htmlpage.write('<br><h3>To write handlabels copy this line into the terminal:</h3>\n')
+    htmlpage.write('<br><p>echo "<span id="output"></span>')
+    htmlpage.write('" > ' + handlablefile + '</p><br>\n')
+
+    htmlpage.write('<script type="text/javascript">\n')
+    htmlpage.write('$("#main").submit(function(e) {\n')
+    htmlpage.write('  e.preventDefault();\n')
+    htmlpage.write('  var handlabels = "[";\n')
+
+    for IC in range(1, len(signal) + len(noise) + 1):
+        htmlpage.write('  if ($("input[name=IC' + str(IC) +']:checked").val() == "Noise") ')
+        htmlpage.write('{handlabels += "'+ str(IC) +', ";}\n')
+
+    htmlpage.write('  handlabels = handlabels.substring(0,handlabels.length - 2) + "]";\n')
+    htmlpage.write('  $("#output").text(handlabels);\n});\n</script>\n')
+
+    htmlpage.write('</BODY>\n</HTML>\n')
     htmlpage.close() # you can omit in most cases as the destructor will call it
 
 
@@ -199,9 +229,9 @@ for featdir in featdirs:
 
     ## write this info to csvreport
     idx = csvreport[csvreport.featdir == featdir].index[0]
-    csvreport.PercentExcluded[idx] = PercentExcluded
-    csvreport.NumSignal[idx] = NumSignal
-    csvreport.numICs[idx] = numICs
+    csvreport[idx,'PercentExcluded'] = PercentExcluded
+    csvreport[idx,'NumSignal'] = NumSignal
+    csvreport[idx,'numICs'] = numICs
 
 
 ## finish the file
