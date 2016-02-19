@@ -336,10 +336,7 @@ The following is a code block demonstrating this structure (based on `epitome/co
         except ValueError as ve:
             return '', None
 
-<<<<<<< HEAD
-=======
         # return a single line for the master script with the appropriate command-line arguments set
->>>>>>> 20b25461484685cf77512c5d07bb72bc94ef3974
         line = '. ${DIR_PIPE/epitome/modules/pre/surfsmooth {} {}'.format(input_name, fwhm)
         return line, output
 
