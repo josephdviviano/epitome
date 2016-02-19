@@ -6,6 +6,6 @@ Usage: gen_gcor <func_prefix>
 
 Calls an AFNI script to calculate the global correlation for each concatenated set of runs (across all sessions). Useful for resting state functional connectivity experiments.
 
-Prerequisites: init_epi
+Prerequisites: init_*, motion_deskull.
 
 Outputs: .gcor files in /PARAMS

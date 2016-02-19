@@ -72,6 +72,6 @@ This computes detrended nuisance time series, fits each run with a computed nois
 [4] Behzadi Y, et al. 2007. A component based noise correction method (CompCor) for BOLD and perfusion based fMRI. Neuroimage. 37(1).
 [5] Satterthwaite TF, et al. 2013. An improved framework fro confound regression and filtering for control of motion artifact in the preprocessing of resting-state functional connectivity data. Neuroimage. 64(1).
 
-Prerequisites: init_epi, linreg_calc_afni/fsl, linreg_FS2epi_afni/fsl.
+Prerequisites: init_*, motion_deskull, linreg_calc_afni/fsl, linreg_FS2epi_afni/fsl.
 
 Outputs: set of masks, regressors in PARAMS/, detrend (detrended, before regression model, mean per voxel removed), mean, std (standard deviation), noise (fit of regression model), filtered (residuals of regression model, mean added back in).

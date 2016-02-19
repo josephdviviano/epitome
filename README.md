@@ -60,11 +60,12 @@ Currently, epitome requires the user to have installed and configured the follow
 
 Optional:
 
-+ [Grid Engine](http://gridscheduler.sourceforge.net/) or [PBS](http://www.adaptivecomputing.com/products/open-source/torque/)
-+ [FSL FIX 1.61](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX)
-+ [Bioread 0.9.3](https://pypi.python.org/pypi/bioread/0.9.3)
-+ [Connectome Workbench](http://www.humanconnectome.org/software/connectome-workbench.html) (if running in "HCP mode")
-+ [HCP Pipeline Scripts and Atlases](http://www.humanconnectome.org/documentation/HCP-pipelines/index.html) (if running in "HCP mode")
++ [Grid Engine: epi-queue](http://gridscheduler.sourceforge.net/) or [PBS](http://www.adaptivecomputing.com/products/open-source/torque/)
++ [FSL FIX 1.61: ica_fix](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX)
++ [Bioread 0.9.3: epi-physio](https://pypi.python.org/pypi/bioread/0.9.3)
++ [gradunwarp: unwarp](https://github.com/Washington-University/gradunwarp)
++ [Connectome Workbench](http://www.humanconnectome.org/software/connectome-workbench.html) if running in "HCP mode"
++ [HCP Pipeline Scripts and Atlases](http://www.humanconnectome.org/documentation/HCP-pipelines/index.html) if running in "HCP mode"
 
 Introduction
 ------------
@@ -320,25 +321,29 @@ Finally, the function should ask the user a single question for each command-lin
 
 This set of questions should be wrapped in a try-except loop, checking for `ValueErrors`. If the user inputs an inappropriate option, the function will throw an error and return the special type `None`, which will prompt epitome to ignore the current call to the function and ask the user to try again. If all is well, the collected variables should be passed to the line variable, which contains a BASH formatted string that will be printed to the master script.
 
-The following is a code block demonstrating this structure (from the function `epitome/commands/surfsmooth.py`):
+The following is a code block demonstrating this structure (based on `epitome/commands/surfsmooth.py`):
+
+    import epitome as epi
 
     def surfsmooth(input_name):
         output = 'smooth'
-
         print('\nSmoothing functional data on a cortical surface.')
 
+        # have the user input one floating-point number, and error out if the user makes a mistake
         try:
             print('\nInput smoothing kernel FWHM (mm):')
-            fwhm, output = selector_float(output)
-
+            fwhm = epi.utils.selector_float()
         except ValueError as ve:
             return '', None
 
-        line = ('. ${DIR_PIPE/epitome/modules/pre/surfsmooth ' +
-                                          str(input_name) + ' ' +
-                                          str(fwhm))
+<<<<<<< HEAD
+=======
+        # return a single line for the master script with the appropriate command-line arguments set
+>>>>>>> 20b25461484685cf77512c5d07bb72bc94ef3974
+        line = '. ${DIR_PIPE/epitome/modules/pre/surfsmooth {} {}'.format(input_name, fwhm)
         return line, output
 
 **documentation**
 
 This is a very important part of module-building. Documentation for a given module is supplied in the doc/ folder, in a markdown document sharing the name of the module itself. This will be viewable on both GitHub, any future web-hosted manual location, and will also be used to generate the command-line help. Remember -- epitome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
+

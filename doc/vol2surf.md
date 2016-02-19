@@ -6,7 +6,7 @@ Usage: vol2surf <func_prefix>
 
 Projects functional data from volume space to a Freesurfer generated cortical mesh. This must be run on epi data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter!
 
-Prerequisites: init_epi, linreg_calc_afni, linreg_epi2T1_afni.
+Prerequisites: init_*, motion_deskull, linreg_calc_afni, linreg_epi2T1_afni.
 
 Outputs: Surface files (left and right seperately).
 

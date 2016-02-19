@@ -5,18 +5,18 @@ every voxel in the supplied mask. This function assumes all supplied
 images are the same size.
 
 Usage:
-    epi-seed-corr [options] <func> <seed> <mask>
+    epi-seed-corr [options] <func> <seed> <mask> <output>
 
 Arguments:
     <func>          functional data
     <seed>          seed mask
     <mask>          brain mask
+    <output>        output name (no extension, .nifti.gz output manditory)
 
 Options:
     --weighted         compute weighted average timeseries from the seed map
     --use-TRs FILE     Only use the TRs listed in the file provided (TR's in file starts with 1)
     --output-ts        Also output write the from the seed to text
-    --outputname STR   Specify the output filename
 
 DETAILS:
     At the moment, the seed mask only works with a single seed (all nonzero
@@ -27,18 +27,20 @@ import sys
 import numpy as np
 import scipy as sp
 import nibabel as nib
-
 from epitome.docopt import docopt
 
 def main():
     arguments = docopt(__doc__)
-    func = arguments['<func>']
-    seed = arguments['<seed>']
-    mask = arguments['<mask>']
+    func   = arguments['<func>']
+    seed   = arguments['<seed>']
+    mask   = arguments['<mask>']
+    output = arguments['<output>']
     weighted = arguments['--weighted']
-    TRs_plusone_file = arguments['--use-TRs']
+    TR_file = arguments['--use-TRs']
     output_ts = arguments['--output-ts']
-    outbase = arguments['--outputname']
+
+    # check types
+    output = str(output)
 
     # determine the filenames
     if func[-7:] == '.nii.gz':
@@ -51,8 +53,13 @@ def main():
     elif seed[-4:] == '.nii' or seed[-4:] == '.mnc':
         seedname = seed[:-4]
 
-    if outbase==None:
-        outbase = 'corr_' + seedname + '_' + funcname
+    # set output name: remove .nii.gz or .nii ext from output name if given
+    if output == None:
+        output = 'corr_{}_{}'.format(seedname, funcname)
+    if output[-7:] == '.nii.gz':
+        output = output[:-7]
+    elif output[-4:] == '.nii' or output[-4:] == '.mnc':
+        output = output[:-4]
 
     # import template, store the output paramaters
     seed = nib.load(seed)
@@ -69,47 +76,43 @@ def main():
     seed = seed.reshape((dims[0]*dims[1]*dims[2], 1))
     mask = mask.reshape((dims[0]*dims[1]*dims[2], 1))
 
-    ## decide which TRs go into the correlation
-    if TRs_plusone_file :
-        TRs_plusone = np.loadtxt(TRs_plusone_file,int)
-        TRs = TRs_plusone - 1
+    # decide which TRs go into the correlation
+    if TR_file:
+        TR_file = np.loadtxt(TR_file, int)
+        TRs = TR_file - 1 # shift TR-list to be zero-indexed
     else:
         TRs = np.arange(dims[3])
 
     # get mean seed timeseries
     idx_mask = np.where(mask >= 1)[0]
-    seed[np.where(mask >= 1)[1]]=0
+    seed[np.where(mask >= 1)[1]] = 0
 
-
+    # calculate weight mask if required
     if weighted:
-        seed_ts = np.average(func,
-            axis=0,
+        seed_ts = np.average(func, axis=0,
             weights=seed.reshape((dims[0]*dims[1]*dims[2])))
     else:
         idx_seed = np.where(seed >= 1)[0]
         seed_ts = np.mean(func[idx_seed, :], axis=0)
 
-    # create correlation vector
-    #corr = sp.corrcoef(seed_ts, func[idx_mask, :])
-
     # create output array
     out = np.zeros([dims[0]*dims[1]*dims[2], 1])
 
-    # look through each time series, calculating r + z
+    # look through each time series, calculating r
     for i in np.arange(len(idx_mask)):
-        out[idx_mask[i]] = np.corrcoef(seed_ts[TRs],
-                                       func[idx_mask[i], TRs])[0][1]
+        out[idx_mask[i]] = np.corrcoef(seed_ts[TRs], func[idx_mask[i], TRs])[0][1]
 
     # create the 3D volume and export
     out = out.reshape([dims[0], dims[1], dims[2], 1])
     out = nib.nifti1.Nifti1Image(out, outA)
 
-    ## write out the ts if asked
+    # write out the ts if asked
     if output_ts:
-        np.savetxt(outbase + '_ts.txt', seed_ts)
+        np.savetxt('{}_ts.txt'.format(output), seed_ts)
 
-    out.to_filename(outbase + '.nii.gz')
-    print('*** Completed ' + outbase + '***')
+    # write out nifti
+    out.to_filename('{}.nii.gz'.format(output))
 
 if __name__ == '__main__':
     main()
+
