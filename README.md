@@ -4,7 +4,7 @@ epitome is a MRI pipeline for generating pipelines out of BASH 'modules'. It is 
 
 epitome is also a package of tools for conducting network analysis (and other types analysis) on fMRI data. These features are intended to eventually play nicely with [NetworkX](https://networkx.github.io/) and replicate at least the base functionality of the [BCT (brain connectivity toolbox)](https://sites.google.com/site/bctnet/) in the Python environment.
 
-Written by Joseph D. Viviano, 2014-2015. Contact: joseph@viviano.ca
+Written by Joseph D. Viviano and Erin W Dickie, 2014-16.
 
 > As long as our brain is a mystery, the universe, the reflection of the structure of the brain will also be a mystery.
 > -- Santiago Ramón y Cajal
