@@ -7,6 +7,6 @@ Usage: nonlinreg_epi2mni_afni <func_prefix> <voxel_dims>
 
 Prepares data for analysis in MNI standard-space, including a nonlinear warp. This also performs a linear registration, so the input data should be in native space.
 
-Prerequisites: init_epi, linreg_calc_afni, nonlinreg_calc_afni
+Prerequisites: init_*, motion_deskull, linreg_calc_afni, nonlinreg_calc_afni
 
 Outputs: MNI-nonlin

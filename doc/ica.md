@@ -7,7 +7,7 @@ Usage: ica <func_prefix> <mask_prefix>
 
 Runs ICA on each input functional file of the type defined using the default MELODIC settings. This module could be easily tweaked to grant the user access to the dimensionality estimation settings, if need be. The output is the full MELODIC report in a `.ica` folder.
 
-Prerequisites: init_epi.
+Prerequisites: init_*, motion_deskull.
 
 Outputs: MELODIC.ica folders (does not directly affect pipeline, no func_whatever.nii.gzs are produced).
 

@@ -16,8 +16,7 @@ def run(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = ('. ${{DIR_PIPE}}/epitome/modules/pre/detrend {input_name} {polort}').format(
-                              input_name=str(input_name),
-                              polort=str(polort))
+    line = '. ${{DIR_PIPE}}/epitome/modules/pre/detrend {} {}'.format(
+                                                        input_name, polort)
 
     return line, output

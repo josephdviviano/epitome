@@ -16,8 +16,10 @@ def FD(motion, head_radius):
     # load motion parameters
     FD = np.genfromtxt(motion)
 
-    # check input head_radius
-    if type(head_radius) != int or type(head_radius) != float:
+    # check input head_radius (convert to float)
+    try:
+        head_radius = float(head_radius)
+    except:
         print('Invalid head radius, defaulting to 50 mm')
         head_radius = 50
 
@@ -29,9 +31,11 @@ def FD(motion, head_radius):
     FD = np.sum(np.abs(np.diff(FD, n=1, axis=0)), axis=1)
     FD = np.insert(FD, 0, 0) # align FD with original run & DVARS
 
+    print(FD)
+
     return FD
 
-def FDR_mask(p=[], q=0.05, iid='yes', crit='no'):
+def FDR_mask(p=[], q=1.05, iid='yes', crit='no'):
 
     """
     Calculates the Benjamini & Hochberg (1995) correction for multiple

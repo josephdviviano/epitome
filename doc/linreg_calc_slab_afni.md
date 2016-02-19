@@ -12,7 +12,7 @@ Each session should have its own whole head EPI, and should be placed into its o
 
 This outputs of this will be identical in utility to `linreg_calc_afni`.
 
-Prerequisites: init_epi.
+Prerequisites: init_epi, motion_deskull.
 
 Outputs: Registration .1D files, resampled anatomicals (including mean EPI).
 
