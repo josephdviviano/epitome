@@ -20,6 +20,10 @@ Make pretty pictures
 
 QC is put in $HCP_DATA_PATH/qc_fsaverage32k/ by default
 
+To do list:
+ + split some into a line of images
+ + dict of exected pics
+
 Written by Erin W Dickie, Feb 2016
 """
 from docopt import docopt
@@ -77,12 +81,28 @@ for subject in subjects:
     scenestream.write(scene_txt)
     scenestream.close()
 
+    qchtml = os.path.join(qc_subdir, 'qc_{}.html'.format(subject))
+    qchtml = open(qchtml,'w')
+    qchtml.write('<HTML><TITLE> qc {} fsaverage_LR32k </TITLE>\n'.format(subject))
+    qchtml.write('<head>\n<style>\n'
+                 'body { background-color:#333333; '
+                 'font-family: futura,sans-serif;'
+                 'color:white;text-align: center;}\n'
+                 'a {color:#99CCFF;}\n'
+                 '</style></head>\n'
+                 '<body>\n')
+
+    qchtml.write('<h1> QC {} fsaverage_LR32k</h1>\n'.format(subject))
+
     for scene_num in scene_list:
+        pic = os.path.join(qc_subdir,'scene_{}.png'.format(scene_num))
         docmd(['wb_command', '-show-scene',
                 scenefile, str(scene_num),
-                os.path.join(qc_subdir,'scene_{}.png'.format(scene_num)),
-                '600', '400'])
+                pic,'600', '400'])
+        picrelpath = os.path.relpath(pic,os.path.dirname(qchtml.name))
+        htmlpage.write('<a href="{}"><img src="{}"></a><br>\n'.format(picrelpath,picrelpath))
 
+    qchtml.close()
     ## remove the subjects scene file
     docmd(['rm', scenefile])
 
@@ -101,6 +121,8 @@ for scene_num in scene_list:
 
     htmlindex.write('<h1> QC Scene {}</h1>\n'.format(scene_num))
     for subject in subjects:
+        subjectpage = os.path.join(qc_subdir, 'qc_{}.html'.format(subject))
         pic = os.path.join(qcdir,subject,'scene_{}.png'.format(scene_num))
         picrelpath = os.path.relpath(pic,os.path.dirname(htmlindex.name))
-        htmlindex.write('<a href="{}"><img src="{}">{}</a><br>\n'.format(picrelpath,picrelpath,subject))
+        subrelpath = os.path.relpath(subjectpage,os.path.dirname(htmlindex.name))
+        htmlindex.write('<a href="{}"><img src="{}">{}</a><br>\n'.format(subrelpath,picrelpath,subject))
