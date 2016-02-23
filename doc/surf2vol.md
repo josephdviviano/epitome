@@ -7,6 +7,6 @@ Usage: surf2vol <func_prefix> <target_prefix>
 
 This projects surface data back into a functional volume with the same properties as <target_prefix>.
 
-Prerequisites: init_epi, linreg_calc_afni, linreg_epi2T1_afni, vol2surf.
+Prerequisites: init_*, motion_deskull, linreg_calc_afni, linreg_epi2T1_afni, vol2surf.
 
 Outputs: ctx

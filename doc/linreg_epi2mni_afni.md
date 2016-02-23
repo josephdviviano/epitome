@@ -7,6 +7,6 @@ Usage: linreg_epi2mni_afni <func_prefix> <voxel_dims>
 
 Prepares data for analysis in MNI standard space.
 
-Prerequisites: init_epi, linreg_calc_afni.
+Prerequisites: init_*, motion_deskull, linreg_calc_afni.
 
 Outputs: MNI-lin

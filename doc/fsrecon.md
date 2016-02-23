@@ -1,6 +1,6 @@
 fsrecon.py
 ----------
-Usage: fsrecon.py <data_directory> <experiment> <modality> <cores> \
+Usage: fsrecon.py <data_directory> <experiment> <modality> <cores>
 
 + data_directory -- full path to your MRI/WORKING directory.
 + experiment -- name of the experiment being analyzed.

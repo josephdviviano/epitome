@@ -10,5 +10,5 @@ Usage: template <func_prefix> <opt1> <opt2> <opt3> <opt4>
 
 This just prints to the screen. but is a useful template for constructing your own modules from.
 
-Prerequisites: init_epi.
+Prerequisites: init_*.
 

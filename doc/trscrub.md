@@ -10,7 +10,7 @@ Usage: trscrub <func_prefix> <head_size> <FD_thresh> <DV_thresh> <mode>
 
 This removes motion-corrupted TRs from fMRI scans and outputs modified versions for connectivity analysis (mostly). By default, DVARS regression is set of OFF by using a very, very high threshold. The interp version is best used before lowpass filtering, and is the only reasonable option if you are analyzing some form of task data.
 
-Prerequisites: init_epi.
+Prerequisites: init_*, motion_deskull.
 
 Outputs: scrubbed
 

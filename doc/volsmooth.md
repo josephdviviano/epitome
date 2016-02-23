@@ -13,7 +13,7 @@ In 'normal' mode, blurs towards target FWHM iteratively using a 'noise' dataset 
 
 In 'multimask' mode, blurs iteratively within unique mask values. This is not as clever a mode, in that it does not explicitly work on a noise model of the data, but can be useful in the subcortical regions when you do not want to blur into non-brain regions or between adjacent nuclei. All zero values in the mask are zeroed out in the output. The output of this can be combined with the outputs of surfsmooth & surf2vol using combine_volumes, if you want cortically-smoothed data and subcortically-smoothed data to be generated in surface and volume space, respectively.
 
-Prerequisites: init_epi, (filtered preferred, not required, for normal mode).
+Prerequisites: init_*, motion_deskull, (filtered preferred, not required, for normal mode).
 
 Outputs: volsmooth
 

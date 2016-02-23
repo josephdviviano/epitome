@@ -4,4 +4,4 @@ Usage: linreg_t12mni_afni
 
 Brings T1 data in register with MNI standard space.
 
-Prerequisites: init_epi, linreg_calc_afni, linreg_epi2t1_afni.
+Prerequisites: init_*, motion_deskull, linreg_calc_afni, linreg_epi2t1_afni.
