@@ -1,7 +1,106 @@
+#!/usr/bin/env python
+"""
+Makes pictures of standard views from the hcp files and pastes them
+together into a qcpage.
+
+Usage:
+    epi-qc-fs2hcp [options]
+
+Options:
+  --qcdir PATH             Full path to location of QC directory
+  --html-out FILE          Name [default: qc_fsaverage32k.html] (fullpath) to index html file.
+  --subject STR            Subject ID to process
+  -v,--verbose             Verbose logging
+  --debug                  Debug logging in Erin's very verbose style
+  -n,--dry-run             Dry run
+  --help                   Print help
+
+DETAILS
+Make pretty pictures
+
+QC is put in $HCP_DATA_PATH/qc_fsaverage32k/ by default
+
+Written by Erin W Dickie, Feb 2016
+"""
+from docopt import docopt
+import epitome as epi
+import os
+import subprocess
+import glob
+import sys
+import pandas as pd
+import numpy as np
+
+arguments       = docopt(__doc__)
+subid           = arguments['--subject']
+qcdir           = arguments['--qcdir']
+htmlindex       = arguments['--html-out']
+VERBOSE         = arguments['--verbose']
+DEBUG           = arguments['--debug']
+DRYRUN          = arguments['--dry-run']
+if DEBUG: print arguments
+
+### Erin's little function for running things in the shell
+def docmd(cmdlist):
+    "sends a command (inputed as a list) to the shell"
+    if DEBUG: print ' '.join(cmdlist)
+    if not DRYRUN: subprocess.call(cmdlist)
+
 ## to run qc
 ## copy qc_template.scene into your hcp directory as qc_views.scene
+
+template_scene = os.path.join(epi.config.find_epitome(),'assets','qcviews_template.scene')
+template_txt = open(template_scene, 'r').read()
+scene_list = range(1,6)
+
+## get the hcp_data_dir - cause we use it a lot
+hcp_data_dir = epi.config.find_hcp_data()
+## set the qcdir Structure
+if not qcdir:
+    qcdir = os.path.join(hcp_data_dir,'qc_fsaverage32k')
+
 ## for each subject
-#     find and replace HCP_DATA_PATH/ with the $HCP_DATA directory path
-#     find and replace SUBJID with the subjects id
-#     run: wb_command -show-scene qcviews.scene 1 qc/subject/scene_file_test1_1.png 600 400
-## repeat above up to pic5
+if subid:
+    subjects = [subid]
+else:
+    subjects = epi.utilities.get_subj(hcp_data_dir)
+
+for subject in subjects:
+    ## make the output directory
+    qc_subdir = os.path.join(qcdir,subject)
+    docmd(['mkdir','-p', qc_subdir])
+
+    scenefile = os.path.join(hcp_data_dir,'qc_{}.scene'.format(subject))
+    scenestream = open(scenefile,'w')
+    scene_txt = template_txt.replace('HCP_DATA_PATH/', hcp_data_dir)
+    scene_txt = scene_txt.replace('SUBJID',subject)
+    scenestream.write(scene_txt)
+    scenestream.close()
+
+    for scene_num in scene_list:
+        docmd(['wb_command', '-show-scene',
+                scenefile, str(scene_num),
+                os.path.join(qc_subdir,'scene_{}.png'.format(scene_num)),
+                '600', '400'])
+
+    ## remove the subjects scene file
+    docmd(['rm', scenefile])
+
+## Start the index html file
+for scene_num in scene_list:
+    htmlindex = os.path.join(qcdir, 'scene{}_allsubs.html'.format(scene_num))
+    htmlindex = open(htmlindex,'w')
+    htmlindex.write('<HTML><TITLE> qc hcp scene </TITLE>\n'
+                    '<head>\n<style>\n'
+                    'body { background-color:#333333; '
+                    'font-family: futura,sans-serif;'
+                    'color:white;text-align: center;}\n'
+                    'a {color:#99CCFF;}\n'
+                    '</style></head>\n'
+                    '<body>\n')
+
+    htmlindex.write('<h1> QC Scene {}</h1>\n'.format(scene_num))
+    for subject in subjects:
+        pic = os.path.join(qcdir,subject,'scene_{}.png'.format(scene_num))
+        picrelpath = os.path.relpath(pic,os.path.dirname(htmlindex.name))
+        htmlindex.write('<a href="{}"><img src="{}">{}</a><br>\n'.format(picrelpath,picrelpath,subject))
