@@ -176,7 +176,7 @@ for scene_num in range(1,len(scene_list) + 1):
 
         # add the pic and a link to the subjects' page
         for subject in subjects:
-            subjectpage = os.path.join(qc_subdir, 'qc_{}.html'.format(subject))
+            subjectpage = os.path.join(qcdir,subject,'qc_{}.html'.format(subject))
             pic = os.path.join(qcdir,subject,'{}.png'.format(scene_dict['Name']))
             picrelpath = os.path.relpath(pic,os.path.dirname(htmlindex.name))
             subrelpath = os.path.relpath(subjectpage,os.path.dirname(htmlindex.name))
