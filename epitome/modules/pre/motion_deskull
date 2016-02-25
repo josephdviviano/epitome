@@ -2,9 +2,8 @@
 
 cat <<EOF
 export INPUT=$(echo func_${1})
-export DATA_QUALITY=${2}
-export MASKING=${3}
-export MASK_METHOD=${4}
+export MASKING=${2}
+export MASK_METHOD=${3}
 
 EOF
 
@@ -22,20 +21,11 @@ for SESS in ${DIR_SESS}; do
 
         # deoblique, motion correct, and scale data
         if [ ! -f ${SESS}/func_motion.${ID}.${NUM}.nii.gz ]; then
-            # deoblique run
-            3dWarp \
-                -prefix ${SESS}/func_tmp_ob.${ID}.${NUM}.nii.gz \
-                -deoblique \
-                -quintic \
-                -verb \
-                -gridset ${SESS}/${INPUT}.${ID}.01.nii.gz \
-                ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > \
-                ${SESS}/PARAMS/deoblique.${ID}.${NUM}.1D
 
             # motion correct to 9th sub-brick of 1st run
             3dvolreg \
                 -prefix ${SESS}/func_motion.${ID}.${NUM}.nii.gz \
-                -base ${SESS}'/func_tmp_ob.'${ID}'.01.nii.gz[8]' \
+                -base ${SESS}/${INPUT}.${ID}'.01.nii.gz[8]' \
                 -twopass \
                 -twoblur 3 \
                 -twodup \
@@ -45,7 +35,7 @@ for SESS in ${DIR_SESS}; do
                 -float \
                 -1Dfile ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
                 -1Dmatrix_save ${SESS}/PARAMS/3dvolreg.${ID}.${NUM}.aff12.1D \
-                ${SESS}/func_tmp_ob.${ID}.${NUM}.nii.gz
+                ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
             # create lagged motion regressors
             if [ ! -f ${SESS}/PARAMS/lag.motion.${ID}.${NUM}.1D ]; then
@@ -67,34 +57,35 @@ for SESS in ${DIR_SESS}; do
             fi
 
             # make a registration volume for low-quality data if required
-            if [ ${DATA_QUALITY} = 'low' ] && [ ${NUM} = 01 ]; then
+            if [ -f ${SESS}/anat_EPI_initTR.nii.gz ] && [ ${NUM} = 01 ] && [ ! -f ${SESS}/anat_EPI_initTR_reg.nii.gz ]; then
+                
                 # deoblique registration volume
                 3dWarp \
-                    -prefix ${SESS}/anat_EPI_tmp_initTR_ob.nii.gz \
+                    -prefix ${SESS}/anat_EPI_initTR_ob.nii.gz \
                     -deoblique \
                     -quintic \
                     -verb \
                     -gridset ${SESS}/${INPUT}.01.nii.gz \
-                    ${SESS}/anat_EPI_tmp_initTR.nii.gz
+                    ${SESS}/anat_EPI_initTR.nii.gz
 
                 # align registration volume with the motion correction TR
                 3dvolreg \
-                    -prefix ${SESS}/anat_EPI_initTR.nii.gz \
-                    -base ${SESS}'/func_tmp_ob.01.nii.gz[8]' \
+                    -prefix ${SESS}/anat_EPI_initTR_reg.nii.gz \
+                    -base ${SESS}/${INPUT}.${ID}.'01.nii.gz[8]' \
                     -twopass \
                     -twoblur 3 \
                     -twodup \
                     -Fourier \
                     -zpad 2 \
                     -float \
-                    ${SESS}/anat_EPI_tmp_initTR_ob.nii.gz
+                    ${SESS}/anat_EPI_initTR_ob.nii.gz
             fi
         fi
 
         # create TS mean for each run
         if [ ! -f ${SESS}/anat_EPI_brain.nii.gz ]; then
             3dTstat \
-                -prefix ${SESS}/anat_EPI_tmp_ts_mean.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/anat_EPI_ts_mean.${ID}.${NUM}.nii.gz \
                 ${SESS}/func_motion.${ID}.${NUM}.nii.gz
         fi
 
@@ -105,7 +96,7 @@ for SESS in ${DIR_SESS}; do
         # create mean over all runs
         3dMean \
             -prefix ${SESS}/anat_EPI_tmp_mean.nii.gz \
-            ${SESS}/anat_EPI_tmp_ts_mean.${ID}.*.nii.gz
+            ${SESS}/anat_EPI_ts_mean.${ID}.*.nii.gz
 
         3dTstat \
             -prefix ${SESS}/anat_EPI_tmp_vol.nii.gz \
@@ -172,7 +163,7 @@ for SESS in ${DIR_SESS}; do
         if [ ${DATA_QUALITY} = 'low' ]; then
             3dcalc \
                 -prefix ${SESS}/anat_EPI_initTR_brain.nii.gz \
-                -a ${SESS}/anat_EPI_initTR.nii.gz \
+                -a ${SESS}/anat_EPI_initTR_reg.nii.gz \
                 -b ${SESS}/anat_EPI_mask.nii.gz \
                 -expr 'a*b'
         fi
