@@ -33,7 +33,7 @@ for SESS in ${DIR_SESS}; do
             # retain 1st TR from 1st run (prestabilization)
             if [ ${DATA_QUALITY} = 'low' ] && [ ${NUM} = 01 ]; then
                 3dcalc \
-                    -prefix ${SESS}/anat_EPI_tmp_initTR.nii.gz \
+                    -prefix ${SESS}/anat_EPI_initTR.nii.gz \
                     -a ${SESS}/func_tmp_RAI.${ID}.${NUM}.nii.gz[0] \
                     -expr 'a'
             fi

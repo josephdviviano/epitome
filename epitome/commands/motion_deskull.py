@@ -7,9 +7,6 @@ def run(input_name):
     print('\nMotion correction and brain masking.')
 
     try:
-        # get the data-quality option
-        print('\nSelect data quality:')
-        quality = epi.utilities.selector_list(['low', 'high'])
 
         # masking
         print('\nEPI masking: acquisition dependent')
@@ -25,7 +22,7 @@ def run(input_name):
         return '', None
 
     # otherwise we print the command and return it
-    line = '. ${{DIR_PIPE}}/epitome/modules/pre/motion_deskull {} {} {} {}'.format(
-                                             input_name, quality, masking, mask_method)
+    line = '. ${{DIR_PIPE}}/epitome/modules/pre/motion_deskull {} {} {}'.format(
+                                             input_name, masking, mask_method)
 
     return line, output
