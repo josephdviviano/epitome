@@ -156,7 +156,7 @@ def check_environment(mode='verbose'):
     dir_pipe = epi.config.find_epitome()
     dir_hcp_data = epi.config.find_hcp_data()
     dir_hcp_tools = epi.config.find_hcp_tools()
-    dir_workbench = epi.config.find_workbench()
+    workbench = epi.config.find_workbench()
     dir_clone = epi.config.find_clone()
 
     # checks for manditory software
@@ -202,7 +202,7 @@ def check_environment(mode='verbose'):
     if dir_hcp_tools == None:
         print('WARNING: HCPPIPEDIR is not set.  HCP modules will not work.')
 
-    if dir_workbench == None:
+    if workbench == None:
         print('WARNING: wb_command is unavailable. HCP modules will not work.')
 
     if dir_fix == None:
@@ -233,7 +233,7 @@ def check_environment(mode='verbose'):
                     DIR_MATLAB=DIR_MATLAB,
                     hcp_data=dir_hcp_data,
                     hcp_tools=dir_hcp_tools,
-                    wb_command=workbence))
+                    wb_command=workbench))
         print(txt)
 
 def check_run(expt, subj, mode, sess, run):
@@ -505,8 +505,8 @@ def main():
     ### Figure out if this is set up for hcp tools
     dir_hcp_data = epi.config.find_hcp_data()
     dir_hcp_tools = epi.config.find_hcp_tools()
-    dir_workbench = epi.config.find_workbench()
-    if not all([dir_hcp_data, dir_hcp_tools, dir_workbench]) :
+    workbench = epi.config.find_workbench()
+    if all([dir_hcp_data, dir_hcp_tools, workbench]) :
         HCPMODE = True
         print('Running epitome - with HCP extras!. Select experiment.')
     else:
@@ -751,4 +751,3 @@ if __name__ == "__main__":
     # return the usage if the user does a silly thing
     else:
         print(__doc__)
-

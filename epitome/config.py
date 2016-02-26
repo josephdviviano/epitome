@@ -49,12 +49,11 @@ def find_workbench():
     Returns path of the workbench bin/ folder, or None if unavailable.
     """
     try:
-        dir_workbench = subprocess.check_output('which wb_command', shell=True)
-        dir_workbench = '/'.join(dir_epitome.split('/')[:-2])
+        workbench = subprocess.check_output('which wb_command', shell=True)
     except:
-        dir_workbench = None
+        workbench = None
 
-    return dir_workbench
+    return workbench
 
 def find_matlab():
     """
