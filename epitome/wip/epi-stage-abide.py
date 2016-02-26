@@ -58,7 +58,9 @@ def find_and_copy_tagnii(colname,pattern):
     """
     for i in range(0,len(checklist)):
     	#if link doesn't exist
-    	targetdir = os.path.join(outputdir, checklist['id'][i],colname, 'SESS01', 'RUN01')
+        subject =  checklist['id'][i]
+        site = subject.split('_')[0]
+    	targetdir = os.path.join(outputdir, site, subject,colname, 'SESS01', 'RUN01')
     	if os.path.exists(targetdir)==False:
             niidir = os.path.join(inputdir,checklist['id'][i],checklist['id'][i],'scans')
     	    #if mnc name not in checklist
