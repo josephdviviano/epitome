@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-This plots a trace of the framewise displacement measure and DVARS measure 
-for each participant (Power et al. 2012). Participants are sorted in the 
-plot from best to worst behaved, and thresholds are printed to facilitate 
+This plots a trace of the framewise displacement measure and DVARS measure
+for each participant (Power et al. 2012). Participants are sorted in the
+plot from best to worst behaved, and thresholds are printed to facilitate
 qualitative participant rejection, if that's how you roll.
 
 Usage:
@@ -41,12 +41,12 @@ DV_t = 10   #
 quality = 0  # set to 1 for dpi = 300, eps output
 blacklist = []  # participants to exclude
 
-def factors(n):    
+def factors(n):
     """
     Returns all factors of n.
     """
-    
-    return set(reduce(list.__add__, 
+
+    return set(reduce(list.__add__,
                 ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
 
 def square_factors(fac, num):
@@ -67,7 +67,7 @@ def square_factors(fac, num):
                     factor = [x, y]
     if factor[0] > factor[1]:
         factor = factor[::-1]
-    
+
     return factor
 
 def figure_quality(q):
@@ -80,8 +80,8 @@ def figure_quality(q):
     else:
         size = 8
         dpi = 72
-    
-    return size, dpi 
+
+    return size, dpi
 
 def main():
     arguments = docopt(__doc__)
@@ -106,11 +106,11 @@ def main():
         FD = np.array([])
         for session in os.walk(os.path.join(path, expt, subj, mode)).next()[1]:
             d = os.path.join(path, expt, subj, mode, session)
-            for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
-                f = epi.stats.FD(os.path.join(d, 'PARAMS/motion.{}.{}.1D'.format(uid, '%02d' % run)), head_r)      
+            for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:
+                f = epi.stats.FD(os.path.join(d, 'PARAMS/motion.{}.{}.1D'.format(uid, '%02d' % run)), head_r)
                 FD = np.append(FD, f)
-            
-            #take total FD over all runs      
+
+            #take total FD over all runs
             dict_FD[subj] = np.sum(FD) / len(FD)
 
     # sort dict on normalized FD sum
@@ -118,15 +118,15 @@ def main():
 
     # find the most square set of factors for n_subj
     while flag == 0:
-        
+
         # get all candidate factors for the current number of subjects
         f_subj = factors(n_subj)
         factor = square_factors(f_subj, n_subj)
-        
+
         # check if solution is 'square enough'
         if float(factor[1]) / float(factor[0]) <= 1.5:
             flag = 1
-       
+
         # if not, try again with a larger number
         else:
             n_subj = n_subj + 1
@@ -134,25 +134,25 @@ def main():
     # init figure
     figure_size, figure_dpi = figure_quality(quality)
 
-    fig_FD, ax_FD = plt.subplots(nrows=factor[0], ncols=factor[1], 
-                                 figsize=(figure_size, figure_size), 
+    fig_FD, ax_FD = plt.subplots(nrows=factor[0], ncols=factor[1],
+                                 figsize=(figure_size, figure_size),
                                  dpi=figure_dpi, facecolor='white')
-    fig_DV, ax_DV = plt.subplots(nrows=factor[0], ncols=factor[1], 
-                                 figsize=(figure_size, figure_size), 
+    fig_DV, ax_DV = plt.subplots(nrows=factor[0], ncols=factor[1],
+                                 figsize=(figure_size, figure_size),
                                  dpi=figure_dpi, facecolor='white')
 
     for subj in subjects:
-        
+
         # skip the blacklist, otherwise find framewise displacement and DVARS
         if any(s in subj[0] for s in blacklist):
-            pass 
+            pass
         else:
             FD = np.array([])
             DV = np.array([])
             breaks = np.array([0])
             for session in os.walk(os.path.join(path, expt, subj[0], mode)).next()[1]:
                 d = os.path.join(path, expt, subj[0], mode, session)
-                for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:     
+                for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:
                     # framewise displacement
                     f = epi.stats.FD(os.path.join(d, 'PARAMS/motion.{}.{}.1D'.format(uid, '%02d' % run)), head_r)
                     FD = np.append(FD, f, axis=1) # per subject
@@ -163,19 +163,19 @@ def main():
                     # DVARS
                     f = np.genfromtxt(os.path.join(d, 'PARAMS/DVARS.{}.{}.1D'.format(uid, '%02d' % run)))
                     f = f[1:] / 10 # remove leading 0, conv. to % signal
-                    DV = np.append(DV, f) # per subject 
+                    DV = np.append(DV, f) # per subject
                     DV_all = np.append(DV_all, f) # across all subjects
-            
+
             t = np.arange(len(DV)) # time axis
-            
+
             # add vertical lines demarking runs
             for b in breaks:
                 ax_FD[ax_y][ax_x].axvline(x=b, ymin=0, ymax=100, color='black')
-            
+
             ax_FD[ax_y][ax_x].axhline(y=FD_t, xmin=0, xmax=len(t), color='red')
             ax_FD[ax_y][ax_x].plot(t, FD.T, lw=1, label=subj[0], color='blue')
             ax_FD[ax_y][ax_x].set_xlim((-3, len(t) + 3))
-            
+
             # crop subject numbers to the last 6 digits, if it is longer than 6
             if len(subj[0]) > 6:
                 ax_FD[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
@@ -189,7 +189,7 @@ def main():
             ax_DV[ax_y][ax_x].axhline(y=DV_t, xmin=0, xmax=len(t), color='red')
             ax_DV[ax_y][ax_x].plot(t, DV.T, lw=1, label=subj[0], color='green')
             ax_DV[ax_y][ax_x].set_xlim((-3, len(t) + 3))
-            
+
             # crop subject numbers to the last 6 digits, if it is longer than 6
             if len(subj[0]) > 6:
                 ax_DV[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
@@ -207,7 +207,7 @@ def main():
     for subj in np.arange(n_subj):
         if subj < len(subjects):
             # common y axis maximum
-            ax_FD[ax_y][ax_x].set_ylim((0, np.max(FD_all))) 
+            ax_FD[ax_y][ax_x].set_ylim((0, np.max(FD_all)))
             ax_DV[ax_y][ax_x].set_ylim((0, np.max(DV_all)))
 
             # remove unnecessary detail
@@ -219,7 +219,7 @@ def main():
             ax_DV[ax_y][ax_x].get_xaxis().tick_bottom()
             ax_FD[ax_y][ax_x].axes.get_xaxis().set_ticks([]) # remove x labels
             ax_DV[ax_y][ax_x].axes.get_xaxis().set_ticks([])
-            
+
             # add in x line at bottom
             xmin, xmax = ax_FD[ax_y][ax_x].get_xaxis().get_view_interval()
             ymin, ymax = ax_FD[ax_y][ax_x].get_yaxis().get_view_interval()
@@ -240,12 +240,12 @@ def main():
 
     fig_FD.suptitle('Framewise Displacement (mm/TR), threshold = {} mm/TR'.format(FD_t))
     fig_DV.suptitle('DVARS (% signal change/TR), line = {}%/TR'.format(DV_t))
-    
+
     fig_FD.subplots_adjust(hspace=0.7) # add some breathing room
     fig_DV.subplots_adjust(hspace=0.7)
 
     # export PDF
-    pdf = PdfPages(os.path.join(path, expt, 'qc_{}_motion_individual_{}.pdf'.format(uid, mode))
+    pdf = PdfPages(os.path.join(path, expt, 'qc_{}_motion_individual_{}.pdf'.format(uid, mode)))
     fig_FD.savefig(pdf, format='pdf')
     fig_DV.savefig(pdf, format='pdf')
 
