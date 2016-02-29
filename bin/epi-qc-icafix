@@ -28,7 +28,7 @@ I text line shows up at the bottom with a command to save the manuall ratings to
 
 Written by Erin W Dickie, August 25 2015
 """
-from docopt import docopt
+from epitome.docopt import docopt
 import os
 import subprocess
 import glob
