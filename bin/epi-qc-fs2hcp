@@ -26,7 +26,7 @@ To do list:
 
 Written by Erin W Dickie, Feb 2016
 """
-from docopt import docopt
+from epitome.docopt import docopt
 import epitome as epi
 import os
 import subprocess
