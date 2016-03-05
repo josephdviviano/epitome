@@ -23,6 +23,9 @@ QC is put in $HCP_DATA_PATH/qc_fsaverage32k/ by default
 To do list:
  + split some into a line of images
  + dict of exected pics
+ DTSERIESFILE --> the dtseries output file
+ SBREFFILE --> rhw SBref
+ + move to scene
 
 Written by Erin W Dickie, Feb 2016
 """
