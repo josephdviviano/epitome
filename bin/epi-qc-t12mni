@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Prints the central slice of the T1 and co-registered + deskulled EPI, 
+Prints the central slice of the T1 and co-registered + deskulled EPI,
 including an edge-detected version of the T1 (requires AFNI).
 
 Usage:
@@ -38,6 +38,9 @@ def main():
 
     # MNI brain -- same for everyone
     anat = os.path.join(path, expt, 'anat_MNI.nii.gz')
+    if not os.path.exists(anat):
+        anat_asset = os.path.join(epi.config.find_epitome(),'assets','MNI152_T1_1mm.nii.gz')
+        os.symlink(anat_asset,anat)
     #edge = os.path.join(path, expt, 'anat_MNI_edge.nii.gz')
 
     # # create edge dataset if it doesn't exist
@@ -60,7 +63,7 @@ def main():
     for subj in subjects:
 
         try:
-            reg = os.path.join(path, expt, subj, mode, 
+            reg = os.path.join(path, expt, subj, mode,
                                                 'SESS01/reg_T1_to_TAL.nii.gz')
         except:
             print('ERROR: No data found for ' + subj + ', skipping.')
