@@ -13,7 +13,6 @@ Options:
   --snaps-only             Do not write the index pages, only do subject pics
   --index-only             Only write the index pages, do not take subject pics
   --qcdir PATH             Full path to location of QC directory
-  --html-out FILE          Name (fullpath) to index html file.
   --subject STR            Subject ID to process
   -v,--verbose             Verbose logging
   --debug                  Debug logging in Erin's very verbose style
@@ -52,7 +51,6 @@ snaps_only      = arguments['--snaps-only']
 index_only      = arguments['--index-only']
 subid           = arguments['--subject']
 qcdir           = arguments['--qcdir']
-htmlindex       = arguments['--html-out']
 VERBOSE         = arguments['--verbose']
 DEBUG           = arguments['--debug']
 DRYRUN          = arguments['--dry-run']
