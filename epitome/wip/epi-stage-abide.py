@@ -10,7 +10,7 @@ Arguments:
   <epi_data_dir>    Top directory for the epitome project tree structure
 
 Options:
-  --copy                   Copies the input files (default is to symlink)
+  --fslreorient2std        Runs fslreorient2std on the input files (default is to symlink)
   --subjectlist FILE       Text file containing a list of subject
   -v,--verbose             Verbose logging
   --debug                  Debug logging in Erin's very verbose style
@@ -36,7 +36,7 @@ import datetime
 arguments       = docopt(__doc__)
 inputdir        = arguments['<abide_inputdir>']
 outputdir       = arguments['<epi_data_dir>']
-COPYFILES       = arguments['--copy']
+FSL2STD       = arguments['--fslreorient2std']
 subjlistfile    = arguments['--subjectlist']
 DEBUG           = arguments['--debug']
 DRYRUN          = arguments['--dry-run']
@@ -81,8 +81,8 @@ def find_and_copy_tagnii(colname,pattern):
                     nii_base = os.path.basename(niipath)
                     targetpath = os.path.abspath(os.path.join(targetdir,nii_base))
                     docmd(['mkdir','-p',targetdir])
-                    if COPYFILES:
-                        docmd(['cp', niipath, targetdir])
+                    if FSL2STD:
+                        docmd(['fslreorient2std', niipath, targetdir])
                     else:
                         os.symlink(niipath, targetpath)
 
