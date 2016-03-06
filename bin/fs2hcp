@@ -80,6 +80,7 @@ BrainSize="150" #BrainSize in mm, 150 for humans
 FNIRTConfig="${HCPPIPEDIR_Config}/T1_2_MNI152_2mm.cnf" #FNIRT 2mm T1w Config
 T1wTemplate="${HCPPIPEDIR_Templates}/MNI152_T1_1mm.nii.gz" #Hires T1w MNI template
 T1wTemplateBrain="${HCPPIPEDIR_Templates}/MNI152_T1_1mm_brain.nii.gz" #Hires brain extracted MNI template
+T1wTemplate2mmBrain="${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz" #Hires brain extracted MNI template
 T1wTemplate2mm="${HCPPIPEDIR_Templates}/MNI152_T1_2mm.nii.gz" #Lowres T1w MNI template
 T1wTemplateMask="${HCPPIPEDIR_Templates}/MNI152_T1_1mm_brain_mask.nii.gz" #Hires MNI brain mask template
 T1wTemplate2mmMask="${HCPPIPEDIR_Templates}/MNI152_T1_2mm_brain_mask_dil.nii.gz" #Lowres MNI brain mask template
@@ -87,6 +88,7 @@ FreeSurferLabels="${HCPPIPEDIR_Config}/FreeSurferAllLut.txt"
 GrayordinatesSpaceDIR="${HCPPIPEDIR_Templates}/91282_Greyordinates"
 SubcorticalGrayLabels="${HCPPIPEDIR_Config}/FreeSurferSubcorticalLabelTableLut.txt"
 SurfaceAtlasDIR="${HCPPIPEDIR_Templates}/standard_mesh_atlases"
+
 
 ### Naming conventions
 AtlasSpaceFolder="$HCPFolder"/"$Subject"/MNINonLinear
@@ -105,6 +107,7 @@ T1wFolder="$HCPFolder"/"$Subject"/"T1w"
 T1w_nonacpc="T1w_noacpc"
 #T1wImage="T1w_acpc" #if running ACPC
 T1wImage="T1w" #if not running
+T1wImageBrain="${T1wImage}_brain"
 #T2wImage="$9"
 
 
@@ -162,13 +165,27 @@ fi
 mri_convert "$FreeSurferFolder"/mri/T1.mgz "$T1wFolder"/${T1wImage}.nii.gz
 fslreorient2std "$T1wFolder"/${T1wImage}.nii.gz "$T1wFolder"/${T1wImage}.nii.gz
 
-##### Linear then non-linear registration to MNI
-${FSLDIR}/bin/flirt -interp spline -dof 12 -in ${T1wFolder}/${T1wImage} -ref ${T1wTemplate} -omat ${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat -out ${AtlasSpaceFolder}/xfms/${T1wImage}_to_MNILinear
+#Convert FreeSurfer Volumes
+for Image in wmparc aparc.a2009s+aseg aparc+aseg ; do
+  if [ -e "$FreeSurferFolder"/mri/"$Image".mgz ] ; then
+    mri_convert -rt nearest -rl "$T1wFolder"/"$T1wImage".nii.gz "$FreeSurferFolder"/mri/"$Image".mgz "$T1wFolder"/"$Image".nii.gz
+    ${CARET7DIR}/wb_command -volume-label-import "$T1wFolder"/"$Image".nii.gz "$FreeSurferLabels" "$T1wFolder"/"$Image".nii.gz -drop-unused-labels
+  fi
+done
 
-${FSLDIR}/bin/fnirt --in=${T1wFolder}/${T1wImage} --ref=${T1wTemplate2mm} --aff=${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat --refmask=${T1wTemplate2mmMask} --fout=${AtlasTransform}_warp --jout=${AtlasSpaceFolder}/xfms/NonlinearRegJacobians.nii.gz --refout=${AtlasSpaceFolder}/xfms/IntensityModulatedT1.nii.gz --iout=${AtlasSpaceFolder}/xfms/2mmReg.nii.gz --logout=${AtlasSpaceFolder}/xfms/NonlinearReg.txt --intout=${AtlasSpaceFolder}/xfms/NonlinearIntensities.nii.gz --cout=${AtlasSpaceFolder}/xfms/NonlinearReg.nii.gz --config=${FNIRTConfig}
+#Create FreeSurfer Brain Mask skipping 1mm version...
+fslmaths "$T1wFolder"/wmparc.nii.gz -bin -dilD -dilD -dilD -ero -ero "$T1wFolder"/"$T1wImageBrainMask".nii.gz
+${CARET7DIR}/wb_command -volume-fill-holes "$T1wFolder"/"$T1wImageBrainMask".nii.gz "$T1wFolder"/"$T1wImageBrainMask".nii.gz
+fslmaths "$T1wFolder"/"$T1wImageBrainMask".nii.gz -bin "$T1wFolder"/"$T1wImageBrainMask".nii.gz
+
+fslmaths "$T1wFolder"/${T1wImage}.nii.gz -mul "$T1wFolder"/"$T1wImageBrainMask".nii.gz "$T1wFolder"/"$T1wImageBrain".nii.gz
+##### Linear then non-linear registration to MNI
+${FSLDIR}/bin/flirt -interp spline -dof 12 -in ${T1wFolder}/${T1wImageBrain} -ref ${T1wTemplate2mmBrain} -omat ${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat -out ${AtlasSpaceFolder}/xfms/${T1wImage}_to_MNILinear
+
+${FSLDIR}/bin/fnirt --in=${T1wFolder}/${T1wImageBrain} --ref=${T1wTemplate2mmBrain} --aff=${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat --refmask=${T1wTemplate2mmMask} --fout=${AtlasTransform}_warp --jout=${AtlasSpaceFolder}/xfms/NonlinearRegJacobians.nii.gz --refout=${AtlasSpaceFolder}/xfms/IntensityModulatedT1.nii.gz --iout=${AtlasSpaceFolder}/xfms/2mmReg.nii.gz --logout=${AtlasSpaceFolder}/xfms/NonlinearReg.txt --intout=${AtlasSpaceFolder}/xfms/NonlinearIntensities.nii.gz --cout=${AtlasSpaceFolder}/xfms/NonlinearReg.nii.gz --config=${FNIRTConfig}
 
 ### calculate the just the warp for the surface transform - need it because sometimes the brain is outside the bounding box of warfield
-${FSLDIR}/bin/fnirt --in=${AtlasSpaceFolder}/xfms/${T1wImage}_to_MNILinear --ref=${T1wTemplate2mm} --refmask=${T1wTemplate2mmMask} --fout=${AtlasTransform}_warp_noaffine --logout=${AtlasSpaceFolder}/xfms/NonlinearReg_fromlinear.txt --config=${FNIRTConfig}
+${FSLDIR}/bin/fnirt --in=${AtlasSpaceFolder}/xfms/${T1wImage}_to_MNILinear --ref=${T1wTemplate2mmBrain} --refmask=${T1wTemplate2mmMask} --fout=${AtlasTransform}_warp_noaffine --logout=${AtlasSpaceFolder}/xfms/NonlinearReg_fromlinear.txt --config=${FNIRTConfig}
 
 ##Input and reference spaces are the same, using 2mm reference to save time
 ${FSLDIR}/bin/invwarp -w ${AtlasTransform}_warp -o ${InverseAtlasTransform}_warp -r ${T1wTemplate2mm}
@@ -183,23 +200,20 @@ ${FSLDIR}/bin/applywarp --rel --interp=trilinear -i ${T1wFolder}/${T1wImage} -r 
 #${FSLDIR}/bin/fslmaths ${AtlasSpaceFolder}/${T1wImage} -mas ${AtlasSpaceFolder}/${T1wImage}_brain_mask ${AtlasSpaceFolder}/${T1wImage}_brain
 
 #Find c_ras offset between FreeSurfer surface and volume and generate matrix to transform surfaces
-MatrixX=`mri_info "$FreeSurferFolder"/mri/brain.finalsurfs.mgz | grep "c_r" | cut -d "=" -f 5 | sed s/" "/""/g`
-MatrixY=`mri_info "$FreeSurferFolder"/mri/brain.finalsurfs.mgz | grep "c_a" | cut -d "=" -f 5 | sed s/" "/""/g`
-MatrixZ=`mri_info "$FreeSurferFolder"/mri/brain.finalsurfs.mgz | grep "c_s" | cut -d "=" -f 5 | sed s/" "/""/g`
-echo "1 0 0 ""$MatrixX" > "$FreeSurferFolder"/mri/c_ras.mat
-echo "0 1 0 ""$MatrixY" >> "$FreeSurferFolder"/mri/c_ras.mat
-echo "0 0 1 ""$MatrixZ" >> "$FreeSurferFolder"/mri/c_ras.mat
-echo "0 0 0 1" >> "$FreeSurferFolder"/mri/c_ras.mat
+if [ ! -e "$FreeSurferFolder"/mri/c_ras.mat ] ; then
+  MatrixX=`mri_info "$FreeSurferFolder"/mri/brain.finalsurfs.mgz | grep "c_r" | cut -d "=" -f 5 | sed s/" "/""/g`
+  MatrixY=`mri_info "$FreeSurferFolder"/mri/brain.finalsurfs.mgz | grep "c_a" | cut -d "=" -f 5 | sed s/" "/""/g`
+  MatrixZ=`mri_info "$FreeSurferFolder"/mri/brain.finalsurfs.mgz | grep "c_s" | cut -d "=" -f 5 | sed s/" "/""/g`
+  echo "1 0 0 ""$MatrixX" > "$FreeSurferFolder"/mri/c_ras.mat
+  echo "0 1 0 ""$MatrixY" >> "$FreeSurferFolder"/mri/c_ras.mat
+  echo "0 0 1 ""$MatrixZ" >> "$FreeSurferFolder"/mri/c_ras.mat
+  echo "0 0 0 1" >> "$FreeSurferFolder"/mri/c_ras.mat
+fi
 
 #Convert FreeSurfer Volumes
 for Image in wmparc aparc.a2009s+aseg aparc+aseg ; do
   if [ -e "$FreeSurferFolder"/mri/"$Image".mgz ] ; then
-    mri_convert -rt nearest -rl "$T1wFolder"/"$T1wImage".nii.gz "$FreeSurferFolder"/mri/"$Image".mgz "$T1wFolder"/"$Image".nii.gz
-    # applywarp --rel --interp=nn -i "$T1wFolder"/"$Image"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$Image".nii.gz
-    # applywarp --rel --interp=nn -i "$T1wFolder"/"$Image"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w "$AtlasTransform"_warp -o "$AtlasSpaceFolder"/"$Image".nii.gz
-    #mri_convert "$FreeSurferFolder"/mri/"$Image".mgz "$T1wFolder"/"$Image".nii.gz
     applywarp --rel --interp=nn -i "$T1wFolder"/"$Image".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w "$AtlasTransform"_warp -o "$AtlasSpaceFolder"/"$Image".nii.gz
-    ${CARET7DIR}/wb_command -volume-label-import "$T1wFolder"/"$Image".nii.gz "$FreeSurferLabels" "$T1wFolder"/"$Image".nii.gz -drop-unused-labels
     ${CARET7DIR}/wb_command -volume-label-import "$AtlasSpaceFolder"/"$Image".nii.gz "$FreeSurferLabels" "$AtlasSpaceFolder"/"$Image".nii.gz -drop-unused-labels
   fi
 done
@@ -211,10 +225,6 @@ done
 # applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$T1wImageBrainMask".nii.gz
 # applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w "$AtlasTransform"_warp -o "$AtlasSpaceFolder"/"$T1wImageBrainMask".nii.gz
 
-#Create FreeSurfer Brain Mask skipping 1mm version...
-fslmaths "$T1wFolder"/wmparc.nii.gz -bin -dilD -dilD -dilD -ero -ero "$T1wFolder"/"$T1wImageBrainMask".nii.gz
-${CARET7DIR}/wb_command -volume-fill-holes "$T1wFolder"/"$T1wImageBrainMask".nii.gz "$T1wFolder"/"$T1wImageBrainMask".nii.gz
-fslmaths "$T1wFolder"/"$T1wImageBrainMask".nii.gz -bin "$T1wFolder"/"$T1wImageBrainMask".nii.gz
 #applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$T1wImageBrainMask".nii.gz
 applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w "$AtlasTransform"_warp -o "$AtlasSpaceFolder"/"$T1wImageBrainMask".nii.gz
 
