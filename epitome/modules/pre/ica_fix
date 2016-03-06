@@ -45,7 +45,7 @@ for SESS in `basename ${DIR_SESS}`; do
             cp ${DIR}/${SESS}/${INPUT}.${ID}.${NUM}.nii.gz ${DIR}/${SESS}/fake.${ID}.${NUM}.feat/filtered_func_data.nii.gz
 
             # raw data (for generating motion paramaters)
-            cp ${DIR}/${SESS}/func_ob.${ID}.${NUM}.nii.gz ${DIR}/${SESS}/fake.${ID}.${NUM}.feat/mc/prefiltered_func_data.nii.gz
+            cp ${DIR}/${SESS}/func_del.${ID}.${NUM}.nii.gz ${DIR}/${SESS}/fake.${ID}.${NUM}.feat/mc/prefiltered_func_data.nii.gz
 
             # temporal mean of 4D data
             cp ${DIR}/${SESS}/anat_EPI_brain.nii.gz ${DIR}/${SESS}/fake.${ID}.${NUM}.feat/mean_func.nii.gz
