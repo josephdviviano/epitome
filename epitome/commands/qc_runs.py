@@ -5,8 +5,7 @@ def run(dir_data, expt, mode):
 
     print('\nAdding NIFTI dimension-checking QC to the outputs.')
 
-    line = ('. ${DIR_PIPE}/epitome/modules/qc/qc_runs ' + 
-             str(dir_data) + ' ' + str(expt))
+    line = ('. ${DIR_PIPE}/epitome/modules/qc/qc_runs ' +
+             '${DIR_DATA} ${EXPT}')
 
     return line, output
-
