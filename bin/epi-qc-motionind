@@ -8,7 +8,7 @@ qualitative participant rejection, if that's how you roll.
 Usage:
     epi-qc-motionind [options] <path> <expt> <mode> <uid>
 
-Arguement:
+Arguments:
     <path>          path to epitome data directory
     <expt>          experiment name
     <mode>          image modaility
@@ -16,6 +16,8 @@ Arguement:
 
 Options:
   --no-DVARS        DVARS was not calculated for this project
+  --FD-thres        Threshold [default : 2.0] plotted as red line in FD plots
+  --DV-thres        Threshold [default : 10.0] plotted as red line in FD plots
 """
 
 import os, sys
@@ -39,8 +41,6 @@ from epitome.docopt import docopt
 
 ## Options: will eventually be set at command line
 head_r = 50   # head diameter in mm
-FD_t = 2    #
-DV_t = 10   #
 quality = 0  # set to 1 for dpi = 300, eps output
 blacklist = []  # participants to exclude
 
@@ -94,6 +94,8 @@ def main():
     mode      = arguments['<mode>']
     uid       = arguments['<uid>']
     NODVARS   = arguments['--no-DVARS']
+    FD_t      = arguments['--FD-thres']
+    DV_t      = arguments['--DV-thres']
 
     if NODVARS : DVARS=False
 
