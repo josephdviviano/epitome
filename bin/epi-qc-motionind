@@ -174,7 +174,7 @@ def main():
                         DV = np.append(DV, f) # per subject
                         DV_all = np.append(DV_all, f) # across all subjects
 
-            t = np.arange(len(DV)) # time axis
+            t = np.arange(len(FD)) # time axis
 
             # add vertical lines demarking runs
             for b in breaks:
