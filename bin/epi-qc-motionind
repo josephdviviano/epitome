@@ -97,6 +97,7 @@ def main():
 
     if NODVARS : DVARS=False
 
+    ax_x = 0
     ax_y = 0
     flag = 0
     FD_all = np.array([])
