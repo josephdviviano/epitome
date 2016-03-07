@@ -95,7 +95,7 @@ def main():
     uid       = arguments['<uid>']
     NODVARS   = arguments['--no-DVARS']
 
-    if NODVARS : DVARS==False
+    if NODVARS : DVARS=False
 
     ax_y = 0
     flag = 0
