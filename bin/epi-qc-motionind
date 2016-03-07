@@ -162,7 +162,7 @@ def main():
                 for run in np.arange(len(glob.glob(d + '/RUN*'))) + 1:
                     # framewise displacement
                     f = epi.stats.FD(os.path.join(d, 'PARAMS/motion.{}.{}.1D'.format(uid, '%02d' % run)), head_r)
-                    FD = np.append(FD, f, axis=1) # per subject
+                    FD = np.append(FD, f) #per subject
                     FD_all= np.append(FD_all, f) # across all subjects
                     run_length = len(FD)
                     breaks = np.append(breaks, run_length) # list of run breaks
