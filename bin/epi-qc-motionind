@@ -13,6 +13,9 @@ Arguement:
     <expt>          experiment name
     <mode>          image modaility
     <uid>           unique identifier for a given run
+
+Options:
+  --no-DVARS        DVARS was not calculated for this project
 """
 
 import os, sys
@@ -84,18 +87,20 @@ def figure_quality(q):
     return size, dpi
 
 def main():
+    global DVARS
     arguments = docopt(__doc__)
     path      = arguments['<path>']
     expt      = arguments['<expt>']
     mode      = arguments['<mode>']
     uid       = arguments['<uid>']
+    NODVARS   = arguments['--no-DVARS']
 
-    # initialize variables
-    ax_x = 0
+    if NODVARS : DVARS==False
+
     ax_y = 0
     flag = 0
     FD_all = np.array([])
-    DV_all = np.array([])
+    if DVARS: DV_all = np.array([])
     dict_FD = {}
 
     subjects = epi.utilities.get_subj(os.path.join(path, expt))
@@ -137,9 +142,11 @@ def main():
     fig_FD, ax_FD = plt.subplots(nrows=factor[0], ncols=factor[1],
                                  figsize=(figure_size, figure_size),
                                  dpi=figure_dpi, facecolor='white')
-    fig_DV, ax_DV = plt.subplots(nrows=factor[0], ncols=factor[1],
-                                 figsize=(figure_size, figure_size),
-                                 dpi=figure_dpi, facecolor='white')
+
+    if DVARS :
+        fig_DV, ax_DV = plt.subplots(nrows=factor[0], ncols=factor[1],
+                                     figsize=(figure_size, figure_size),
+                                     dpi=figure_dpi, facecolor='white')
 
     for subj in subjects:
 
@@ -148,7 +155,7 @@ def main():
             pass
         else:
             FD = np.array([])
-            DV = np.array([])
+            if DVARS: DV = np.array([])
             breaks = np.array([0])
             for session in os.walk(os.path.join(path, expt, subj[0], mode)).next()[1]:
                 d = os.path.join(path, expt, subj[0], mode, session)
@@ -161,10 +168,11 @@ def main():
                     breaks = np.append(breaks, run_length) # list of run breaks
 
                     # DVARS
-                    f = np.genfromtxt(os.path.join(d, 'PARAMS/DVARS.{}.{}.1D'.format(uid, '%02d' % run)))
-                    f = f[1:] / 10 # remove leading 0, conv. to % signal
-                    DV = np.append(DV, f) # per subject
-                    DV_all = np.append(DV_all, f) # across all subjects
+                    if DVARS:
+                        f = np.genfromtxt(os.path.join(d, 'PARAMS/DVARS.{}.{}.1D'.format(uid, '%02d' % run)))
+                        f = f[1:] / 10 # remove leading 0, conv. to % signal
+                        DV = np.append(DV, f) # per subject
+                        DV_all = np.append(DV_all, f) # across all subjects
 
             t = np.arange(len(DV)) # time axis
 
@@ -182,19 +190,20 @@ def main():
             else:
                 ax_FD[ax_y][ax_x].set_title(str(subj[0]), fontsize=6)
 
-            # add vertical lines demarking runs
-            for b in breaks:
-                ax_DV[ax_y][ax_x].axvline(x=b, ymin=0, ymax=100, color='black')
+            if DVARS:
+                # add vertical lines demarking runs
+                for b in breaks:
+                    ax_DV[ax_y][ax_x].axvline(x=b, ymin=0, ymax=100, color='black')
 
-            ax_DV[ax_y][ax_x].axhline(y=DV_t, xmin=0, xmax=len(t), color='red')
-            ax_DV[ax_y][ax_x].plot(t, DV.T, lw=1, label=subj[0], color='green')
-            ax_DV[ax_y][ax_x].set_xlim((-3, len(t) + 3))
+                ax_DV[ax_y][ax_x].axhline(y=DV_t, xmin=0, xmax=len(t), color='red')
+                ax_DV[ax_y][ax_x].plot(t, DV.T, lw=1, label=subj[0], color='green')
+                ax_DV[ax_y][ax_x].set_xlim((-3, len(t) + 3))
 
-            # crop subject numbers to the last 6 digits, if it is longer than 6
-            if len(subj[0]) > 6:
-                ax_DV[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
-            else:
-                ax_DV[ax_y][ax_x].set_title(str(subj[0]), fontsize=6)
+                # crop subject numbers to the last 6 digits, if it is longer than 6
+                if len(subj[0]) > 6:
+                    ax_DV[ax_y][ax_x].set_title(str(subj[0][-6:]), fontsize=6)
+                else:
+                    ax_DV[ax_y][ax_x].set_title(str(subj[0]), fontsize=6)
 
             # this keeps us moving through the grid of plots
             ax_x = ax_x + 1
@@ -208,29 +217,40 @@ def main():
         if subj < len(subjects):
             # common y axis maximum
             ax_FD[ax_y][ax_x].set_ylim((0, np.max(FD_all)))
-            ax_DV[ax_y][ax_x].set_ylim((0, np.max(DV_all)))
 
             # remove unnecessary detail
             ax_FD[ax_y][ax_x].set_frame_on(False) # remove frame
-            ax_DV[ax_y][ax_x].set_frame_on(False)
             ax_FD[ax_y][ax_x].axes.get_yaxis().set_visible(False) # rm y axis
-            ax_DV[ax_y][ax_x].axes.get_yaxis().set_visible(False)
             ax_FD[ax_y][ax_x].get_xaxis().tick_bottom() # remove x ticks
-            ax_DV[ax_y][ax_x].get_xaxis().tick_bottom()
             ax_FD[ax_y][ax_x].axes.get_xaxis().set_ticks([]) # remove x labels
-            ax_DV[ax_y][ax_x].axes.get_xaxis().set_ticks([])
 
             # add in x line at bottom
             xmin, xmax = ax_FD[ax_y][ax_x].get_xaxis().get_view_interval()
             ymin, ymax = ax_FD[ax_y][ax_x].get_yaxis().get_view_interval()
             ax_FD[ax_y][ax_x].add_artist(plt.Line2D((xmin, xmax), (ymin, ymin), color='black', linewidth=1))
-            xmin, xmax = ax_DV[ax_y][ax_x].get_xaxis().get_view_interval()
-            ymin, ymax = ax_DV[ax_y][ax_x].get_yaxis().get_view_interval()
-            ax_DV[ax_y][ax_x].add_artist(plt.Line2D((xmin, xmax), (ymin, ymin), color='black', linewidth=1))
+
         # delete empty plots
         if subj >= len(subjects):
             ax_FD[ax_y][ax_x].axis('off')
-            ax_DV[ax_y][ax_x].axis('off')
+
+        if DVARS:
+            if subj < len(subjects):
+                # common y axis maximum
+                ax_DV[ax_y][ax_x].set_ylim((0, np.max(DV_all)))
+
+                # remove unnecessary detail
+                ax_DV[ax_y][ax_x].set_frame_on(False)
+                ax_DV[ax_y][ax_x].axes.get_yaxis().set_visible(False)
+                ax_DV[ax_y][ax_x].get_xaxis().tick_bottom()
+                ax_DV[ax_y][ax_x].axes.get_xaxis().set_ticks([])
+
+                # add in x line at bottom
+                xmin, xmax = ax_DV[ax_y][ax_x].get_xaxis().get_view_interval()
+                ymin, ymax = ax_DV[ax_y][ax_x].get_yaxis().get_view_interval()
+                ax_DV[ax_y][ax_x].add_artist(plt.Line2D((xmin, xmax), (ymin, ymin), color='black', linewidth=1))
+            # delete empty plots
+            if subj >= len(subjects):
+                ax_DV[ax_y][ax_x].axis('off')
 
         # this keeps us moving through the grid of plots
         ax_x = ax_x + 1
@@ -239,15 +259,16 @@ def main():
             ax_y = ax_y + 1
 
     fig_FD.suptitle('Framewise Displacement (mm/TR), threshold = {} mm/TR'.format(FD_t))
-    fig_DV.suptitle('DVARS (% signal change/TR), line = {}%/TR'.format(DV_t))
-
     fig_FD.subplots_adjust(hspace=0.7) # add some breathing room
-    fig_DV.subplots_adjust(hspace=0.7)
+
+    if DVARS:
+        fig_DV.suptitle('DVARS (% signal change/TR), line = {}%/TR'.format(DV_t))
+        fig_DV.subplots_adjust(hspace=0.7)
 
     # export PDF
     pdf = PdfPages(os.path.join(path, expt, 'qc_{}_motion_individual_{}.pdf'.format(uid, mode)))
     fig_FD.savefig(pdf, format='pdf')
-    fig_DV.savefig(pdf, format='pdf')
+    if DVARS: fig_DV.savefig(pdf, format='pdf')
 
     # Add some metadata and close the PDF object
     d = pdf.infodict()
