@@ -6,7 +6,7 @@ plot from best to worst behaved, and thresholds are printed to facilitate
 qualitative participant rejection, if that's how you roll.
 
 Usage:
-    epi-qc-motionind <path> <expt> <mode> <uid>
+    epi-qc-motionind [options] <path> <expt> <mode> <uid>
 
 Arguement:
     <path>          path to epitome data directory
