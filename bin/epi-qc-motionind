@@ -16,8 +16,8 @@ Arguments:
 
 Options:
   --no-DVARS        DVARS was not calculated for this project
-  --FD-thres float  Threshold [default : 2.0] plotted as red line in FD plots
-  --DV-thres float  Threshold [default : 10.0] plotted as red line in FD plots
+  --FD-thres float  Threshold [default: 0.5] plotted as red line in FD plots
+  --DV-thres float  Threshold [default: 10.0] plotted as red line in FD plots
 """
 
 import os, sys
