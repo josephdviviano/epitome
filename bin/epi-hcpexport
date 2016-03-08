@@ -86,7 +86,7 @@ def run_commands(path, directory, expt, subj, session):
     TAL_to_T1 = os.path.join(dir_o, 'mat_TAL_to_T1.mat')
     if os.path.isfile(TAL_to_T1) == False:
         docmd(['cp',
-            os.path.join(dir_i, 'MNINonLinear','xfms','acpc2MNILinear.mat'),
+            os.path.join(dir_i, 'MNINonLinear','xfms','T1w2StandardLinear.mat'),
             os.path.join(dir_o, 'mat_T1_to_TAL.mat')])
         docmd(['cp',
             os.path.join(dir_i, 'MNINonLinear','xfms','T1w_to_MNILinear.nii.gz'),
@@ -102,7 +102,7 @@ def run_commands(path, directory, expt, subj, session):
         docmd(['cp', os.path.join(dir_i, 'MNINonLinear','T1w.nii.gz'),
             os.path.join(dir_o, 'reg_nlin_TAL.nii.gz')])
         docmd(['cp',
-            os.path.join(dir_i,'MNINonLinear','xfms', 'acpc2standard_warp_noaffine.nii.gz'),
+            os.path.join(dir_i,'MNINonLinear','xfms', 'T1w2Standard_warp_noaffine.nii.gz'),
             nlin_warp])
 
 

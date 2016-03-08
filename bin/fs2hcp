@@ -92,8 +92,8 @@ SurfaceAtlasDIR="${HCPPIPEDIR_Templates}/standard_mesh_atlases"
 
 ### Naming conventions
 AtlasSpaceFolder="$HCPFolder"/"$Subject"/MNINonLinear
-AtlasTransform="$AtlasSpaceFolder"/xfms/acpc2standard
-InverseAtlasTransform="$AtlasSpaceFolder"/xfms/standard2acpc
+AtlasTransform="$AtlasSpaceFolder"/xfms/T1w2Standard
+InverseAtlasTransform="$AtlasSpaceFolder"/xfms/Standard2T1w
 FeatSubjectFolder="$FeatFolder"/"$Subject.feat"
 FreeSurferFolder="$FSFolder"/"$Subject"
 GrayordinatesResolutions="2"
@@ -180,21 +180,21 @@ fslmaths "$T1wFolder"/"$T1wImageBrainMask".nii.gz -bin "$T1wFolder"/"$T1wImageBr
 
 fslmaths "$T1wFolder"/${T1wImage}.nii.gz -mul "$T1wFolder"/"$T1wImageBrainMask".nii.gz "$T1wFolder"/"$T1wImageBrain".nii.gz
 ##### Linear then non-linear registration to MNI
-${FSLDIR}/bin/flirt -interp spline -dof 12 -in ${T1wFolder}/${T1wImageBrain} -ref ${T1wTemplate2mmBrain} -omat ${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat -out ${AtlasSpaceFolder}/xfms/${T1wImage}_to_MNILinear
+${FSLDIR}/bin/flirt -interp spline -dof 12 -in ${T1wFolder}/${T1wImageBrain} -ref ${T1wTemplate2mmBrain} -omat ${AtlasTransform}Linear.mat -out ${AtlasSpaceFolder}/xfms/${T1wImage}_to_MNILinear
 
-${FSLDIR}/bin/fnirt --in=${T1wFolder}/${T1wImageBrain} --ref=${T1wTemplate2mmBrain} --aff=${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat --refmask=${T1wTemplate2mmMask} --fout=${AtlasTransform}_warp --jout=${AtlasSpaceFolder}/xfms/NonlinearRegJacobians.nii.gz --refout=${AtlasSpaceFolder}/xfms/IntensityModulatedT1.nii.gz --iout=${AtlasSpaceFolder}/xfms/2mmReg.nii.gz --logout=${AtlasSpaceFolder}/xfms/NonlinearReg.txt --intout=${AtlasSpaceFolder}/xfms/NonlinearIntensities.nii.gz --cout=${AtlasSpaceFolder}/xfms/NonlinearReg.nii.gz --config=${FNIRTConfig}
+# ${FSLDIR}/bin/fnirt --in=${T1wFolder}/${T1wImage} --ref=${T1wTemplate2mm} --aff=${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat --refmask=${T1wTemplate2mmMask} --fout=${AtlasTransform}_warp --jout=${AtlasSpaceFolder}/xfms/NonlinearRegJacobians.nii.gz --refout=${AtlasSpaceFolder}/xfms/IntensityModulatedT1.nii.gz --iout=${AtlasSpaceFolder}/xfms/2mmReg.nii.gz --logout=${AtlasSpaceFolder}/xfms/NonlinearReg.txt --intout=${AtlasSpaceFolder}/xfms/NonlinearIntensities.nii.gz --cout=${AtlasSpaceFolder}/xfms/NonlinearReg.nii.gz --config=${FNIRTConfig}
 
 ### calculate the just the warp for the surface transform - need it because sometimes the brain is outside the bounding box of warfield
-${FSLDIR}/bin/fnirt --in=${AtlasSpaceFolder}/xfms/${T1wImage}_to_MNILinear --ref=${T1wTemplate2mmBrain} --refmask=${T1wTemplate2mmMask} --fout=${AtlasTransform}_warp_noaffine --logout=${AtlasSpaceFolder}/xfms/NonlinearReg_fromlinear.txt --config=${FNIRTConfig}
+${FSLDIR}/bin/fnirt --in=${AtlasSpaceFolder}/xfms/${T1wImage}_to_MNILinear --ref=${T1wTemplate2mm} --refmask=${T1wTemplate2mmMask} --fout=${AtlasTransform}_warp_noaffine --logout=${AtlasSpaceFolder}/xfms/NonlinearReg_fromlinear.txt --config=${FNIRTConfig}
 
 ##Input and reference spaces are the same, using 2mm reference to save time
-${FSLDIR}/bin/invwarp -w ${AtlasTransform}_warp -o ${InverseAtlasTransform}_warp -r ${T1wTemplate2mm}
+#${FSLDIR}/bin/invwarp -w ${AtlasTransform}_warp -o ${InverseAtlasTransform}_warp -r ${T1wTemplate2mm}
 ## also inverse the non-prelinear warp
 ${FSLDIR}/bin/invwarp -w ${AtlasTransform}_warp_noaffine -o ${InverseAtlasTransform}_warp_noaffine -r ${T1wTemplate2mm}
 
 
 ##T1w set of warped outputs (brain/whole-head + restored/orig)
-${FSLDIR}/bin/applywarp --rel --interp=trilinear -i ${T1wFolder}/${T1wImage} -r ${T1wTemplate2mm} -w ${AtlasTransform}_warp -o ${AtlasSpaceFolder}/${T1wImage}
+${FSLDIR}/bin/applywarp --rel --interp=trilinear -i ${T1wFolder}/${T1wImage} -r ${T1wTemplate2mm} -w ${AtlasTransform}_warp_noaffine --premat=${AtlasTransform}Linear.mat -o ${AtlasSpaceFolder}/${T1wImage}
 ## also do the brainmask...but we are getting another from freesurfer anyway
 #${FSLDIR}/bin/applywarp --rel --interp=nn -i ${T1wFolder}/${T1w_nonacpc}_brain_mask.nii.gz -r ${T1wTemplate2mm} -w ${AtlasTransform}_warp --premat=${T1wFolder}/xfms/acpc.mat -o ${AtlasSpaceFolder}/${T1wImage}_brain_mask
 #${FSLDIR}/bin/fslmaths ${AtlasSpaceFolder}/${T1wImage} -mas ${AtlasSpaceFolder}/${T1wImage}_brain_mask ${AtlasSpaceFolder}/${T1wImage}_brain
@@ -213,7 +213,7 @@ fi
 #Convert FreeSurfer Volumes
 for Image in wmparc aparc.a2009s+aseg aparc+aseg ; do
   if [ -e "$FreeSurferFolder"/mri/"$Image".mgz ] ; then
-    applywarp --rel --interp=nn -i "$T1wFolder"/"$Image".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w "$AtlasTransform"_warp -o "$AtlasSpaceFolder"/"$Image".nii.gz
+    applywarp --rel --interp=nn -i "$T1wFolder"/"$Image".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w ${AtlasTransform}_warp_noaffine --premat=${AtlasTransform}Linear.mat -o "$AtlasSpaceFolder"/"$Image".nii.gz
     ${CARET7DIR}/wb_command -volume-label-import "$AtlasSpaceFolder"/"$Image".nii.gz "$FreeSurferLabels" "$AtlasSpaceFolder"/"$Image".nii.gz -drop-unused-labels
   fi
 done
@@ -226,7 +226,7 @@ done
 # applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w "$AtlasTransform"_warp -o "$AtlasSpaceFolder"/"$T1wImageBrainMask".nii.gz
 
 #applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$T1wImageBrainMask".nii.gz
-applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w "$AtlasTransform"_warp -o "$AtlasSpaceFolder"/"$T1wImageBrainMask".nii.gz
+applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask".nii.gz -r "$AtlasSpaceFolder"/"$T1wImage" -w ${AtlasTransform}_warp_noaffine --premat=${AtlasTransform}Linear.mat -o "$AtlasSpaceFolder"/"$T1wImageBrainMask".nii.gz
 
 
 #Add volume files to spec files
@@ -287,7 +287,7 @@ for Hemisphere in L R ; do
     ${CARET7DIR}/wb_command -set-structure "$T1wFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii ${Structure} -surface-type $Type$Secondary
     ${CARET7DIR}/wb_command -surface-apply-affine "$T1wFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii "$FreeSurferFolder"/mri/c_ras.mat "$T1wFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii
     ${CARET7DIR}/wb_command -add-to-spec-file "$T1wFolder"/"$NativeFolder"/"$Subject".native.wb.spec $Structure "$T1wFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii
-    ${CARET7DIR}/wb_command -surface-apply-affine "$T1wFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii ${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat "$AtlasSpaceFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii -flirt ${T1wFolder}/${T1wImage}.nii.gz ${T1wTemplate}
+    ${CARET7DIR}/wb_command -surface-apply-affine "$T1wFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii ${AtlasTransform}Linear.mat "$AtlasSpaceFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii -flirt ${T1wFolder}/${T1wImage}.nii.gz ${T1wTemplate}
     ${CARET7DIR}/wb_command -surface-apply-warpfield "$AtlasSpaceFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii "${InverseAtlasTransform}"_warp_noaffine.nii.gz "$AtlasSpaceFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii -fnirt "$AtlasTransform"_warp_noaffine.nii.gz
 	  ${CARET7DIR}/wb_command -add-to-spec-file "$AtlasSpaceFolder"/"$NativeFolder"/"$Subject".native.wb.spec $Structure "$AtlasSpaceFolder"/"$NativeFolder"/"$Subject"."$Hemisphere"."$Surface".native.surf.gii
     i=$(($i+1))
