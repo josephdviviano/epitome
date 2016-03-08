@@ -7,7 +7,7 @@ Usage:
     epi-qc-fs2hcp [options] <QCmode>
 
 Arguments:
-  <QCmode>                 Type of QC to do (fsaverage32k, )
+  <QCmode>                 Type of QC to do ("MNIfsaverage32k" or "native")
 
 Options:
   --snaps-only             Do not write the index pages, only do subject pics
