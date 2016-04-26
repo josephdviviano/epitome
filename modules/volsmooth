@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# volsmooth input mask fwhm mode
+#
+# input: input prefix
+# mask:  epi brain mask OR epi space mask delineating multiple brain regions [list: anat_EPI_mask, anat_EPI_mask_MNI-lin, anat_EPI_mask_MNI-nonlin, anat_EPI_mask_T1, ?]
+# fwhm:  smoothing kernel full width half maximum (mm) [float]
+# mode:  smoothing method [list: normal multimask]
+#
+# output: func_volsmooth
+# prereq: motion_deskull
+#
+# Re-samples a mask containing one or more labels to the functional data. 
+#
+# In 'normal' mode, blurs towards target fwhm iteratively using a 'noise' 
+# dataset from the `filter` module with no spatial structure as the guide. If 
+# you have not run `filter`, this simply detrends the input and uses that to 
+# estimate smoothness. Therefore you **must** run this before transforming the 
+# data to MNI space if you are using the `filter` module. The objective here is 
+# to standardize the spatial smoothness of the noise across all datasets.  This 
+# is particularly useful in multi-scanner experiments. 
+# 
+# In 'multimask' mode, blurs iteratively within unique mask values. This is not
+# as clever a mode, in that it does not explicitly work on a noise model of the
+# data, but can be useful in the subcortical regions when you do not want to
+# blur into non-brain regions or between adjacent nuclei. All zero values in
+# the mask are zeroed out in the output. The output of this can be combined
+# with the outputs of surfsmooth & surf2vol using combine_volumes, if you want
+# cortically-smoothed data and subcortically-smoothed data to be generated in
+# surface and volume space, respectively.
+
+echo '*** MODULE: volsmooth. Spatially smooths volume data. *******************'
+export input=${1}
+export mask=${2}
+export fwhm=${3}
+export mode=${4}
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        # if an old smoothmask is left behind, obliterate
+        if [ -f ${SESS}/anat_tmp_smoothmask.nii.gz ]; then
+            rm ${SESS}/anat_tmp_smoothmask.nii.gz
+        fi
+
+        # resample input mask to match dimensions of first run
+        3dresample \
+            -prefix ${SESS}/anat_tmp_smoothmask.nii.gz \
+            -master ${SESS}/${input}.${ID}.01.nii.gz \
+            -rmode NN \
+            -inset ${SESS}/${mask}.nii.gz
+
+        # smooth to specified fwhm
+        if [ ! -f ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz ]; then
+
+            # use 3dBlurTofwhm
+            if [ ${mode} == 'normal' ]; then
+                # If already run filter, use noise model from it as blurmaster
+                if [ -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
+                    echo 'MSG: func_noise found. ensure that the filter module was run in the same space as volsmooth, or this command will fail and complain about grid spacing of the BLURMASTER!'
+                    3dBlurTofwhm \
+                        -quiet \
+                        -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                        -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
+                        -fwhm ${fwhm} \
+                        -blurmaster ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
+                        -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                else
+                    3dBlurTofwhm \
+                        -quiet \
+                        -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                        -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
+                        -fwhm ${fwhm} \
+                        -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                fi
+
+            # use 3dBlurInMask
+            elif [ ${mode} == 'multimask' ]; then
+                3dBlurInMask \
+                    -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                    -Mmask ${SESS}/anat_tmp_smoothmask.nii.gz \
+                    -fwhm ${fwhm} \
+                    -quiet -float \
+                    -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
+            fi
+        fi
+    done
+done

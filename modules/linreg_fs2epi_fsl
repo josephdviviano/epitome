@@ -1,0 +1,43 @@
+#!/bin/bash
+#
+# linreg_fs2epi_fsl
+#
+# output: 
+# prereq: fsrecon, linreg_calc_fsl
+#
+# Brings Freesurfer atlases in register with single-subject EPIs.
+
+echo '*** MODULE: linreg_fs2epi_fsl. Puts freesurfer atlases in EPI space. ****'
+
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
+for SESS in ${DIR_SESS}; do
+    SESS=$(basename ${SESS})
+    DIR=$(echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS})
+    DIR_T1=$(echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1)
+
+    if [ ${multisession} -eq 1 ]; then
+        DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}"
+    else
+        DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/SESS01)"
+    fi
+
+    # register aparc atlas to EPI
+    if [ ! -f ${DIR}/anat_aparc_reg.nii.gz ]; then
+        flirt \
+            -in ${DIR_T1}/anat_aparc_brain.nii.gz \
+            -ref ${DIR}/anat_EPI_brain.nii.gz \
+            -applyxfm -init ${DIR}/mat_T1_to_EPI.mat \
+            -interp nearestneighbour \
+            -out ${DIR}/anat_aparc_reg.nii.gz
+    fi
+
+    # register aparc2009 atlas to EPI
+    if [ ! -f ${DIR}/anat_aparc2009_reg.nii.gz ]; then
+        flirt \
+            -in ${DIR_T1}/anat_aparc2009_brain.nii.gz \
+            -ref ${DIR}/anat_EPI_brain.nii.gz \
+            -applyxfm -init ${DIR}/mat_T1_to_EPI.mat \
+            -interp nearestneighbour \
+            -out ${DIR}/anat_aparc2009_reg.nii.gz
+    fi
+done

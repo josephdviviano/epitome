@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+# detrend input det
+#
+# input: input prefix
+# det:   polynomial order to detrend each voxel against
+#
+# output: func_detrend
+# prereq: init_*
+#
+# Detrends data with specified polynomial, retaining the mean.
+
+echo '*** MODULE: detrend. Detrends all inputs to order n, retaining the mean.*'
+export input=${1}
+export polort=${2}
+
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        if [ ! -f ${SESS}/func_detrend.${ID}.${NUM}.nii.gz ]; then
+            # produce mean
+            3dTstat \
+                -prefix ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
+                -mean ${SESS}/${input}.${ID}.${NUM}.nii.gz
+
+            # detrend data
+            3dDetrend \
+                -prefix ${SESS}/func_tmp_detrend.${ID}.${NUM}.nii.gz \
+                -polort ${polort} \
+                ${SESS}/${input}.${ID}.${NUM}.nii.gz
+
+            # add mean back into detrended data
+            3dcalc \
+                -prefix ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                -a ${SESS}/func_tmp_detrend.${ID}.${NUM}.nii.gz \
+                -b ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
+                -expr 'a+b'
+        fi
+    done
+done

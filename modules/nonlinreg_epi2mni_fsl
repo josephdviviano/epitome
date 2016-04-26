@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# nonlinreg_epi2mni_fsl input dims
+#
+# input: input prefix
+# dims:  target voxel dimensions (isotropic) [float]
+#
+# output: func_MNI-nonlin
+# prereq: nonlinreg_calc_fsl
+#
+# Calculates the nonlinear warp of the T1 image to the MNI brain in MNI space. 
+# This also performs a linear registration on the EPI data, so the input data 
+# should be in native space.
+
+echo '*** MODULE: nonlinreg_epi2mni_fsl. Warps EPI data to MNI space. *********'
+export input=${1}
+export dims=${2}
+
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
+for SESS in ${DIR_SESS}; do
+    SESS=$(basename ${SESS})
+    DIR="${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}"
+
+    # create registration dummy for FSL
+    if [ ! -f ${DIR}/anat_EPI_reg_target.nii.gz ]; then
+        3dresample \
+            -dxyz ${dims} ${dims} ${dims} \
+            -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
+            -inset ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz
+    fi
+
+    DIR_RUNS=$(ls -d -- ${DIR}/RUN*)
+    for RUN in ${DIR_RUNS}; do
+        NUM=$(basename ${RUN} | sed 's/[^0-9]//g')
+
+        # register runs with MNI
+        if [ ! -f ${DIR}/func_MNI-nonlin.${ID}.${NUM}.nii.gz ]; then
+            applywarp \
+                --ref=${DIR}/anat_EPI_reg_target.nii.gz \
+                --in=${DIR}/${input}.${ID}.${NUM}.nii.gz \
+                --warp=${DIR}/reg_nlin_TAL_WARP.nii.gz \
+                --premat=${DIR}/mat_EPI_to_TAL.mat \
+                --interp=spline \
+                --out=${DIR}/func_MNI-nonlin.${ID}.${NUM}.nii.gz
+        fi
+    done
+
+    # register session masks with MNI-lin
+    if [ ! -f ${DIR}/anat_EPI_mask_MNI-lin.nii.gz ]; then
+        flirt \
+            -in ${DIR}/anat_EPI_mask.nii.gz \
+            -ref ${DIR}/anat_EPI_reg_target.nii.gz \
+            -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
+            -interp nearestneighbour \
+            -out ${DIR}/anat_EPI_mask_MNI-lin.nii.gz
+    fi
+
+    # register session masks with MNI-nonlin
+    if [ ! -f ${DIR}/anat_EPI_mask_MNI-nonlin.nii.gz ]; then
+        applywarp \
+            --ref=${DIR}/anat_EPI_reg_target.nii.gz \
+            --in=${DIR}/anat_EPI_mask.nii.gz \
+            --warp=${DIR}/reg_nlin_TAL_WARP.nii.gz \
+            --premat=${DIR}/mat_EPI_to_TAL.mat \
+            --interp=nn \
+            --out=${DIR}/anat_EPI_mask_MNI-nonlin.nii.gz
+    fi
+done

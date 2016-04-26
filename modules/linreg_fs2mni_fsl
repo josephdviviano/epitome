@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+# linreg_fs2mni_fsl
+#
+# output: 
+# prereq: fsrecon, linreg_calc_fsl
+#
+# Brings Freesurfer atlases in register with the MNI brain.
+
+echo '*** MODULE: linreg_fs2mni_fsl. Puts freesurfer atlases in MNI space. ***'
+
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
+for SESS in ${DIR_SESS}; do
+    SESS=$(basename ${SESS})
+    DIR="${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}"
+    DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}"
+    
+    # register aparc atlas to EPI
+    if [ ! -f ${DIR}/anat_aparc_reg.nii.gz ]; then
+        flirt \
+            -in ${DIR_T1}/anat_aparc_brain.nii.gz \
+            -ref ${DIR}/anat_EPI_reg_target.nii.gz \
+            -applyxfm -init ${DIR}/mat_T1_to_TAL.mat\
+            -interp nearestneighbour \
+            -out ${DIR}/anat_aparc_reg.nii.gz
+    fi
+
+    # register aparc2009 atlas to EPI
+    if [ ! -f ${DIR}/anat_aparc2009_reg.nii.gz ]; then
+        flirt \
+            -in ${DIR_T1}/anat_aparc2009_brain.nii.gz \
+            -ref ${DIR}/anat_EPI_reg_target.nii.gz \
+            -applyxfm -init ${DIR}/mat_T1_to_TAL.mat \
+            -interp nearestneighbour \
+            -out ${DIR}/anat_aparc2009_reg.nii.gz
+    fi
+done

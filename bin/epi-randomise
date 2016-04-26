@@ -1,0 +1,153 @@
+#!/usr/bin/env python
+"""
+Usage:
+    epi-randomise [options] <subjlist>
+
+Arguments:
+    <subjlist>  A .txt list of all input statmap files (full paths).
+
+Options:
+    --prefix=<prefix>        Desired prefix for the outputs [default: rand]
+    --n=<n>                  Number of permutations [default: 5000]
+    --design=<design>        A .mat file from FSL's GLM.
+    --contrasts=<contrasts>  A .con file from FSL's GLM.
+    --group=<group>          A .grp file from FSL's GLM.
+    --mask=<mask>            A NIFTI mask file.
+    --cleanup                Delete intermediate files.
+
+Details:
+    A wrapper for FSL's randomise and cluster programs.
+
+    Takes a list of input files (full paths), and a .mat, .con, .grp triplet
+    from FSL's GLM interface, and runs FSL Randomise on them. This wrapper
+    uses threshold-free cluster enhancement (TFCE) and voxel-wise statistics
+    for all outputs. The stats are then concatenated, thresholded statmaps are
+    produced, and a cluster table for each statmap is produced in a space-
+    delimited format using FSL cluster.
+
+    All outputs are put in the present working directory.
+
+Requirements:
+    FSL
+"""
+import epitome as epi
+from epitome.docopt import docopt
+import os, sys
+
+def check_exist(filename):
+    if not os.path.isfile(filename):
+        sys.exit('ERROR: manditory input {} not found'.format(filename))
+
+def get_n_contrasts(contrasts):
+    """
+    Returns the number of contrasts defined in the submitted .con file.
+    """
+    n_contrasts = 0
+    f = open(contrasts, 'rb')
+    for l in f.readlines():
+        if l.startswith('/ContrastName'):
+            n_contrasts += 1
+
+    return n_contrasts
+
+def main():
+    """
+    Prints out subjlist.txt and design-matrix.txt.
+    """
+    arguments = docopt(__doc__)
+    subjlist  = arguments['<subjlist>']
+    prefix    = arguments['--prefix']
+    n         = arguments['--n']
+    design    = arguments['--design']
+    contrasts = arguments['--contrasts']
+    group     = arguments['--group']
+    mask      = arguments['--mask']
+    cleanup   = arguments['--cleanup']
+
+    # check/convert inputs
+    check_exist(subjlist)
+    prefix = epi.utilities.mangle_string(prefix)
+    n = int(n)
+    check_exist(design)
+    check_exist(contrasts)
+    check_exist(group)
+    if mask:
+        check_exist(mask)
+
+    # create 4d input file
+    if os.path.isfile('all_subjects.nii.gz'):
+        os.remove('all_subjects.nii.gz')
+    os.system('subjects=$(cat {}); fslmerge -t all_subjects.nii.gz ${{subjects}}'.format(subjlist))
+
+    # run randomise if required
+    if not os.path.isfile('{}_tfce_corrp_tstat1.nii.gz'.format(prefix)):
+        cmd = 'randomise -i all_subjects -o {} -d {} -t {} -e {} -n {} -T -x'.format(
+                                               prefix, design, contrasts, group, n)
+        if mask:
+            cmd = '{} -m {}'.format(cmd, mask)
+        os.system(cmd)
+
+    # generate thresholded t-stat map for each contrast
+    n_contrasts = get_n_contrasts(contrasts)
+
+    t_list = ''
+    t_list_vox = ''
+    t_list_tfc = ''
+    p_list_vox = ''
+    p_list_tfc = ''
+
+    for i in range(1, n_contrasts+1):
+
+        # output filenames for each thresholded image
+        out_vox = '{}_vox_corrp_tstat{}_threshold.nii.gz'.format(prefix, i)
+        out_tfc = '{}_tfce_corrp_tstat{}_threshold.nii.gz'.format(prefix, i)
+
+        # ordered strings used for statmap concatenation later on
+        t_list = '{} {}_tstat{}.nii.gz'.format(t_list, prefix, i)
+        t_list_vox = '{} {}'.format(t_list_vox, out_vox)
+        t_list_tfc = '{} {}'.format(t_list_tfc, out_tfc)
+        p_list_vox = '{} {}_vox_corrp_tstat{}.nii.gz'.format(p_list_vox, prefix, i)
+        p_list_tfc = '{} {}_tfce_corrp_tstat{}.nii.gz'.format(p_list_tfc, prefix, i)
+
+        # calculate thresholded t-stats, create cluster reports
+        if not os.path.isfile(out_vox):
+            os.system('fslmaths {prefix}_vox_corrp_tstat{i}.nii.gz -thr 0.95 -bin -mul {prefix}_tstat{i}.nii.gz {out_vox}'.format(
+                                            prefix=prefix, i=i, out_vox=out_vox))
+            os.system('cluster --in={out_vox} --thresh=0.0001 --mm > tmp_table.txt'.format(out_vox=out_vox))
+            os.system('echo ClusterIndex Voxels Max MaxX MaxY MaxZ CogX CogY CogZ > clusters_vox_{}.txt'.format(i))
+            os.system("awk 'FNR>1' tmp_table.txt >> clusters_vox_{}.txt".format(i))
+
+        if not os.path.isfile(out_tfc):
+            os.system('fslmaths {prefix}_tfce_corrp_tstat{i}.nii.gz -thr 0.95 -bin -mul {prefix}_tstat{i}.nii.gz {out_tfc}'.format(
+                                            prefix=prefix, i=i, out_tfc=out_tfc))
+            os.system('cluster --in={out_tfc} --thresh=0.0001 --mm > tmp_table.txt'.format(out_tfc=out_tfc))
+            os.system('echo ClusterIndex Voxels Max MaxX MaxY MaxZ CogX CogY CogZ > clusters_tfce_{}.txt'.format(i))
+            os.system("awk 'FNR>1' tmp_table.txt >> clusters_tfce_{}.txt".format(i))
+
+    os.remove('tmp_table.txt')
+
+    # concatenate images
+    t_name = 'randomise_{}_t.nii.gz'.format(prefix)
+    t_name_vox = 'randomise_{}_t_threshold_vox'.format(prefix)
+    t_name_tfc = 'randomise_{}_t_threshold_tfce'.format(prefix)
+    p_name_vox = 'randomise_{}_p_vox.nii.gz'.format(prefix)
+    p_name_tfc = 'randomise_{}_p_tfce.nii.gz'.format(prefix)
+
+    if not os.path.isfile(t_name):
+        os.system('fslmerge -t {} {}'.format(t_name, t_list))
+    if not os.path.isfile(t_name_vox):
+        os.system('fslmerge -t {} {}'.format(t_name_vox, t_list_vox))
+    if not os.path.isfile(t_name_tfc):
+        os.system('fslmerge -t {} {}'.format(t_name_tfc, t_list_tfc))
+    if not os.path.isfile(p_name_vox):
+        os.system('fslmerge -t {} {}'.format(p_name_vox, p_list_vox))
+    if not os.path.isfile(p_name_tfc):
+        os.system('fslmerge -t {} {}'.format(p_name_tfc, p_list_tfc))
+
+    # remove intermediate files
+    if cleanup:
+        os.system('rm {}_*.nii.gz'.format(prefix))
+
+if __name__ == '__main__':
+    main()
+

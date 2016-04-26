@@ -1,0 +1,104 @@
+#!/bin/bash
+#
+# linreg_calc_hcp_fsl data_quality cost reg_dof
+#
+# data_quality: 'low' for poor internal contrast [list: low high]
+# cost:         cost function minimized during registration (see FLIRT) [list: mutualinfo, leastsq, corratio, normcorr, labeldiff, bbr]
+# reg_dof:      registration degrees of freedom [list: 6, 7, 9, 12]
+#
+# output: 
+# prereq: motion_deskull hcpexport
+#
+# Uses FSL's FLIRT to calculate linear registration between epi <--> T1. It also 
+# copies the registration of the T1 to MNI space (that came from the HCP_DATA 
+# directory) from the T1 directory down to this session. It generate an epi 
+# template registered to T1 \& T1 registered to epi (sessionwise). Specific 
+# options can be found in the command-line interface's help function.
+
+echo '*** MODULE: linreg_calc_hcp_fsl. Calcs EPI <--> T1 <--> MNI152 on HCP ***'
+export data_quality=${1}
+export cost=${2}
+export reg_dof=${3}
+
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
+for SESS in ${DIR_SESS}; do
+    SESS=$(basename ${SESS})
+    DIR="${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}"
+    DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1"
+
+    # If we have a T1 for each session, we register to the session T1.
+    # Otherwise, we go to the first session.
+    if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
+        ANAT_T1="${DIR_T1}/${SESS}/anat_T1_brain.nii.gz"
+        DIR_T1_SESS="${DIR_T1}/${SESS}"
+    else
+        ANAT_T1="${DIR_T1}/SESS01/anat_T1_brain.nii.gz"
+        DIR_T1_SESS="${DIR_T1}/SESS01"
+    fi
+
+    # Set EPI data file (for low vs high quality data).
+    if [ ${data_quality} = 'low' ]; then
+        ANAT_EPI="${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz"
+    else
+        ANAT_EPI="${DIR}/${SESS}/anat_EPI_brain.nii.gz"
+    fi
+
+    # calculate registration of EPI to T1
+    if [ ! -f ${DIR}/${SESS}/mat_T1_to_EPI.mat ]; then
+        flirt \
+            -in ${ANAT_EPI} \
+            -ref ${ANAT_T1} \
+            -out ${DIR}/${SESS}/reg_EPI_to_T1.nii.gz \
+            -omat ${DIR}/${SESS}/mat_EPI_to_T1.mat \
+            -dof ${reg_dof} \
+            -cost ${cost} \
+            -searchcost ${cost} \
+            -searchrx -180 180 -searchry -180 180 -searchrz -180 180 \
+            -v
+
+        # invert flirt transform
+        convert_xfm \
+            -omat ${DIR}/${SESS}/mat_T1_to_EPI.mat \
+            -inverse \
+            ${DIR}/${SESS}/mat_EPI_to_T1.mat
+    fi
+
+    # produce T1 registered to EPI
+    if [ ! -f ${DIR}/${SESS}/reg_T1_to_EPI.nii.gz ]; then
+        # T1 to EPI -- FSL
+        flirt \
+            -in ${ANAT_T1} \
+            -ref ${ANAT_EPI} \
+            -out ${DIR}/${SESS}/reg_T1_to_EPI.nii.gz \
+            -applyxfm \
+            -init ${DIR}/${SESS}/mat_T1_to_EPI.mat \
+            -v
+    fi
+
+    # calculate registration of T1 to reg_T1_to_TAL
+    if [ ! -f ${DIR}/${SESS}/mat_TAL_to_T1.mat ]; then
+          cp ${DIR_T1_SESS}/mat_T1_to_TAL.mat ${DIR}/${SESS}/mat_T1_to_TAL.mat
+          cp ${DIR_T1_SESS}/reg_T1_to_TAL.nii.gz ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz
+          cp ${DIR_T1_SESS}/mat_TAL_to_T1.mat ${DIR}/${SESS}/mat_TAL_to_T1.mat
+    fi
+
+    # concatenate transformations
+    if [ ! -f ${DIR}/${SESS}/mat_TAL_to_EPI.mat ]; then
+        convert_xfm \
+            -omat ${DIR}/${SESS}/mat_EPI_to_TAL.mat \
+            -concat ${DIR}/${SESS}/mat_T1_to_TAL.mat \
+                    ${DIR}/${SESS}/mat_EPI_to_T1.mat
+
+        convert_xfm \
+            -omat ${DIR}/${SESS}/mat_TAL_to_EPI.mat \
+            -concat ${DIR}/${SESS}/mat_T1_to_EPI.mat \
+                    ${DIR}/${SESS}/mat_TAL_to_T1.mat
+    fi
+
+    ## copy the non-linear too..
+    if [ ! -f ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz ]; then
+      cp ${DIR_T1_SESS}/reg_nlin_TAL_WARP.nii.gz ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz
+      cp ${DIR_T1_SESS}/reg_nlin_TAL.nii.gz ${DIR}/${SESS}/reg_nlin_TAL.nii.gz
+    fi
+
+done

@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# lowpass_freq input mask filter cutoff
+# 
+# input:  input prefix
+# mask:   epi brain mask [list: anat_EPI_mask, anat_EPI_mask_MNI-lin, anat_EPI_mask_MNI-nonlin, anat_EPI_mask_T1, ?]
+# filter: frequency domain lowpass filter type [list: kaiser, butterworth]
+# cutoff: filter cutoff frequency [float]
+#
+# output: func_lowpass
+# prereq: motion_deskull
+#
+# Removes high frequency content from your fMRI time series.
+#
+# The 'kaiser' and 'butterworth' filters work in the frequency domain and accept 
+# a cutoff in Hz (a good default is 0.1). Both are implemented as bi-directional
+# FIR filters. The kaiser window is high order and permits reasonably sharp 
+# rolloff with minimal passband ringing for shorter fMRI time series. The 
+# butterworth filter is of low order and achieves minimal passband ringing at 
+# the expense of passband roll off. In other words, butterworth filters will 
+# retain more high-frequency content than a kaiser filter with equivalent cutoff. 
+# The effect of the passband ringing is an empirical question that would be best
+# tested by the User.
+
+echo '*** MODULE: lowpass_freq. Low pass using frequency domain filter. *******'
+export input=${1}
+export mask=${2}
+export filter=${3}
+export cutoff=${4}
+
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
+for SESS in ${DIR_SESS}; do
+    DIR_RUNS=$(ls -d -- ${SESS}/RUN*)
+    for RUN in ${DIR_RUNS}; do
+        NUM=$(basename ${RUN} | sed 's/[^0-9]//g')
+
+        if [ ! -f ${SESS}/func_lowpass.${ID}.${NUM}.nii.gz ]; then
+            epi-lowpass \
+                ${SESS}/${input}.${ID}.${NUM}.nii.gz \
+                ${SESS}/${mask}.nii.gz \
+                ${SESS}/func_lowpass.${ID}.${NUM}.nii.gz \
+                --type ${filter} \
+                --cutoff ${cutoff}
+        fi
+    done
+done

@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# deoblique input
+#
+# input: input prefix
+#
+# output: func_ob
+# prereq: init_*
+#
+# Removes any obliquity from the images, and reslices all images to be on the
+# same grid as run 1 from each session. This is helpful if your data is in
+# different shapes for different runs, or you want to use the AFNI registration
+# tools.
+#
+# For more details, see the help of AFNI's 3dWarp.
+
+echo '*** MODULE: deoblique. Alters image to have no obliquity. ***************'
+export input=${1}
+
+
+# loop through sessions
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+
+    # loop through runs
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+        FILE=`echo ${RUN}/*.nii.gz`
+
+        if [ ! -f ${SESS}/func_ob.${ID}.${NUM}.nii.gz ]; then
+            if [ ${NUM} == '01' ]; then
+                # deoblique run (unconstrained for first run)
+                3dWarp \
+                    -prefix ${SESS}/func_ob.${ID}.${NUM}.nii.gz \
+                    -deoblique \
+                    -quintic \
+                    -verb \
+                    ${SESS}/${input}.${ID}.${NUM}.nii.gz > \
+                    ${SESS}/PARAMS/deoblique.${ID}.${NUM}.1D
+
+            else
+                # deoblique run, matching dimensions to first run
+                3dWarp \
+                   -prefix ${SESS}/func_ob.${ID}.${NUM}.nii.gz \
+                   -deoblique \
+                   -quintic \
+                   -verb \
+                   -gridset ${SESS}/func_ob.${ID}.01.nii.gz \
+                   ${SESS}/${input}.${ID}.${NUM}.nii.gz > \
+                   ${SESS}/PARAMS/deoblique.${ID}.${NUM}.1D
+            fi
+        fi
+    done
+done
+
+EOF

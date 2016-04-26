@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# nonlinreg_calc_fsl
+#
+# output:
+# prereq: linreg_calc_fsl
+#
+## Calculates the nonlinear warp of the T1 --> MNI in MNI space. Therefore, this 
+# must be run AFTER linreg_calc_fsl, so it can work on the MNI-space 
+# registration image.
+
+echo '*** MODULE: nonlinreg_calc_fsl. Calcs MNI warp from linreg outputs. *****'
+
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
+for SESS in ${DIR_SESS}; do
+    SESS=$(basename ${SESS})
+    DIR="${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}"
+
+    # calculate nonlinear warp of T1 to MNI space
+    if [ ! -f ${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz ]; then
+        fnirt \
+            --ref=${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz \
+            --refmask=${DIR_DATA}/${DIR_EXPT}/anat_MNI_mask.nii.gz \
+            --in=${DIR}/${SESS}/reg_T1_to_TAL.nii.gz \
+            --config=T1_2_MNI152_2mm.cnf \
+            --iout=${DIR}/${SESS}/reg_nlin_TAL.nii.gz \
+            --fout=${DIR}/${SESS}/reg_nlin_TAL_FIELD.nii.gz \
+            --cout=${DIR}/${SESS}/reg_nlin_TAL_WARP.nii.gz \
+            --intout=${DIR}/${SESS}/reg_nlin_TAL_INTOUT.nii.gz \
+            --interp=spline
+    fi
+done

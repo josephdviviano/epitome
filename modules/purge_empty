@@ -1,0 +1,21 @@
+#!/bin/bash
+# 
+# purge_empty
+#
+# output: 
+# prereq: 
+#
+# Finds and removes empty files, that might arise from certain programs failing.
+
+echo '*** MODULE: purge_empty *************************************************'
+dir_sess=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+files=$(find ${dir_sess})
+    for file in ${files}; do
+
+        # remove all empty files
+        size=$(cat ${file} | wc -l);
+        if [ ${size} -eq 0 ]; then
+            rm ${file}
+        fi
+    done
+done

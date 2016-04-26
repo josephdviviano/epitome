@@ -1,0 +1,43 @@
+#!/bin/bash
+#
+# autocrop input
+#
+# input: input prefix
+# 
+# output: func_box
+# prereq: init_*
+#
+# Removes all-zero regions from the brain in run 1 of the session, and matches 
+# the remaining runs in the session to this crop. For more details, see the help 
+# of AFNI's 3dAutobox.
+
+echo '*** MODULE: autocrop. Removes empty areas on a per session basis. *******'
+input=${1}
+
+# loop through sessions
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+
+    # loop through runs
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+        FILE=`echo ${RUN}/*.nii.gz`
+
+        if [ ! -f ${SESS}/func_box.${ID}.${NUM}.nii.gz ]; then
+            if [ ${NUM} == '01' ]; then
+                # 3dAutobox run (unconstrained for first run)
+                3dAutobox \
+                    -prefix ${SESS}/func_box.${ID}.${NUM}.nii.gz \
+                    ${SESS}/${input}.${ID}.${NUM}.nii.gz
+
+            else
+                # resample all other runs to match the first run of the session
+                3dresample \
+                   -prefix ${SESS}/func_box.${ID}.${NUM}.nii.gz \
+                   -master ${SESS}/func_box.${ID}.01.nii.gz \
+                   -inset ${SESS}/${input}.${ID}.${NUM}.nii.gz
+            fi
+        fi
+    done
+done

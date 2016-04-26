@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# align_centers input
+#
+# input: input prefix
+#
+# output: func_ac 
+# prereq: init_*
+#
+# Aligns center of mass between EPI and T1 images.
+
+echo '*** MODULE: align_centers. Shifts the center of EPI to match T1. ********'
+input=${1}
+
+# loop through sessions
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    SESS=$(basename ${SESS})
+    dir=$(echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE})
+    dir_t1=$(echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1)
+
+    # figure out if we should use each session's T1, or just the first session
+    if [ $(ls -l ${dir} | grep ^d | wc -l) -eq $(ls -l ${dir_t1} | grep ^d | wc -l) ]; then
+        multisession=1
+    else
+        multisession=0
+    fi
+
+    if [ ${multisession} -eq 1 ]; then
+        anat_t1=$(echo ${dir_t1}/${SESS}/anat_T1_brain.nii.gz)
+    else
+        anat_t1=$(echo ${dir_t1}/SESS01/anat_T1_brain.nii.gz)
+    fi
+
+    # loop through runs
+    DIR_RUNS=`ls -d -- ${dir}/${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        if [ ! -f ${dir}/${SESS}/func_ac.${ID}.${NUM}.nii.gz ]; then
+            (
+            # make temporary folder, cd into it
+            tmpstring=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 6 | head -n 1)
+            tmpfolder=$(echo tmp_${tmpstring}_${NUM})
+            mkdir ${tmpfolder}
+            cd ${tmpfolder}
+
+            # @Align_Centers requires the func to be in the current directory
+            cp ${dir}/${SESS}/${input}.${ID}.${NUM}.nii.gz func_tmp_align.nii.gz
+
+            # use the -cm flag to rely on the centre of mass
+            @Align_Centers \
+                -base ${anat_t1} \
+                -dset func_tmp_align.nii.gz \
+                -cm
+
+            # move outputs to correct location
+            mv func_tmp_align_shft.nii.gz ${dir}/${SESS}/func_ac.${ID}.${NUM}.nii.gz
+            mv func_tmp_align_shft.1D ${dir}/${SESS}/mat_EPI_to_T1_shft.1D
+
+            # remove tmpfolder
+            cd ..
+            rm -r ${tmpfolder}
+            )
+        fi
+    done
+done

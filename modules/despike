@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# despike input
+#
+# input: input prefix
+#
+# output: func_despike
+# prereq: init_*
+#
+# Removes time series outliers from each voxel. Specifically, this
+#
+# + L1 fit a smooth-ish curve to each voxel time series
+# + Compute the MAD of the difference between the curve and the data time series.
+# + Estimate the standard deviation 'sigma' of the residuals as sqrt(PI/2)*MAD.
+# + For each voxel value, define s = (value-curve)/sigma.
+# + Values with s > c1 are replaced with a value that yields a modified: 
+#
+#                     s' = c1+(c2-c1)*tanh((s-c1)/(c2-c1))
+#
+#   where c1 is the threshold value of s for a 'spike' [default c1=2.5], and c2 
+#   is the upper range of the allowed deviation from the curve: s=[c1..infinity) 
+#   is mapped to s'=[c1..c2) [default c2=4].
+#
+# For more details, see the help of AFNI's 3dDespike.
+
+echo '*** MODULE: despike. Removes time series outliers via L1 regression. ****'
+export input=${1}
+
+# loop through sessions
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+
+    # loop through runs
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        if [ ! -f ${SESS}/func_despike.${ID}.${NUM}.nii.gz ]; then
+	        3dDespike \
+	            -prefix ${SESS}/func_despike.${ID}.${NUM}.nii.gz \
+	            -ssave ${SESS}/PARAMS/spikes.${ID}.${NUM}.nii.gz \
+	            -quiet \
+	             ${SESS}/${input}.${ID}.${NUM}.nii.gz
+        fi
+    done
+done

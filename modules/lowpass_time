@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# lowpass_time input mask filter cutoff
+# 
+# input:  input prefix
+# mask:   epi brain mask [list: anat_EPI_mask, anat_EPI_mask_MNI-lin, anat_EPI_mask_MNI-nonlin, anat_EPI_mask_T1, ?]
+# filter: frequency domain lowpass filter type [list: median, average]
+# cutoff: filter window length [int]
+#
+# output: func_lowpass
+# prereq: motion_deskull
+#
+# Removes high frequency content from your fMRI time series.
+#
+# Both median and average filters operate in the time domain and therefore, the 
+# best cutoff values are odd (and must be larger than 1 to do anything). Time-
+# domain filters are very good at removing high-frequency noise from the data 
+# without introducing any phase-shifts or ringing into the time series. When in 
+# doubt, a moving average filter with window length of 3 is a decent and 
+# conservative choice.
+
+echo '*** MODULE: lowpass_time. Low pass using time-domain filter. ************'
+export input=${1}
+export mask=${2}
+export filter=${3}
+export cutoff=${4}
+
+# if input cutoff is even, change to odd by adding 1
+if [ $((cutoff%2)) -eq 0 ]; then 
+    cutoff=$((cutoff+1))
+fi
+
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
+for SESS in ${DIR_SESS}; do
+    DIR_RUNS=$(ls -d -- ${SESS}/RUN*)
+    for RUN in ${DIR_RUNS}; do
+        NUM=$(basename ${RUN} | sed 's/[^0-9]//g')
+
+        if [ ! -f ${SESS}/func_lowpass.${ID}.${NUM}.nii.gz ]; then
+            epi-lowpass \
+                ${SESS}/${input}.${ID}.${NUM}.nii.gz \
+                ${SESS}/${mask}.nii.gz \
+                ${SESS}/func_lowpass.${ID}.${NUM}.nii.gz \
+                --type ${filter} \
+                --cutoff ${cutoff}
+        fi
+    done
+done

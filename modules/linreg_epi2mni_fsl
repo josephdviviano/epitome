@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# linreg_epi2mni_fsl input dims
+#
+# input: input prefix
+# dims:  target voxel dimensions (isotropic) [float]
+#
+# output: func_MNI-lin
+# prereq: linreg_calc_fsl
+#
+# Prepares data for analysis in MNI standard space, reslicing to the defined
+# voxel dimensions.
+
+echo '*** MODULE: linreg_epi2mni_fsl. MNI-transforms functional data. *********'
+export input=${1}
+export dims=${2}
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    SESS=$(basename ${SESS})
+
+    DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
+    DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
+
+    # create registration dummy for FSL
+    if [ -f ${DIR}/anat_EPI_reg_target.nii.gz ]; then
+        rm ${DIR}/anat_EPI_reg_target.nii.gz
+    fi
+    3dresample \
+        -dxyz ${dims} ${dims} ${dims} \
+        -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
+        -inset ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz
+
+    DIR_RUNS=`ls -d -- ${DIR}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        # register runs with individual T1s
+        if [ ! -f ${DIR}/func_MNI.${ID}.${NUM}.nii.gz ]; then
+            flirt \
+                -in ${DIR}/${input}.${ID}.${NUM}.nii.gz \
+                -ref ${DIR}/anat_EPI_reg_target.nii.gz \
+                -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
+                -out ${DIR}/func_MNI-lin.${ID}.${NUM}.nii.gz \
+                -interp sinc \
+                -sincwidth 7 \
+                -sincwindow blackman
+        fi
+    done
+
+    # register session masks with MNI
+    if [ ! -f ${DIR}/${SESS}/anat_EPI_mask_MNI-linreg.nii.gz ]; then
+        flirt \
+            -in ${DIR}/anat_EPI_mask.nii.gz \
+            -ref ${DIR}/anat_EPI_reg_target.nii.gz \
+            -applyxfm -init ${DIR}/mat_EPI_to_TAL.mat \
+            -interp nearestneighbour \
+            -out ${DIR}/anat_EPI_mask_MNI-lin.nii.gz
+    fi
+done

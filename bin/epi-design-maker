@@ -1,0 +1,168 @@
+#!/usr/bin/env python
+"""
+Usage:
+    epi-design-maker [options] <database> <covars>...
+
+Arguments:
+    <database>  A .csv containing all of the data of interest
+    <covars>    A list of strings of the desired covariate columns. Any
+                covariate ending with '@' will be split by group.
+
+Options:
+    --filename=<filename>  Column name containing the statmap files.
+    --group=<group>        Column name contaning the group identifiers.
+
+Details:
+
+    Takes a database .csv of the following format:
+
+        filename,group,covar1,covar2,covar3...
+
+    And creates a list of input files, and marching design matrix, for FSL's GLM
+    programs, where,
+
+        filename = /full/path/to/statmap.nii.gz
+        group = a set of identifiers denoting group (n groups = n unique values)
+        covar = columns of relevant covariates (e.g., age, sex, iq).
+
+    If columns 'filename' and/or 'group' do not exist, they should be defined
+    using --filename='column' and --group='column', respecively. They do not
+    need to be in a particular column.
+
+    If any covariate ends with '@', that covariate will be split by group. This
+    allows for group * covariate interactions at the expense of degrees of
+    freedom.
+
+    Any row that begins with # will be ignored. Use this to 'comment out'
+    subjects.
+
+    All covariates will be centered about 0 by subtracting the mean, either
+    within group, or across groups. Missing values will be replaced with the
+    mean of the group.
+"""
+
+from epitome.docopt import docopt
+import os, sys
+import pandas as pd
+import numpy as np
+
+def covar_column(df, col, group=None):
+    """
+    Centers the variable submitted about zero.
+
+    Each group gets a single column for each covariate, and 0s are entered for
+    subjects not in a given group for each column, if group is defined.
+
+    Missing values are also replaced with zeros.
+    """
+    if group:
+        idx = df['group'] == group
+        data = df[col][idx]
+        data = data - np.mean(data)
+        data[data.isnull()] = 0
+        covar = np.zeros(df.shape[0])
+        covar[idx.as_matrix()] = data
+
+    else:
+        covar = df[col] - np.mean(df[col])
+        covar[covar.isnull()] = 0
+        covar = covar.as_matrix()
+
+    return covar
+
+def subject_column(df, group):
+    idx = df['group'] == group
+    subject = np.zeros(df.shape[0])
+    subject[idx.as_matrix()] = 1
+
+    return subject
+
+def main():
+    """
+    Prints out subjlist.txt and design-matrix.txt.
+    """
+    arguments = docopt(__doc__)
+    database = arguments['<database>']
+    covars   = arguments['<covars>']
+    filename = arguments['--filename']
+    group    = arguments['--group']
+
+    # read in database and remove commented out rows
+    database = pd.read_csv(database)
+    test = database[database.columns[0]]
+
+    # ~test.str.startswith will return typeerror if no # found
+    try:
+        idx = ~test.str.startswith('#')
+        database = database[idx]
+    except TypeError:
+        pass
+
+    if filename:
+        database = database.rename(columns = {filename : 'filename'})
+    if group:
+        database = database.rename(columns = {group : 'group'})
+
+    # check that group and filename columns exist
+    try:
+        database['filename']
+    except KeyError:
+        sys.exit('ERROR: filename column does not exist.')
+    try:
+        database['group']
+    except KeyError:
+        sys.exit('ERROR: group column does not exist.')
+
+    # init the output matrix as a block of zeros
+    groups = database['group']
+    ngroup = groups.nunique()
+    nsubj = database.shape[0]
+
+    # calculate the number of covariate columns
+    count_split = 0
+    count_reg = 0
+
+    for cv in covars:
+        if cv.endswith('@'):
+            count_split += 1
+        else:
+            count_reg += 1
+
+    ncols = ngroup + count_reg + count_split*ngroup
+    design = np.zeros((nsubj, ncols))
+
+    # begin
+    ncol = 0
+    fmtstr = ''
+
+    # add subjects
+    for group in groups.unique():
+       subject = subject_column(database, group)
+       design[:, ncol] = subject
+       ncol += 1
+       fmtstr = '{} %i'.format(fmtstr)
+
+    # add covariates
+    for covar in covars:
+        # split by groups command
+        if covar[-1] == '@':
+            for group in groups.unique():
+                design[:, ncol] = covar_column(database, covar[:-1], group)
+                ncol += 1
+                fmtstr = '{} %2.2f'.format(fmtstr)
+        else:
+            design[:, ncol] = covar_column(database, covar)
+            ncol += 1
+            fmtstr = '{} %2.2f'.format(fmtstr)
+
+    np.savetxt('fsl_design.txt', design, fmt=fmtstr)
+
+    # save subject list
+    filenames = database['filename'].tolist()
+    f = open('fsl_subjects.txt', 'wb')
+    f.writelines('\n'.join(filenames))
+    f.close()
+
+if __name__ == '__main__':
+    main()
+
