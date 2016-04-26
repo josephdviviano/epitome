@@ -1,4 +1,4 @@
-![epitome -- an MRI metapipeline](assets/logo.png "epitome -- a MRI metapipeline and analysis suite")
+![epitome](assets/logo.png "epitome: scriptuit modules for MRI analysis")
 
 epitome is a collection of scriptuit modules for pre-processing MRI data, as well as a bundle of command-line tools for processing and analysing.
 
