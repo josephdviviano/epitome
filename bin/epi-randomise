@@ -90,7 +90,7 @@ def main():
     # generate thresholded t-stat map for each contrast
     n_contrasts = get_n_contrasts(contrasts)
 
-    t_list = ''
+    raw_list = ''
     t_list_vox = ''
     t_list_tfc = ''
     p_list_vox = ''
@@ -103,7 +103,7 @@ def main():
         out_tfc = '{}_tfce_corrp_tstat{}_threshold.nii.gz'.format(prefix, i)
 
         # ordered strings used for statmap concatenation later on
-        t_list = '{} {}_tstat{}.nii.gz'.format(t_list, prefix, i)
+        raw_list = '{raw_list} {pre}_tstat{i}.nii.gz {pre}_vox_p_tstat{i}.nii.gz'.format(raw_list=raw_list, pre=pre, i=i)
         t_list_vox = '{} {}'.format(t_list_vox, out_vox)
         t_list_tfc = '{} {}'.format(t_list_tfc, out_tfc)
         p_list_vox = '{} {}_vox_corrp_tstat{}.nii.gz'.format(p_list_vox, prefix, i)
@@ -127,14 +127,18 @@ def main():
     os.remove('tmp_table.txt')
 
     # concatenate images
-    t_name = 'randomise_{}_t.nii.gz'.format(prefix)
+    raw_name = 'randomise_{}_raw.nii.gz'.format(prefix)
     t_name_vox = 'randomise_{}_t_threshold_vox'.format(prefix)
     t_name_tfc = 'randomise_{}_t_threshold_tfce'.format(prefix)
     p_name_vox = 'randomise_{}_p_vox.nii.gz'.format(prefix)
     p_name_tfc = 'randomise_{}_p_tfce.nii.gz'.format(prefix)
 
+    # create cluster-size thresholded t-stat maps
+    # cluster -i rand_vox_p_tstat3.nii.gz -t 0.995 --osize=test.nii.gz
+    # 3dcalc -prefix threshold_t.nii.gz -a test.nii.gz  -b t.nii.gz -expr 'astep(a, ${size})*b'
+
     if not os.path.isfile(t_name):
-        os.system('fslmerge -t {} {}'.format(t_name, t_list))
+        os.system('fslmerge -t {} {}'.format(raw_name, raw_list))
     if not os.path.isfile(t_name_vox):
         os.system('fslmerge -t {} {}'.format(t_name_vox, t_list_vox))
     if not os.path.isfile(t_name_tfc):
