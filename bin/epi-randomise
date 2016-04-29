@@ -79,8 +79,8 @@ def main():
         os.remove('all_subjects.nii.gz')
     os.system('subjects=$(cat {}); fslmerge -t all_subjects.nii.gz ${{subjects}}'.format(subjlist))
 
-    # run randomise if required
-    if not os.path.isfile('{}_tfce_corrp_tstat1.nii.gz'.format(prefix)):
+    # run randomise if raw outputs with prefix are not found
+    if not os.path.isfile('randomise_{}_raw.nii.gz'.format(prefix)):
         cmd = 'randomise -i all_subjects -o {} -d {} -t {} -e {} -n {} -T -x'.format(
                                                prefix, design, contrasts, group, n)
         if mask:
@@ -103,7 +103,7 @@ def main():
         out_tfc = '{}_tfce_corrp_tstat{}_threshold.nii.gz'.format(prefix, i)
 
         # ordered strings used for statmap concatenation later on
-        raw_list = '{raw_list} {pre}_tstat{i}.nii.gz {pre}_vox_p_tstat{i}.nii.gz'.format(raw_list=raw_list, pre=pre, i=i)
+        raw_list = '{raw_list} {pre}_tstat{i}.nii.gz {pre}_vox_p_tstat{i}.nii.gz'.format(raw_list=raw_list, pre=prefix, i=i)
         t_list_vox = '{} {}'.format(t_list_vox, out_vox)
         t_list_tfc = '{} {}'.format(t_list_tfc, out_tfc)
         p_list_vox = '{} {}_vox_corrp_tstat{}.nii.gz'.format(p_list_vox, prefix, i)
@@ -116,6 +116,7 @@ def main():
             os.system('cluster --in={out_vox} --thresh=0.0001 --mm > tmp_table.txt'.format(out_vox=out_vox))
             os.system('echo ClusterIndex Voxels Max MaxX MaxY MaxZ CogX CogY CogZ > clusters_vox_{}.txt'.format(i))
             os.system("awk 'FNR>1' tmp_table.txt >> clusters_vox_{}.txt".format(i))
+            os.remove('tmp_table.txt')
 
         if not os.path.isfile(out_tfc):
             os.system('fslmaths {prefix}_tfce_corrp_tstat{i}.nii.gz -thr 0.95 -bin -mul {prefix}_tstat{i}.nii.gz {out_tfc}'.format(
@@ -123,8 +124,7 @@ def main():
             os.system('cluster --in={out_tfc} --thresh=0.0001 --mm > tmp_table.txt'.format(out_tfc=out_tfc))
             os.system('echo ClusterIndex Voxels Max MaxX MaxY MaxZ CogX CogY CogZ > clusters_tfce_{}.txt'.format(i))
             os.system("awk 'FNR>1' tmp_table.txt >> clusters_tfce_{}.txt".format(i))
-
-    os.remove('tmp_table.txt')
+            os.remove('tmp_table.txt')
 
     # concatenate images
     raw_name = 'randomise_{}_raw.nii.gz'.format(prefix)
@@ -133,11 +133,7 @@ def main():
     p_name_vox = 'randomise_{}_p_vox.nii.gz'.format(prefix)
     p_name_tfc = 'randomise_{}_p_tfce.nii.gz'.format(prefix)
 
-    # create cluster-size thresholded t-stat maps
-    # cluster -i rand_vox_p_tstat3.nii.gz -t 0.995 --osize=test.nii.gz
-    # 3dcalc -prefix threshold_t.nii.gz -a test.nii.gz  -b t.nii.gz -expr 'astep(a, ${size})*b'
-
-    if not os.path.isfile(t_name):
+    if not os.path.isfile(raw_name):
         os.system('fslmerge -t {} {}'.format(raw_name, raw_list))
     if not os.path.isfile(t_name_vox):
         os.system('fslmerge -t {} {}'.format(t_name_vox, t_list_vox))
