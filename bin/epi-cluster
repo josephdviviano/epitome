@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+"""
+Usage:
+    epi-randomise [options] <stats>
+
+Arguments:
+    <stats>  A 4D input NIFTI file with alternating statmap and p-value volumes.
+
+Options:
+    --n=<n>  Number of voxels required for a significant cluster (faces connectivity only).
+    --p=<p>  Significant p threshold.
+    --pflip  p value volumes are treated as 1-p (as is common with FSL).
+
+Details:
+    Takes a series of statmaps and creates cluster-size based thresholded stat
+    maps of them. The number of volumes in the stats input must be even, as it
+    is expected to be in stats,pval,stat,pval,... order.
+
+    One output file will be made for each pair. This makes it easier to import
+    the files into various viewing programs.
+
+    On pflip: FSL, and other programs, only let you threshold higher numbers, so
+    p-value based thresholds are typically output as 1-p. Only set this option
+    if your significant p-values are close to 1.
+
+Dependencies:
+    FSL
+"""
+
+import epitome as epi
+from epitome.docopt import docopt
+import os, sys
+import glob
+
+def main():
+    """
+    Outputs one thresholded statmap for each input pair.
+    """
+    arguments = docopt(__doc__)
+    stats     = arguments['<stats>']
+    n         = arguments['--n']
+    p         = arguments['--p']
+    pflip     = arguments['--pflip']
+
+    n = int(n)
+    p = float(p)
+
+    if p >= 1 or p <= 0:
+        sys.exit('ERROR: p values {} invalid.'.format(p))
+
+    os.system('fslsplit {} tmp -t'.format(stats))
+    files = glob.glob('tmp*.nii.gz')
+    files.sort()
+    n_files = len(files)
+
+    if n_files % 2 != 0:
+        os.system('rm tmp*.nii.gz')
+        sys.exit('ERROR: input stat file should have an even number of volumes')
+
+    # loop through stats, creating thresholds
+    for i, j in enumerate(range(0, n_files, 2)):
+
+        output = 'stat_cluster_{}.nii.gz'.format(i+1)
+        if os.path.isfile(output):
+            continue
+
+        pfile = 'tmp{}.nii.gz'.format('%04d' % (j+1))
+        sfile = 'tmp{}.nii.gz'.format('%04d' %  j)
+        cfile = 'cluster_mask.nii.gz'
+
+        if not pflip:
+            os.system("3dcalc -a {} -prefix pflipped.nii.gz expr '1-a'".format(pfile))
+            os.remove(pfile)
+            pfile = 'pflipped.nii.gz'
+
+        # create a mask of all of the clusters surviving threshold
+        os.system('cluster -i {} -t {} --osize=cluster_mask.nii.gz'.format(pfile, 1-p))
+
+        # threshold the stat file
+        os.system("3dcalc -prefix {} -a {} -b {} -expr 'astep(a, {})*b'".format(
+                                             output, cfile, sfile, n))
+
+        # remove temporary data
+        os.remove(pfile)
+        os.remove(sfile)
+        os.remove(cfile)
+
+if __name__ == '__main__':
+    main()
+
