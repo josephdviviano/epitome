@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# turn this into a python script
+
+# compute fit
+3dTfitter -prefix output_betas.nii.gz -fitts noise.nii.gz -polort 0 -RHS stats/all_FA_skeletonised.nii.gz -mask stats/mean_FA_skeleton_mask.nii.gz -LHS sex.1D
+
+# compute mean
+3dTstat -prefix mean.nii.gz stats/all_FA_skeletonised.nii.gz
+
+# compute residuals retaining the mean
+3dcalc -prefix scrubbed_data.nii.gz -a stats/all_FA_skeletonised.nii.gz -b noise.nii.gz -c mean.nii.gz -expr 'a-b+c'
+
