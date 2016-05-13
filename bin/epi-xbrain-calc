@@ -88,7 +88,7 @@ def main():
         means = get_mean_ts(d, seed)
 
         if means.shape != template.shape:
-            sys.exit('ERROR: Template does not match input {}.'.format(subj))
+            sys.exit('ERROR: Template shape {} does not match input {} shape {}.'.format(template.shape, subj, means.shape))
 
         # correlate template + means, save diagonal of off diagonal
         c = np.corrcoef(template, means)
