@@ -1,4 +1,23 @@
 #!/usr/bin/env python
+"""
+Does some regressions up in this ish.
+
+Usage:
+    epi-xbrain-rf [options] <X> <y>
+
+Arguments:
+    <X>         Input data to run predictions on (one row per participant)
+    <y>         Data to predict (continuous).
+
+Options:
+    --model=<model>   LR_L1, SVR, or RFR [default: RFR]
+    --nfold=<nfold>   Number of folds for cross validations [default: 10]
+    --stratified      Do stratified cross-validation.
+
+DETAILS
+    epi-xbrain-rf -h or --help prints this message.
+"""
+
 from epitome.docopt import docopt
 import numpy as np
 from scipy import stats
@@ -12,11 +31,8 @@ import datetime
 import collections
 import tables as tb
 from math import isnan
-# parallel computation
-from functools import partial
 
 import matplotlib.pyplot as plt
-%matplotlib inline
 plt.rcParams['figure.figsize'] = (15, 10)
 plt.style.use('ggplot')
 
@@ -30,226 +46,150 @@ from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error as mse
 
-import ipyparallel as ipp
-
 def pickleIt(my_data,save_path):
     f = open(save_path, 'wb')
     pickle.dump(my_data, f)
     f.close()
 
-def computeOuterFold(train_X, train_y, valid_X, valid_y, model_clf, hyper_params, inner_loop, save_model, save_model_path):
-    import collections
-    from sklearn.linear_model import LinearRegression
-    from sklearn.linear_model import Lasso
-    from sklearn.svm import SVR
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn import grid_search
-    import datetime
-    import time
-    import collections
-    from scipy.stats import mode
-    from sklearn.metrics import mean_squared_error as mse
-    from scipy import stats
-
-    print('MSG: starting outer fold computation')
-
-    hp_dict = collections.defaultdict(list) #store best hyper-parameters for each fold
-
-    if inner_loop:
-        print 'Starting InnerFold computation'
-        save_model_path_fold = save_model_path + '_fold_'
-        clf = innerCVLoop(model_clf,hyper_params,train_X, train_y,save_model,save_model_path_fold)
-        for hp in hyper_params:
-            hp_dict[hp].append(clf.best_estimator_.get_params()[hp])
-
-        print 'Ending InnerFold computation'
-
-    else:
-        clf = model_clf
-        clf.fit(fold_X,fold_y)
-
-    #CV_scores
-    r_train = stats.pearsonr(clf.predict(train_X),train_y)
-    r_valid = stats.pearsonr(clf.predict(valid_X),valid_y)
-
-    R2_train = clf.score(train_X,train_y)
-    R2_valid = clf.score(valid_X,valid_y)
-
-    MSE_train = mse(clf.predict(train_X),train_y)
-    MSE_valid = mse(clf.predict(valid_X),valid_y)
-
-    print 'Ending OuterFold computation'
-
-    return {'r_train':r_train, 'r_valid':r_valid, 'R2_train':R2_train, 'R2_valid':R2_valid,
-            'MSE_train':MSE_train, 'MSE_valid':MSE_valid, 'hp_dict':hp_dict,
-            'predicted_fold_score': clf.predict(valid_X), 'actual_fold_scores':valid_y}
-
-def innerCVLoop(model_clf,hyper_params,fold_X, fold_y,save_model,save_model_path):
-    from sklearn.linear_model import LinearRegression
-    from sklearn.linear_model import Lasso
-    from sklearn.svm import SVR
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn import grid_search
-    clf = grid_search.GridSearchCV(model_clf, hyper_params,cv=3,verbose=0)
-    clf.fit(fold_X, fold_y)
-    #Save classifier
-    if save_model:
-        save_model(clf,save_model_path)
+def CVLoop(model_clf, hyperparams, X_train, y_train):
+    """
+    Uses cross validation to do a grid search on the hyperparameter dictionary
+    input.
+    """
+    clf = grid_search.GridSearchCV(model_clf, hyperparams, cv=3,verbose=0)
+    clf.fit(X_train, y_train)
 
     return clf
 
-def autolabel(rects,_ax):
-    for rect in rects:
-        height = rect.get_height()
-        _ax.text(rect.get_x() + rect.get_width()/2., 1.05*height,
-                '{:03.2f}'.format(height), ha='center', va='bottom', fontsize = 25)
+def fold(X_train, y_train, X_test, y_test, model_clf, hyperparams, i):
+
+    hp_dict = collections.defaultdict(list) #store best hyper-parameters for each fold
+
+    clf = CVLoop(model_clf, hyperparams, X_train, y_train)
+    for hp in hyperparams:
+        hp_dict[hp].append(clf.best_estimator_.get_params()[hp])
+
+    r_train = stats.pearsonr(clf.predict(X_train), y_train)
+    r_test = stats.pearsonr(clf.predict(X_test), y_test)
+    R2_train = clf.score(X_train, y_train)
+    R2_test = clf.score(X_test, y_test)
+    MSE_train = mse(clf.predict(X_train), y_train)
+    MSE_test = mse(clf.predict(X_test), y_test)
+
+    # visualization
+    plt.scatter(clf.predict(X_test),  y_test)
+    plt.savefig('test_predicit_{}.jpg'.format(i))
+    plt.close()
+
+    # check feature importance (QC for HC importance)
+    # for fid in np.arange(10):
+    #     model_clf.fit(X_train[fid],y_train[fid])
+    #     feat_imp = model_clf.feature_importances_
+    #     print
+    #     print 'fid: {} r: {}'.format(fid, zip(*CV_r_valid)[0][fid])
+    #     print feat_imp[70:], np.argsort(feat_imp)[70:]
+
+    return {'r_train':r_train,
+            'r_test':r_test,
+            'R2_train':R2_train,
+            'R2_test':R2_test,
+            'MSE_train':MSE_train,
+            'MSE_test':MSE_test,
+            'hp_dict':hp_dict,
+            'predicted_fold_score': clf.predict(X_test),
+            'actual_fold_scores':y_test}
 
 def main():
-
     arguments = docopt(__doc__)
-    model   = arguments['<model>']
-    X       = arguments['<X>']
-    y       = arguments['<y>']
-    stratified = arguments['--stratafied']
+    X          = arguments['<X>']
+    y          = arguments['<y>']
+    model      = arguments['--model']
+    nfold      = int(arguments['--nfold'])
+    stratified = arguments['--stratified']
 
     # transforms label values
-    le = preprocessing.LabelEncoder()
-    le.fit(y)
-    y_labels = le.transform(y)
+    # only for classification!!
+    #le = preprocessing.LabelEncoder()
+    #le.fit(y)
+    #y_labels = le.transform(y)
 
-    if stratafied:
+    X = np.genfromtxt(X, delimiter=',')
+    y = np.genfromtxt(y, delimiter=',')
+
+    if X.shape[0] != y.shape[0]:
+        sys.exit('ERROR: X has {} rows, y has {} rows'.format(X.shape[0], y.shape[0]))
+
+    if stratified:
         print('MSG: using stratified kfold cross-validation')
-        kf = StratifiedKFold(y_labels, n_folds=10)
+        kf = StratifiedKFold(y_labels, n_folds=nfold)
     else:
         print('MSG: using kfold cross-validation')
-        kf = KFold(len(y), n_folds=10)
+        kf = KFold(len(y), n_folds=nfold)
 
+    if model == 'LR_L1':
+        model_clf = Lasso()
+        hyperparams = {'alpha':[0.2, 0.1, 0.05, 0.01]}
+        scale_data = True
+        feat_imp = True
+    elif model == 'SVR':
+        model_clf = SVR()
+        hyperparams = {'kernel':['linear','rbf'], 'C':[1,10,25]}
+        scale_data = True
+        feat_imp = True
+    elif model == 'RFR':
+        model_clf = RandomForestRegressor(n_jobs=6)
+        hyperparams = {'n_estimators':[10,25,50,100,200],'min_samples_split':[2,4,6,8,10]}
+        scale_data = False
+        feat_imp = True
+    else:
+        sys.exit('ERROR: Invalid model type {}'.format(model))
+
+    if scale_data:
+        X = preprocessing.scale(X)
+
+    # values stored for each fold
+    CV_r_train, CV_r_valid = [], []
+    CV_R2_train, CV_R2_valid = [], []
+    CV_MSE_train, CV_MSE_valid = [], []
+    predicted_CV_scores, actual_CV_scores = [], []
+    hp_dict = collections.defaultdict(list)
+
+    # get training and test data for each fold
+    i = 1
     for train_index, test_index in kf:
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-    if model_choice == 'LR_L1':
-        model_clf = Lasso()
-        hyper_params = {'alpha':[0.2, 0.1, 0.05, 0.01]}
-        scale_data = True #Scales HC and CT features
-        inner_loop = True #only needed to optimize hyper-params
-        feat_imp = True
+        print('MSG: fold {}'.format(i))
+        results = fold(X_train, y_train, X_test, y_test, model_clf, hyperparams, i)
+        i += 1
 
-    elif model_choice == 'SVR':
-        model_clf = SVR()
-        hyper_params = {'kernel':['linear','rbf'], 'C':[1,10,25]}
-        scale_data = True #Scales HC and CT features
-        inner_loop = True #only needed to optimize hyper-params
-        feat_imp = True
+        CV_r_train.append(results['r_train'])
+        CV_r_valid.append(results['r_test'])
+        CV_R2_train.append(results['R2_train'])
+        CV_R2_valid.append(results['R2_test'])
+        CV_MSE_train.append(results['MSE_train'])
+        CV_MSE_valid.append(results['MSE_test'])
+        predicted_CV_scores.append(results['predicted_fold_score'])
+        actual_CV_scores.append(results['actual_fold_scores'])
 
-    elif model_choice == 'RFR':
-        model_clf = RandomForestRegressor(n_jobs=6)
-        hyper_params = {'n_estimators':[10,50,100,200],'min_samples_split':[2,4,8]}
-        scale_data = False
-        inner_loop = True #only needed to optimize hyper-params
-        feat_imp = True
+        for hp in hyperparams:
+            hp_dict[hp].append(results['hp_dict'][hp])
 
-    else:
-        sys.exit('ERROR: Invalid model type {}'.format(model))
 
-   # Train and Test models
-    if scale_data:
-        X = preprocessing.scale(X)
-    else:
-        X = X
-
-    # Create list of all the fold-subsets (needed for parallelization)
-    X_train = []
-    X_valid = []
-    y_train = []
-    y_valid = []
-    for train, valid in kf:
-        X_train.append(X[train])
-        X_valid.append(X[valid])
-        y_train.append(y[train])
-        y_valid.append(y[valid])
-
-    CV_r_train=[] #pearson r score for each outer fold on train set
-    CV_r_valid=[] #pearson r score for each outer fold on validation set
-
-    CV_R2_train=[] #R2 score for each outer fold on train set
-    CV_R2_valid=[] #R2 score for each outer fold on validation set
-
-    CV_MSE_train=[] #MSE for each outer fold on train set
-    CV_MSE_valid=[] #MSE for each outer fold on validation set
-
-    predicted_CV_scores = []
-    actual_CV_scores = []
-
-    # Parallization configs for ipython notebook cluster
-    rc = ipp.Client()
-    dview = rc[:]
-    dview.push(dict(computeOuterFold = computeOuterFold))
-    dview.push(dict(innerCVLoop = innerCVLoop))
-    mapfunc = partial(computeOuterFold, model_clf=model_clf, hyper_params=hyper_params, inner_loop=inner_loop,
-                  save_model=save_model, save_model_path=save_model_path)
-    parallel_result = dview.map_sync(mapfunc, X_train, y_train, X_valid, y_valid)
-
-    hp_dict = collections.defaultdict(list)
-    for pr in parallel_result:
-        CV_r_train.append(pr['r_train'])
-        CV_r_valid.append(pr['r_valid'])
-        CV_R2_train.append(pr['R2_train'])
-        CV_R2_valid.append(pr['R2_valid'])
-        CV_MSE_train.append(pr['MSE_train'])
-        CV_MSE_valid.append(pr['MSE_valid'])
-        predicted_CV_scores.append(pr['predicted_fold_score'])
-        actual_CV_scores.append(pr['actual_fold_scores'])
-
-        for hp in hyper_params:
-            hp_dict[hp].append(pr['hp_dict'][hp])
-
-    #Find out most frequent hyper-params during cross-val
+    # find out most frequent hyper-params during cross-val
     hp_mode = {}
-    for hp in hyper_params:
+    for hp in hyperparams:
         hp_mode[hp] = mode(hp_dict[hp])[0][0]
 
-    print 'most frequent hp:' + str(hp_mode)
-
-else:
-    print "Loading previously saved model: "
-    f = open(load_model_path)
-    result = pickle.load(f)
-    test_clf = result['best_clf']
-    CV_r_valid = result['CV_r']
-    CV_R2_valid = result['CV_R2']
-    CV_MSE_valid = result['CV_MSE']
-    f.close()
-
-print 'CV r (mean, median, std_err): ' + '{:04.2f},{:04.2f},{:04.2f}'.format(np.mean(zip(*CV_r_valid)[0]),np.median(zip(*CV_r_valid)[0]),stats.sem(zip(*CV_r_valid)[0]))
-print 'CV R2 (mean, median, std_err): ' + '{:04.2f},{:04.2f}, {:04.2f}'.format(np.mean(CV_R2_valid),np.median(CV_R2_valid),stats.sem(CV_R2_valid))
-print 'CV MSE (mean, median, std_err): ' + '{:04.2f},{:04.2f}, {:04.2f}'.format(np.mean(CV_MSE_valid),np.median(CV_MSE_valid),stats.sem(CV_MSE_valid))
-
-# check feature importance (QC for HC importance)
-# for fid in np.arange(10):
-#     model_clf.fit(X_train[fid],y_train[fid])
-#     feat_imp = model_clf.feature_importances_
-#     print
-#     print 'fid: {} r: {}'.format(fid, zip(*CV_r_valid)[0][fid])
-#     print feat_imp[70:], np.argsort(feat_imp)[70:]
-print zip(*CV_r_valid)[0]
+    print('most frequent hp: {}'.format(hp_mode))
+    print('CV r   (mean, median, std_err): {:04.2f}, {:04.2f}, {:04.2f}'.format(
+           np.mean(zip(*CV_r_valid)[0]), np.median(zip(*CV_r_valid)[0]),stats.sem(zip(*CV_r_valid)[0])))
+    print('CV R2  (mean, median, std_err): {:04.2f}, {:04.2f}, {:04.2f}'.format(
+           np.mean(CV_R2_valid),         np.median(CV_R2_valid),        stats.sem(CV_R2_valid)))
+    print('CV MSE (mean, median, std_err): {:04.2f}, {:04.2f}, {:04.2f}'.format(
+           np.mean(CV_MSE_valid),        np.median(CV_MSE_valid),       stats.sem(CV_MSE_valid)))
 
 if __name__ == '__main__':
     main()
-
-
-    # Data imports
-    my_name = 'Exp5'
-    cohort = 'ADNI2'
-    clinical_scale = 'ADAS13'
-    exp_name = '{}_{}_{}'.format(my_name,cohort,clinical_scale)
-    atlas = 'AAL'
-
-    baseline_dir = '/projects/nikhil/ADNI_prediction/input_datasets/'
-    HC_L_data_path = baseline_dir + 'HC/subject_HC_vol_dictionary_{}_left_{}.pkl'.format(cohort,my_name)
-    HC_R_data_path = baseline_dir + 'HC/subject_HC_vol_dictionary_{}_right_{}.pkl'.format(cohort,my_name)
-    CT_data_path = baseline_dir + 'CT/civet_out/{}_subject_ROI_CT_dict_{}.pkl'.format(cohort,atlas)
-    CT_unique_ROIs_path = baseline_dir + 'CT/civet_out/ADNI_unique_ROIs_{}.pkl'.format(atlas)
-    sub_CS_data_path = baseline_dir + 'CS/{}_BL_PTID_ADAS13_dict.pkl'.format(cohort)
-    sub_DX_data_path = baseline_dir + 'CS/{}_BL_PTID_DX_bl_dict.pkl'.format(cohort)
 
