@@ -1,27 +1,33 @@
 #!/usr/bin/env python
 """
-Produces a .csv of the mean timeseries from each ROI defined in the input mask
-across all of the input niftis. All time series are scaled to percent signal
-change before calculation.
+Produces a 3D roi * timepoint * subject template matrix of the timeseries from
+each ROI defined in the input mask across all of the input niftis. All time
+series are scaled to percent signal change. This template can be used to
+compute cross-brain correlations with held-out subjects using epi-xbrain-
 
 Usage:
     epi-xbrain-template [options] <output> <seeds> <nifti>...
 
 Arguments:
-    <output>        Output .csv filename.
+    <output>        Output filename.
     <seeds>         Mask with one or more ROI.
     <nifti>         Input niftis for subjects.
 
 Options:
     --mask=<mask>   A binary brain mask.
-    --var=<var>     Compute the variance of the timeseries between subjects.
+    --var=<var>     Filename of the time series variance between subjects.
+    --csv           Instead of outputting a 3D file, produces a simpler output
+                    containing only the mean of the input subjects time series.
 
 DETAILS
 
     This computes the mean time series within each ROI in the supplied mask.
     This program treats each unique input value in the seeds NIFTI as a unique
-    ROI. It takes the mean time series within that ROI, and then takes the mean
-    time series between those ROIs to create a group template.
+    ROI. It takes the mean time series within that ROI, and stores them for all
+    input subjects. epi-xbrian-calc can then be used to generate multiple
+    templates from subsets of these subjects. Alternatively, you can produce a
+    single template csv. In this case, the program takes the mean time series
+    between those ROIs to create a group template.
 
     epi-xbrain-template -h or --help prints this message.
 """
@@ -67,6 +73,7 @@ def main():
     data   = arguments['<nifti>']
     mask   = arguments['--mask']
     var    = arguments['--var']
+    csv    = arguments['--csv']
 
     if len(data) < 2:
         sys.exit('ERROR: Need at least two inputs to average')
@@ -83,24 +90,34 @@ def main():
             sys.exit('ERROR: At least 1 ROI completely outside mask for {}.'.format(output))
 
     # init output matrix (TRs / ROIs)
-    out_data = np.zeros((len(np.unique(seed)[1:]), dims[3]))
+    if csv:
+        outDat = np.zeros((len(np.unique(seed)[1:]), dims[3]))
+    else:
+        outDat = np.zeros((len(np.unique(seed)[1:]), dims[3], len(data)))
     if var:
-        outvar = np.zeros((len(np.unique(seed)[1:]), dims[3], len(data)))
+        outVar = np.zeros((len(np.unique(seed)[1:]), dims[3], len(data)))
 
     for i, subj in enumerate(data):
         subj, _, _, _ = epi.utilities.loadnii(subj)
         means = get_mean_ts(subj, seed)
+        if csv:
+            outDat = outDat + means
+        else:
+            outDat[:,:,i] = means
+
         if var:
-            outvar[:,:,i] = means
-        out_data = out_data + means
+            outVar[:,:,i] = means
 
     # write outputs
-    out_data = out_data / len(subj)
-    np.savetxt(output, out_data, delimiter=",")
+    if csv:
+        outDat = outDat / len(subj)
+        np.savetxt(output, outDat, delimiter=",")
+    else:
+        np.save(output, outDat)
 
     if var:
-        outvar = np.var(outvar, axis=2)
-        np.savetxt(var, out_data, delimiter=",")
+        outVar = np.var(outVar, axis=2)
+        np.savetxt(var, outVar, delimiter=",")
 
 if __name__ == '__main__':
     main()
