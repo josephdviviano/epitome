@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Usage:
-    epi-randomise [options] <subjlist>
+    epi-randomize [options] <subjlist>
 
 Arguments:
     <subjlist>  A .txt list of all input statmap files (full paths).
@@ -16,10 +16,10 @@ Options:
     --cleanup                Delete intermediate files.
 
 Details:
-    A wrapper for FSL's randomise and cluster programs.
+    A wrapper for FSL's randomize and cluster programs.
 
     Takes a list of input files (full paths), and a .mat, .con, .grp triplet
-    from FSL's GLM interface, and runs FSL Randomise on them. This wrapper
+    from FSL's GLM interface, and runs FSL randomize on them. This wrapper
     uses threshold-free cluster enhancement (TFCE) and voxel-wise statistics
     for all outputs. The stats are then concatenated, thresholded statmaps are
     produced, and a cluster table for each statmap is produced in a space-
