@@ -29,16 +29,19 @@ Details:
     using --filename='column' and --group='column', respecively. They do not
     need to be in a particular column.
 
-    If any covariate ends with '@', that covariate will be split by group. This
-    allows for group * covariate interactions at the expense of degrees of
-    freedom.
+    If any covariate ends with '@', that covariate will be split by group and
+    treated as continuous. This allows for group * covariate interactions at the
+    expense of degrees of freedom.
+
+    If any covariate has less than 10 unique values, it will automatically be
+    treated as categorical and converted into dummy coded columns.
 
     Any row that begins with # will be ignored. Use this to 'comment out'
     subjects.
 
-    All covariates will be centered about 0 by subtracting the mean, either
-    within group, or across groups. Missing values will be replaced with the
-    mean of the group.
+    All continuous covariates will be centered about 0 by subtracting the mean,
+    either within group, or across groups. Missing values will be replaced with
+    the mean of the group.
 """
 
 from epitome.docopt import docopt
@@ -69,6 +72,15 @@ def covar_column(df, col, group=None):
         covar = covar.as_matrix()
 
     return covar
+
+def dummy_columns(df, col):
+    """
+    Returns a column as a categorical, non centered numeric vector.
+    """
+    data = pd.get_dummies(df[col])
+    data = data.as_matrix()
+
+    return data
 
 def subject_column(df, group):
     idx = df['group'] == group
@@ -120,15 +132,21 @@ def main():
 
     # calculate the number of covariate columns
     count_split = 0
+    count_dummy = 0
     count_reg = 0
 
     for cv in covars:
+        # continuous variables that will be centered independently
         if cv.endswith('@'):
             count_split += 1
+        # categorical variables will be converted into dummy columns
+        elif len(database[cv].unique()) < 10:
+            count_dummy += len(database[cv].unique())
         else:
             count_reg += 1
 
-    ncols = ngroup + count_reg + count_split*ngroup
+    # pre-calculate the size of the complete design matrix
+    ncols = ngroup + count_reg + count_dummy + count_split*ngroup
     design = np.zeros((nsubj, ncols))
 
     # begin
@@ -144,12 +162,23 @@ def main():
 
     # add covariates
     for covar in covars:
+
         # split by groups command
         if covar[-1] == '@':
             for group in groups.unique():
                 design[:, ncol] = covar_column(database, covar[:-1], group)
                 ncol += 1
                 fmtstr = '{} %2.2f'.format(fmtstr)
+
+        # split into dummy columns command
+        elif len(database[covar].unique()) < 10:
+            d = dummy_columns(database, covar)
+            for i in range(len(database[covar].unique())):
+                design[:, ncol] = d[:, i]
+                ncol += 1
+                fmtstr = '{} %i'.format(fmtstr)
+
+        # regular continuous variable
         else:
             design[:, ncol] = covar_column(database, covar)
             ncol += 1
