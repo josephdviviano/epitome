@@ -58,6 +58,8 @@ def covar_column(df, col, group=None):
 
     Missing values are also replaced with zeros.
     """
+    print('MSG: adding covariate column {}'.format(col))
+
     if group:
         idx = df['group'] == group
         data = df[col][idx]
@@ -77,6 +79,8 @@ def dummy_columns(df, col):
     """
     Returns a column as a categorical, non centered numeric vector.
     """
+    print('MSG: adding dummy columns {}'.format(col))
+
     data = pd.get_dummies(df[col])
     data = data.as_matrix()
 
@@ -109,6 +113,11 @@ def main():
         database = database[idx]
     except TypeError:
         pass
+
+    # exit if the surviving rows contain nans
+    if database.isnull().values.any():
+        badSubj = database.loc[database.isnull().sum(axis=1) > 0]
+        sys.exit('ERROR: found NaNs in the following database rows:\n {}'.format(badSubj))
 
     if filename:
         database = database.rename(columns = {filename : 'filename'})
@@ -149,6 +158,13 @@ def main():
     ncols = ngroup + count_reg + count_dummy + count_split*ngroup
     design = np.zeros((nsubj, ncols))
 
+    print("""MSG: Creating design matrix with {} columns:
+    {} groups
+    {} dummy-coded covariates
+    {} regular centered covariates
+    {} split centered covariates""".format(
+        ncols, ngroup, count_dummy, count_reg, count_split*ngroup))
+
     # begin
     ncol = 0
     fmtstr = ''
@@ -180,6 +196,7 @@ def main():
 
         # regular continuous variable
         else:
+            print(ncol)
             design[:, ncol] = covar_column(database, covar)
             ncol += 1
             fmtstr = '{} %2.2f'.format(fmtstr)
