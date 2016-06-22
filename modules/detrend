@@ -3,7 +3,7 @@
 # detrend input det
 #
 # input: input prefix
-# det:   polynomial order to detrend each voxel against
+# det:   polynomial order to detrend each voxel against [int]
 #
 # output: func_detrend
 # prereq: init_*

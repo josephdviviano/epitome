@@ -5,8 +5,8 @@
 # input: input prefix
 # dims:  target voxel dimensions (isotropic) [float]
 #
-# output: func_T1 
-# prereq: linreg_calc_afni OR linreg_calc_slab_afni
+# output: func_T1
+# prereq: linreg_calc*afni
 #
 # Brings EPI data in register with T1 single subject space.
 

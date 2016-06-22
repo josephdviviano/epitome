@@ -3,14 +3,14 @@
 # ica input mask
 #
 # input: input prefix
-# mask:   epi brain mask [list: anat_EPI_mask, anat_EPI_mask_MNI-lin, anat_EPI_mask_MNI-nonlin, anat_EPI_mask_T1, ?]
+# mask:   epi brain mask [list: anat_EPI_mask anat_EPI_mask_MNI-lin anat_EPI_mask_MNI-nonlin anat_EPI_mask_T1 ?]
 #
-# output: 
-# prereq: init_*, motion_deskull
-# 
-# Runs ICA on each input functional file of the type defined using the default 
+# output:
+# prereq: init_* motion_deskull
+#
+# Runs ICA on each input functional file of the type defined using the default
 # MELODIC settings. This module could be easily tweaked to grant the user access
-# to the dimensionality estimation settings, if need be. The output is the full 
+# to the dimensionality estimation settings, if need be. The output is the full
 # MELODIC report in a `.ica` folder.
 
 echo '*** MODULE: ica. Runs MELODIC on each run. ******************************'

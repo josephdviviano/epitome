@@ -2,8 +2,8 @@
 #
 # make_thal_mask
 #
-# output: 
-# prereq: fsrecon, linreg_fs2epi_*
+# output:
+# prereq: fsrecon linreg_fs2epi_*
 #
 # Uses the aparc2009 atlas from freesurfer to create a thalamus mask.
 
@@ -11,7 +11,7 @@ echo '*** MODULE: make_thal_mask. Creates a thalamus mask for fMRI data. ******'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
-    SESS=`basename ${SESS}`        
+    SESS=`basename ${SESS}`
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
 
     if [ ! -f ${DIR}/${SESS}/anat_THAL_mask.nii.gz ]; then
@@ -30,7 +30,7 @@ for SESS in ${DIR_SESS}; do
             -b ${DIR}/anat_EPI_mask.nii.gz \
             -expr 'and(a,b)'
 
-        rm ${DIR}/anat_tmp_THAL_mask.nii.gz   
+        rm ${DIR}/anat_tmp_THAL_mask.nii.gz
     fi
 done
 

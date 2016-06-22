@@ -2,8 +2,8 @@
 #
 # linreg_fs2mni_afni
 #
-# output: 
-# prereq: fsrecon, linreg_calc_fsl
+# output:
+# prereq: fsrecon linreg_calc*afni
 #
 # Brings Freesurfer atlases in register with the MNI brain.
 
@@ -14,14 +14,14 @@ for SESS in ${DIR_SESS}; do
     SESS=$(basename ${SESS})
     DIR="${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}"
 
-    # If we have a T1 for each session, we register to the session T1. 
+    # If we have a T1 for each session, we register to the session T1.
     # Otherwise, we go to the first session.
     if [ `ls -l ${DIR} | grep ^d | wc -l` -eq `ls -l ${DIR_T1} | grep ^d | wc -l` ]; then
         DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}"
     else
         DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/SESS01"
     fi
- 
+
     # register aparc atlas to MNI (at same resolution as transformed EPI)
     if [ ! -f ${DIR}/anat_aparc_reg.nii.gz ]; then
         3dAllineate \

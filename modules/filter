@@ -2,8 +2,8 @@
 #
 # filter input det diff lag sq std gm dv anaticor compcor mask
 #
-# input:    input prefix 
-# det:      polynomial order to detrend each voxel against. 
+# input:    input prefix
+# det:      polynomial order to detrend each voxel against. [int]
 # diff:     fit first differences all other regressors defined, including squares [list: on off]
 # lag:      fit first lags of regressors from data [list: on off]
 # sq:       fit squares of regressors from data Does NOT take the squares of the derivatives. [list: on off]
@@ -15,9 +15,9 @@
 # mask:     prefix for the EPI brain mask used [list: anat_EPI_mask ?]
 #
 # output: func_filtered
-# prereq: init_*, motion_deskull, linreg_calc_*, linreg_fs2epi_*
+# prereq: init_* motion_deskull linreg_calc_* linreg_fs2epi_*
 #
-# Creates a series of regressors from fMRI data and a freesurfer segmentation: 
+# Creates a series of regressors from fMRI data and a freesurfer segmentation:
 #
 # + white matter + eroded mask
 # + ventricles + eroded mask
@@ -47,7 +47,7 @@
 #
 # dv
 # --
-# An experimental draining vessel regressor c.o. Dr. W. Dale Stevens. 
+# An experimental draining vessel regressor c.o. Dr. W. Dale Stevens.
 #
 # + mean draining vessel signal
 #
@@ -65,7 +65,7 @@
 #
 # compcor
 # -------
-# Takes the first N principal components from the white matter and ventricle tissue masks and applies them as regressors. Believed by some to deal well with physiological noise (like global mean regression) without the spurious anticorrelations [4]. 
+# Takes the first N principal components from the white matter and ventricle tissue masks and applies them as regressors. Believed by some to deal well with physiological noise (like global mean regression) without the spurious anticorrelations [4].
 #
 # This computes detrended nuisance time series, fits each run with a computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional.
 #

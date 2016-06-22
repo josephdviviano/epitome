@@ -2,8 +2,8 @@
 #
 # linreg_fs2mni_fsl
 #
-# output: 
-# prereq: fsrecon, linreg_calc_fsl
+# output:
+# prereq: fsrecon linreg_calc_fsl
 #
 # Brings Freesurfer atlases in register with the MNI brain.
 
@@ -14,7 +14,7 @@ for SESS in ${DIR_SESS}; do
     SESS=$(basename ${SESS})
     DIR="${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}"
     DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}"
-    
+
     # register aparc atlas to EPI
     if [ ! -f ${DIR}/anat_aparc_reg.nii.gz ]; then
         flirt \

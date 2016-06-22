@@ -3,7 +3,7 @@
 # make_group_mni_mask
 #
 # output:
-# prereq: linreg_epi2mni_* OR nonlinreg_epi2mni_*
+# prereq: *linreg_epi2mni_*
 #
 # Creates a group-level MNI mask using all available MNI space EPI masks.
 

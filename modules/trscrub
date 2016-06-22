@@ -6,18 +6,18 @@
 # headrad: head radius (mm), default 50 [float]
 # fd:      framewise displacement threshold (mm/TR), default 0.5 [float]
 # dv:      DVARS threshold (%/TR), defaults 5 [float]
-# mode:    method for scrubbing high-motion TRs [listr: drop interp]
+# mode:    method for scrubbing high-motion TRs [list: drop interp]
 #
 # output: func_scrubbed
 # prereq: motion_deskull calc_dvars
 #
-# This removes motion-corrupted TRs from fMRI scans and outputs modified 
-# versions for connectivity analysis (mostly). 
+# This removes motion-corrupted TRs from fMRI scans and outputs modified
+# versions for connectivity analysis (mostly).
 #
-# On mode selection: 'drop' removes TRs from output file, 'interp' replaces TRs 
+# On mode selection: 'drop' removes TRs from output file, 'interp' replaces TRs
 # with a linear interpolate between the TR before and after the removed region.
 #
-# The interp version is best used before lowpass filtering, and is the only 
+# The interp version is best used before lowpass filtering, and is the only
 # reasonable option if you are analyzing some form of task data.
 
 echo '*** MODULE: trscrub. Removes TRs corrupted by motion. *******************'

@@ -6,7 +6,7 @@
 # dims:  target voxel dimensions (isotropic) [float]
 #
 # output: func_MNI-lin
-# prereq: linreg_calc_afni OR linreg_calc_slab_afni
+# prereq: linreg_calc*afni
 #
 # Prepares data for analysis in MNI standard space, reslicing to the defined
 # voxel dimensions.

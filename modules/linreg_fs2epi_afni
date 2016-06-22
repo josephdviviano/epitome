@@ -2,8 +2,8 @@
 #
 # linreg_fs2epi_afni
 #
-# output: 
-# prereq: fsrecon, linreg_calc_afni OR linreg_calc_slab_afni
+# output:
+# prereq: fsrecon linreg_calc*afni
 #
 # Brings Freesurfer atlases in register with single-subject EPIs.
 

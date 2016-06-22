@@ -3,14 +3,14 @@
 # linreg_calc_fsl data_quality cost reg_dof
 #
 # data_quality: 'low' for poor internal contrast [list: low high]
-# cost:         cost function minimized during registration (see FLIRT) [list: mutualinfo, leastsq, corratio, normcorr, labeldiff, bbr]
-# reg_dof:      registration degrees of freedom [list: 6, 7, 9, 12]
+# cost:         cost function minimized during registration (see FLIRT) [list: mutualinfo leastsq corratio normcorr labeldiff bbr]
+# reg_dof:      registration degrees of freedom [list: 6 7 9 12]
 #
-# output: 
+# output:
 # prereq: motion_deskull
 #
-# Uses FSL's FLIRT to calculate linear registration between epi <--> T1 <--> 
-# MNI152, and generate an epi template registered to T1 & T1 registered to epi 
+# Uses FSL's FLIRT to calculate linear registration between epi <--> T1 <-->
+# MNI152, and generate an epi template registered to T1 & T1 registered to epi
 # (sessionwise). Specific options can be found in FLIRT's help.
 
 echo '*** MODULE: linreg_calc_fsl. Calculates EPI <--> T1 <--> MNI152. ********'

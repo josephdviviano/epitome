@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 # lowpass_freq input mask filter cutoff
-# 
+#
 # input:  input prefix
-# mask:   epi brain mask [list: anat_EPI_mask, anat_EPI_mask_MNI-lin, anat_EPI_mask_MNI-nonlin, anat_EPI_mask_T1, ?]
-# filter: frequency domain lowpass filter type [list: kaiser, butterworth]
+# mask:   epi brain mask [list: anat_EPI_mask anat_EPI_mask_MNI-lin anat_EPI_mask_MNI-nonlin anat_EPI_mask_T1 ?]
+# filter: frequency domain lowpass filter type [list: kaiser butterworth]
 # cutoff: filter cutoff frequency [float]
 #
 # output: func_lowpass
@@ -12,13 +12,13 @@
 #
 # Removes high frequency content from your fMRI time series.
 #
-# The 'kaiser' and 'butterworth' filters work in the frequency domain and accept 
+# The 'kaiser' and 'butterworth' filters work in the frequency domain and accept
 # a cutoff in Hz (a good default is 0.1). Both are implemented as bi-directional
-# FIR filters. The kaiser window is high order and permits reasonably sharp 
-# rolloff with minimal passband ringing for shorter fMRI time series. The 
-# butterworth filter is of low order and achieves minimal passband ringing at 
-# the expense of passband roll off. In other words, butterworth filters will 
-# retain more high-frequency content than a kaiser filter with equivalent cutoff. 
+# FIR filters. The kaiser window is high order and permits reasonably sharp
+# rolloff with minimal passband ringing for shorter fMRI time series. The
+# butterworth filter is of low order and achieves minimal passband ringing at
+# the expense of passband roll off. In other words, butterworth filters will
+# retain more high-frequency content than a kaiser filter with equivalent cutoff.
 # The effect of the passband ringing is an empirical question that would be best
 # tested by the User.
 
