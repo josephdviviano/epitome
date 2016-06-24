@@ -1,0 +1,62 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+CIV='civet'
+EOF
+
+cat <<"EOF"
+echo ''
+echo '************** Moves MNI-space Civet .obj to Native Space **************'
+echo '                  No reason to explain this further ;)'
+echo '************************************************************************'
+echo ''
+
+# invert linear tranform
+xfminvert \
+    ${DIR}/${CIV}/transforms/linear/*t1_tal.xfm \
+    ${DIR}/tmp/dewarp_linear.xfm
+
+# linear dewarp each standard-spaced surface file
+if [ ! -f ${DIR}/proc/surf_wm_L.obj ]; then
+    transform_objects \
+        ${DIR}/${CIV}/surfaces/*${SSID}_white_surface_left_calibrated_*.obj \
+        ${DIR}/tmp/dewarp_linear.xfm \
+        ${DIR}/proc/surf_wm_L.obj
+fi
+
+if [ ! -f ${DIR}/proc/surf_wm_R.obj ]; then
+    transform_objects \
+        ${DIR}/${CIV}/surfaces/*${SSID}_white_surface_right_calibrated_*.obj \
+        ${DIR}/tmp/dewarp_linear.xfm \
+        ${DIR}/proc/surf_wm_R.obj
+fi
+
+if [ ! -f ${DIR}/proc/surf_mid_L.obj ]; then
+    transform_objects \
+        ${DIR}/${CIV}/surfaces/*${SSID}_mid_surface_left_*.obj \
+        ${DIR}/tmp/dewarp_linear.xfm \
+        ${DIR}/proc/surf_mid_L.obj
+fi
+
+if [ ! -f ${DIR}/proc/surf_mid_R.obj ]; then
+    transform_objects \
+        ${DIR}/${CIV}/surfaces/*${SSID}_mid_surface_right_*.obj \
+        ${DIR}/tmp/dewarp_linear.xfm \
+        ${DIR}/proc/surf_mid_R.obj
+fi
+
+if [ ! -f ${DIR}/proc/surf_gm_L.obj ]; then
+    transform_objects \
+        ${DIR}/${CIV}/surfaces/*${SSID}_gray_surface_left_*.obj \
+        ${DIR}/tmp/dewarp_linear.xfm \
+        ${DIR}/proc/surf_gm_L.obj
+fi
+
+if [ ! -f ${DIR}/proc/surf_gm_R.obj ]; then
+    transform_objects \
+        ${DIR}/${CIV}/surfaces/*${SSID}_gray_surface_right_*.obj \
+        ${DIR}/tmp/dewarp_linear.xfm \
+        ${DIR}/proc/surf_gm_R.obj
+fi
+EOF

@@ -1,0 +1,56 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+INPUT=`echo 'func_'${1}`
+COUNT=1
+EOF
+
+cat <<"EOF"
+echo ''
+echo '******* Nonlinear De-Warp to Native Space for Resting State fMRI *******'
+echo '                Running on files with prefix' ${INPUT}
+echo '************************************************************************'
+echo ''
+
+## LOOP THROUGH RUNS
+for RUN in `ls -d ${DIR}/MNINonLinear/Results/*/`; do
+    # generate run number for filenames, add 1 to count
+    NUM=`printf %02d ${COUNT}`
+    COUNT=$(( $COUNT + 1 ))
+
+    echo 'De-MNIing subject ' ${SSID} ' run ' ${NUM} 
+
+    # create reg target for escaping from MNI space (re-sampled)
+    if [ ! -f ${DIR}/T1w/T1w_resample_brain.nii.gz ]; then
+        3dresample \
+            -prefix ${DIR}/T1w/T1w_resample_brain.nii.gz \
+            -dxyz 2.0 2.0 2.0 \
+            -inset ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+    fi
+
+    # warp image back to ACPC space with spline interpolation
+    if [ ! -f ${DIR}/proc/func_warped.${NUM}.nii.gz ]; then
+
+echo ''
+echo '************************************************************************'
+echo '            Warping' ${SSID} 'run ' ${NUM} 'to native space' 
+echo '************************************************************************'
+echo ''
+
+        applywarp \
+          -i ${DIR}/proc/${INPUT}.${NUM}.nii.gz \
+          -o ${DIR}/tmp/func_warped.${NUM}.nii.gz \
+          -r ${DIR}/T1w/T1w_resample_brain.nii.gz \
+          -w ${DIR}/MNINonLinear/xfms/standard2acpc_dc.nii.gz \
+          --interp=spline
+
+        # the FSL transformation makes extra-brain voxels non-zero.
+        # this turns them back to zeros, usually resulting in 1/3 compression.
+        3dcalc \
+            -a ${DIR}/tmp/func_warped.${NUM}.nii.gz \
+            -expr 'a*astep(a, 10)' \
+            -prefix ${DIR}/proc/func_warped.${NUM}.nii.gz
+    fi
+done
+EOF

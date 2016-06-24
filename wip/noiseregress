@@ -1,0 +1,440 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+COUNT=1
+EOF
+
+cat <<"EOF"
+echo ''
+echo '************ Noise Regression Module for Resting State fMRI ************'
+echo '               Making regressors masks for subject' ${SSID} 
+echo '************************************************************************'
+echo ''
+
+# make eroded white matter mask in EPI space
+if [ ! -f ${DIR}/proc/anat_wm_ero.nii.gz ]; then
+    3dcalc \
+        -a ${DIR}/MNINonLinear/aparc+aseg.nii.gz \
+        -expr "equals(a,2)  + \
+               equals(a,7)  + \
+               equals(a,41) + \
+               equals(a,46) + \
+               equals(a,251)+ \
+               equals(a,252)+ \
+               equals(a,253)+ \
+               equals(a,254)+ \
+               equals(a,255)" \
+        -prefix ${DIR}/proc/anat_wm.nii.gz
+
+    3dcalc \
+        -a ${DIR}/proc/anat_wm.nii.gz \
+        -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
+        -expr 'a*(1-amongst(0,b,c,d,e,f,g))' \
+        -prefix ${DIR}/proc/anat_wm_ero.nii.gz
+
+    3dresample \
+        -prefix ${DIR}/proc/anat_wm_ero.nii.gz \
+        -master ${DIR}/MNINonLinear/T1w_restore.2.nii.gz \
+        -rmode NN \
+        -inset ${DIR}/proc/anat_wm_ero.nii.gz
+fi
+
+# make eroded ventricle mask in EPI space
+if [ ! -f ${DIR}/proc/anat_vent_ero.nii.gz ]; then
+    3dcalc \
+        -a ${DIR}/MNINonLinear/aparc+aseg.nii.gz \
+        -expr 'equals(a,4) + equals(a,43)' \
+        -prefix ${DIR}/proc/anat_vent.nii.gz
+
+    3dcalc \
+        -a ${DIR}/MNINonLinear/aparc+aseg.nii.gz \
+        -expr "equals(a,10) + \
+               equals(a,11) + \
+               equals(a,26) + \
+               equals(a,49) + \
+               equals(a,50) + \
+               equals(a,58)" \
+        -prefix ${DIR}/proc/anat_nonvent.nii.gz
+
+    3dcalc \
+        -a ${DIR}/proc/anat_nonvent.nii.gz \
+        -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
+        -expr 'amongst(1,a,b,c,d,e,f,g)' \
+        -prefix ${DIR}/proc/anat_nonvent_dia.nii.gz
+
+    3dcalc \
+        -a ${DIR}/proc/anat_vent.nii.gz \
+        -b ${DIR}/proc/anat_nonvent_dia.nii.gz \
+        -expr 'a-step(a*b)' \
+        -prefix ${DIR}/proc/anat_vent_ero.nii.gz
+
+    3dresample \
+        -prefix ${DIR}/proc/anat_vent_ero.nii.gz \
+        -master ${DIR}/MNINonLinear/T1w_restore.2.nii.gz \
+        -rmode NN \
+        -inset ${DIR}/proc/anat_vent_ero.nii.gz       
+fi
+
+# make gray matter mask
+if [ ! -f ${DIR}/proc/anat_gm.nii.gz ]; then
+    3dcalc \
+        -a ${DIR}/MNINonLinear/aparc+aseg.nii.gz \
+        -short \
+        -expr 'step(a-1000)*step(1036-a)+step(a-2000)*step(2036-a)' \
+        -prefix ${DIR}/proc/anat_gm.nii.gz
+
+    3dresample \
+        -prefix ${DIR}/proc/anat_gm.nii.gz \
+        -master ${DIR}/MNINonLinear/T1w_restore.2.nii.gz \
+        -rmode NN \
+        -inset ${DIR}/proc/anat_gm.nii.gz
+fi
+
+# make dilated brain mask
+if [ ! -f ${DIR}/proc/anat_EPI_mask_dia.nii.gz ]; then
+    3dcalc \
+        -a ${DIR}/MNINonLinear/brainmask_fs.nii.gz \
+        -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
+        -expr 'amongst(1,a,b,c,d,e,f,g)' \
+        -prefix ${DIR}/proc/anat_EPI_mask_dia.nii.gz
+
+    3dresample \
+        -prefix ${DIR}/proc/anat_EPI_mask_dia.nii.gz \
+        -master ${DIR}/MNINonLinear/T1w_restore.2.nii.gz \
+        -rmode NN \
+        -inset ${DIR}/proc/anat_EPI_mask_dia.nii.gz
+fi
+
+# Loop through runs
+for RUN in `ls -d ${DIR}/MNINonLinear/Results/*/`; do
+    
+    # generate run number for filenames, add 1 to count
+    NUM=`printf %02d ${COUNT}`
+    COUNT=$(( $COUNT + 1 ))
+    
+    # Minimally-preprocessed data
+    INPUT=`ls ${RUN}/rfMRI_REST?_??.nii.gz`
+
+    # ICA FIXed OPTION (I am morally opposed to this).
+    #INPUT=`ls ${RUN}/*hp2000_clean.nii.gz`
+
+    # only do the things if our output file dosen't exist
+    if [ ! -f ${DIR}/proc/func_filtered.${NUM}.nii.gz ]; then
+
+
+echo ''
+echo '************************************************************************'
+echo '      Making regressors timeseries for subject' ${SSID} 'run' ${NUM} 
+echo '************************************************************************'
+echo ''
+
+        if [ ! -f ${DIR}/proc/func_detrend.${NUM}.nii.gz ]; then
+        
+            # remove outliers, recording the edits
+            3dDespike \
+                -prefix ${DIR}/proc/func_tmp_despike.${NUM}.nii.gz \
+                -ssave ${DIR}/proc/params/spikes.${NUM}.nii.gz \
+                -NEW \
+                ${INPUT}
+
+            3dTstat \
+                -prefix ${DIR}/proc/func_mean.${NUM}.nii.gz \
+                -mean ${DIR}/proc/func_tmp_despike.${NUM}.nii.gz
+
+            3dTstat \
+                -prefix ${DIR}/proc/func_stdev.${NUM}.nii.gz \
+                -stdev ${DIR}/proc/func_tmp_despike.${NUM}.nii.gz
+
+            # compute temporal SNR
+            3dcalc \
+                -a ${DIR}/proc/func_mean.${NUM}.nii.gz \
+                -b ${DIR}/proc/func_stdev.${NUM}.nii.gz \
+                -expr 'a/b' \
+                -prefix ${DIR}/proc/func_tSNR.${NUM}.nii.gz
+
+            3dDetrend \
+                -prefix ${DIR}/proc/func_detrend.${NUM}.nii.gz \
+                -polort 1 \
+                ${DIR}/proc/func_tmp_despike.${NUM}.nii.gz
+        fi
+
+
+        ## ANATICOR METHOD -- Depricated in exchange for COMPCOR        
+        # # create local white matter regressors +1 lag
+        # if [ ! -f ${DIR}/proc/params/wm_local15.${NUM}.nii.gz ]; then
+        #     3dLocalstat \
+        #         -prefix ${DIR}/proc/params/wm_local15.${NUM}.nii.gz \
+        #         -nbhd 'SPHERE(15)' \
+        #         -stat mean \
+        #         -mask ${DIR}/proc/anat_wm_ero.nii.gz \
+        #         -use_nonmask ${INPUT}
+        #     3dTcat \
+        #         -prefix ${DIR}/proc/params/lag.wm_local15.${NUM}.nii.gz \
+        #         ${DIR}/proc/params/wm_local15.${NUM}.nii.gz'[0]' \
+        #         ${DIR}/proc/params/wm_local15.${NUM}.nii.gz'[0..$]'
+        #     3dDetrend \
+        #         -prefix ${DIR}/proc/params/det.wm_local15.${NUM}.nii.gz \
+        #         -polort 1 \
+        #         ${DIR}/proc/params/wm_local15.${NUM}.nii.gz
+        #     3dDetrend \
+        #         -prefix ${DIR}/proc/params/det.lag.wm_local15.${NUM}.nii.gz \
+        #         -polort 1 \
+        #         ${DIR}/proc/params/lag.wm_local15.${NUM}.nii.gz
+        # fi
+        
+        # make ventricle time series & +1 lag
+        3dmaskave \
+            -q \
+            -mask ${DIR}/proc/anat_vent_ero.nii.gz \
+            ${DIR}/proc/func_detrend.${NUM}.nii.gz > ${DIR}/proc/params/vent.${NUM}.1D
+        
+        1dcat \
+            ${DIR}/proc/params/vent.${NUM}.1D'{0}' > \
+            ${DIR}/proc/params/lag.vent.${NUM}.1D
+        
+        1dcat \
+            ${DIR}/proc/params/vent.${NUM}.1D'{0..$}' >> \
+            ${DIR}/proc/params/lag.vent.${NUM}.1D
+
+        # make white matter time series & +1 lag
+        3dmaskave \
+            -q \
+            -mask ${DIR}/proc/anat_wm_ero.nii.gz \
+            ${DIR}/proc/func_detrend.${NUM}.nii.gz > ${DIR}/proc/params/wm.${NUM}.1D
+        
+        1dcat \
+            ${DIR}/proc/params/wm.${NUM}.1D'{0}' > \
+            ${DIR}/proc/params/lag.wm.${NUM}.1D
+        
+        1dcat \
+            ${DIR}/proc/params/wm.${NUM}.1D'{0..$}' >> \
+            ${DIR}/proc/params/lag.wm.${NUM}.1D
+
+        # find top 5 PCs in ventricles
+        epi-genregress \
+            ${DIR}/proc/func_detrend.${NUM}.nii.gz \
+            ${DIR}/proc/anat_vent_ero.nii.gz \
+            ${DIR}/proc/params/vent_PC.${NUM}.1D \
+            5
+
+        # find top 5 PCs in white matter
+        epi-genregress \
+            ${DIR}/proc/func_detrend.${NUM}.nii.gz \
+            ${DIR}/proc/anat_wm_ero.nii.gz \
+            ${DIR}/proc/params/wm_PC.${NUM}.1D \
+            5
+
+        ## make physiological regressors if possible
+        if [ -f ${RUN}/*Physio_log.txt ]; then
+        
+            # calculate various timeseries from physio data
+            popp \
+                 -i ${RUN}/*Physio_log.txt \
+                 -s 400 \
+                 --tr=0.7 \
+                 -o phys \
+                 --trigger=1 \
+                 --cardiac=2 \
+                 --resp=3 \
+                 --rvt \
+                 --heartrate \
+                 -v
+
+            # calculate slice-wise regressors
+            pnm_evs \
+                 -i ${DIR}/proc/func_detrend.${NUM}.nii.gz \
+                 -o phys_ \
+                 --tr=0.7 \
+                 -c phys_card.txt \
+                 -r phys_resp.txt \
+                 --rvt=phys_rvt.txt \
+                 --heartrate=phys_hr.txt \
+                 --slicedir=y \
+                 -v
+              
+            # take 1st voxel (justified by low TR & post slice-correction)
+            3dmaskdump \
+                -ibox 0 0 0 \
+                -noijk phys_ev001.nii.gz \
+                > ${DIR}/proc/params/phys.01.${NUM}.1D
+            
+            3dmaskdump \
+                -ibox 0 0 0 \
+                -noijk phys_ev002.nii.gz \
+                > ${DIR}/proc/params/phys.02.${NUM}.1D
+            
+            3dmaskdump \
+                -ibox 0 0 0 \
+                -noijk phys_ev003.nii.gz \
+                > ${DIR}/proc/params/phys.03.${NUM}.1D
+            
+            3dmaskdump \
+                -ibox 0 0 0 \
+                -noijk phys_ev004.nii.gz \
+                > ${DIR}/proc/params/phys.04.${NUM}.1D
+            
+            3dmaskdump \
+                -ibox 0 0 0 \
+                -noijk phys_ev005.nii.gz \
+                > ${DIR}/proc/params/phys.05.${NUM}.1D
+            
+            3dmaskdump \
+                -ibox 0 0 0 \
+                -noijk phys_ev006.nii.gz \
+                > ${DIR}/proc/params/phys.06.${NUM}.1D
+            
+            3dmaskdump \
+                -ibox 0 0 0 \
+                -noijk phys_ev007.nii.gz \
+                > ${DIR}/proc/params/phys.07.${NUM}.1D
+            
+            3dmaskdump \
+                -ibox 0 0 0 \
+                -noijk phys_ev008.nii.gz \
+                > ${DIR}/proc/params/phys.08.${NUM}.1D
+
+            # remove all tmp phys files
+            rm phys*
+        fi
+
+echo ''
+echo '************************************************************************'
+echo '         Fitting noise model for subject ' ${SSID}' run '${NUM} 
+echo '************************************************************************'
+echo ''
+
+        if [ ! -f ${DIR}/proc/params/det.motion.${NUM}.1D ]; then
+            cp ${RUN}/Movement_Regressors.txt \
+               ${DIR}/proc/params/motion.${NUM}.1D
+
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/motion.${NUM}.1D\' > \
+                ${DIR}/proc/params/det.motion.${NUM}.1D
+        fi
+
+        # detrend physio data, if it exists
+        if [ -f ${RUN}/*Physio_log.txt ]; then
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/phys.01.${NUM}.1D > \
+                ${DIR}/proc/params/det.phys.01.${NUM}.1D 
+
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/phys.02.${NUM}.1D > \
+                ${DIR}/proc/params/det.phys.02.${NUM}.1D
+
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/phys.03.${NUM}.1D > \
+                ${DIR}/proc/params/det.phys.03.${NUM}.1D
+
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/phys.04.${NUM}.1D > \
+                ${DIR}/proc/params/det.phys.04.${NUM}.1D
+
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/phys.05.${NUM}.1D > \
+                ${DIR}/proc/params/det.phys.05.${NUM}.1D
+
+           3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/phys.06.${NUM}.1D > \
+                ${DIR}/proc/params/det.phys.06.${NUM}.1D
+
+            3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/phys.07.${NUM}.1D > \
+                ${DIR}/proc/params/det.phys.07.${NUM}.1D
+
+           3dDetrend \
+                -prefix - \
+                -DAFNI_1D_TRANOUT=YES \
+                -polort 1 \
+                ${DIR}/proc/params/phys.08.${NUM}.1D > \
+                ${DIR}/proc/params/det.phys.08.${NUM}.1D
+        fi
+    
+        # fit each run with all nuisance variables (COMPCOR BELOW)
+        if [ -f ${RUN}/*Physio_log.txt ]; then
+
+            3dTfitter \
+                -prefix ${DIR}/proc/func_noise_betas.${NUM}.nii.gz \
+                -fitts ${DIR}/proc/func_noise.${NUM}.nii.gz \
+                -polort 1 \
+                -RHS ${DIR}/proc/func_detrend.${NUM}.nii.gz \
+                -LHS ${DIR}/proc/params/det.motion.${NUM}.1D \
+                     ${DIR}/proc/params/vent.${NUM}.1D \
+                     ${DIR}/proc/params/lag.vent.${NUM}.1D \
+                     ${DIR}/proc/params/wm.${NUM}.1D \
+                     ${DIR}/proc/params/lag.wm.${NUM}.1D \
+                     ${DIR}/proc/params/vent_PC.${NUM}.1D \
+                     ${DIR}/proc/params/wm_PC.${NUM}.1D \
+                     ${DIR}/proc/cerebellum_wm.${NUM}.1D \
+                     ${DIR}/proc/params/det.phys.01.${NUM}.1D \
+                     ${DIR}/proc/params/det.phys.02.${NUM}.1D \
+                     ${DIR}/proc/params/det.phys.03.${NUM}.1D \
+                     ${DIR}/proc/params/det.phys.04.${NUM}.1D \
+                     ${DIR}/proc/params/det.phys.05.${NUM}.1D \
+                     ${DIR}/proc/params/det.phys.06.${NUM}.1D \
+                     ${DIR}/proc/params/det.phys.07.${NUM}.1D \
+                     ${DIR}/proc/params/det.phys.08.${NUM}.1D
+
+        else
+
+            3dTfitter \
+                -prefix ${DIR}/proc/func_noise_betas.${NUM}.nii.gz \
+                -fitts ${DIR}/proc/func_noise.${NUM}.nii.gz \
+                -polort 1 \
+                -RHS ${DIR}/proc/func_detrend.${NUM}.nii.gz \
+                -LHS ${DIR}/proc/params/det.motion.${NUM}.1D \
+                     ${DIR}/proc/params/vent.${NUM}.1D \
+                     ${DIR}/proc/params/lag.vent.${NUM}.1D \
+                     ${DIR}/proc/params/wm.${NUM}.1D \
+                     ${DIR}/proc/params/lag.wm.${NUM}.1D \
+                     ${DIR}/proc/params/vent_PC.${NUM}.1D \
+                     ${DIR}/proc/params/wm_PC.${NUM}.1D
+        fi
+
+echo ''
+echo '************************************************************************'
+echo '       Subtracting noise model from subject' ${SSID} 'run ' ${NUM} 
+echo '************************************************************************'
+echo ''
+        # subtracts nuisances from inputs, retaining the mean
+        3dcalc \
+            -float \
+            -a ${DIR}/proc/func_detrend.${NUM}.nii.gz \
+            -b ${DIR}/proc/func_noise.${NUM}.nii.gz \
+            -c ${DIR}/proc/func_mean.${NUM}.nii.gz \
+            -expr 'a-b+c' \
+            -prefix ${DIR}/proc/func_filtered.${NUM}.nii.gz
+    fi
+
+    rm ${DIR}/proc/func_noise.${NUM}.nii.gz
+
+done
+
+rm ${DIR}/proc/func_tmp_*
+
+EOF

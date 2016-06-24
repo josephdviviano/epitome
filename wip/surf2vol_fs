@@ -1,0 +1,72 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+COUNT=1
+FS='T1w/fsaverage_LR32k'
+EOF
+
+cat <<"EOF"
+echo ''
+echo '***************** Project surface data onto a volume *******************'
+echo '          projects data from a surface back into voxel format           '
+echo '************************************************************************'
+echo ''
+
+# make an AFNI-COMPATIBLE spec file
+quickspec \
+  -tn GII ${DIR}/${FS}/${SSID}.L.inflated.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.L.midthickness.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.L.pial.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.L.very_inflated.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.L.white.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.R.inflated.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.R.midthickness.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.R.pial.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.R.very_inflated.32k_fs_LR.surf.gii \
+  -tn GII ${DIR}/${FS}/${SSID}.R.white.32k_fs_LR.surf.gii
+
+## loop through runs
+for RUN in `ls -d ${DIR}/MNINonLinear/Results/*/`; do
+
+    # generate run number for filenames, add 1 to count
+    NUM=`printf %02d ${COUNT}`
+    COUNT=$(( $COUNT + 1 ))
+
+    if [ ! -f ${DIR}/proc/func_ctx.${NUM}.nii.gz ]; then
+        # project surface data --> volume
+        3dSurf2Vol \
+          -prefix ${DIR}/tmp/func_ctx.L.${NUM}.nii.gz \
+          -spec quick.spec \
+          -surf_A ${DIR}/${FS}/${SSID}.L.white.32k_fs_LR.surf.gii \
+          -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz \
+          -grid_parent ${DIR}/proc/func_warped.${NUM}.nii.gz \
+          -map_func ave \
+          -f_steps 15 \
+          -f_index nodes \
+          -sdata ${DIR}/proc/func_smooth.L.${NUM}.niml.dset
+        
+        # project surface data --> volume
+        3dSurf2Vol \
+          -prefix ${DIR}/tmp/func_ctx.R.${NUM}.nii.gz \
+          -spec quick.spec \
+          -surf_A ${DIR}/${FS}/${SSID}.R.white.32k_fs_LR.surf.gii \
+          -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz \
+          -grid_parent ${DIR}/proc/func_warped.${NUM}.nii.gz \
+          -map_func ave \
+          -f_steps 15 \
+          -f_index nodes \
+          -sdata ${DIR}/proc/func_smooth.R.${NUM}.niml.dset
+
+        # add all volumes to create smoothed cortical dataset
+        3dcalc \
+          -prefix ${DIR}/proc/func_ctx.${NUM}.nii.gz \
+          -a ${DIR}/tmp/func_ctx.R.${NUM}.nii.gz \
+          -b ${DIR}/tmp/func_ctx.L.${NUM}.nii.gz \
+          -expr 'a+b'
+    fi
+done
+EOF
+
+# suma -spec ${FS}/quick.spec \
+#      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz

@@ -1,0 +1,100 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+INPUT=`echo ${1}`
+EOF
+
+cat <<"EOF"
+echo ''
+echo '****************** Volume atlas to Civet surface atlas *****************'
+echo '      were going to use the native-space Civet surfaces to get our   '
+echo '                        input atlas on a surface                     '
+echo '************************************************************************'
+echo ''
+
+# convert civet surfaces to freesurfer binaries
+if [ ! -f ${DIR}/proc/surf_wm_L.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_wm_L.obj \
+        -o_fs ${DIR}/proc/surf_wm_L.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_wm_R.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_wm_R.obj \
+        -o_fs ${DIR}/proc/surf_wm_R.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_mid_L.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_mid_L.obj \
+        -o_fs ${DIR}/proc/surf_mid_L.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_mid_R.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_mid_R.obj \
+        -o_fs ${DIR}/proc/surf_mid_R.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_gm_L.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_gm_L.obj \
+        -o_fs ${DIR}/proc/surf_gm_L.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_gm_R.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_gm_R.obj \
+        -o_fs ${DIR}/proc/surf_gm_R.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+# make an AFNI-COMPATIBLE spec file
+# NB -- lack of absoloute paths here.
+# this is likly because AFNI is poorly-written. 
+# by hungry graduate students.
+# instead of real people.
+
+quickspec \
+  -tn FS proc/surf_wm_L.asc \
+  -tn FS proc/surf_wm_R.asc \
+  -tn FS proc/surf_gm_L.asc \
+  -tn FS proc/surf_gm_R.asc \
+  -tn FS proc/surf_mid_L.asc \
+  -tn FS proc/surf_mid_R.asc
+
+if [ ! -f ${DIR}/proc/atlas.L.${NUM}.1D.dset ]; then
+    3dVol2Surf \
+      -spec quick.spec \
+      -surf_A proc/surf_mid_L.asc \
+      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz \
+      -grid_parent labels/${INPUT}.nii.gz \
+      -map_func mask \
+      -f_steps 2 \
+      -f_index nodes \
+      -out_1D proc/atlas_civ.L.1D
+fi
+
+if [ ! -f ${DIR}/proc/atlas.R.${NUM}.1D.dset ]; then
+    3dVol2Surf \
+      -spec quick.spec \
+      -surf_A proc/surf_mid_R.asc \
+      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz \
+      -grid_parent labels/${INPUT}.nii.gz \
+      -map_func mask \
+      -f_steps 2 \
+      -f_index nodes \
+      -out_1D proc/atlas_civ.R.1D 
+fi
+
+EOF
+
+# suma -spec ${FS}/quick.spec \
+#      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz

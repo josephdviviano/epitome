@@ -1,0 +1,55 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+TYPE=`echo ${1}`
+INPUT=`echo ${2}`
+CIV='civet'
+EOF
+
+cat <<"EOF"
+echo ''
+echo '****************** Volume civet atlas to Native Space  *****************'
+echo '  Moves civet claffication masks / atlases to a subject's native space  '
+echo '************************************************************************'
+echo ''
+
+if [ ! -f ${DIR}/proc/anat_${INPUT}.nii.gz ]; then 
+
+    # make temporary T1 in MINC file as a registration target
+    if [ ! -f ${DIR}/proc/anat_wm.nii.gz ]; then    
+        cp ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz \
+           ${DIR}/tmp/anat_T1_brain.nii.gz
+
+        gunzip ${DIR}/tmp/anat_T1_brain.nii.gz
+
+        nii2mnc \
+            ${DIR}/tmp/anat_T1_brain.nii.gz \
+            ${DIR}/tmp/anat_T1_brain.mnc
+    fi
+
+    # invert linear tranform  
+    if [ ! -f ${DIR}/tmp/dewarp_linear.xfm ]; then
+        xfminvert \
+            ${DIR}/${CIV}/transforms/linear/*t1_tal.xfm \
+            ${DIR}/tmp/dewarp_linear.xfm
+    fi
+
+    # resample input mask to native space 
+    mincresample \
+        -2 \
+        -near \
+        -like ${DIR}/tmp/anat_T1_brain.mnc \
+        -transform transform.xfm \
+        input ${DIR}/civet/${TYPE}/*${INPUT}.mnc \
+        outpus ${DIR}/tmp/anat_${INPUT}.mnc
+
+    mnc2nii \
+        ${DIR}/tmp/anat_${INPUT}.mnc \
+        ${DIR}/proc/anat_${INPUT}.nii
+
+    gzip ${DIR}/proc/anat_${INPUT}.nii
+
+fi
+
+EOF

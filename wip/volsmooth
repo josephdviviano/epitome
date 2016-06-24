@@ -1,0 +1,44 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+INPUT=`echo 'func_'${1}`
+MASK=`echo ${2}`
+FWHM=`echo ${3}`
+COUNT=1
+EOF
+
+cat <<"EOF"
+echo ''
+echo '************ Volume Smoothing Module for Resting State fMRI ************'
+echo '       This accepts a single mask file with individual labels, and'
+echo '        smooths within each unique value. You can easily combine'
+echo '              multiple masks before this stage using 3dCalc'
+echo '************************************************************************'
+echo ''
+echo '************************************************************************'
+echo '   Volume smoothing within masks for' ${SSID} 'using a FWHM of' ${FWHM}
+echo '************************************************************************'
+echo ''
+
+# Loop through runs
+for RUN in `ls -d ${DIR}/MNINonLinear/Results/*/`; do
+    # generate run number for filenames, add 1 to count
+    NUM=`printf %02d ${COUNT}`
+    COUNT=$(( $COUNT + 1 ))
+
+    if [ ! -f ${DIR}/proc/func_volsmooth.${NUM}.nii.gz ]; then
+        3dresample \
+            -prefix ${DIR}/proc/smoothmask.${NUM}.nii.gz \
+            -master ${DIR}/proc/${INPUT}.${NUM}.nii.gz \
+            -rmode NN \
+            -inset ${DIR}/labels/${MASK}.nii.gz
+
+        3dBlurInMask \
+            -prefix ${DIR}/proc/func_volsmooth.${NUM}.nii.gz \
+            -Mmask ${DIR}/proc/smoothmask.${NUM}.nii.gz \
+            -FWHM ${FWHM} \
+            -input ${DIR}/proc/${INPUT}.${NUM}.nii.gz
+    fi
+done
+EOF

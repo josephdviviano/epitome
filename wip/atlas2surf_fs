@@ -1,0 +1,59 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+INPUT=`echo ${1}`
+EOF
+
+cat <<"EOF"
+echo ''
+echo '**************** Volume atlas to Freesurfer surface atlas **************'
+echo '    were going to use the native-space Freesurfer surfaces to get our   '
+echo '                        input atlas on a surface                     '
+echo '************************************************************************'
+echo ''
+
+# make an AFNI-COMPATIBLE spec file. NB -- lack of absoloute paths here. this 
+# is likly because AFNI is poorly-written. by hungry graduate students.
+# instead of real people.
+
+quickspec \
+  -tn GII ${FS}/${SSID}.L.inflated.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.L.midthickness.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.L.pial.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.L.very_inflated.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.L.white.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.inflated.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.midthickness.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.pial.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.very_inflated.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.white.32k_fs_LR.surf.gii
+
+if [ ! -f ${DIR}/proc/atlas.L.${NUM}.1D.dset ]; then
+    3dVol2Surf \
+      -spec quick.spec \
+      -surf_A ${SSID}.L.midthickness.32k_fs_LR.surf.gii \
+      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz \
+      -grid_parent labels/${INPUT}.nii.gz \
+      -map_func mask \
+      -f_steps 2 \
+      -f_index nodes \
+      -out_1D proc/atlas_fs.L.1D
+fi
+
+if [ ! -f ${DIR}/proc/atlas.R.${NUM}.1D.dset ]; then
+    3dVol2Surf \
+      -spec quick.spec \
+      -surf_A ${SSID}.R.midthickness.32k_fs_LR.surf.gii \
+      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz \
+      -grid_parent labels/${INPUT}.nii.gz \
+      -map_func mask \
+      -f_steps 2 \
+      -f_index nodes \
+      -out_1D proc/atlas_fs.R.1D 
+fi
+
+EOF
+
+# suma -spec ${FS}/quick.spec \
+#      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz

@@ -1,0 +1,92 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+COUNT=1
+FS='T1w/fsaverage_LR32k'
+INPUT=`echo 'func_'${1}`
+FWHM=`echo ${2}`
+EOF
+
+cat <<"EOF"
+echo ''
+echo '*************** Cortical Smoothing for Resting State fMRI **************'
+echo '    were going to use the pre-made Freesurfer segmentation to get our   '
+echo '  functional data on a surface, whence it will be smoothed and exported '
+echo '            as an ASCII file to be readinto R / MATLAB/ PYTHON          '
+echo '************************************************************************'
+echo ''
+
+# make an AFNI-COMPATIBLE spec file
+quickspec \
+  -tn GII ${FS}/${SSID}.L.inflated.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.L.midthickness.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.L.pial.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.L.very_inflated.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.L.white.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.inflated.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.midthickness.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.pial.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.very_inflated.32k_fs_LR.surf.gii \
+  -tn GII ${FS}/${SSID}.R.white.32k_fs_LR.surf.gii
+
+## loop through runs
+for RUN in `ls -d ${DIR}/MNINonLinear/Results/*/`; do
+
+    # generate run number for filenames, add 1 to count
+    NUM=`printf %02d ${COUNT}`
+    COUNT=$(( $COUNT + 1 ))
+
+    # Smooth cortical data on surface for each subject
+    if [ ! -f ${DIR}/proc/func_surface_fs.L.${NUM}.1D.dset ]; then
+
+        # project volume data --> surface
+        3dVol2Surf \
+          -spec quick.spec \
+          -surf_A ${SSID}.L.white.32k_fs_LR.surf.gii \
+          -surf_B ${SSID}.L.pial.32k_fs_LR.surf.gii \
+          -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz \
+          -grid_parent ${DIR}/proc/${INPUT}.${NUM}.nii.gz \
+          -map_func ave \
+          -f_steps 15 \
+          -f_index nodes \
+          -outcols_NSD_format \
+          -out_1D ${DIR}/tmp/func_surface_fs.L.${NUM}.1D
+
+        SurfSmooth \
+          -met HEAT_07 \
+          -spec quick.spec \
+          -surf_A ${SSID}.L.midthickness.32k_fs_LR.surf.gii \
+          -input ${DIR}/tmp/func_surface_fs.L.${NUM}.1D \
+          -target_fwhm ${FWHM} \
+          -output ${DIR}/proc/func_surface_fs.L.${NUM}.1D
+    fi
+
+    if [ ! -f ${DIR}/proc/func_surface_fs.R.${NUM}.1D.dset ]; then
+
+        # project volume data --> surface
+        3dVol2Surf \
+          -spec quick.spec \
+          -surf_A ${SSID}.R.white.32k_fs_LR.surf.gii \
+          -surf_B ${SSID}.R.pial.32k_fs_LR.surf.gii \
+          -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz \
+          -grid_parent ${DIR}/proc/${INPUT}.${NUM}.nii.gz \
+          -map_func ave \
+          -f_steps 15 \
+          -f_index nodes \
+          -outcols_NSD_format \
+          -out_1D ${DIR}/tmp/func_surface_fs.R.${NUM}.1D
+
+        SurfSmooth \
+          -met HEAT_07 \
+          -spec quick.spec \
+          -surf_A ${SSID}.R.midthickness.32k_fs_LR.surf.gii \
+          -input ${DIR}/tmp/func_surface_fs.R.${NUM}.1D \
+          -target_fwhm ${FWHM} \
+          -output ${DIR}/proc/func_surface_fs.R.${NUM}.1D
+    fi
+done
+EOF
+
+# suma -spec ${FS}/quick.spec \
+#      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz

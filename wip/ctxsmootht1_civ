@@ -1,0 +1,123 @@
+#! /bin/bash
+
+# set variables
+cat <<EOF
+COUNT=1
+CIV='civet'
+FWHM=`echo ${1}`
+EOF
+
+cat <<"EOF"
+echo ''
+echo '*************** Cortical Smoothing for Native-Space T1 Data *************'
+echo '      were going to use the native-space Civet surfaces to get our   '
+echo '    native-space T1 intensities on a surface, smoothed, and exported '
+echo '           as an ASCII file to be read into R / MATLAB / PYTHON          '
+echo '************************************************************************'
+echo ''
+
+# convert civet surfaces to freesurfer binaries
+if [ ! -f ${DIR}/proc/surf_wm_L.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_wm_L.obj \
+        -o_fs ${DIR}/proc/surf_wm_L.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_wm_R.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_wm_R.obj \
+        -o_fs ${DIR}/proc/surf_wm_R.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_mid_L.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_mid_L.obj \
+        -o_fs ${DIR}/proc/surf_mid_L.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_mid_R.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_mid_R.obj \
+        -o_fs ${DIR}/proc/surf_mid_R.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_gm_L.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_gm_L.obj \
+        -o_fs ${DIR}/proc/surf_gm_L.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+if [ ! -f ${DIR}/proc/surf_gm_R.asc ]; then
+    ConvertSurface \
+        -i_mni ${DIR}/proc/surf_gm_R.obj \
+        -o_fs ${DIR}/proc/surf_gm_R.asc \
+        -sv ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz
+fi
+
+# make an AFNI-COMPATIBLE spec file
+# NB -- lack of absoloute paths here.
+# this is likly because AFNI is poorly-written. 
+# by hungry graduate students.
+# instead of real people.
+
+quickspec \
+  -tn FS proc/surf_wm_L.asc \
+  -tn FS proc/surf_wm_R.asc \
+  -tn FS proc/surf_gm_L.asc \
+  -tn FS proc/surf_gm_R.asc \
+  -tn FS proc/surf_mid_L.asc \
+  -tn FS proc/surf_mid_R.asc
+
+# Smooth cortical data on surface for each subject
+if [ ! -f ${DIR}/proc/anat_surface_civ.L.1D.dset ]; then
+    3dVol2Surf \
+      -spec quick.spec \
+      -surf_A proc/surf_wm_L.asc \
+      -surf_B proc/surf_gm_L.asc \
+      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz \
+      -grid_parent ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz \
+      -map_func ave \
+      -f_steps 15 \
+      -f_index nodes \
+      -outcols_NSD_format \
+      -out_1D tmp/anat_surface_civ.L.1D
+
+    SurfSmooth \
+      -met HEAT_07 \
+      -spec quick.spec \
+      -surf_A proc/surf_gm_L.asc \
+      -input tmp/anat_surface_civ.L.1D \
+      -target_fwhm ${FWHM} \
+      -output proc/anat_surface_civ.L.1D
+fi
+
+if [ ! -f ${DIR}/proc/anat_surface_civ.R.1D.dset ]; then
+    3dVol2Surf \
+      -spec quick.spec \
+      -surf_A proc/surf_wm_R.asc \
+      -surf_B proc/surf_gm_R.asc \
+      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz \
+      -grid_parent ${DIR}/T1w/T1w_acpc_dc_restore_brain.nii.gz \
+      -map_func ave \
+      -f_steps 15 \
+      -f_index nodes \
+      -outcols_NSD_format \
+      -out_1D tmp/anat_surface_civ.R.1D
+    
+    SurfSmooth \
+      -met HEAT_07 \
+      -spec quick.spec \
+      -surf_A proc/surf_wm_R.asc \
+      -input tmp/anat_surface_civ.R.1D \
+      -target_fwhm ${FWHM} \
+      -output proc/anat_surface_civ.R.1D      
+fi
+EOF
+
+# suma -spec ${FS}/quick.spec \
+#      -sv T1w/T1w_acpc_dc_restore_brain.nii.gz
