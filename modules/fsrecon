@@ -31,7 +31,7 @@ for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/); do
     if [ ${finished} -eq 0 ]; then
 
         # if freesurfer is not finished but the subject folder exists, remove it
-        if [ -f ${SUBJECTS_DIR}/${subjid} ]; then
+        if [ -d ${SUBJECTS_DIR}/${subjid} ]; then
             rm -r ${SUBJECTS_DIR}/${subjid}
         fi
 
