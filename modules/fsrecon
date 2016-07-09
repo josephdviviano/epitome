@@ -5,10 +5,80 @@
 # output:
 # prereq:
 #
-# This sends each subject's T1s through the Freesurfer pipeline. It uses 
+# This sends each subject's T1s through the Freesurfer pipeline. It uses
 # multiple T1s per imaging session, but does not combine them between sessions.
 # Data is output to ${SUBJECTS_DIR} directory, relevant outputs are copies to
 # the SESS folder for the T1 modality.
 
-
 echo '*** MODULE: fsrecon. Runs freesurfer on the anatomical data. ************'
+
+for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/); do
+
+    # this is the subject name in the freesurfer ${SUBJECTS_DIR} directory
+    sessname=$(basename ${SESS})
+    subjid="${DIR_EXPT}_${SUB}_${sessname}"
+
+    # determine if subject finished successfully
+    if [ -f ${SUBJECTS_DIR}/${subjid}/scripts/recon-all.log ]; then
+        # will be 1 if freesurfer finished, 0 if not
+        # don't distinguish ERRORS, since many ERRORS are actually bugs
+        finished=$(tail -1 ${SUBJECTS_DIR}/${subjid}/scripts/recon-all.log | grep finished | wc -l)
+    else
+        finished=0
+    fi
+
+    # if we haven't run freesurfer yet
+    if [ ${finished} -eq 0 ]; then
+
+        # if freesurfer is not finished but the subject folder exists, remove it
+        if [ -f ${SUBJECTS_DIR}/${subjid} ]; then
+            rm -r ${SUBJECTS_DIR}/${subjid}
+        fi
+
+        # construct freesurfer commands
+        cmd="recon-all -all -qcache -notal-check -subjid ${subjid} "
+        inputs=$(find ${SESS}/RUN??/*.nii*)
+        for input in ${inputs}; do
+            cmd="${cmd} -i ${input}"
+        done
+
+        # run freesurfer
+        echo ${cmd}
+    fi
+
+    # convert freesurfer outputs to nifti in session directories
+    if [ ! -f ${SESS}/anat_T1_brain.nii.gz ]; then
+        mri_convert \
+            --in_type mgz --out_type nii -odt float -rt nearest \
+            --input_volume ${SUBJECTS_DIR}/${subjid}/mri/brain.mgz \
+            --output_volume ${SESS}/tmp_T1.nii.gz
+        3daxialize \
+            -prefix ${SESS}/anat_T1_brain.nii.gz \
+            -axial ${SESS}/tmp_T1.nii.gz
+        rm ${SESS}/tmp_T1.nii.gz
+    fi
+
+    if [ ! -f ${SESS}/anat_aparc_brain.nii.gz ]; then
+        mri_convert \
+            --in_type mgz --out_type nii -odt float -rt nearest \
+            --input_volume ${SUBJECTS_DIR}/${subjid}/mri/aparc+aseg.mgz \
+            --output_volume ${SESS}/tmp_aparc.nii.gz
+        3daxialize \
+            -prefix ${SESS}/anat_aparc_brain.nii.gz \
+            -axial ${SESS}/tmp_aparc.nii.gz
+        rm ${SESS}/tmp_aparc.nii.gz
+    fi
+
+    if [ ! -f ${SESS}/anat_aparc2009_brain.nii.gz ]; then
+        mri_convert \
+            --in_type mgz --out_type nii -odt float -rt nearest \
+            --input_volume ${SUBJECTS_DIR}/${subjid}/mri/aparc.a2009s+aseg.mgz \
+            --output_volume ${SESS}/tmp_2009.nii.gz
+        3daxialize \
+            -prefix ${SESS}/anat_aparc2009_brain.nii.gz \
+            -axial ${SESS}/tmp_2009.nii.gz
+        rm ${SESS}/tmp_2009.nii.gz
+    fi
+
+done
+

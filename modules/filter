@@ -15,7 +15,7 @@
 # mask:     prefix for the EPI brain mask used [list: anat_EPI_mask ?]
 #
 # output: func_filtered
-# prereq: init_* motion_deskull linreg_calc_* linreg_fs2epi_*
+# prereq: init_* motion_deskull fsrecon linreg_calc_* linreg_fs2epi_*
 #
 # Creates a series of regressors from fMRI data and a freesurfer segmentation:
 #

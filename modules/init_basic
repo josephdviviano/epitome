@@ -89,17 +89,17 @@ for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/); do
 
                 # Output both the single-slice and multi-slice data
                 1dcat \
-                    oba.slibase.1D[0..12]{${DELTR}..$} > ${SESS}/PARAMS/phys.${ID}.${NUM}.1D
+                    oba.slibase.1D[0..12]{${del}..$} > ${SESS}/PARAMS/phys.${ID}.${NUM}.1D
 
                 1dcat \
-                    oba.slibase.1D[0..$]{${DELTR}..$} > ${SESS}/PARAMS/phys_slicewise.${ID}.${NUM}.1D
+                    oba.slibase.1D[0..$]{${del}..$} > ${SESS}/PARAMS/phys_slicewise.${ID}.${NUM}.1D
                 rm oba.slibase*
             fi
 
             # delete initial time points
             3dcalc \
                 -prefix ${SESS}/func_del.${ID}.${NUM}.nii.gz \
-                -a ${SESS}/func_tmp_RAI.${ID}.${NUM}.nii.gz[${DELTR}..$] \
+                -a "${SESS}/func_tmp_RAI.${ID}.${NUM}.nii.gz[${del}..$]" \
                 -expr 'a'
             rm ${SESS}/func_tmp_*
         fi
