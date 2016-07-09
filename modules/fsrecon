@@ -43,7 +43,8 @@ for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/); do
         done
 
         # run freesurfer
-        echo ${cmd}
+        echo "MSG: Running freesurfer on ${subjid}."
+        ${cmd}
     fi
 
     # convert freesurfer outputs to nifti in session directories
