@@ -54,4 +54,3 @@ for SESS in ${DIR_SESS}; do
     done
 done
 
-EOF
