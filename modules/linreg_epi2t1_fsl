@@ -6,6 +6,7 @@
 # dims:  target voxel dimensions (isotropic) [float]
 #
 # output: func_T1
+# others: anat_EPI_reg_target anat_EPI_mask_T1
 # prereq: linreg_calc_fsl
 #
 # Brings EPI data in register with T1 single subject space.
@@ -28,7 +29,7 @@ for SESS in ${DIR_SESS}; do
         -dxyz ${dims} ${dims} ${dims} \
         -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
         -inset ${DIR_T1}/anat_T1_brain.nii.gz
- 
+
     DIR_RUNS=$(ls -d -- ${DIR}/RUN*)
     for RUN in ${DIR_RUNS}; do
         NUM=$(basename ${RUN} | sed 's/[^0-9]//g')
@@ -46,7 +47,7 @@ for SESS in ${DIR_SESS}; do
         fi
 
     done
-    
+
     # register session masks with T1
     if [ ! -f ${DIR}/anat_EPI_mask_T1.nii.gz ]; then
         flirt \

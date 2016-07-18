@@ -4,10 +4,11 @@
 #
 # input: input prefix
 #
-# output: func_ob
+# output:
+# others: func_concat
 # prereq: init_*
 #
-# Concatenates all runs in order of a particular prefix with the current ID. 
+# Concatenates all runs in order of a particular prefix with the current ID.
 
 echo '*** MODULE: concatenate. Concatenates all functional runs. **************'
 export input=${1}
@@ -19,9 +20,9 @@ if [ ! -f ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_concat.nii.gz ]; then
     for SESS in ${DIR_SESS}; do
         FILES=`ls ${SESS}/${input}.${ID}.*`
         LIST="${LIST} ${FILES}"
-    done    
-    
+    done
+
     3dTcat \
-        -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_concat.nii.gz \
-        $(echo ${LIST}) 
+        -prefix ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/func_concat.${ID}.nii.gz \
+        $(echo ${LIST})
 fi

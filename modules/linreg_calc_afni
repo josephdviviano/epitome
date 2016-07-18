@@ -7,6 +7,7 @@
 # reg_dof:      registration degrees of freedom (see align_EPI_anat.py) [list: big_move giant_move]
 #
 # output:
+# others: mat_ reg_
 # prereq: motion_deskull
 #
 # Uses AFNI's align_epi_anat.py to calculate linear registration between
@@ -34,9 +35,9 @@ for SESS in ${DIR_SESS}; do
 
     # Set EPI data file (for low vs high quality data).
     if [ ${data_quality} = 'low' ]; then
-        EPI_BRAIN=`echo ${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz`
+        EPI_BRAIN="${DIR}/${SESS}/anat_EPI_initTR_brain.nii.gz"
     else
-        EPI_BRAIN=`echo ${DIR}/${SESS}/anat_EPI_brain.nii.gz`
+        EPI_BRAIN="${DIR}/${SESS}/anat_EPI_brain.nii.gz"
     fi
 
     # figure out if we should use each session's T1, or just the first session

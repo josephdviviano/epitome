@@ -3,6 +3,7 @@
 # make_thal_mask
 #
 # output:
+# others: anat_THAL_mask
 # prereq: fsrecon linreg_fs2epi_*
 #
 # Uses the aparc2009 atlas from freesurfer to create a thalamus mask.

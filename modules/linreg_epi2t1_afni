@@ -6,6 +6,7 @@
 # dims:  target voxel dimensions (isotropic) [float]
 #
 # output: func_T1
+# others: anat_EPI_mask_T1
 # prereq: linreg_calc*afni
 #
 # Brings EPI data in register with T1 single subject space.

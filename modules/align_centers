@@ -4,7 +4,8 @@
 #
 # input: input prefix
 #
-# output: func_ac 
+# output: func_ac
+# others: mat_EPI_to_T1_shft
 # prereq: init_*
 #
 # Aligns center of mass between EPI and T1 images.

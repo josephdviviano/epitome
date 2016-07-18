@@ -7,6 +7,7 @@
 # reg_dof:      registration degrees of freedom (see align_EPI_anat.py) [list: big_move giant_move]
 #
 # output:
+# others: anat_WHEPI mat_ reg_
 # prereq: motion_deskull
 #
 # Uses AFNI's align_epi_anat.py to calculate linear registration between
@@ -42,9 +43,9 @@ fi
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     SESS=$(basename ${SESS})
-    DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}`
-    DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1`
-    DIR_WHEPI=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/WHEPI`
+    DIR="${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}"
+    DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1"
+    DIR_WHEPI="${DIR_DATA}/${DIR_EXPT}/${SUB}/WHEPI"
 
     cd ${DIR}/${SESS}
 

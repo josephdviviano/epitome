@@ -3,6 +3,7 @@
 # linreg_fs2epi_afni
 #
 # output:
+# others: anat_aparc_reg anat_aparc2009_reg
 # prereq: fsrecon linreg_calc*afni
 #
 # Brings Freesurfer atlases in register with single-subject EPIs.
@@ -46,3 +47,4 @@ for SESS in ${DIR_SESS}; do
             -final NN
     fi
 done
+

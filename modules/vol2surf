@@ -7,9 +7,9 @@
 # output: func_surface
 # prereq: fsrecon linreg_epi2t1_*
 #
-# Projects functional data from volume space to a Freesurfer generated cortical 
-# mesh. This must be run on epi data in single-subject T1 space, otherwise we 
-# won't end up projecting the cortex to the surface model, but rather some 
+# Projects functional data from volume space to a Freesurfer generated cortical
+# mesh. This must be run on epi data in single-subject T1 space, otherwise we
+# won't end up projecting the cortex to the surface model, but rather some
 # random selection of brain and non-brain matter!
 
 echo '*** MODULE: vol2surf. Projects functional data onto a cortical surface. *'
@@ -18,24 +18,26 @@ export input=${1}
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
     DIR_RUNS=`ls -d -- ${SESS}/RUN*`
-    SESS=`basename ${SESS}`        
+    SESS=`basename ${SESS}`
     DIR=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/${SESS}`
     DIR_T1=`echo ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}`
     DIR_FS=`echo ${SUBJECTS_DIR}/${DIR_EXPT}_${SUB}_${SESS}`
     FS_NAME=`echo ${DIR_EXPT}_${SUB}_${SESS}`
-    
+
     # create SUMA folder
     if [ ! -d ${DIR_FS}/SUMA ]; then
-    @SUMA_Make_Spec_FS \
-        -fspath ${DIR_FS} \
-        -sid ${FS_NAME} \
-        -use_mgz
+        @SUMA_Make_Spec_FS \
+            -fspath ${DIR_FS} \
+            -sid ${FS_NAME} \
+            -use_mgz
     fi
 
     # Align experimental T1 to FS-exported T1 (might not be required)
     if [ ! -f ${DIR_FS}/SUMA/${FS_NAME}_SurfVol_Alnd_Exp+orig.BRIK ]; then
-        
-        if [ ! -f ${DIR_FS}/SUMA/anat_T1_brain+orig ]; then 3dcopy ${DIR_T1}/anat_T1_brain.nii.gz ${DIR_FS}/SUMA/anat_T1_brain+orig.; fi
+
+        if [ ! -f ${DIR_FS}/SUMA/anat_T1_brain+orig ]; then
+            3dcopy ${DIR_T1}/anat_T1_brain.nii.gz ${DIR_FS}/SUMA/anat_T1_brain+orig.
+        fi
 
         # note: we have to cd to this directory for the pipeline to work
         cd ${DIR_FS}/SUMA

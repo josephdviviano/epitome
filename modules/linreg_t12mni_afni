@@ -5,7 +5,8 @@
 # input: input prefix
 # dims:  target voxel dimensions (isotropic) [float]
 #
-# output: func_T1
+# output: func_MNI
+# others: anat_EPI_mask_MNI
 # prereq: linreg_calc*afni
 #
 # Brings EPI data already in T1 space in register with MNI space.

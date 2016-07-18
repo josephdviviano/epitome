@@ -6,6 +6,7 @@
 # dims:  target voxel dimensions (isotropic) [float]
 #
 # output: func_MNI-lin
+# others: anat_EPI_reg_target anat_EPI_mask_MNI-lin
 # prereq: linreg_calc_fsl
 #
 # Prepares data for analysis in MNI standard space, reslicing to the defined

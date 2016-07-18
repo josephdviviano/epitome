@@ -24,7 +24,7 @@ for SESS in ${DIR_SESS}; do
         if [ ! -f ${SESS}/func_detrend.${ID}.${NUM}.nii.gz ]; then
             # produce mean
             3dTstat \
-                -prefix ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
                 -mean ${SESS}/${input}.${ID}.${NUM}.nii.gz
 
             # detrend data
@@ -37,8 +37,11 @@ for SESS in ${DIR_SESS}; do
             3dcalc \
                 -prefix ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
                 -a ${SESS}/func_tmp_detrend.${ID}.${NUM}.nii.gz \
-                -b ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
+                -b ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
                 -expr 'a+b'
+
+            rm ${SESS}/func_tmp_detrend.${ID}.${NUM}.nii.gz
+            rm ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz
         fi
     done
 done

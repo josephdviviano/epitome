@@ -4,11 +4,11 @@
 #
 # input: input prefix
 #
-# output: 
+# output:
 # prereq: motion_deskull
 #
-#  Calls an AFNI script to calculate the global correlation for each 
-# concatenated set of runs (across all sessions). Useful for resting state 
+#  Calls an AFNI script to calculate the global correlation for each
+# concatenated set of runs (across all sessions). Useful for resting state
 # functional connectivity experiments.
 
 echo '*** MODULE: calc_gcor. calculates global correlation in native space. ***'

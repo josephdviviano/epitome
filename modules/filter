@@ -15,6 +15,7 @@
 # mask:     prefix for the EPI brain mask used [list: anat_EPI_mask ?]
 #
 # output: func_filtered
+# others: anat_wm anat_vent anat_gm anat_bstem anat_dv anat_EPI_mask_dia sq. dif. det. vent. vent_local15 vent_pc wm. wm_local15 wm_pc global_mean. func_tSNR func_noise
 # prereq: init_* motion_deskull fsrecon linreg_calc_* linreg_fs2epi_*
 #
 # Creates a series of regressors from fMRI data and a freesurfer segmentation:
@@ -184,7 +185,6 @@ for SESS in ${DIR_SESS}; do
                    equals(a,28)*b + \
                    equals(a,60)*b" \
             -prefix ${SESS}/anat_bstem.nii.gz
-
     fi
 
     # eroded draining vessel mask
@@ -210,28 +210,27 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        # detrend functional data and motion paramaters, calculate tSNR
-        if [ ! -f ${SESS}/func_det.${ID}.${NUM}.nii.gz ]; then
+        if [ ! -f ${SESS}/func_filtered.${ID}.${NUM}.nii.gz ]; then
 
             # compute mean, standard deviation
             3dTstat \
-                -prefix ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
                 -mean ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
             3dTstat \
-                -prefix ${SESS}/func_stdev.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_tmp_stdev.${ID}.${NUM}.nii.gz \
                 -stdev ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
             # compute temporal SNR (pre anything)
             3dcalc \
-                -a ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
-                -b ${SESS}/func_stdev.${ID}.${NUM}.nii.gz \
+                -a ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
+                -b ${SESS}/func_tmp_stdev.${ID}.${NUM}.nii.gz \
                 -expr 'a/b' \
                 -prefix ${SESS}/func_tSNR.${ID}.${NUM}.nii.gz
 
             # input data detrend (before calculating regressors...)
             3dDetrend \
-                -prefix ${SESS}/func_det.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
                 -polort ${POLORT} \
                 ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
 
@@ -338,17 +337,14 @@ for SESS in ${DIR_SESS}; do
                     ${SESS}/PARAMS/phys.${ID}.${NUM}.1D\' > \
                     ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D
             fi
-        fi
 
-        # initialize filter command
-        if [ ! -f ${SESS}/func_filtered.${ID}.${NUM}.nii.gz ]; then
-
+            # initialize filter command
             CMD=`echo 3dTfitter \
                           -prefix ${SESS}/func_noise_betas.${ID}.${NUM}.nii.gz \
                           -fitts ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
                           -polort 0 \
                           -quiet \
-                          -RHS ${SESS}/func_det.${ID}.${NUM}.nii.gz \
+                          -RHS ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
                           -LHS `
 
             # add the physio regressors if they exist
@@ -468,12 +464,12 @@ for SESS in ${DIR_SESS}; do
                 fi
             fi
 
-            if [ `echo ${GM}` = 'on' ]; then
+            if [ ${GM} = 'on' ]; then
 
                 # global mean, lag, dif, sq
                 3dmaskave \
                     -mask ${SESS}/anat_EPI_mask.nii.gz \
-                    -quiet ${SESS}/func_det.${ID}.${NUM}.nii.gz \
+                    -quiet ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
                     > ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D
                 1dcat \
                     ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0}' > \
@@ -604,7 +600,7 @@ for SESS in ${DIR_SESS}; do
                 # aCompcor regressors for WM and ventricles
                 if [ ! -f ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D ]; then
                     epi-genregress \
-                        ${SESS}/func_det.${ID}.${NUM}.nii.gz \
+                        ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
                         ${SESS}/anat_vent.nii.gz \
                         ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D \
                         ${COMPCOR}
@@ -612,7 +608,7 @@ for SESS in ${DIR_SESS}; do
 
                 if [ ! -f ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D ]; then
                     epi-genregress \
-                        ${SESS}/func_det.${ID}.${NUM}.nii.gz \
+                        ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
                         ${SESS}/anat_wm.nii.gz \
                         ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D \
                         ${COMPCOR}
@@ -630,11 +626,16 @@ for SESS in ${DIR_SESS}; do
             # subtracts nuisances from inputs, retaining the mean
             3dcalc \
                 -float \
-                -a ${SESS}/func_det.${ID}.${NUM}.nii.gz \
+                -a ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
                 -b ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
-                -c ${SESS}/func_mean.${ID}.${NUM}.nii.gz \
+                -c ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
                 -expr 'a-b+c' \
                 -prefix ${SESS}/func_filtered.${ID}.${NUM}.nii.gz
+
+            rm anat_tmp*
+            rm func_tmp_det.${ID}.${NUM}.nii.gz
+            rm func_tmp_mean.${ID}.${NUM}.nii.gz
+            rm func_tmp_stdev.${ID}.${NUM}.nii.gz
         fi
     done
 done

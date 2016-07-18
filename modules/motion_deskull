@@ -7,6 +7,7 @@
 # method:  software to use for deskulling [list: FSL AFNI]
 #
 # output: func_deskull
+# others: func_motion 3dvolreg motion dif.motion lag.motion anat_EPI_initTR_ob anat_EPI_initTR_reg anat_EPI_initTR_brain anat_EPI_ts_mean anat_EPI_brain anat_EPI_mask
 # prereq: init_*
 #
 # This motion corrects your data, saves the motion parameters, calculates a
@@ -142,7 +143,6 @@ for SESS in ${DIR_SESS}; do
                 -a ${SESS}/anat_EPI_tmp_mask.nii.gz \
                 -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
                 -expr 'amongst(1,a,b,c,d,e,f,g)'
-            rm ${SESS}/anat_EPI_tmp_mask.nii.gz
         fi
 
         # FSL
@@ -176,6 +176,7 @@ for SESS in ${DIR_SESS}; do
             -a ${SESS}/anat_EPI_tmp_vol.nii.gz \
             -b ${SESS}/anat_EPI_mask.nii.gz \
             -expr 'a*b'
+        rm ${SESS}/anat_EPI_tmp*
     fi
 
     # deskull anat_EPI_initTR if required

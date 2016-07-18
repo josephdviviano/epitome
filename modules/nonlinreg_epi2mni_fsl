@@ -6,10 +6,11 @@
 # dims:  target voxel dimensions (isotropic) [float]
 #
 # output: func_MNI-nonlin
+# others: anat_EPI_reg_target anat_EPI_mask_MNI-lin
 # prereq: nonlinreg_calc_fsl
 #
-# Calculates the nonlinear warp of the T1 image to the MNI brain in MNI space. 
-# This also performs a linear registration on the EPI data, so the input data 
+# Calculates the nonlinear warp of the T1 image to the MNI brain in MNI space.
+# This also performs a linear registration on the EPI data, so the input data
 # should be in native space.
 
 echo '*** MODULE: nonlinreg_epi2mni_fsl. Warps EPI data to MNI space. *********'

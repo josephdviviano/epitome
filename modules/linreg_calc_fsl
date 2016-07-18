@@ -7,6 +7,7 @@
 # reg_dof:      registration degrees of freedom [list: 6 7 9 12]
 #
 # output:
+# others: mat_ reg_
 # prereq: motion_deskull
 #
 # Uses FSL's FLIRT to calculate linear registration between epi <--> T1 <-->

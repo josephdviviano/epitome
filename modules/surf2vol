@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # surf2vol input
-# 
+#
 # input: input prefix
 #
 # output: func_ctx
@@ -24,7 +24,7 @@ for SESS in ${DIR_SESS}; do
 
     for RUN in ${DIR_RUNS}; do
         NUM=$(basename ${RUN} | sed 's/[^0-9]//g')
-    
+
         if [ ! -f ${DIR}/func_ctx.${ID}.${NUM}.nii.gz ]; then
             # project surface data --> volume
             3dSurf2Vol \
@@ -55,6 +55,8 @@ for SESS in ${DIR_SESS}; do
               -a ${DIR}/func_tmp_ctx.R.${ID}.${NUM}.nii.gz \
               -b ${DIR}/func_tmp_ctx.L.${ID}.${NUM}.nii.gz \
               -expr 'a+b'
+
+            rm ${DIR}/func_tmp*
         fi
     done
 done

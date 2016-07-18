@@ -6,6 +6,7 @@
 # del:          number of TRs to remove from the beginning of the run. [int]
 #
 # output: func_del
+# others: phys
 # prereq:
 #
 # Works from the raw data in each RUN folder, and prepares the data for the rest of epitome. This is the most basic form of initialization, which:

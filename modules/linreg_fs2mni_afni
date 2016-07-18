@@ -3,6 +3,7 @@
 # linreg_fs2mni_afni
 #
 # output:
+# others: anat_aparc_reg anat_aparc2009_reg
 # prereq: fsrecon linreg_calc*afni
 #
 # Brings Freesurfer atlases in register with the MNI brain.

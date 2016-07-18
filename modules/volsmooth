@@ -86,6 +86,7 @@ for SESS in ${DIR_SESS}; do
                     -quiet -float \
                     -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
             fi
+        rm ${SESS}/anat_tmp_smoothmask.nii.gz
         fi
     done
 done

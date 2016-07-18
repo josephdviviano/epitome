@@ -3,6 +3,7 @@
 # make_group_mni_mask
 #
 # output:
+# others: anat_EPI_mask_MNI_group
 # prereq: *linreg_epi2mni_*
 #
 # Creates a group-level MNI mask using all available MNI space EPI masks.
@@ -50,3 +51,4 @@ else
         rm ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz
     fi
 fi
+

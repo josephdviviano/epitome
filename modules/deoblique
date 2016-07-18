@@ -5,6 +5,7 @@
 # input: input prefix
 #
 # output: func_ob
+# others: deoblique
 # prereq: init_*
 #
 # Removes any obliquity from the images, and reslices all images to be on the
@@ -16,7 +17,6 @@
 
 echo '*** MODULE: deoblique. Alters image to have no obliquity. ***************'
 export input=${1}
-
 
 # loop through sessions
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
