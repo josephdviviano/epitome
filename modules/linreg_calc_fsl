@@ -19,10 +19,12 @@ export data_quality=${1}
 export cost=${2}
 export reg_dof=${3}
 
+dir_pipe=$(dirname $(dirname $(which epi-lowpass)))
+
 # Copy MNI brain to experiment directory
 if [ ! -f ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz ]; then
-    cp ${DIR_PIPE}/assets/MNI152_T1_1mm_brain.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
-    cp ${DIR_PIPE}/assets/MNI152_T1_1mm_brain_mask_dil.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI_mask.nii.gz
+    cp ${dir_pipe}/assets/MNI152_T1_1mm_brain.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+    cp ${dir_pipe}/assets/MNI152_T1_1mm_brain_mask_dil.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI_mask.nii.gz
 fi
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`

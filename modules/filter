@@ -632,7 +632,6 @@ for SESS in ${DIR_SESS}; do
                 -expr 'a-b+c' \
                 -prefix ${SESS}/func_filtered.${ID}.${NUM}.nii.gz
 
-            rm anat_tmp*
             rm func_tmp_det.${ID}.${NUM}.nii.gz
             rm func_tmp_mean.${ID}.${NUM}.nii.gz
             rm func_tmp_stdev.${ID}.${NUM}.nii.gz
