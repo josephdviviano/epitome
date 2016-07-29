@@ -59,7 +59,7 @@ for SESS in ${DIR_SESS}; do
 
             ## copy relevent nifti inputs
             # melodic (command-line program) full output
-            cp -r ${DIR}/${SESS}/MELODIC.${ID}.${NUM} ${DIR}/${SESS}/fake.${ID}.${NUM}.feat/filtered_func_data.ica
+            ln -s ${DIR}/${SESS}/MELODIC.${ID}.${NUM} ${DIR}/${SESS}/fake.${ID}.${NUM}.feat/filtered_func_data.ica
 
             # preprocessed 4D data
             cp ${DIR}/${SESS}/${input}.${ID}.${NUM}.nii.gz ${DIR}/${SESS}/fake.${ID}.${NUM}.feat/filtered_func_data.nii.gz
