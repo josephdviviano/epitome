@@ -10,7 +10,7 @@
 #
 # Concatenates all runs in order of a particular prefix with the current ID.
 
-echo '*** MODULE: concatenate. Concatenates all functional runs. **************'
+echo '*** MODULE: concatenate. Concatenates all functional runs. *************'
 export input=${1}
 
 # create concatenated runs in order

@@ -8,7 +8,7 @@
 #
 # Uses the aparc2009 atlas from freesurfer to create a thalamus mask.
 
-echo '*** MODULE: make_thal_mask. Creates a thalamus mask for fMRI data. ******'
+echo '*** MODULE: make_thal_mask. Creates a thalamus mask for fMRI data. *****'
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do

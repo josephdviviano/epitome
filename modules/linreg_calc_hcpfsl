@@ -9,13 +9,9 @@
 # output:
 # prereq: motion_deskull hcpexport
 #
-# Uses FSL's FLIRT to calculate linear registration between epi <--> T1. It also
-# copies the registration of the T1 to MNI space (that came from the HCP_DATA
-# directory) from the T1 directory down to this session. It generate an epi
-# template registered to T1 \& T1 registered to epi (sessionwise). Specific
-# options can be found in the command-line interface's help function.
+# Uses FSL's FLIRT to calculate linear registration between epi <--> T1. It also copies the registration of the T1 to MNI space (that came from the HCP_DATA directory) from the T1 directory down to this session. It generate an epi template registered to T1 \& T1 registered to epi (sessionwise). Specific options can be found in the command-line interface's help function.
 
-echo '*** MODULE: linreg_calc_hcp_fsl. Calcs EPI <--> T1 <--> MNI152 on HCP ***'
+echo '*** MODULE: linreg_calc_hcp_fsl. Calcs EPI <--> T1 <--> MNI152 on HCP **'
 export data_quality=${1}
 export cost=${2}
 export reg_dof=${3}

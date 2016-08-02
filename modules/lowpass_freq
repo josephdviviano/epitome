@@ -12,17 +12,11 @@
 #
 # Removes high frequency content from your fMRI time series.
 #
-# The 'kaiser' and 'butterworth' filters work in the frequency domain and accept
-# a cutoff in Hz (a good default is 0.1). Both are implemented as bi-directional
-# FIR filters. The kaiser window is high order and permits reasonably sharp
-# rolloff with minimal passband ringing for shorter fMRI time series. The
-# butterworth filter is of low order and achieves minimal passband ringing at
-# the expense of passband roll off. In other words, butterworth filters will
-# retain more high-frequency content than a kaiser filter with equivalent cutoff.
-# The effect of the passband ringing is an empirical question that would be best
-# tested by the User.
+# The 'kaiser' and 'butterworth' filters work in the frequency domain and accept a cutoff in Hz (a good default is 0.1). Both are implemented as bi-directional FIR filters. The kaiser window is high order and permits reasonably sharp rolloff with minimal passband ringing for shorter fMRI time series. The butterworth filter is of low order and achieves minimal passband ringing at the expense of passband roll off. In other words, butterworth filters will retain more high-frequency content than a kaiser filter with equivalent cutoff.
+#
+# The effect of the passband ringing is an empirical question that would be best tested by the User.
 
-echo '*** MODULE: lowpass_freq. Low pass using frequency domain filter. *******'
+echo '*** MODULE: lowpass_freq. Low pass using frequency domain filter. ******'
 export input=${1}
 export mask=${2}
 export filter=${3}

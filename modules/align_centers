@@ -10,7 +10,7 @@
 #
 # Aligns center of mass between EPI and T1 images.
 
-echo '*** MODULE: align_centers. Shifts the center of EPI to match T1. ********'
+echo '*** MODULE: align_centers. Shifts the center of EPI to match T1. *******'
 input=${1}
 
 # loop through sessions

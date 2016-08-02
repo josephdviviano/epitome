@@ -8,7 +8,7 @@
 #
 # Brings Freesurfer atlases in register with single-subject EPIs.
 
-echo '*** MODULE: linreg_fs2epi_afni. Puts freesurfer atlases in EPI space. ***'
+echo '*** MODULE: linreg_fs2epi_afni. Puts freesurfer atlases in EPI space. **'
 
 DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
 for SESS in ${DIR_SESS}; do

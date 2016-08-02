@@ -9,10 +9,9 @@
 # others: anat_EPI_mask_MNI-lin
 # prereq: linreg_calc*afni
 #
-# Prepares data for analysis in MNI standard space, reslicing to the defined
-# voxel dimensions.
+# Prepares data for analysis in MNI standard space, reslicing to the defined voxel dimensions.
 
-echo '*** MODULE: linreg_epi2mni_afni. MNI-transforms functional data. ********'
+echo '*** MODULE: linreg_epi2mni_afni. MNI-transforms functional data. *******'
 export input=${1}
 export dims=${2}
 

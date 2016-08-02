@@ -18,13 +18,11 @@
 #
 #                     s' = c1+(c2-c1)*tanh((s-c1)/(c2-c1))
 #
-#   where c1 is the threshold value of s for a 'spike' [default c1=2.5], and c2
-#   is the upper range of the allowed deviation from the curve: s=[c1..infinity)
-#   is mapped to s'=[c1..c2) [default c2=4].
+# where c1 is the threshold value of s for a 'spike' [default c1=2.5], and c2 is the upper range of the allowed deviation from the curve: s=[c1..infinity) is mapped to s'=[c1..c2) [default c2=4].
 #
 # For more details, see the help of AFNI's 3dDespike.
 
-echo '*** MODULE: despike. Removes time series outliers via L1 regression. ****'
+echo '*** MODULE: despike. Removes time series outliers via L1 regression. ***'
 export input=${1}
 
 # loop through sessions

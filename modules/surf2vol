@@ -7,10 +7,9 @@
 # output: func_ctx
 # prereq: vol2surf
 #
-# This projects cortical surface data back into a functional volume. Non-cortical
-# regions will be zero in this output.
+# This projects cortical surface data back into a functional volume. Non-cortical regions will be zero in this output.
 
-echo '*** MODULE: surf2vol. Projects surface data into single subject volume. *'
+echo '*** MODULE: surf2vol. Projects surface data into single subject volume. '
 export input=${1}
 
 DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)

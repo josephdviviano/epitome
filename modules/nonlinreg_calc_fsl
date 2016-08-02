@@ -6,11 +6,9 @@
 # others: reg_nlin_TAL
 # prereq: linreg_calc_fsl
 #
-## Calculates the nonlinear warp of the T1 --> MNI in MNI space. Therefore, this
-# must be run AFTER linreg_calc_fsl, so it can work on the MNI-space
-# registration image.
+## Calculates the nonlinear warp of the T1 --> MNI in MNI space. Therefore, this must be run AFTER linreg_calc_fsl, so it can work on the MNI-space registration image.
 
-echo '*** MODULE: nonlinreg_calc_fsl. Calcs MNI warp from linreg outputs. *****'
+echo '*** MODULE: nonlinreg_calc_fsl. Calcs MNI warp from linreg outputs. ****'
 
 DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
 for SESS in ${DIR_SESS}; do

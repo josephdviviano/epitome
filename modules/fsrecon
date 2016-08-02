@@ -5,12 +5,9 @@
 # output:
 # prereq:
 #
-# This sends each subject's T1s through the Freesurfer pipeline. It uses
-# multiple T1s per imaging session, but does not combine them between sessions.
-# Data is output to ${SUBJECTS_DIR} directory, relevant outputs are copies to
-# the SESS folder for the T1 modality.
+# This sends each subject's T1s through the Freesurfer pipeline. It uses multiple T1s per imaging session, but does not combine them between sessions. Data is output to ${SUBJECTS_DIR} directory, relevant outputs are copies to the SESS folder for the T1 modality.
 
-echo '*** MODULE: fsrecon. Runs freesurfer on the anatomical data. ************'
+echo '*** MODULE: fsrecon. Runs freesurfer on the anatomical data. ***********'
 
 for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/); do
 

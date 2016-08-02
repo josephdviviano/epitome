@@ -10,11 +10,9 @@
 # others: mat_ reg_
 # prereq: motion_deskull
 #
-# Uses FSL's FLIRT to calculate linear registration between epi <--> T1 <-->
-# MNI152, and generate an epi template registered to T1 & T1 registered to epi
-# (sessionwise). Specific options can be found in FLIRT's help.
+# Uses FSL's FLIRT to calculate linear registration between epi <--> T1 <--> MNI152, and generate an epi template registered to T1 & T1 registered to epi (sessionwise). Specific options can be found in FLIRT's help.
 
-echo '*** MODULE: linreg_calc_fsl. Calculates EPI <--> T1 <--> MNI152. ********'
+echo '*** MODULE: linreg_calc_fsl. Calculates EPI <--> T1 <--> MNI152. *******'
 export data_quality=${1}
 export cost=${2}
 export reg_dof=${3}

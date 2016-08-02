@@ -12,14 +12,9 @@
 #
 # Removes high frequency content from your fMRI time series.
 #
-# Both median and average filters operate in the time domain and therefore, the
-# best cutoff values are odd (and must be larger than 1 to do anything). Time-
-# domain filters are very good at removing high-frequency noise from the data
-# without introducing any phase-shifts or ringing into the time series. When in
-# doubt, a moving average filter with window length of 3 is a decent and
-# conservative choice.
+# Both median and average filters operate in the time domain and therefore, the best cutoff values are odd (and must be larger than 1 to do anything). Time-domain filters are very good at removing high-frequency noise from the data without introducing any phase-shifts or ringing into the time series. When in doubt, a moving average filter with window length of 3 is a decent and conservative choice.
 
-echo '*** MODULE: lowpass_time. Low pass using time-domain filter. ************'
+echo '*** MODULE: lowpass_time. Low pass using time-domain filter. ***********'
 export input=${1}
 export mask=${2}
 export filter=${3}

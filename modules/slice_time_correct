@@ -10,7 +10,7 @@
 #
 # This performs slice time correction using the supplied slice timing pattern.
 
-echo '*** MODULE: slice_time_correct. Corrects slice timing. ******************'
+echo '*** MODULE: slice_time_correct. Corrects slice timing. *****************'
 export input=${1}
 export tpattern=${2}
 

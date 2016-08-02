@@ -76,7 +76,7 @@
 # [4] Behzadi Y, et al. 2007. A component based noise correction method (CompCor) for BOLD and perfusion based fMRI. Neuroimage. 37(1).
 # [5] Satterthwaite TF, et al. 2013. An improved framework fro confound regression and filtering for control of motion artifact in the preprocessing of resting-state functional connectivity data. Neuroimage. 64(1).
 
-echo '*** MODULE: filter. Applies regression models of noise sources. *********'
+echo '*** MODULE: filter. Applies regression models of noise sources. ********'
 export INPUT=${1}
 export POLORT=${2}
 export DIFF=${3}

@@ -8,10 +8,9 @@
 # output: func_smooth
 # prereq: vol2surf
 #
-# This spatially-smooths cortical data along the surface mesh, estimated by 
-# Freesurfer.
+# This spatially-smooths cortical data along the surface mesh, estimated by Freesurfer.
 
-echo '*** MODULE: surfsmooth. Smooths functional data on a cortical surface ***'
+echo '*** MODULE: surfsmooth. Smooths functional data on a cortical surface **'
 export input=${1}
 export fwhm=${2}
 

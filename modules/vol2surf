@@ -7,10 +7,7 @@
 # output: func_surface
 # prereq: fsrecon linreg_epi2t1_*
 #
-# Projects functional data from volume space to a Freesurfer generated cortical
-# mesh. This must be run on epi data in single-subject T1 space, otherwise we
-# won't end up projecting the cortex to the surface model, but rather some
-# random selection of brain and non-brain matter!
+# Projects functional data from volume space to a Freesurfer generated cortical mesh. This must be run on epi data in single-subject T1 space, otherwise we won't end up projecting the cortex to the surface model, but rather some random selection of brain and non-brain matter!
 
 echo '*** MODULE: vol2surf. Projects functional data onto a cortical surface. *'
 export input=${1}

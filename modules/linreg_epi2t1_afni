@@ -11,7 +11,7 @@
 #
 # Brings EPI data in register with T1 single subject space.
 
-echo '*** MODULE: linreg_epi2t1_afni. T1-transforms functional data. **********'
+echo '*** MODULE: linreg_epi2t1_afni. T1-transforms functional data. *********'
 export input=${1}
 export dims=${2}
 

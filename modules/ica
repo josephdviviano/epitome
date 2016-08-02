@@ -8,12 +8,9 @@
 # output:
 # prereq: init_* motion_deskull
 #
-# Runs ICA on each input functional file of the type defined using the default
-# MELODIC settings. This module could be easily tweaked to grant the user access
-# to the dimensionality estimation settings, if need be. The output is the full
-# MELODIC report in a `.ica` folder.
+# Runs ICA on each input functional file of the type defined using the default MELODIC settings. This module could be easily tweaked to grant the user access to the dimensionality estimation settings, if need be. The output is the full MELODIC report in a `.ica` folder.
 
-echo '*** MODULE: ica. Runs MELODIC on each run. ******************************'
+echo '*** MODULE: ica. Runs MELODIC on each run. *****************************'
 export input=${1}
 export mask=${2}
 

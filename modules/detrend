@@ -10,7 +10,7 @@
 #
 # Detrends data with specified polynomial, retaining the mean.
 
-echo '*** MODULE: detrend. Detrends all inputs to order n, retaining the mean.*'
+echo '*** MODULE: detrend. Detrends all inputs to order n, retaining the mean.'
 export input=${1}
 export polort=${2}
 

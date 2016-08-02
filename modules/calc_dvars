@@ -9,7 +9,7 @@
 #
 # Calculates DVARS on the last stage of the pipeline.
 
-echo '*** MODULE: calc-dvars. Calculates the DVARS regressors.*****************'
+echo '*** MODULE: calc-dvars. Calculates the DVARS regressors. ***************'
 export INPUT=${1}
 
 DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)

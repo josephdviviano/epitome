@@ -11,20 +11,13 @@
 # output: func_fix
 # prereq: init_* motion_deskull linreg_calc_fsl ica
 #
-# Runs FSL ICA-based de-noising based on expert rating of ICA components into
-# signal and noise. FSL FIX is not easy to run outside of the FSL ecosystem, so
-# you must follow a pretty tight perscription to run this module (see prereqs
-# below). The key is all registrations need to be done with FSL, and you really
-# should use 'detrend' to remove (at least) the linear trend from all voxels.
+# Runs FSL ICA-based de-noising based on expert rating of ICA components into signal and noise. FSL FIX is not easy to run outside of the FSL ecosystem, so you must follow a pretty tight perscription to run this module (see prereqs below). The key is all registrations need to be done with FSL, and you really should use 'detrend' to remove (at least) the linear trend from all voxels.
 #
-# Internally, this This takes the above MELODIC output, generates a phony
-# '.feat' folder, and runs FIX within that. The output it moved to the epitome
-# SESS folder as `func_fix`.
+# Internally, this takes the above MELODIC output, generates a phony '.feat' folder, and runs FIX within that. The output it moved to the epitome SESS folder as `func_fix`.
 #
-# It is also recommended to smooth the data before running ICA if you are using
-# one of the included FIX classifiers.
+# It is also recommended to smooth the data before running ICA if you are using one of the included FIX classifiers.
 
-echo '*** MODULE: ica_fix. runs FSL FIX using MELODIC outputs. ****************'
+echo '*** MODULE: ica_fix. runs FSL FIX using MELODIC outputs. ***************'
 export input=${1}
 export traindata=${2}
 export threshold=${3}
