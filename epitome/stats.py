@@ -91,8 +91,6 @@ def FD(motion, head_radius):
     FD = np.sum(np.abs(np.diff(FD, n=1, axis=0)), axis=1)
     FD = np.insert(FD, 0, 0) # align FD with original run & DVARS
 
-    print(FD)
-
     return FD
 
 def FDR_mask(p=[], q=1.05, iid='yes', crit='no'):
