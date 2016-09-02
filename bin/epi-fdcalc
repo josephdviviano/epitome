@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+"""
+Calculates the framewise displacement from a submitted AFNI-formatted motion
+paramater (.1D) file. This gets written out as an n-length vector in a text file
+(n = number of TRs).
+
+If the option --mean is set to a file, the average framewise displacement is
+also written out for that subject.
+
+This program assumes a head radius of 50 mm.
+
+Usage:
+    epi-fdcalc [options] <motion> <output>
+
+Arguments:
+    <motion>        full path to input AFNI motion paramater file.
+    <output>        full path to output text file.
+
+Options:
+    --mean=<mean>   full path to output mean FD calculation
+
+"""
+import os, sys
+import csv
+
+import epitome as epi
+import numpy as np
+import scipy as sp
+
+from epitome.docopt import docopt
+
+def main():
+    arguments  = docopt(__doc__)
+    motion = arguments['<motion>']
+    output = arguments['<output>']
+    mean = arguments['--mean']
+
+    head = 50 # arbitrary, but reasonable, default.
+
+    FD = epi.stats.FD(motion, head)
+    np.savetxt(output, FD, '%2.10f')
+
+    if mean:
+        with open(mean, 'wb') as f:
+            f.write(str(np.mean(FD[1:])))
+
+if __name__ == '__main__':
+    main()
