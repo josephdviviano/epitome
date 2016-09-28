@@ -2,8 +2,11 @@
 #
 # slice_time_correct input tpattern
 #
-# input:    input prefix
-# tpattern: slice timing at acquisition [list: alt+z alt+z2 alt-z alt-z2 seq+z seq-z]
+# input:      input prefix
+# tr:         acquisition TR [float]
+# direction:  acquisition direction [list: x y z]
+# reverse:    reverse slice indexing [list: yes no]
+# interleave: acquisition was interleaved [list: yes no]
 #
 # output: func_tshift
 # prereq: init_*
@@ -12,7 +15,22 @@
 
 echo '*** MODULE: slice_time_correct. Corrects slice timing. *****************'
 export input=${1}
-export tpattern=${2}
+export tr=${2}
+export direction=${3}
+export reverse=${4}
+export interleave=${5}
+
+if [ ${reverse} = 'yes']; then
+    reverse='--down'
+else;
+    reverse=''
+fi
+
+if [ ${interleave} = 'yes']; then
+    interleave='--odd'
+else;
+    interleave=''
+fi
 
 # loop through sessions
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -27,18 +45,17 @@ for SESS in ${DIR_SESS}; do
         # NB: Physio regression must happen BEFORE NOW
         if [ ! -f ${SESS}/func_tshift.${ID}.${NUM}.nii.gz ]; then
             if [ -f ${RUN}/slice_timing.1D ]; then
-                3dTshift \
-                    -prefix ${SESS}/func_tshift.${ID}.${NUM}.nii.gz \
-                    -verbose -Fourier \
-                    -tpattern @ ${RUN}/slice_timing.1D \
-                    ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                slicetimer \
+                    -i ${SESS}/${input}.${ID}.${NUM}.nii.gz \
+                    -o ${SESS}/func_tshift.${ID}.${NUM}.nii.gz \
+                    --ocustom @ ${RUN}/slice_timing.1D
             else
-                3dTshift \
-                    -prefix ${SESS}/func_tshift.${ID}.${NUM}.nii.gz \
-                    -verbose -Fourier \
-                    -tpattern ${tpattern} \
-                    ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                slicetimer \
+                    -i ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                    -o ${SESS}/func_tshift.${ID}.${NUM}.nii.gz \
+                    -r ${tr} -d ${direction} ${reverse} ${interleave}
             fi
         fi
     done
 done
+
