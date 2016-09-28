@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# init_copy
+#
+# output: func_copy
+# others:
+# prereq:
+#
+# Creates a simple link to the raw data in each RUN folder. Use in cases that the raw data should be left untouched before going through the rest of the pipeline.
+#
+
+# sets some handy AFNI defaults
+export AFNI_NIFTI_TYPE_WARN='NO'
+export AFNI_DECONFLICT=OVERWRITE
+
+echo '*** MODULE: init_copy. Links to the raw data. ***************************'
+
+# loop through sessions
+for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/); do
+
+    # make the output folder for the paramaters
+    if [ ! -d ${SESS}/PARAMS ]; then
+        mkdir ${SESS}/PARAMS
+    fi
+
+    RUNS=$(find ${SESS} -type d -name 'RUN*' | sort)
+    for RUN in ${RUNS}; do
+        NUM=$(basename ${RUN} | sed 's/[^0-9]//g')
+        input=$(echo ${SESS}/RUN${NUM}/*.nii*)
+
+        if [ ! -f ${SESS}/func_copy.${ID}.${NUM}.nii.gz ]; then
+           ln -s ${input} ${SESS}/func_copy.${ID}.${NUM}.nii.gz
+        fi
+    done
+done
