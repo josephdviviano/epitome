@@ -20,13 +20,13 @@ export direction=${3}
 export reverse=${4}
 export interleave=${5}
 
-if [ ${reverse} = 'yes']; then
+if [ ${reverse} = 'yes' ]; then
     reverse='--down'
 else;
     reverse=''
 fi
 
-if [ ${interleave} = 'yes']; then
+if [ ${interleave} = 'yes' ]; then
     interleave='--odd'
 else;
     interleave=''
@@ -51,7 +51,7 @@ for SESS in ${DIR_SESS}; do
                     --ocustom @ ${RUN}/slice_timing.1D
             else
                 slicetimer \
-                    -i ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                    -i ${SESS}/${input}.${ID}.${NUM}.nii.gz \
                     -o ${SESS}/func_tshift.${ID}.${NUM}.nii.gz \
                     -r ${tr} -d ${direction} ${reverse} ${interleave}
             fi
