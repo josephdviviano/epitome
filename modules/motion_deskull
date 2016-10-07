@@ -28,7 +28,7 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        # deoblique, motion correct, and scale data
+        # deoblique and motion correct data
         if [ ! -f ${SESS}/func_motion.${ID}.${NUM}.nii.gz ]; then
 
             # motion correct to 9th sub-brick of 1st run

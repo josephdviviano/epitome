@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# slice_time_correct input tpattern
+# slice_time_correct input tr direction reverse interleave
 #
 # input:      input prefix
 # tr:         acquisition TR [float]
 # direction:  acquisition direction [list: x y z]
-# reverse:    reverse slice indexing [list: yes no]
+# ascending:  ascending slice acquisition order? [list: yes no]
 # interleave: acquisition was interleaved [list: yes no]
 #
 # output: func_tshift
@@ -17,13 +17,13 @@ echo '*** MODULE: slice_time_correct. Corrects slice timing. *****************'
 export input=${1}
 export tr=${2}
 export direction=${3}
-export reverse=${4}
+export ascending=${4}
 export interleave=${5}
 
-if [ ${reverse} = 'yes' ]; then
-    reverse='--down'
+if [ ${ascending} = 'no' ]; then
+    ascending='--down'
 else;
-    reverse=''
+    ascending=''
 fi
 
 if [ ${interleave} = 'yes' ]; then
@@ -53,7 +53,7 @@ for SESS in ${DIR_SESS}; do
                 slicetimer \
                     -i ${SESS}/${input}.${ID}.${NUM}.nii.gz \
                     -o ${SESS}/func_tshift.${ID}.${NUM}.nii.gz \
-                    -r ${tr} -d ${direction} ${reverse} ${interleave}
+                    -r ${tr} -d ${direction} ${ascending} ${interleave}
             fi
         fi
     done
