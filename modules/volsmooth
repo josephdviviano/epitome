@@ -52,7 +52,7 @@ for SESS in ${DIR_SESS}; do
                         -quiet \
                         -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
                         -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
-                        -fwhm ${fwhm} \
+                        -FWHM ${fwhm} \
                         -blurmaster ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
                         -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
                 else
@@ -60,7 +60,7 @@ for SESS in ${DIR_SESS}; do
                         -quiet \
                         -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
                         -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
-                        -fwhm ${fwhm} \
+                        -FWHM ${fwhm} \
                         -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
                 fi
 
@@ -69,7 +69,7 @@ for SESS in ${DIR_SESS}; do
                 3dBlurInMask \
                     -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
                     -Mmask ${SESS}/anat_tmp_smoothmask.nii.gz \
-                    -fwhm ${fwhm} \
+                    -FWHM ${fwhm} \
                     -quiet -float \
                     -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
             fi
