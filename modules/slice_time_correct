@@ -22,14 +22,22 @@ export interleave=${5}
 
 if [ ${ascending} = 'no' ]; then
     ascending='--down'
-else;
+else
     ascending=''
 fi
 
 if [ ${interleave} = 'yes' ]; then
     interleave='--odd'
-else;
+else
     interleave=''
+fi
+
+if [ ${direction} = 'x' ]; then
+    direction=1
+elif [ ${direction} = 'y' ]; then
+    direction=2
+else
+    direction=3
 fi
 
 # loop through sessions
