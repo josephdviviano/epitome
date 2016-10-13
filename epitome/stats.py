@@ -299,7 +299,11 @@ def pca_reduce(data, n=None, copy=True, whiten=False, cutoff=1000):
     elif method == 'normal':
         pcmodel = dec.pca.PCA(n_components=n, copy=copy, whiten=whiten)
 
-    pcmodel.fit(data)
+    try:
+        pcmodel.fit(data)
+    except LinAlgError:
+        print('ERROR: failed to find the top principal components of input data:\n{}'.format(data))
+
     data = pcmodel.transform(data)
     #components = pcmodel.components_
     exp_var = pcmodel.explained_variance_ratio_
