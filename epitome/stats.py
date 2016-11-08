@@ -301,7 +301,7 @@ def pca_reduce(data, n=None, copy=True, whiten=False, cutoff=1000):
 
     try:
         pcmodel.fit(data)
-    except LinAlgError:
+    except:
         print('ERROR: failed to find the top principal components of input data:\n{}'.format(data))
 
     data = pcmodel.transform(data)
