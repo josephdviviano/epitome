@@ -252,7 +252,7 @@ def pct_signal_change(data):
 
     return data
 
-def pca_reduce(data, n=None, copy=True, whiten=False, cutoff=1000):
+def pca_reduce(data, n=None, copy=True, method='random' whiten=False, cutoff=1000):
     """
     Principal component analysis dimensionality reduction using Scikit Learn.
 
@@ -284,11 +284,6 @@ def pca_reduce(data, n=None, copy=True, whiten=False, cutoff=1000):
 
     data = data.astype(np.float)
     data -= np.mean(data) # mean-center entire dataset
-
-    if data.shape[0] > cutoff:
-        method = 'random'
-    else:
-        method = 'normal'
 
     # set n to be the cutoff if the dimensionality of the data is large
     if n == None and method == 'random':
