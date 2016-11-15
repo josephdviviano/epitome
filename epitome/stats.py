@@ -252,7 +252,7 @@ def pct_signal_change(data):
 
     return data
 
-def pca_reduce(data, n=None, copy=True, method='random' whiten=False, cutoff=1000):
+def pca_reduce(data, n=None, copy=True, method='random', whiten=False, cutoff=1000):
     """
     Principal component analysis dimensionality reduction using Scikit Learn.
 
