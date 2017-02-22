@@ -10,6 +10,8 @@
 # std:      fit 6 head motion parameters, mean white matter, and mean csf [list: on off]
 # gm:       fit mean global signal from each voxel [list: on off]
 # dv:       fit mean draining vessel signal from each voxel [list: on off]
+# censor:   method for TR censoring (if calc_censor was run) [list: drop interpolate]
+# bandpass: bandpass filter data (0.01 < f < 0.1 Hz) as per standard [list: on off]
 # anaticor: fit 15mm local white matter signal from data [list: on off]
 # compcor:  if > 0, regress top n PCA regressors from the white matter and csf [int]
 # mask:     prefix for the EPI brain mask used [list: anat_EPI_mask ?]
@@ -26,46 +28,45 @@
 # + brain stem mask
 # + dialated whole-brain mask
 # + draining vessels mask
-# + DVARS (for 'scrubbing' -- calculated here because we need detrended data) [1].
 #
 # All regressors are constrained within the supplied EPI mask (for partial acquisitions in particular).
 #
 # The regressors calculated depend on the method(s) used to filter the data:
 #
-# std
-# ---
+# **std**
+#
 # 'Standard' resting state tissue regressors for resting-state fMRI . See [2] for an overview.
 #
 # + 6 head motion paramaters
 # + local white matter regressors
 # + ventricle regressors
 #
-# gm
-# --
+# **gm**
+#
 # Global mean regression. Often, but controversially, combined with 'std' above. Watch your anticorrelations!
 #
 # + global mean signal
 #
-# dv
-# --
+# **dv**
+#
 # An experimental draining vessel regressor c.o. Dr. W. Dale Stevens.
 #
 # + mean draining vessel signal
 #
-# diff
-# ----
+# **diff**
+#
 # Combined with std, gm, and/or dv above to additionally regress the first derivative(s) of the selected regressors from the data.
 #
-# sq
-# --
+# **sq**
+#
 # Combined with std, gm, dv, and/or diff above to additionall regress the squares of the computed regressors from the data. See [5] for more details.
 #
-# anaticor
-# --------
+# **anaticor**
+#
 # An AFNI method for dealing with artifacts in your data using 15mm local white matter regressors + 1 temporal lag. Tends to be conservative. Good at dealing with distance-dependnet motion artifacts, but less so at dealing with physiological noise [3]. NB: Currently does not interact with the DET, LAG, or SQ options. This will only produce the local WM regressor and the first lag.
 #
-# compcor
-# -------
+# **compcor**
+#
 # Takes the first N principal components from the white matter and ventricle tissue masks and applies them as regressors. Believed by some to deal well with physiological noise (like global mean regression) without the spurious anticorrelations [4].
 #
 # This computes detrended nuisance time series, fits each run with a computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional.
@@ -75,6 +76,7 @@
 # [3] Jo HJ, et al. 2010. Mapping sources of correlation in resting state FMRI, with artifact detection and removal. Neuroimage. 52(2).
 # [4] Behzadi Y, et al. 2007. A component based noise correction method (CompCor) for BOLD and perfusion based fMRI. Neuroimage. 37(1).
 # [5] Satterthwaite TF, et al. 2013. An improved framework fro confound regression and filtering for control of motion artifact in the preprocessing of resting-state functional connectivity data. Neuroimage. 64(1).
+# [6] Hallquist MN, et al. 2013. The Nuisance of Nuisance Regression: Spectral Misspecification in a Common Approach to Resting-State fMRI Preprocessing Reintroduces Noise and Obscures Functional Connectivity. Neuroimage.
 
 echo '*** MODULE: filter. Applies regression models of noise sources. ********'
 export INPUT=${1}
@@ -85,9 +87,11 @@ export SQ=${5}
 export STD=${6}
 export GM=${7}
 export DV=${8}
-export ANATICOR=${9}
-export COMPCOR=${10}
-export MASK=${11}
+export CENSOR=${9}
+export BANDPASS=${10}
+export ANATICOR=${11}
+export COMPCOR=${12}
+export MASK=${13}
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -236,23 +240,17 @@ for SESS in ${DIR_SESS}; do
 
             # motion paramaters, detrend, lag, dif, sq
             3dDetrend \
-                -prefix - \
-                -DAFNI_1D_TRANOUT=YES \
-                -polort ${POLORT} \
+                -prefix - -DAFNI_1D_TRANOUT=YES -polort ${POLORT} \
                 ${SESS}/PARAMS/motion.${ID}.${NUM}.1D\' > \
                 ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D
 
             3dDetrend \
-                -prefix - \
-                -DAFNI_1D_TRANOUT=YES \
-                -polort ${POLORT} \
+                -prefix - -DAFNI_1D_TRANOUT=YES -polort ${POLORT} \
                 ${SESS}/PARAMS/lag.motion.${ID}.${NUM}.1D\' > \
                 ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D
 
             3dDetrend \
-                -prefix - \
-                -DAFNI_1D_TRANOUT=YES \
-                -polort ${POLORT} \
+                -prefix - -DAFNI_1D_TRANOUT=YES -polort ${POLORT} \
                 ${SESS}/PARAMS/dif.motion.${ID}.${NUM}.1D\' > \
                 ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D
 
@@ -299,57 +297,48 @@ for SESS in ${DIR_SESS}; do
             # diff of detrended + squared head motion
             1d_tool.py \
                 -infile ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D \
-                -backward_diff \
-                -overwrite \
+                -backward_diff -overwrite \
                 -write ${SESS}/PARAMS/dif.sq.1.det.motion.${ID}.${NUM}.1D
             1d_tool.py \
                 -infile ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D \
-                -backward_diff \
-                -overwrite \
+                -backward_diff -overwrite \
                 -write ${SESS}/PARAMS/dif.sq.2.det.motion.${ID}.${NUM}.1D
             1d_tool.py \
                 -infile ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D \
-                -backward_diff \
-                -overwrite \
+                -backward_diff -overwrite \
                 -write ${SESS}/PARAMS/dif.sq.3.det.motion.${ID}.${NUM}.1D
             1d_tool.py \
                 -infile ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D \
-                -backward_diff \
-                -overwrite \
+                -backward_diff -overwrite \
                 -write ${SESS}/PARAMS/dif.sq.4.det.motion.${ID}.${NUM}.1D
             1d_tool.py \
                 -infile ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D \
-                -backward_diff \
-                -overwrite \
+                -backward_diff -overwrite \
                 -write ${SESS}/PARAMS/dif.sq.5.det.motion.${ID}.${NUM}.1D
             1d_tool.py \
                 -infile ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D \
-                -backward_diff \
-                -overwrite \
+                -backward_diff -overwrite \
                 -write ${SESS}/PARAMS/dif.sq.6.det.motion.${ID}.${NUM}.1D
 
             # detrend physiological regressors, if they exist
             if [ -f ${SESS}/PARAMS/phys.${ID}.${NUM}.1D ]; then
                 3dDetrend \
-                    -prefix - \
-                    -DAFNI_1D_TRANOUT=YES \
-                    -polort ${POLORT} \
+                    -prefix - -DAFNI_1D_TRANOUT=YES -polort ${POLORT} \
                     ${SESS}/PARAMS/phys.${ID}.${NUM}.1D\' > \
                     ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D
             fi
 
             # initialize filter command
-            CMD=`echo 3dTfitter \
-                          -prefix ${SESS}/func_noise_betas.${ID}.${NUM}.nii.gz \
-                          -fitts ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
-                          -polort 0 \
-                          -quiet \
-                          -RHS ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
-                          -LHS `
+            CMD=$(echo 3dTproject \
+                          -input ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
+                          -prefix ${SESS}/func_filtered.${ID}.${NUM}.nii.gz \
+                          -mask ${SESS}/${MASK}.nii.gz \
+                          -polort 2 \
+                          -quiet )
 
             # add the physio regressors if they exist
             if [ -f ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D ]; then
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D`
+                CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D)
             fi
 
             if [ `echo ${STD}` = 'on' ]; then
@@ -367,8 +356,7 @@ for SESS in ${DIR_SESS}; do
                     ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
                 1d_tool.py \
                     -infile ${SESS}/PARAMS/wm.${ID}.${NUM}.1D \
-                    -backward_diff \
-                    -overwrite \
+                    -backward_diff -overwrite \
                     -write ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D
                 1deval \
                     -a ${SESS}/PARAMS/wm.${ID}.${NUM}.1D \
@@ -378,8 +366,7 @@ for SESS in ${DIR_SESS}; do
                     -expr 'a^2' > ${SESS}/PARAMS/sq.lag.wm.${ID}.${NUM}.1D
                 1d_tool.py \
                     -infile ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D \
-                    -backward_diff \
-                    -overwrite \
+                    -backward_diff -overwrite \
                     -write ${SESS}/PARAMS/dif.sq.wm.${ID}.${NUM}.1D
 
                 # ventricle mean, lag, dif, sq
@@ -395,8 +382,7 @@ for SESS in ${DIR_SESS}; do
                     ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
                 1d_tool.py \
                     -infile ${SESS}/PARAMS/vent.${ID}.${NUM}.1D \
-                    -backward_diff \
-                    -overwrite \
+                    -backward_diff -overwrite \
                     -write ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D
                 1deval \
                     -a ${SESS}/PARAMS/vent.${ID}.${NUM}.1D \
@@ -406,60 +392,59 @@ for SESS in ${DIR_SESS}; do
                     -expr 'a^2' > ${SESS}/PARAMS/sq.lag.vent.${ID}.${NUM}.1D
                 1d_tool.py \
                     -infile ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D \
-                    -backward_diff \
-                    -overwrite \
+                    -backward_diff -overwrite \
                     -write ${SESS}/PARAMS/dif.sq.vent.${ID}.${NUM}.1D
 
-                CMD=`echo ${CMD} ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/vent.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/wm.${ID}.${NUM}.1D`
+                CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D)
+                CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/vent.${ID}.${NUM}.1D)
+                CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/wm.${ID}.${NUM}.1D)
 
                 if [ `echo ${SQ}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D)
 
                     if [ `echo ${DIFF}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.1.det.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.2.det.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.3.det.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.4.det.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.5.det.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.6.det.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.vent.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.wm.${ID}.${NUM}.1D`
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.1.det.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.2.det.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.3.det.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.4.det.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.5.det.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.6.det.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.vent.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.wm.${ID}.${NUM}.1D)
                     fi
 
                 fi
 
                 if [ `echo ${DIFF}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D)
                 fi
 
                 # note the difference in the order of operations from the diff method,
                 # above. It isn't clear to me if there is a meaningful difference in the
                 # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` == 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D`
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D)
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D)
 
                     if [ `echo ${SQ}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.1.det.lag.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.2.det.lag.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.3.det.lag.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.4.det.lag.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.5.det.lag.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.6.det.lag.motion.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.vent.${ID}.${NUM}.1D`
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.wm.${ID}.${NUM}.1D`
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.1.det.lag.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.2.det.lag.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.3.det.lag.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.4.det.lag.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.5.det.lag.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.6.det.lag.motion.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.lag.vent.${ID}.${NUM}.1D)
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.lag.wm.${ID}.${NUM}.1D)
                     fi
                 fi
             fi
@@ -479,8 +464,7 @@ for SESS in ${DIR_SESS}; do
                     ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
                 1d_tool.py \
                     -infile ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D \
-                    -backward_diff \
-                    -overwrite \
+                    -backward_diff -overwrite \
                     -write ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D
                 1deval \
                     -a ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D \
@@ -490,31 +474,30 @@ for SESS in ${DIR_SESS}; do
                     -expr 'a^2' > ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D
                 1d_tool.py \
                     -infile ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D \
-                    -backward_diff \
-                    -overwrite \
+                    -backward_diff -overwrite \
                     -write ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D
 
-                CMD=`echo ${CMD} ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D`
+                CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D)
                 if [ `echo ${SQ}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D)
 
                     if [ `echo ${DIFF}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D`
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D)
                     fi
                 fi
 
                 if [ `echo ${DIFF}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D)
                 fi
 
                 # note the difference in the order of operations from the diff method,
                 # above. It isn't clear to me if there is a meaningful difference in the
                 # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D)
 
                     if [ `echo ${SQ}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D`
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D)
                     fi
                 fi
             fi
@@ -534,8 +517,7 @@ for SESS in ${DIR_SESS}; do
                     ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
                 1d_tool.py \
                     -infile ${SESS}/PARAMS/dv.${ID}.${NUM}.1D \
-                    -backward_diff \
-                    -overwrite \
+                    -backward_diff -overwrite \
                     -write ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D
                 1deval \
                     -a ${SESS}/PARAMS/dv.${ID}.${NUM}.1D \
@@ -545,31 +527,30 @@ for SESS in ${DIR_SESS}; do
                     -expr 'a^2' > ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D
                 1d_tool.py \
                     -infile ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D \
-                    -backward_diff \
-                    -overwrite \
+                    -backward_diff -overwrite \
                     -write ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D
 
                 CMD=`echo ${CMD} ${SESS}/PARAMS/dv.${ID}.${NUM}.1D`
                 if [ `echo ${SQ}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D)
 
                     if [ `echo ${DIFF}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D`
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D)
                     fi
                 fi
 
                 if [ `echo ${DIFF}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D)
                 fi
 
                 # note the difference in the order of operations from the diff method,
                 # above. It isn't clear to me if there is a meaningful difference in the
                 # lag case. -- jdv may 2015
                 if [ `echo ${LAG}` = 'on' ]; then
-                    CMD=`echo ${CMD} ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D`
+                    CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D)
 
                     if [ `echo ${SQ}` = 'on' ]; then
-                        CMD=`echo ${CMD} ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D`
+                        CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D)
                     fi
                 fi
             fi
@@ -591,8 +572,8 @@ for SESS in ${DIR_SESS}; do
                         ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz'[0..$]'
                 fi
 
-                CMD=`echo ${CMD} ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz`
+                CMD=$(echo ${CMD} -dsort ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz)
+                CMD=$(echo ${CMD} -dsort ${SESS}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz)
             fi
 
             if [ ${COMPCOR} -gt 0 ]; then
@@ -615,22 +596,27 @@ for SESS in ${DIR_SESS}; do
                 fi
 
                 # https://www.youtube.com/watch?v=oavMtUWDBTM
-                CMD=`echo ${CMD} ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D`
-                CMD=`echo ${CMD} ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D`
+                CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D)
+                CMD=$(echo ${CMD} -ort ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D)
             fi
 
-            ####################################################################
-            # Finally, run the command
-            ${CMD}
+            # add optional bandpass
+            if [ `echo ${BANDPASS}` = 'on' ]; then
+                CMD=$(echo ${CMD} -passband 0.01 0.1)
+            fi
 
-            # subtracts nuisances from inputs, retaining the mean
-            3dcalc \
-                -float \
-                -a ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
-                -b ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
-                -c ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
-                -expr 'a-b+c' \
-                -prefix ${SESS}/func_filtered.${ID}.${NUM}.nii.gz
+            # if censor vector exists
+            if [ -f ${SESS}/PARAMS/censor.${ID}.${NUM}.1D ]; then
+                CMD=$(echo ${CMD} -censor ${SESS}/PARAMS/censor.${ID}.${NUM}.1D)
+                if [ `echo ${CENSOR}` == 'drop' ]; then
+                    CMD=$(echo ${CMD} -cenmode KILL)
+                elif [ `echo ${CENSOR}` == 'interp' ]; then
+                    CMD=$(echo ${CMD} -cenmode NTRP)
+                fi
+            fi
+
+            # run the regression
+            ${CMD}
 
             #rm func_tmp_det.${ID}.${NUM}.nii.gz
             #rm func_tmp_mean.${ID}.${NUM}.nii.gz
