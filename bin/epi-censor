@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+"""
+Identifies the TRs that are associated with either high DVARS, high framewise
+displacement, or both. Output is a binary 1D file indicating good TRs (1) and
+bad TRs (0).
+
+Usage:
+    epi-censor [options] <func> <output> <motion>
+
+Arguments:
+    <func>          full path to input nifti file.
+    <output>        full path to output 1D file.
+    <motion>        full path to AFNI motion parameters.
+
+Options:
+    --DVARS=<DVARS>   full path to DVARS calculation
+    --report=<report> full path to report on TRs scrubbed per subject
+    --head=<head>     head radius in mm [default: 50].
+    --FD=<FD>         censor TRs with instantaneous motion > x mm [default: 0.3]
+    --DV=<DV>         censor TRs with instantaneous GS fluctuation > x % [default: 0.3]
+
+DETAILS:
+    Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to change.
+"""
+import os
+import epitome as epi
+import numpy as np
+import nibabel as nib
+from epitome.docopt import docopt
+
+def main():
+    arguments  = docopt(__doc__)
+    func   = arguments['<func>']
+    output = arguments['<output>']
+    motion = arguments['<motion>']
+    DVARS  = arguments['--DVARS']
+    report = arguments['--report']
+    head   = arguments['--head']
+    FD_t   = arguments['--FD']
+    DV_t   = arguments['--DV']
+
+    if type(head) == list and len(head) > 1:
+        head = float(head[0])
+
+    print('calculating outliers on {} using FD={} mm, DVARS={} %, head radius={} mm'.format(func, FD_t, DV_t, head))
+
+    FD = epi.stats.FD(motion, head)
+    n_trs = len(FD)
+    idx_FD = np.where(FD >= FD_t)[0]
+
+    if DVARS != None:
+        DV = np.genfromtxt(DVARS)
+        DV = (DV) / 1000 # convert to % signal change
+        idx_DV = np.where(DV >= DV_t)[0]
+        idx = np.union1d(idx_FD, idx_DV)
+    else:
+        idx = idx_FD
+
+    # mask TRs 1 back and 1 forward from threshold
+    idx = np.union1d(np.union1d(idx-1, idx), idx+1)
+
+    # remove censor idx < 1 and > length of run -1 (always keep 1st and last tr)
+    idx = idx[idx > 1]
+    idx = idx[idx < n_trs-1]
+
+    # create output vector
+    output_data = np.ones(n_trs).astype(np.int)
+    output_data[idx] = 0
+
+    # record number of removed datapoints
+    n_retained = n_trs-len(idx)
+
+    # write .1D output
+    np.savetxt(output, output_data, fmt='%i')
+    print('TRs retained: {}, Run: {}'.format(str(n_retained), os.path.basename(func)))
+
+    # if we specify a report, write it out
+    if report != None:
+        f = open(report, 'wb')
+        f.write(str(n_retained))
+        f.close()
+
+if __name__ == "__main__":
+    main()
+
