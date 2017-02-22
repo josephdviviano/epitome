@@ -1,8 +1,0 @@
-#!/bin/bash
-
-DIR_DATA=${1}
-EXPT=${2}
-
-cat <<EOF
-epi-hcpexport ${DIR_DATA} ${EXPT}
-EOF
