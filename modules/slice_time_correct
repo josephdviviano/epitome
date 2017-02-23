@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# slice_time_correct input tr direction reverse interleave
+# slice_time_correct input tr direction ascending interleave
 #
 # input:      input prefix
 # tr:         acquisition TR [float]
