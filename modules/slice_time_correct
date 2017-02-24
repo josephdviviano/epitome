@@ -3,7 +3,7 @@
 # slice_time_correct input tr direction ascending interleave
 #
 # input:      input prefix
-# tr:         acquisition TR [float]
+# tr_sec:     acquisition TR in seconds [float]
 # direction:  acquisition direction [list: x y z]
 # ascending:  ascending slice acquisition order? [list: yes no]
 # interleave: acquisition was interleaved [list: yes no]
@@ -15,7 +15,7 @@
 
 echo '*** MODULE: slice_time_correct. Corrects slice timing. *****************'
 export input=${1}
-export tr=${2}
+export tr_sec=${2}
 export direction=${3}
 export ascending=${4}
 export interleave=${5}
@@ -61,7 +61,7 @@ for SESS in ${DIR_SESS}; do
                 slicetimer \
                     -i ${SESS}/${input}.${ID}.${NUM}.nii.gz \
                     -o ${SESS}/func_tshift.${ID}.${NUM}.nii.gz \
-                    -r ${tr} -d ${direction} ${ascending} ${interleave}
+                    -r ${tr_sec} -d ${direction} ${ascending} ${interleave}
             fi
         fi
     done
