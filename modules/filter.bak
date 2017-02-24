@@ -1,0 +1,494 @@
+#!/bin/bash
+#
+# filter input det diff lag sq std gm dv censor bandpass anaticor compcor mask
+#
+# input:    input prefix
+# det:      polynomial order to detrend each voxel against. [int]
+# diff:     fit first differences all other regressors defined, including squares [list: on off]
+# lag:      fit first lags of regressors from data [list: on off]
+# sq:       fit squares of regressors from data Does NOT take the squares of the derivatives. [list: on off]
+# std:      fit 6 head motion parameters, mean white matter, and mean csf [list: on off]
+# gm:       fit mean global signal from each voxel [list: on off]
+# dv:       fit mean draining vessel signal from each voxel [list: on off]
+# censor:   method for TR censoring (if calc_censor was run) [list: drop interpolate]
+# bandpass: bandpass filter data (0.01 < f < 0.1 Hz) as per standard [list: on off]
+# anaticor: fit 15mm local white matter signal from data [list: on off]
+# compcor:  if > 0, regress top n PCA regressors from the white matter and csf [int]
+# mask:     prefix for the EPI brain mask used [list: anat_EPI_mask ?]
+#
+# output: func_filtered
+# others: anat_wm anat_vent anat_gm anat_bstem anat_dv anat_EPI_mask_dia sq. dif. det. vent. vent_local15 vent_pc wm. wm_local15 wm_pc global_mean. func_tSNR
+# prereq: init_* motion_deskull fsrecon linreg_calc_* linreg_fs2epi_*
+#
+# Creates a series of regressors from fMRI data and a freesurfer segmentation:
+#
+# + white matter + eroded mask
+# + ventricles + eroded mask
+# + grey matter mask
+# + brain stem mask
+# + dialated whole-brain mask
+# + draining vessels mask
+#
+# All regressors are constrained within the supplied EPI mask (for partial acquisitions in particular). The regressors calculated depend on the method(s) used to filter the data:
+#
+# + std: standard resting state regressors [2]. 6 head motion paramaters, white matters, csf.
+# + gm: global mean regression. Often, but controversially, combined with 'std' above. Watch your anticorrelations!
+# + dv: An experimental draining vessel regressor c.o. Dr. W. Dale Stevens.
+# + diff: additionally regress the first derivative(s) of the selected regressors from the data.
+# + sq: additionally regress the squares of the computed regressors from the data. See [5] for more details.
+# + anaticor: 15mm local white matter regressors + 1 temporal lag. Tends to be conservative. Good at dealing with distance-dependnet motion artifacts, but less so at dealing with physiological noise [3]. NB: Currently does not interact with the DET, LAG, or SQ options. This will only produce the local WM regressor and the first lag.
+# + compcor: takes the first N principal components from the white matter and ventricle tissue masks and applies them as regressors. Believed by some to deal well with physiological noise (like global mean regression) without the spurious anticorrelations [4].
+#
+# This computes detrended nuisance time series, fits each run with a computed noise model, and subtracts the fit. Computes temporal SNR. This program always regresses the motion parameters \& their first lags, as well as physiological noise regressors generated my McRetroTS if they are available. The rest are optional.
+#
+# [1] Power JD, et al. 2012. Spurious but systematic correlations in functional connectivity MRI networks arise from subject motion. Neuroimage. 59(3).
+# [2] Van Dijk K, et al. 2010. Intrinsic Functional Connectivity As a Tool For Human Connectomics: Theory, Properties, and Optimization. Journal of Neurophysiology. 103(1).
+# [3] Jo HJ, et al. 2010. Mapping sources of correlation in resting state FMRI, with artifact detection and removal. Neuroimage. 52(2).
+# [4] Behzadi Y, et al. 2007. A component based noise correction method (CompCor) for BOLD and perfusion based fMRI. Neuroimage. 37(1).
+# [5] Satterthwaite TF, et al. 2013. An improved framework fro confound regression and filtering for control of motion artifact in the preprocessing of resting-state functional connectivity data. Neuroimage. 64(1).
+# [6] Hallquist MN, et al. 2013. The Nuisance of Nuisance Regression: Spectral Misspecification in a Common Approach to Resting-State fMRI Preprocessing Reintroduces Noise and Obscures Functional Connectivity. Neuroimage.
+
+echo '*** MODULE: filter. Applies regression models of noise sources. ********'
+export INPUT=${1}
+export POLORT=${2}
+export DIFF=${3}
+export LAG=${4}
+export SQ=${5}
+export STD=${6}
+export GM=${7}
+export DV=${8}
+export CENSOR=${9}
+export BANDPASS=${10}
+export ANATICOR=${11}
+export COMPCOR=${12}
+export MASK=${13}
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+
+    # eroded white matter mask
+    if [ ! -f ${SESS}/anat_wm_ero.nii.gz ]; then
+        3dcalc \
+            -a ${SESS}/anat_aparc_reg.nii.gz \
+            -expr "equals(a,2)  + \
+                   equals(a,7)  + \
+                   equals(a,41) + \
+                   equals(a,46) + \
+                   equals(a,251)+ \
+                   equals(a,252)+ \
+                   equals(a,253)+ \
+                   equals(a,254)+ \
+                   equals(a,255)" \
+            -prefix ${SESS}/anat_wm.nii.gz
+
+        3dcalc \
+            -a ${SESS}/anat_wm.nii.gz \
+            -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
+            -h ${SESS}/${MASK}.nii.gz \
+            -expr 'a*(1-amongst(0,b,c,d,e,f,g))*h' \
+            -prefix ${SESS}/anat_wm_ero.nii.gz
+    fi
+
+    # eroded ventricle mask
+    if [ ! -f ${SESS}/anat_vent_ero.nii.gz ]; then
+        3dcalc \
+            -a ${SESS}/anat_aparc_reg.nii.gz \
+            -expr 'equals(a,4) + equals(a,43)' \
+            -prefix ${SESS}/anat_vent.nii.gz
+
+        3dcalc \
+            -a ${SESS}/anat_aparc_reg.nii.gz \
+            -expr "equals(a,10) + \
+                   equals(a,11) + \
+                   equals(a,26) + \
+                   equals(a,49) + \
+                   equals(a,50) + \
+                   equals(a,58)" \
+            -prefix ${SESS}/anat_tmp_nonvent.nii.gz
+
+        3dcalc \
+            -a ${SESS}/anat_tmp_nonvent.nii.gz \
+            -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
+            -expr 'amongst(1,a,b,c,d,e,f,g)' \
+            -prefix ${SESS}/anat_tmp_nonvent_dia.nii.gz
+
+        3dcalc \
+            -a ${SESS}/anat_vent.nii.gz \
+            -b ${SESS}/anat_tmp_nonvent_dia.nii.gz \
+            -c ${SESS}/${MASK}.nii.gz \
+            -expr 'a-step(a*b)*c' \
+            -prefix ${SESS}/anat_vent_ero.nii.gz
+    fi
+
+    # grey matter mask
+    if [ ! -f ${SESS}/anat_gm.nii.gz ]; then
+        3dcalc \
+            -a ${SESS}/anat_aparc_reg.nii.gz \
+            -short \
+            -expr 'step(a-1000)*step(1036-a)+step(a-2000)*step(2036-a)' \
+            -prefix ${SESS}/anat_gm.nii.gz
+    fi
+
+    # dialated brain mask
+    if [ ! -f ${SESS}/anat_EPI_mask_dia.nii.gz ]; then
+        3dcalc \
+            -a ${SESS}/${MASK}.nii.gz \
+            -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
+            -expr 'amongst(1,a,b,c,d,e,f,g)' \
+            -prefix ${SESS}/anat_EPI_mask_dia.nii.gz
+    fi
+
+    # brainstem mask
+    if [ ! -f ${SESS}/anat_bstem.nii.gz ]; then
+        3dcalc \
+            -a ${SESS}/anat_aparc_reg.nii.gz \
+            -b ${SESS}/${MASK}.nii.gz \
+            -expr "equals(a,8)*b  + \
+                   equals(a,47)*b + \
+                   equals(a,16)*b + \
+                   equals(a,12)*b + \
+                   equals(a,13)*b + \
+                   equals(a,26)*b + \
+                   equals(a,51)*b + \
+                   equals(a,52)*b + \
+                   equals(a,17)*b + \
+                   equals(a,18)*b + \
+                   equals(a,53)*b + \
+                   equals(a,54)*b + \
+                   equals(a,58)*b + \
+                   equals(a,28)*b + \
+                   equals(a,60)*b" \
+            -prefix ${SESS}/anat_bstem.nii.gz
+    fi
+
+    # eroded draining vessel mask
+    if [ ! -f ${SESS}/anat_dv_ero.nii.gz ]; then
+        3dcalc \
+            -a ${SESS}/${MASK}.nii.gz \
+            -b ${SESS}/anat_gm.nii.gz \
+            -c ${SESS}/anat_wm.nii.gz \
+            -d ${SESS}/anat_vent.nii.gz \
+            -e ${SESS}/anat_tmp_nonvent.nii.gz \
+            -f ${SESS}/anat_bstem.nii.gz \
+            -expr '(a-b-c-d-e-f)' \
+            -prefix ${SESS}/anat_dv.nii.gz
+
+        3dcalc \
+            -a ${SESS}/anat_dv.nii.gz \
+            -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
+            -expr 'a*(1-amongst(0,b,c,d,e,f,g))' \
+            -prefix ${SESS}/anat_dv_ero.nii.gz
+    fi
+
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        if [ ! -f ${SESS}/func_filtered.${ID}.${NUM}.nii.gz ]; then
+
+            # compute mean, standard deviation
+            3dTstat \
+                -prefix ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
+                -mean ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
+
+            3dTstat \
+                -prefix ${SESS}/func_tmp_stdev.${ID}.${NUM}.nii.gz \
+                -stdev ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
+
+            # compute temporal SNR (pre anything)
+            3dcalc \
+                -a ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
+                -b ${SESS}/func_tmp_stdev.${ID}.${NUM}.nii.gz \
+                -expr 'a/b' \
+                -prefix ${SESS}/func_tSNR.${ID}.${NUM}.nii.gz
+
+            # input data detrend (before calculating regressors...)
+            3dDetrend \
+                -prefix ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
+                -polort ${POLORT} \
+                ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
+
+            # motion paramaters, detrend, lag, dif, sq
+            3dDetrend \
+                -prefix - -DAFNI_1D_TRANOUT=YES -polort ${POLORT} \
+                ${SESS}/PARAMS/motion.${ID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D
+
+            3dDetrend \
+                -prefix - -DAFNI_1D_TRANOUT=YES -polort ${POLORT} \
+                ${SESS}/PARAMS/lag.motion.${ID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D
+
+            3dDetrend \
+                -prefix - -DAFNI_1D_TRANOUT=YES -polort ${POLORT} \
+                ${SESS}/PARAMS/dif.motion.${ID}.${NUM}.1D\' > \
+                ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D
+
+            # squares of detrended head motion
+            1deval -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[0] -expr 'a^2' > ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[1] -expr 'a^2' > ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[2] -expr 'a^2' > ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[3] -expr 'a^2' > ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[4] -expr 'a^2' > ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D[5] -expr 'a^2' > ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D
+
+            # squares of detrended + lagged head motion
+            1deval -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[0] -expr 'a^2' > ${SESS}/PARAMS/sq.1.det.lag.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[1] -expr 'a^2' > ${SESS}/PARAMS/sq.2.det.lag.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[2] -expr 'a^2' > ${SESS}/PARAMS/sq.3.det.lag.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[3] -expr 'a^2' > ${SESS}/PARAMS/sq.4.det.lag.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[4] -expr 'a^2' > ${SESS}/PARAMS/sq.5.det.lag.motion.${ID}.${NUM}.1D
+            1deval -a ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D[5] -expr 'a^2' > ${SESS}/PARAMS/sq.6.det.lag.motion.${ID}.${NUM}.1D
+
+            # diff of detrended + squared head motion
+            1d_tool.py -infile ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.1.det.motion.${ID}.${NUM}.1D
+            1d_tool.py -infile ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.2.det.motion.${ID}.${NUM}.1D
+            1d_tool.py -infile ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.3.det.motion.${ID}.${NUM}.1D
+            1d_tool.py -infile ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.4.det.motion.${ID}.${NUM}.1D
+            1d_tool.py -infile ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.5.det.motion.${ID}.${NUM}.1D
+            1d_tool.py -infile ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.6.det.motion.${ID}.${NUM}.1D
+
+            # detrend physiological regressors, if they exist
+            if [ -f ${SESS}/PARAMS/phys.${ID}.${NUM}.1D ]; then
+                3dDetrend \
+                    -prefix - -DAFNI_1D_TRANOUT=YES -polort ${POLORT} \
+                    ${SESS}/PARAMS/phys.${ID}.${NUM}.1D\' > \
+                    ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D
+            fi
+
+            # initialize filter command
+            CMD="3dTproject -input ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz -prefix ${SESS}/func_det_filtered.${ID}.${NUM}.nii.gz -mask ${SESS}/${MASK}.nii.gz -polort 2 -quiet"
+
+            # add the physio regressors if they exist
+            if [ -f ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D ]; then
+                CMD="${CMD} -ort ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D"
+            fi
+
+            # mean white matter + csf regressor
+            if [ ${STD} = 'on' ]; then
+
+                # white matter mean
+                3dmaskave -q -mask ${SESS}/anat_wm.nii.gz ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > ${SESS}/PARAMS/wm.${ID}.${NUM}.1D
+                # white matter lag
+                1dcat ${SESS}/PARAMS/wm.${ID}.${NUM}.1D'{0}' > ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
+                1dcat ${SESS}/PARAMS/wm.${ID}.${NUM}.1D'{0..$}' >> ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D
+                # white matter 1st derivative (backwards differences)
+                1d_tool.py -infile ${SESS}/PARAMS/wm.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D
+                # white matter squared
+                1deval -a ${SESS}/PARAMS/wm.${ID}.${NUM}.1D -expr 'a^2' > ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D
+                # white matter lag squared
+                1deval -a ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D -expr 'a^2' > ${SESS}/PARAMS/sq.lag.wm.${ID}.${NUM}.1D
+                # white matter squared 1st derivative
+                1d_tool.py -infile ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.wm.${ID}.${NUM}.1D
+
+                # csf (calculate means, lags, squares, and derivatives)
+                3dmaskave -q -mask ${SESS}/anat_vent.nii.gz ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > ${SESS}/PARAMS/vent.${ID}.${NUM}.1D
+                1dcat ${SESS}/PARAMS/vent.${ID}.${NUM}.1D'{0}' > ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
+                1dcat ${SESS}/PARAMS/vent.${ID}.${NUM}.1D'{0..$}' >> ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D
+                1d_tool.py -infile ${SESS}/PARAMS/vent.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D
+                1deval -a ${SESS}/PARAMS/vent.${ID}.${NUM}.1D -expr 'a^2' > ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D
+                1deval -a ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D -expr 'a^2' > ${SESS}/PARAMS/sq.lag.vent.${ID}.${NUM}.1D
+                1d_tool.py -infile ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.vent.${ID}.${NUM}.1D
+
+                # add motion, csf, white matter regressors
+                CMD="${CMD} -ort ${SESS}/PARAMS/det.motion.${ID}.${NUM}.1D"
+                CMD="${CMD} -ort ${SESS}/PARAMS/vent.${ID}.${NUM}.1D"
+                CMD="${CMD} -ort ${SESS}/PARAMS/wm.${ID}.${NUM}.1D"
+
+                if [ ${SQ} = 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.1.det.motion.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.2.det.motion.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.3.det.motion.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.4.det.motion.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.5.det.motion.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.6.det.motion.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.vent.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.wm.${ID}.${NUM}.1D"
+
+                    if [ ${DIFF} = 'on' ]; then
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.1.det.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.2.det.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.3.det.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.4.det.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.5.det.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.6.det.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.vent.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.wm.${ID}.${NUM}.1D"
+                    fi
+                fi
+
+                if [ ${DIFF} = 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/det.dif.motion.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/dif.vent.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/dif.wm.${ID}.${NUM}.1D"
+                fi
+
+                # note the difference in the order of operations from the diff method,
+                # above. It isn't clear to me if there is a meaningful difference in the
+                # lag case. -- jdv may 2015
+                if [ ${LAG} == 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/det.lag.motion.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/lag.vent.${ID}.${NUM}.1D"
+                    CMD="${CMD} -ort ${SESS}/PARAMS/lag.wm.${ID}.${NUM}.1D"
+
+                    if [ ${SQ} = 'on' ]; then
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.1.det.lag.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.2.det.lag.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.3.det.lag.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.4.det.lag.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.5.det.lag.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.6.det.lag.motion.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.lag.vent.${ID}.${NUM}.1D"
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.lag.wm.${ID}.${NUM}.1D"
+                    fi
+                fi
+            fi
+
+            # global mean regression
+            if [ ${GM} = 'on' ]; then
+
+                # global mean (calculate means, lags, squares, and derivatives)
+                3dmaskave -mask ${SESS}/anat_EPI_mask.nii.gz -quiet ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz > ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D
+                1dcat ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0}' > ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
+                1dcat ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D'{0..$}' >> ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D
+                1d_tool.py -infile ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D
+                1deval -a ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D -expr 'a^2' > ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D
+                1deval -a ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D -expr 'a^2' > ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D
+                1d_tool.py -infile ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D
+
+                CMD="${CMD} -ort ${SESS}/PARAMS/global_mean.${ID}.${NUM}.1D"
+                if [ ${SQ} = 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.global_mean.${ID}.${NUM}.1D"
+                    if [ ${DIFF} = 'on' ]; then
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.global_mean.${ID}.${NUM}.1D"
+                    fi
+                fi
+
+                if [ ${DIFF} = 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/dif.global_mean.${ID}.${NUM}.1D"
+                fi
+
+                # note the difference in the order of operations from the diff method,
+                # above. It isn't clear to me if there is a meaningful difference in the
+                # lag case. -- jdv may 2015
+                if [ ${LAG} = 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/lag.global_mean.${ID}.${NUM}.1D"
+                    if [ ${SQ} = 'on' ]; then
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.lag.global_mean.${ID}.${NUM}.1D"
+                    fi
+                fi
+            fi
+
+            # regression of draining vessels
+            if [ ${DV} = 'on' ]; then
+
+                # draining vessel (calculate means, lags, squares, and derivatives)
+                3dmaskave -q -mask ${SESS}/anat_dv.nii.gz ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz > ${SESS}/PARAMS/dv.${ID}.${NUM}.1D
+                1dcat ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0}' > ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
+                1dcat ${SESS}/PARAMS/dv.${ID}.${NUM}.1D'{0..$}' >> ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D
+                1d_tool.py -infile ${SESS}/PARAMS/dv.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D
+                1deval -a ${SESS}/PARAMS/dv.${ID}.${NUM}.1D -expr 'a^2' > ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D
+                1deval -a ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D -expr 'a^2' > ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D
+                1d_tool.py -infile ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D -backward_diff -overwrite -write ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D
+
+                CMD="${CMD} ${SESS}/PARAMS/dv.${ID}.${NUM}.1D"
+                if [ ${SQ} = 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/sq.dv.${ID}.${NUM}.1D"
+                    if [ ${DIFF} = 'on' ]; then
+                        CMD="${CMD} -ort ${SESS}/PARAMS/dif.sq.dv.${ID}.${NUM}.1D"
+                    fi
+                fi
+
+                if [ "${DIFF}" = 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/dif.dv.${ID}.${NUM}.1D"
+                fi
+
+                # note the difference in the order of operations from the diff method,
+                # above. It isn't clear to me if there is a meaningful difference in the
+                # lag case. -- jdv may 2015
+                if [ ${LAG} = 'on' ]; then
+                    CMD="${CMD} -ort ${SESS}/PARAMS/lag.dv.${ID}.${NUM}.1D"
+                    if [ ${SQ} = 'on' ]; then
+                        CMD="${CMD} -ort ${SESS}/PARAMS/sq.lag.dv.${ID}.${NUM}.1D"
+                    fi
+                fi
+            fi
+
+            # local white matter regression
+            if [ ${ANATICOR} = 'on' ]; then
+
+                if [ ! -f ${SESS}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz ]; then
+                    3dLocalstat \
+                        -prefix ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz \
+                        -nbhd 'SPHERE(15)' \
+                        -stat mean \
+                        -mask ${SESS}/anat_wm.nii.gz \
+                        -use_nonmask ${SESS}/${INPUT}.${ID}.${NUM}.nii.gz
+
+                    3dTcat \
+                        -prefix ${SESS}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz \
+                        ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz'[0]' \
+                        ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz'[0..$]'
+                fi
+
+                CMD="${CMD} -dsort ${SESS}/PARAMS/wm_local15.${ID}.${NUM}.nii.gz"
+                CMD="${CMD} -dsort ${SESS}/PARAMS/lag.wm_local15.${ID}.${NUM}.nii.gz"
+            fi
+
+            if [ ${COMPCOR} -gt 0 ]; then
+
+                # aCompcor regressors for WM and ventricles
+                if [ ! -f ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D ]; then
+                    epi-genregress \
+                        ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
+                        ${SESS}/anat_vent.nii.gz \
+                        ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D \
+                        ${COMPCOR}
+                fi
+
+                if [ ! -f ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D ]; then
+                    epi-genregress \
+                        ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz \
+                        ${SESS}/anat_wm.nii.gz \
+                        ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D \
+                        ${COMPCOR}
+                fi
+
+                # https://www.youtube.com/watch?v=oavMtUWDBTM
+                CMD="${CMD} -ort ${SESS}/PARAMS/wm_pc.${ID}.${NUM}.1D"
+                CMD="${CMD} -ort ${SESS}/PARAMS/vent_pc.${ID}.${NUM}.1D"
+            fi
+
+            # add optional bandpass
+            if [ ${BANDPASS} = 'on' ]; then
+                CMD="${CMD} -passband 0.01 0.1"
+            fi
+
+            # if censor vector exists
+            if [ -f ${SESS}/PARAMS/censor.${ID}.${NUM}.1D ]; then
+                CMD="${CMD} -censor ${SESS}/PARAMS/censor.${ID}.${NUM}.1D"
+                if [ ${CENSOR} = 'drop' ]; then
+                    CMD="${CMD} -cenmode KILL"
+                elif [ ${CENSOR} = 'interp' ]; then
+                    CMD="${CMD} -cenmode NTRP"
+                fi
+            fi
+
+            # run the regression
+            ${CMD}
+
+            # add in mean
+            3dcalc \
+                -a ${SESS}/func_det_filtered.${ID}.${NUM}.nii.gz \
+                -b ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
+                -expr "a+b" \
+                -prefix ${SESS}/func_filtered.${ID}.${NUM}.nii.gz
+
+            # delete temporary files
+            rm ${SESS}/func_det_filtered.${ID}.${NUM}.nii.gz
+            rm ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz
+            rm ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz
+            rm ${SESS}/func_tmp_stdev.${ID}.${NUM}.nii.gz
+        fi
+    done
+done

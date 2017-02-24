@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# trscrub input headrad fd dv mode
+#
+# input:   input prefix
+# headrad: head radius (mm), default 50 [float]
+# fd:      framewise displacement threshold (mm/TR), default 0.5 [float]
+# dv:      DVARS threshold (%/TR), defaults 5 [float]
+# mode:    method for scrubbing high-motion TRs [list: drop interp]
+#
+# output: func_scrubbed
+# others: retained_TRs
+# prereq: motion_deskull calc_dvars
+#
+# This removes motion-corrupted TRs from fMRI scans and outputs modified versions for connectivity analysis (mostly).
+#
+# On mode selection: 'drop' removes TRs from output file, 'interp' replaces TRs with a linear interpolate between the TR before and after the removed region.
+#
+# The interp version is best used before lowpass filtering, and is the only reasonable option if you are analyzing some form of task data.
+
+echo '*** MODULE: trscrub. Removes TRs corrupted by motion. ******************'
+export input=${1}
+export headrad=${2}
+export fd=${3}
+export dv=${4}
+export mode=${5}
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        if [ ! -f ${SESS}/func_scrubbed.${ID}.${NUM}.nii.gz ]; then
+            epi-trscrub \
+                ${SESS}/${input}.${ID}.${NUM}.nii.gz \
+                ${SESS}/func_scrubbed.${ID}.${NUM}.nii.gz \
+                ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
+                --DVARS ${SESS}/PARAMS/DVARS.${ID}.${NUM}.1D \
+                --report ${SESS}/PARAMS/retained_TRs.${ID}.${NUM}.1D \
+                --head ${headrad} \
+                --FD ${fd} \
+                --DV ${dv} \
+                --mode ${mode}
+        fi
+    done
+done
