@@ -310,7 +310,7 @@ for SESS in ${DIR_SESS}; do
                         CMD="${CMD} ${SESS}/PARAMS/dif.sq.6.det.motion.${ID}.${NUM}.1D"
                         CMD="${CMD} ${SESS}/PARAMS/dif.sq.vent.${ID}.${NUM}.1D"
                         CMD="${CMD} ${SESS}/PARAMS/dif.sq.wm.${ID}.${NUM}.1D"
-                    if
+                    fi
                 fi
 
                 if [ ${DIFF} = 'diff' ]; then
