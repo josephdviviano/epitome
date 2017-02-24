@@ -15,6 +15,7 @@ echo '*** MODULE: nonlinreg_epi2mni_fsl. Warps EPI data to MNI space. ********'
 export input=${1}
 export dims=${2}
 
+FSLDIR=$(dirname $(dirname $(which fsl)))
 DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
 for SESS in ${DIR_SESS}; do
     SESS=$(basename ${SESS})

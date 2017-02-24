@@ -10,6 +10,11 @@
 
 echo '*** MODULE: nonlinreg_calc_fsl. Calcs MNI warp from linreg outputs. ****'
 
+# copy template from FSL folder
+FSLDIR=$(dirname $(dirname $(which fsl)))
+cp ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
+cp ${FSLDIR}/data/standard/MNI152_T1_2mm_brain_mask_dil.nii.gz ${DIR_DATA}/${DIR_EXPT}/anat_MNI_mask.nii.gz
+
 DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
 for SESS in ${DIR_SESS}; do
     SESS=$(basename ${SESS})

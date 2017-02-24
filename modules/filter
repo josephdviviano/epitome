@@ -481,7 +481,7 @@ for SESS in ${DIR_SESS}; do
             3dcalc \
                 -a ${SESS}/func_det_filtered.${ID}.${NUM}.nii.gz \
                 -b ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
-                -expr "a+b"
+                -expr "a+b" \
                 -prefix ${SESS}/func_filtered.${ID}.${NUM}.nii.gz
 
             # delete temporary files
