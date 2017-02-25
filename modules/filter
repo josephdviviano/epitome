@@ -253,7 +253,7 @@ for SESS in ${DIR_SESS}; do
             fi
 
             # initialize filter command
-            CMD="3dTfitter -prefix ${SESS}/func_noise_betas.${ID}.${NUM}.nii.gz -fitts ${SESS}/func_noise.${ID}.${NUM}.nii.gz -polort 0 -quiet -RHS ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz -LHS "
+            CMD="3dTfitter -prefix ${SESS}/func_noise_betas.${ID}.${NUM}.nii.gz -fitts ${SESS}/func_noise.${ID}.${NUM}.nii.gz -polort 0 -RHS ${SESS}/func_tmp_det.${ID}.${NUM}.nii.gz -LHS "
 
             # add the physio regressors if they exist
             if [ -f ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D ]; then
