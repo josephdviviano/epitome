@@ -23,6 +23,10 @@
 export AFNI_NIFTI_TYPE_WARN='NO'
 export AFNI_DECONFLICT=OVERWRITE
 
+# variable used to keep track of the current 'space' of the functional data
+# space = 'native', 'T1', 'MNI'
+export space='native'
+
 echo '*** MODULE: init_basic. Reorients, phys regression, removes init TRs. ***'
 export data_quality=${1}
 export del=${2}

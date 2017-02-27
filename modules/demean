@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# demean input
+#
+# input: input prefix
+#
+# output: func_demean
+# prereq: init_*
+#
+# Detrends data with specified polynomial, retaining the mean.
+
+echo '*** MODULE: demean. Removes the mean of each voxel.'
+export input=${1}
+
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        if [ ! -f ${SESS}/func_demean.${ID}.${NUM}.nii.gz ]; then
+            3dTstat \
+                -prefix ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
+                -mean ${SESS}/${input}.${ID}.${NUM}.nii.gz
+
+            3dcalc \
+                -prefix ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                -a ${SESS}/${input}.${ID}.${NUM}.nii.gz \
+                -b ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
+                -expr 'a-b'
+
+            rm ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz
+        fi
+    done
+done

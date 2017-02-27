@@ -35,13 +35,7 @@ for SESS in ${DIR_SESS}; do
             3dvolreg \
                 -prefix ${SESS}/func_motion.${ID}.${NUM}.nii.gz \
                 -base ${SESS}/${input}.${ID}'.01.nii.gz[8]' \
-                -twopass \
-                -twoblur 3 \
-                -twodup \
-                -coarse 10 3 \
-                -Fourier \
-                -zpad 10 \
-                -float \
+                -twopass -twoblur 3 -twodup -coarse 10 3 -Fourier -zpad 10 -float \
                 -1Dfile ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
                 -1Dmatrix_save ${SESS}/PARAMS/3dvolreg.${ID}.${NUM}.aff12.1D \
                 ${SESS}/${input}.${ID}.${NUM}.nii.gz
@@ -81,12 +75,7 @@ for SESS in ${DIR_SESS}; do
                 3dvolreg \
                     -prefix ${SESS}/anat_EPI_initTR_reg.nii.gz \
                     -base ${SESS}/${input}.${ID}.'01.nii.gz[8]' \
-                    -twopass \
-                    -twoblur 3 \
-                    -twodup \
-                    -Fourier \
-                    -zpad 2 \
-                    -float \
+                    -twopass -twoblur 3 -twodup -Fourier -zpad 2 -float \
                     ${SESS}/anat_EPI_initTR_ob.nii.gz
             fi
         fi
@@ -194,3 +183,7 @@ for SESS in ${DIR_SESS}; do
         fi
     done
 done
+
+# set mask to native space
+mask=anat_EPI_mask.nii.gz
+

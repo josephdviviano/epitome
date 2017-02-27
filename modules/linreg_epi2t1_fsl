@@ -41,9 +41,16 @@ for SESS in ${DIR_SESS}; do
                 -ref ${DIR}/anat_EPI_reg_target.nii.gz \
                 -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
                 -out ${DIR}/func_T1.${ID}.${NUM}.nii.gz \
-                -interp sinc \
-                -sincwidth 7 \
-                -sincwindow blackman
+                -interp sinc -sincwidth 7 -sincwindow blackman
+            # if func noise exists, bring it along
+            if [ -f ${DIR}/func_noise.${ID}.${NUM}.nii.gz ]; then
+                flirt \
+                    -in ${DIR}/func_noise.${ID}.${NUM}.nii.gz \
+                    -ref ${DIR}/anat_EPI_reg_target.nii.gz \
+                    -applyxfm -init ${DIR}/mat_EPI_to_T1.mat \
+                    -out ${DIR}/func_noise_T1.${ID}.${NUM}.nii.gz \
+                    -interp sinc -sincwidth 7 -sincwindow blackman
+            fi
         fi
 
     done
@@ -58,3 +65,6 @@ for SESS in ${DIR_SESS}; do
           -out ${DIR}/anat_EPI_mask_T1.nii.gz
     fi
 done
+
+space='T1'
+mask=anat_EPI_mask_T1.nii.gz

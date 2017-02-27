@@ -1,9 +1,8 @@
 #!/bin/bash
 #
-# ica input mask
+# ica input
 #
 # input: input prefix
-# mask:   epi brain mask [list: anat_EPI_mask anat_EPI_mask_MNI-lin anat_EPI_mask_MNI-nonlin anat_EPI_mask_T1 ?]
 #
 # output:
 # prereq: init_* motion_deskull
@@ -12,20 +11,20 @@
 
 echo '*** MODULE: ica. Runs MELODIC on each run. *****************************'
 export input=${1}
-export mask=${2}
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
+
     DIR_RUNS=`ls -d -- ${SESS}/RUN*`
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        # run MELODIC, output some images of components (saves space)
+        # run MELODIC, saves everything
         if [ ! -d ${SESS}/MELODIC.${ID}.${NUM}/ ]; then
             melodic \
                 -i ${SESS}/${input}.${ID}.${NUM}.nii.gz \
                 -o ${SESS}/MELODIC.${ID}.${NUM} \
-                --mask=${SESS}/${mask}.nii.gz \
+                --mask=${mask} \
                 --dimest=lap \
                 --report \
                 --Oall \

@@ -15,40 +15,26 @@ if [ -f ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI_group.nii.gz ]; then
     rm ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI_group.nii.gz
 fi
 
-# try finding all nonlinear masks and count them
+# try finding nonlinear masks. if they exist, use those, otherwise use linear
 inputs=$(find ${DIR_DATA}/${DIR_EXPT} -name anat_EPI_mask_MNI-nonlin.nii.gz)
 nfiles=$(echo ${inputs} | wc -l)
 if [ ! ${nfiles} -eq 0 ]; then
-    3dMean \
-        -datum short \
-        -prefix ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
-        ${inputs}
-
-    3dcalc \
-        -a ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
-        -expr 'step(a-0.999)' \
-        -prefix ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI_group.nii.gz
-
-    rm ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz
-
-# if we don't find any nonlinear masks, try linear
+    mask=anat_EPI_mask_MNI-lin.nii.gz
 else
-
-    # find all of the linear registered masks, and count them
-    inputs=$(find ${DIR_DATA}/${DIR_EXPT} -name anat_EPI_mask_MNI-lin.nii.gz)
-    nfiles=$(echo ${inputs} | wc -l)
-    if [ ! ${nfiles} -eq 0 ]; then
-        3dMean \
-            -datum short \
-            -prefix ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
-            ${inputs}
-
-        3dcalc \
-            -a ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
-            -expr 'step(a-0.999)' \
-            -prefix ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI_group.nii.gz
-
-        rm ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz
-    fi
+    mask=anat_EPI_mask_MNI-nonlin.nii.gz
 fi
+
+# now collect the inputs, take the mean, and threshold at 0.999 (i.e., 100%)
+inputs=$(find ${DIR_DATA}/${DIR_EXPT} -name ${mask})
+3dMean \
+    -datum short \
+    -prefix ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
+    ${inputs}
+
+3dcalc \
+    -a ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz \
+    -expr 'step(a-0.999)' \
+    -prefix ${DIR_DATA}/${DIR_EXPT}/anat_EPI_mask_MNI_group.nii.gz
+
+rm ${DIR_DATA}/${DIR_EXPT}/tmp_mean.nii.gz
 

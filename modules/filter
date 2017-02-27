@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# filter input det diff lag sq std gm dv anaticor compcor mask
+# filter input det diff lag sq std gm dv anaticor compcor
 #
 # input:    input prefix
 # det:      polynomial order to detrend each voxel against. [int]
@@ -12,7 +12,6 @@
 # dv:       fit mean draining vessel signal from each voxel [list: dv off]
 # anaticor: fit 15mm local white matter signal from data [list: anaticor off]
 # compcor:  if > 0, regress top n PCA regressors from the white matter and csf [int]
-# mask:     prefix for the EPI brain mask used [list: anat_EPI_mask ?]
 #
 # output: func_filtered
 # others: anat_wm anat_vent anat_gm anat_bstem anat_dv anat_EPI_mask_dia sq. dif. det. vent. vent_local15 vent_pc wm. wm_local15 wm_pc global_mean. func_tSNR
@@ -57,7 +56,6 @@ export GM=${7}
 export DV=${8}
 export ANATICOR=${9}
 export COMPCOR=${10}
-export MASK=${11}
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -80,7 +78,7 @@ for SESS in ${DIR_SESS}; do
         3dcalc \
             -a ${SESS}/anat_wm.nii.gz \
             -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
-            -h ${SESS}/${MASK}.nii.gz \
+            -h ${SESS}/${mask} \
             -expr 'a*(1-amongst(0,b,c,d,e,f,g))*h' \
             -prefix ${SESS}/anat_wm_ero.nii.gz
     fi
@@ -111,7 +109,7 @@ for SESS in ${DIR_SESS}; do
         3dcalc \
             -a ${SESS}/anat_vent.nii.gz \
             -b ${SESS}/anat_tmp_nonvent_dia.nii.gz \
-            -c ${SESS}/${MASK}.nii.gz \
+            -c ${SESS}/${mask} \
             -expr 'a-step(a*b)*c' \
             -prefix ${SESS}/anat_vent_ero.nii.gz
     fi
@@ -128,7 +126,7 @@ for SESS in ${DIR_SESS}; do
     # dialated brain mask
     if [ ! -f ${SESS}/anat_EPI_mask_dia.nii.gz ]; then
         3dcalc \
-            -a ${SESS}/${MASK}.nii.gz \
+            -a ${SESS}/${mask} \
             -b a+i -c a-i -d a+j -e a-j -f a+k -g a-k \
             -expr 'amongst(1,a,b,c,d,e,f,g)' \
             -prefix ${SESS}/anat_EPI_mask_dia.nii.gz
@@ -138,7 +136,7 @@ for SESS in ${DIR_SESS}; do
     if [ ! -f ${SESS}/anat_bstem.nii.gz ]; then
         3dcalc \
             -a ${SESS}/anat_aparc_reg.nii.gz \
-            -b ${SESS}/${MASK}.nii.gz \
+            -b ${SESS}/${mask} \
             -expr "equals(a,8)*b  + \
                    equals(a,47)*b + \
                    equals(a,16)*b + \
@@ -160,7 +158,7 @@ for SESS in ${DIR_SESS}; do
     # eroded draining vessel mask
     if [ ! -f ${SESS}/anat_dv_ero.nii.gz ]; then
         3dcalc \
-            -a ${SESS}/${MASK}.nii.gz \
+            -a ${SESS}/${mask} \
             -b ${SESS}/anat_gm.nii.gz \
             -c ${SESS}/anat_wm.nii.gz \
             -d ${SESS}/anat_vent.nii.gz \

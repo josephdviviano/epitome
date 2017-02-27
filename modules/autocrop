@@ -1,9 +1,8 @@
 #!/bin/bash
 #
-# autocrop input mask
+# autocrop input
 #
 # input: input prefix
-# mask:  epi brain mask [list: anat_EPI_mask anat_EPI_mask_MNI-lin anat_EPI_mask_MNI-nonlin anat_EPI_mask_T1 ?]
 #
 # output: func_box
 # prereq: init_*
@@ -12,7 +11,6 @@
 
 echo '*** MODULE: autocrop. Removes empty areas on a per session basis. ******'
 input=${1}
-mask=${2}
 
 # loop through sessions
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
@@ -46,7 +44,7 @@ for SESS in ${DIR_SESS}; do
         3dresample \
             -prefix ${SESS}/anat_EPI_mask_box.nii.gz \
             -master ${SESS}/func_box.${ID}.01.nii.gz \
-            -inset ${SESS}/${mask}.nii.gz
+            -inset ${SESS}/${mask}
     fi
 done
 

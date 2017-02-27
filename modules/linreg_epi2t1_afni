@@ -28,9 +28,17 @@ for SESS in ${DIR_SESS}; do
                 -input ${SESS}/${input}.${ID}.${NUM}.nii.gz \
                 -1Dmatrix_apply ${SESS}/mat_EPI_to_T1.aff12.1D \
                 -master ${SESS}/reg_EPI_to_T1.nii.gz \
-                -float quiet \
-                -final wsinc5 \
-                -mast_dxyz ${dims} ${dims} ${dims}
+                -float -quiet -final wsinc5 -mast_dxyz ${dims} ${dims} ${dims}
+
+            # if func_noise exists, bring it along
+            if [ -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
+                3dAllineate \
+                    -prefix ${SESS}/func_noise_T1.${ID}.${NUM}.nii.gz \
+                    -input ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
+                    -1Dmatrix_apply ${SESS}/mat_EPI_to_T1.aff12.1D \
+                    -master ${SESS}/reg_EPI_to_T1.nii.gz \
+                    -float -quiet -final wsinc5 -mast_dxyz ${dims} ${dims} ${dims}
+            fi
         fi
     done
 
@@ -46,3 +54,6 @@ for SESS in ${DIR_SESS}; do
             -mast_dxyz ${dims} ${dims} ${dims}
     fi
 done
+
+space='T1'
+mask=anat_EPI_mask_T1.nii.gz

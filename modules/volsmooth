@@ -1,9 +1,8 @@
 #!/bin/bash
 #
-# volsmooth input mask fwhm mode
+# volsmooth input fwhm mode
 #
 # input: input prefix
-# mask:  epi brain mask OR epi space mask delineating multiple brain regions [list: anat_EPI_mask anat_EPI_mask_MNI-lin anat_EPI_mask_MNI-nonlin anat_EPI_mask_T1 ?]
 # fwhm:  smoothing kernel full width half maximum (mm) [float]
 # mode:  smoothing method [list: normal multimask]
 #
@@ -18,9 +17,8 @@
 
 echo '*** MODULE: volsmooth. Spatially smooths volume data. ******************'
 export input=${1}
-export mask=${2}
-export fwhm=${3}
-export mode=${4}
+export fwhm=${2}
+export mode=${3}
 
 DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
 for SESS in ${DIR_SESS}; do
@@ -38,7 +36,7 @@ for SESS in ${DIR_SESS}; do
             -prefix ${SESS}/anat_tmp_smoothmask.nii.gz \
             -master ${SESS}/${input}.${ID}.01.nii.gz \
             -rmode NN \
-            -inset ${SESS}/${mask}.nii.gz
+            -inset ${SESS}/${mask}
 
         # smooth to specified fwhm
         if [ ! -f ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz ]; then
@@ -47,14 +45,44 @@ for SESS in ${DIR_SESS}; do
             if [ ${mode} == 'normal' ]; then
                 # If already run filter, use noise model from it as blurmaster
                 if [ -f ${SESS}/func_noise.${ID}.${NUM}.nii.gz ]; then
-                    echo 'MSG: func_noise found. ensure that the filter module was run in the same space as volsmooth, or this command will fail and complain about grid spacing of the BLURMASTER!'
-                    3dBlurToFWHM \
-                        -quiet \
-                        -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
-                        -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
-                        -FWHM ${fwhm} \
-                        -blurmaster ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
-                        -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                    if [ ${space} == 'native' ]; then
+                        3dBlurToFWHM \
+                            -quiet \
+                            -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                            -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
+                            -FWHM ${fwhm} \
+                            -blurmaster ${SESS}/func_noise.${ID}.${NUM}.nii.gz \
+                            -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                    elif [ ${space} == 'T1' ]; then
+                        3dBlurToFWHM \
+                            -quiet \
+                            -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                            -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
+                            -FWHM ${fwhm} \
+                            -blurmaster ${SESS}/func_noise_T1.${ID}.${NUM}.nii.gz \
+                            -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                    elif [ ${space} == 'MNI' ]; then
+                        if [ -f ${SESS}/func_noise_MNI-nonlin.${ID}.${NUM}.nii.gz ]; then
+                            # nonlinear MNI space
+                            3dBlurToFWHM \
+                                -quiet \
+                                -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                                -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
+                                -FWHM ${fwhm} \
+                                -blurmaster ${SESS}/func_noise_MNI-nonlin.${ID}.${NUM}.nii.gz \
+                                -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                        else
+                            # linear MNI space
+                            3dBlurToFWHM \
+                                -quiet \
+                                -prefix ${SESS}/func_volsmooth.${ID}.${NUM}.nii.gz \
+                                -mask ${SESS}/anat_tmp_smoothmask.nii.gz \
+                                -FWHM ${fwhm} \
+                                -blurmaster ${SESS}/func_noise_MNI-lin.${ID}.${NUM}.nii.gz \
+                                -input ${SESS}/${input}.${ID}.${NUM}.nii.gz
+                        fi
+                    fi
+                # haven't run filter, so we just use the data itself as the blurmaster
                 else
                     3dBlurToFWHM \
                         -quiet \

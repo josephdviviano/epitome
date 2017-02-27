@@ -43,6 +43,16 @@ for SESS in ${DIR_SESS}; do
                 --premat=${DIR}/mat_EPI_to_TAL.mat \
                 --interp=spline \
                 --out=${DIR}/func_MNI-nonlin.${ID}.${NUM}.nii.gz
+            # if func noise exists, bring it along
+            if [ -f ${DIR}/func_noise.${ID}.${NUM}.nii.gz ]; then
+                applywarp \
+                    --ref=${DIR}/anat_EPI_reg_target.nii.gz \
+                    --in=${DIR}/func_noise.${ID}.${NUM}.nii.gz \
+                    --warp=${DIR}/reg_nlin_TAL_WARP.nii.gz \
+                    --premat=${DIR}/mat_EPI_to_TAL.mat \
+                    --interp=spline \
+                    --out=${DIR}/func_noise_MNI-nonlin.${ID}.${NUM}.nii.gz
+            fi
         fi
     done
 
@@ -67,3 +77,6 @@ for SESS in ${DIR_SESS}; do
             --out=${DIR}/anat_EPI_mask_MNI-nonlin.nii.gz
     fi
 done
+
+space='MNI'
+mask=anat_EPI_mask_MNI-nonlin.nii.gz
