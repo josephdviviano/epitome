@@ -41,7 +41,7 @@ else
 fi
 
 # loop through sessions
-DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
 for SESS in ${DIR_SESS}; do
 
     # loop through runs

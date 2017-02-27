@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# vol2hcp input fwhm_hcp
+#
+# input:    input_prefix
+# fwhm_hcp: surface smoothing kernel in mm [float]
+#
+# output:
+#
+# prereq: init_* fsrecon motion_deskull
+#
+# Uses ciftify to A) project a freesurfer subject into HCP format, and B) project the functional data input to this same format. The remainder of epitome is incompatible with this transformation, so this is considered a terminal step in the pipeline.
+
+echo '*** MODULE: vol2hcp. Generates HCP folder with projected functional data.'
+export input=${1}
+export fwhm_hcp=${2}
+for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/); do
+
+    # this is the subject name in the freesurfer ${SUBJECTS_DIR} directory
+    sessname=$(basename ${SESS})
+    subjid="${DIR_EXPT}_${SUB}_${sessname}"
+    if [ ! -d ${HCP_DATA}/${subjid} ]; then
+        fs2hcp --FSpath=${SUBJECTS_DIR} --HCPpath=${HCP_DATA} --subject ${subjid}
+    fi
+done
+
+# loop through sessions
+DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
+for SESS in ${DIR_SESS}; do
+
+    sessname=$(basename ${SESS})
+    subjid="${DIR_EXPT}_${SUB}_${sessname}"
+
+    # loop through runs
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        func2hcp.py \
+            --FLIRT-template ${SESS}/anat_EPI_brain.nii.gz \
+            ${SESS}/${input}.${ID}.${NUM}.nii.gz \
+            ${subjid} \
+            ${DATA_TYPE}_${NUM} \
+            ${fwhm_hcp}
+    done
+done
+
