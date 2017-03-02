@@ -21,7 +21,7 @@ for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/); do
     sessname=$(basename ${SESS})
     subjid="${DIR_EXPT}_${SUB}_${sessname}"
     if [ ! -d ${HCP_DATA}/${subjid} ]; then
-        fs2hcp --FSpath=${SUBJECTS_DIR} --HCPpath=${HCP_DATA} --subject ${subjid}
+        fs2hcp --FSpath=${SUBJECTS_DIR} --HCPpath=${HCP_DATA} --subject=${subjid}
     fi
 done
 
