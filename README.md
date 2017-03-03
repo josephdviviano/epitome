@@ -4,12 +4,10 @@ epitome is a collection of scriptuit modules for pre-processing MRI data, as wel
 
 These tools will be of interest to researchers who want to prototype new analysis strategies in a confirgurable environment with little up-front cost.
 
-Written by Joseph D. Viviano and Erin W Dickie, 2014-16.
+Written by Joseph D. Viviano 2014-17.
 
 > As long as our brain is a mystery, the universe, the reflection of the structure of the brain will also be a mystery.
 > -- Santiago Ramón y Cajal
-
-*Current under active development at the TIGRLab (CAMH).*
 
 **Shortcuts:**
 
@@ -18,8 +16,6 @@ Written by Joseph D. Viviano and Erin W Dickie, 2014-16.
 + [Dependencies](#dependencies)
 + [Bundled Files](#bundled-files)
 + [Overview](#overview)
-+ [Usage](#usage)
-+ [Modules](#modules)
 + [Workflows](#workflows)
 + [Writing Modules](#writing-modules)
 
@@ -32,21 +28,18 @@ epitome does not have any direct dependencies, but the scripts it generates rely
 Quickstart:
 
 + `git clone` this repository to a directory of your choosing.
-+ Create an MRI data directory somewhere.
-+ Add some MRI data to your data directory.
-+ Add epitome/bin to your PATH.
-+ Add epitome to your PYTHONPATH.
-+ Set `EPITOME_DATA` to point to your MRI data folder.
-+ Set `EPITOME_CLONE` to point to a directoy that will contain copies of epitome.
++ Set `SCRIPTIT_DATA` to point to an MRI data directory.
++ Set `SCRIPTIT_MODULES` to point to `epitome/modules`.
++ Set `PATH` to point to `epitome/bin`.
++ Set `PYTHONPATH` to poing to `epitome`.
 + Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
-+ Check your work using `epitome check`.
-+ Create an experiment and some subjects using `epi-folder`.
++ Set `HCP_DATA` to point to a directory that will hold data in the HCP folder.
++ Check your work using `scriptit check`.
++ Create an experiment and some subjects using `sit-folder`.
 + Put some NIFTI data into these subject's RUN folders.
-+ Check your work using `epitome verify <experiment>`
-+ Generate some pre-processing scripts using `epitome run`.
-
-If you want to run use Human Connectome Project (HCP) Tools, there are some additional steps:
-+ Set `HCP_DATA` to point to a directory that will hold data in the HCP folder structure
++ Check your work using `scriptit verify <experiment>`
++ Generate a pre-processing pipeline using `scriptit generate`.
++ Render this pipeline to a BASH script using `scriptit render`.
 
 Currently, epitome requires the user to have installed and configured the following packages to be in their path:
 
@@ -62,12 +55,12 @@ Currently, epitome requires the user to have installed and configured the follow
 
 Optional:
 
-+ [Grid Engine: epi-queue](http://gridscheduler.sourceforge.net/) or [PBS](http://www.adaptivecomputing.com/products/open-source/torque/)
 + [FSL FIX 1.61: ica_fix](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FIX)
 + [Bioread 0.9.3: epi-physio](https://pypi.python.org/pypi/bioread/0.9.3)
 + [gradunwarp: unwarp](https://github.com/Washington-University/gradunwarp)
-+ [Connectome Workbench](http://www.humanconnectome.org/software/connectome-workbench.html) if running in "HCP mode"
-+ [HCP Pipeline Scripts and Atlases](http://www.humanconnectome.org/documentation/HCP-pipelines/index.html) if running in "HCP mode"
++ [Connectome Workbench](http://www.humanconnectome.org/software/connectome-workbench.html)
++ [HCP Pipeline Scripts and Atlases](http://www.humanconnectome.org/documentation/HCP-pipelines/index.html)
++ [Ciftify](https://github.com/edickie/ciftify)
 
 Introduction
 ------------
@@ -142,74 +135,6 @@ These session folders are currently used to match epis with the T1 taken on the 
 **RUN**
 
 Each `RUN` folder should contain one and only one .nii or .nii.gz formatted file. Appropriate companion files should also be entered here: physiological noise recordings (extension .PHYS, and/or custom slice timing files (extension .1D). If more than one NIFTI file is in this folder, the pipeline will fail. Any other files kept in this folder will remain untouched, so this is a fine place to keep run-specific notes.
-
-Usage
------
-epitome contains a set of helper subroutines and two main functions: `run' and `clean'. Typing epitome into your command line after installation should show each function and a brief description of each, so I won't reiterate that here. I will mention that `epitome check <experiment>` allows you to check the total number of raw NIFTIs in the `RUN` folders of each image modality. This allows you to quickly find empty `RUN` folders, and ensure you have properly imported all of your data.
-
-**epitome run**
-
-This walks you through the construction of a pipeline for a single image modality within a single experiment. Every run of epitome begins with a run of Freesurfer on all T1s, and `init_epi`, which does the most basic kinds of MRI pre-processing. Following that, you are free to chain together modules as you see fit.
-
-Each pipeline is generated from a local copy of the epitome repo in the `EPITOME_CLONE` directory (if undefined, this will be `~/epitome`). This is to prevent software updates from interfering with any ongoing project. This also means you can make local hacks to a copy of the pipeline and not disturb your other projects, or other users. Ideally, some of these hacks will end up being integrated back into the main branch of epitome. Before each run of the pipeline, you will be required to pick between an old branch of the pipeline (so try to name them reasonably), or `***NEW***`, which will work from a copy of the master epitome repo.
-
-IMPORTANT for cluster users: the `EPITOME_CLONE` folder should be available to every node of the queue that will be used to process your data, otherwise certian calls made by the `cmd` scripts will fail.
-
-In order to retain the modular and easily-customized structure of epitome, this program allows you to shoot yourself in the foot. In fact, if you aren't clear on what to do, you are more likely to make a malformed pipeline than you are to making a good one. Therefore, I recommend reading the Pipeline section of this manual at least once, and perhaps skimming the Presets section following, to get a sense of reasonable usage.
-
-The pipeline will allow you to chain together various modules in order until you give it the stop command, when it will switch over to asking you to submit a set of desired QC outputs. Internally, this program is simply looking through the `epitome/modules/qc` directory instead of `epitome/modules/pre`. These QC outputs will only properly work once all of your subjects are pre-processed, as they output single PDFs detailing some feature of the entire experiment.
-
-Finally, a few outputs will be deposited in your experiment directory: a `master` script, a `proclist` script, and a set of `cmd` scripts. A copy of all the current modules at the time of running will be deposited in an epitome directory in your home folder. The master script generates everything else from these copied modules, and can be edited by-hand to produce new pipelines. In fact, those who know what they are doing can generate new pipelines directly from an old master script, instead of interacting with the command line interface again. The cmd scripts are the actual set of commands run on each participant. These are essentially the module script files concatenated in the way defined by the user with the appropriate variables filled in. These files are meant to be well-commented, and should be easily edited by-hand for those adventurous types who would like to tweak various settings, try new methods, or debug beguiling problems, on a subject-wise basis. Alternatively, the modules in your home folder can be edited, the master script re-run, and the changes will be applied to every subject's cmd script. The proclist is simply a set of calls to these various scripts in order. It can be called directly, to run the subjects serially, or submitted to a batch queuing system to be analyzed in a cluster environment.
-
-epitome scripts are written to never re-do done work. Therefore, to replace a bad set of outputs with good ones, one must first delete the bad outputs. This can be done by hand, or via a set of helper cleanup scripts, detailed below.
-
-**epitome clean**
-
-Produces scripts for deleting files from subject's `SESS` folders. Generally, it is good practice to inspect the outputs of epitome first, and if problems are identified, to work backwards through the pipeline until the problem arises to determine the origin of the issue. After the outputs have been vetted, use these cleanup scripts to remove unnessicary files.
-
-**epitome help**
-
-Prints the help for the selected module (stored as markdown files in `doc/`).
-
-**epi-folder**
-
-This simple tool will help you generate folders properly-formatted for epitome. It is run on a per-subject basis, but a clever user could manually duplicate a single folder structure for as many participants as needed. These folders will automatically be generated in the designated working directory.
-
-**epi-physio**
-
-epitome will automatically regress physiological noise out of your data, if you place it (appropriately named) in each RUN folder. The BioPak system outputs a single giant set of physiological data for the entirety of an MRI session. This program will take in this single file and split it into a set of heart rate and respiration time series for each run. These output files are placed in your current working directory and will need to be sorted manually.
-
-**epi-queue**
-
-epitome eventually generates a `proclist`, a set of commands that must be executed in order to generate the desired outputs. This proclist can be run manually, if desired, but can also be submitted to the sun-grid queuing system by using epi-queue. This is generally preferred, as multiple users attempting to run proclists simultaneously might overload the system.
-
-**everything else**
-
-For the usage of all other epitome command-line tools, run the appropriate program with the `--help` flag (e.g., `epi-fft --help`).
-
-
-Modules
--------
-Modules can be easily chained together manually, or by using the command-line interface included with the pipeline. New modules are simply bash scripts which call various programs, including FSL, Freesurfer, AFNI, and custom python program. Any script found in the modules directories will be added to the command line interface automatically, but will not work properly unless a matching python wrappper function is added to `epitome/commands`.
-
-**freesurfer**
-
-Right now, freesurfer's `recon-all` is run on every participant before further processing. This is to produce surface files that can be used for cortical smoothing / data visualization, and the automatic generation of tissue masks which can be used for the generation of nuisance regressors.
-
-**hcp**
-After running, freesurfer's `recon-all` on every participant. The hcpexport module will convert the outputs of freesurfer into a the nifti (for volume) and gifti (for surface) files organized into the folder structure of the Human Connectome Project. This directory structure is useful if using later hcp tools analyze your functional data or other data modalities (i.e. cortical thickness). This step also converts freesurfer derived masks into a format that is easier for epitome to use (nifti format) and does a non-linear (FSL based) registration of all these files into MNI space. These useful files get copied into the T1 directory so that epiotome can use them.
-
-**pre-processing**
-
-This contains the lion's share of the pipeline. Every run of epitome begins with `init_epi`, which contains a non-contentious set of pre-processing steps for EPI images. The following stages can be chained together at will to preform de-noising, spatial transformations, projections to surface-space, and spatial smoothing.
-
-**quality control**
-
-These programs run experiment-wide, and therefore are run after all /pre modules have completed for every subject. They produce reports that give a broad overview of the data quality at different stages of pre-processing, encouraging visual inspection of the data and hopefully reducing the amount of time spent hunting for the source of bugs when they do arise.
-
-**cleanup**
-
-These programs are run separately using epitome clean. They generally provide the ability to eliminate faulty outputs or intermediate files from experiments. Due to their destructive nature, these scripts must be executed by hand and each step must be manually confirmed. They are therefore not amiable to unattended scripting, although one could easily write their own with some know-how.
 
 Workflows
 ---------
@@ -311,37 +236,3 @@ loop. This is not mandatory, but highly recommended. It allows one to re-run the
 
 Finally, variables can be defined within the module to allow the user to set them before running the module via the command line. Each command-line argument should correspond to a variable at the top of the module, which is then referenced in the appropriate locations throughout the script. Since the variables are defined before each module, the name-space between modules does not need to be maintained. However, for consistency, it is best to select variable names that are specific and unlikely to have shared meanings in other areas of the pipeline.
 
-**python wrapper**
-
-With modules written, an advanced user could write a master BASH script by hand to make use of it. However, most users will want to make use of the python-based command line interface, which will require you to write a small wrapper function: `.../epitome/commands/foo.py`.
-
-Each function should have the same name as the associated module and wrapper function, and accept a single variable input_name. This denotes the filename prefix that the module will operate on.
-
-Next, you should define the output prefix (e.g., lowpass). This will be passed on to the next module, assuming the user does not make any errors inputing the various module options.
-
-Finally, the function should ask the user a single question for each command-line argument. I have built 4 `selector` functions for integers, floats, lists, and dictionaries. These final two allow the user to select from a set of options, with or without an accompanying description. The first two allow the use to input a numerical value for appropriate settings, for example, smoothing kernel size in millimeters.
-
-This set of questions should be wrapped in a try-except loop, checking for `ValueErrors`. If the user inputs an inappropriate option, the function will throw an error and return the special type `None`, which will prompt epitome to ignore the current call to the function and ask the user to try again. If all is well, the collected variables should be passed to the line variable, which contains a BASH formatted string that will be printed to the master script.
-
-The following is a code block demonstrating this structure (based on `epitome/commands/surfsmooth.py`):
-
-    import epitome as epi
-
-    def surfsmooth(input_name):
-        output = 'smooth'
-        print('\nSmoothing functional data on a cortical surface.')
-
-        # have the user input one floating-point number, and error out if the user makes a mistake
-        try:
-            print('\nInput smoothing kernel FWHM (mm):')
-            fwhm = epi.utils.selector_float()
-        except ValueError as ve:
-            return '', None
-
-        # return a single line for the master script with the appropriate command-line arguments set
-        line = '. ${DIR_PIPE/epitome/modules/pre/surfsmooth {} {}'.format(input_name, fwhm)
-        return line, output
-
-**documentation**
-
-This is a very important part of module-building. Documentation for a given module is supplied in the doc/ folder, in a markdown document sharing the name of the module itself. This will be viewable on both GitHub, any future web-hosted manual location, and will also be used to generate the command-line help. Remember -- epitome modules should always be useful to advanced users who simply want to write their own master BASH script, and therefore, the documentation should contain enough information so that they can perform this task manually. Hopefully the current set of documentation is a sufficient guide for future development.
