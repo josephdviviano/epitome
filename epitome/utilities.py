@@ -162,7 +162,7 @@ def maskdata(data, mask, rule='>', threshold=[0]):
     idx = np.setdiff1d(idx, idx_zeros)
 
     # collapse data using the index
-    idx = idx.tolist()
+    idx = idx.astype(np.int)
     data = data[idx, :]
 
     return data, idx

@@ -31,23 +31,29 @@ from epitome.docopt import docopt
 
 def main():
     arguments = docopt(__doc__)
-    data = arguments['<data>']
-    mask = arguments['<mask>']
-    output = arguments['<output>']
+    dataname = arguments['<data>']
+    maskname = arguments['<mask>']
+    outputname = arguments['<output>']
     n = arguments['<n>']
 
     n = int(n) # check type
 
-    data, _, _, _ = epi.utilities.loadnii(data)
-    mask, _, _, _ = epi.utilities.loadnii(mask)
-    data, idx = epi.utilities.maskdata(data, mask)
+    data, _, _, _ = epi.utilities.loadnii(dataname)
+    mask, _, _, _ = epi.utilities.loadnii(maskname)
+
+    try:
+        data, idx = epi.utilities.maskdata(data, mask)
+    except:
+        print('failed to mask data {},shape={} with mask {},shape={}'.format(
+            dataname, data.shape, maskname, mask.shape))
+        sys.exit(1)
 
     data -= np.mean(data, 1)[:, None]  # mean center
     data /= np.std(data, 1)[:, None]   # variance normalize
 
     # retrieve the top component and save to an afni-compatible 1D file
     components, exp_var = epi.stats.pca_reduce(data.T, n=n, copy=True, method='random', whiten=True)
-    np.savetxt(output, components, fmt='%10.12f')
+    np.savetxt(outputname, components, fmt='%10.12f')
 
 if __name__ == '__main__':
     main()
