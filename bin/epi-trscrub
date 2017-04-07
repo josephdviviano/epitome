@@ -26,7 +26,7 @@ DETAILS:
     interpolate is constructed between the deleted TRs, which is more appropriate
     for task-based fMRI (and maybe resting state).
 
-    Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to change.
+    Defaults taken from Gwig et al. 2014 Cerebral Ctx and are subject to change.
 
 """
 import os, sys
@@ -183,6 +183,13 @@ def main():
 
     if type(head) == list and len(head) > 1:
         head = float(head[0])
+
+    # convert input numbers to floats
+    if DV_t:
+        DV_t = float(DV_t)
+
+    if FD_t:
+        FD_t = float(FD_t)
 
     print('\n epi-trscrub: {}'.format(func))
     print('           FD = {} mm,'.format(FD_t))
