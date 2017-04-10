@@ -37,7 +37,7 @@ for SESS in ${DIR_SESS}; do
     for RUN in ${DIR_RUNS}; do
         NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
 
-        if [ ! -f ${HCP_DATA}/${subjid}/MNINonLinear/Results/${DATA_TYPE}_${NUM}/${DATA_TYPE}_${NUM}.nii.gz ];
+        if [ ! -f ${HCP_DATA}/${subjid}/MNINonLinear/Results/${DATA_TYPE}_${NUM}/${DATA_TYPE}_${NUM}.nii.gz ]; then
             func2hcp.py \
                 --FLIRT-template ${SESS}/anat_EPI_brain.nii.gz \
                 ${SESS}/${input}.${ID}.${NUM}.nii.gz \
