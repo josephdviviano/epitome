@@ -58,14 +58,14 @@ def interp(data, idx, threshold=0.5):
     # if we are asked to interpolate an unreasonable number of TRs, use drop
     if idx.size > ntrs * threshold:
         print('Too many TRs to remove, using drop method!')
-        data = drop(data, idx)
+        data, new_trs = drop(data, idx)
 
-        return data
+        return data, new_trs
 
     # if we have nothing to do, move along
     if idx.size == 0:
 
-        return data
+        return data, ntrs
 
     roi = 0
     # for all elements in the censor idx
@@ -151,7 +151,7 @@ def interp(data, idx, threshold=0.5):
                     data[x, roiLo:ntrs + 1] = new
                     print("***4***")
 
-    return data
+    return data, ntrs
 
 def drop(data, idx):
     """
@@ -223,7 +223,8 @@ def main():
     if mode == 'drop':
         data, dims[3] = drop(data, idx)
     elif mode == 'interp':
-        data = interp(data, idx)
+        # dims[3] will be unchanged, unless forced to fall back to using 'drop'
+        data, dims[3] = interp(data, idx)
 
     # reshape data, header
     data = np.reshape(data, (dims[0], dims[1], dims[2], dims[3]))
