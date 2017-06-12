@@ -19,7 +19,7 @@ for SESS in ${DIR_SESS}; do
     if [ ${multisession} -eq 1 ]; then
         DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/${SESS}"
     else
-        DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/SESS01)"
+        DIR_T1="${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/SESS01"
     fi
 
     # register aparc atlas to EPI
