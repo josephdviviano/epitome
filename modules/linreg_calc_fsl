@@ -85,7 +85,7 @@ for SESS in ${DIR_SESS}; do
     if [ ! -f ${DIR}/${SESS}/mat_TAL_to_T1.mat ]; then
         flirt \
             -in ${ANAT_T1} \
-            -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz \
+            -ref ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz \
             -out ${DIR}/${SESS}/reg_T1_to_TAL.nii.gz \
             -omat ${DIR}/${SESS}/mat_T1_to_TAL.mat \
             -dof 12 \
