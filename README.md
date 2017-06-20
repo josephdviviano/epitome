@@ -21,7 +21,7 @@ Written by Joseph D. Viviano 2014-17.
 
 Setup
 -----
-+ install [script-it](https://github.com/josephdviviano/script-it)
++ install [scriptit](https://github.com/josephdviviano/scriptit)
 
 epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with epitome under bin/
 
