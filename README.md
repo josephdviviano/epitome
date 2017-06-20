@@ -1,6 +1,6 @@
 ![epitome](assets/logo.png "epitome: scriptuit modules for MRI analysis")
 
-epitome is a collection of scriptuit modules for pre-processing MRI data, as well as a bundle of command-line tools for processing and analysing.
+epitome is a collection of scriptit modules for pre-processing MRI data, as well as a bundle of command-line tools for processing and analysing.
 
 These tools will be of interest to researchers who want to prototype new analysis strategies in a confirgurable environment with little up-front cost.
 
@@ -21,7 +21,7 @@ Written by Joseph D. Viviano 2014-17.
 
 Setup
 -----
-+ install [scriptuit]()
++ install [script-it](https://github.com/josephdviviano/script-it)
 
 epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with epitome under bin/
 
