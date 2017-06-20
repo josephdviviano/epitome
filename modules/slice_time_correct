@@ -3,7 +3,7 @@
 # slice_time_correct input tr direction ascending interleave
 #
 # input:      input prefix
-# tr_sec:     acquisition TR in seconds [float]
+# tr:         acquisition TR in seconds [float]
 # direction:  acquisition direction [list: x y z]
 # ascending:  ascending slice acquisition order? [list: yes no]
 # interleave: acquisition was interleaved [list: yes no]
