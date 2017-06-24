@@ -101,7 +101,8 @@ def main():
     # cast types
     fd = float(fd)
     rad = float(rad)
-    if cycles: cycles = int(cycles)
+    if cycles:
+        cycles = int(cycles)
 
     # checks inputs
     if len(inputs) <= 1:
@@ -126,20 +127,22 @@ def main():
         print('ERROR: Inputs must be 4D')
         sys.exit()
 
-    if cycles == 1: cycles = None
+    if cycles == 1:
+        cycles = None
 
     if cycles and dims[3] % cycles != 0:
         print('ERROR: Cycles are not integral with the length of the run.')
         sys.exit()
 
-    cycle_trs = dims[3] / cycles
-
     # define matrices
     nvox = dims[0]*dims[1]*dims[2]
     mean = np.zeros((nvox, dims[3]))
-    cycle = np.zeros((nvox, cycle_trs))
     trcount = np.zeros(dims[3])
-    cycle_trcount = np.zeros(cycle_trs)
+
+    if cycles:
+        cycle_trs = dims[3] / cycles
+        cycle = np.zeros((nvox, cycle_trs))
+        cycle_trcount = np.zeros(cycle_trs)
 
     # calculate the mean across all runs
     for i in inputs:
