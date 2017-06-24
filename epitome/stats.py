@@ -150,7 +150,7 @@ def FDR_mask(p=[], q=1.05, iid='yes', crit='no'):
     del(dat, threshold)
 
     # create & reshape binary output mask
-    mask = np.zeros(size)
+    mask = np.zeros(int(size))
     if crit_p > 0:
         mask[p <= crit_p] = 1
 
