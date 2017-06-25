@@ -149,7 +149,6 @@ def main():
         data, _, _, _ = epi.utilities.loadnii(i)
         idx = find_surviving_trs(inputs[i], fd)
         trcount[idx] += 1
-        mean[:, idx] += data[:, idx]
 
         if cycles:
             for c in range(cycles):
@@ -158,8 +157,12 @@ def main():
                 cycle[:, cycle_idx-((c)*cycle_trs)] += data[:, cycle_idx]
                 cycle_trcount[cycle_idx-((c)*cycle_trs)] += 1
 
+        mean[:, idx] += data[:, idx]
+
+    if cycles:
+        cycle = cycle / np.tile(cycle_trcount, [nvox, 1])
+
     mean = mean / np.tile(trcount, [nvox, 1])
-    cycle = cycle / np.tile(cycle_trcount, [nvox, 1])
 
     # calculate the SD, if required
     # note SD is calculated differently than the mean because we can't use
@@ -177,16 +180,11 @@ def main():
             idx = find_surviving_trs(inputs[i], fd)
 
             if cycles:
-                data = np.reshape(data, (nvox, dims[3]/cycles, cycles))
-
-                # does some footwork to map from run to cycles to properly calculate SD
-                for cyc in np.arange(cycles):
-                    cycidx = np.arange(cyc*dims[3]/cycles,(cyc+1)*dims[3]/cycles)
-                    cycidx = np.intersect1d(cycidx, idx) # get this cycle's subset
-                    cycidx = cycidx - (cyc*dims[3]/cycles) # set to start at 0
-                    std[:, cycidx] = std[:, cycidx] + (data[:, cycidx, cyc] - mean[:, cycidx])**2
-                    trcount[cycidx] = trcount[cycidx] + 1
-
+                for c in range(cycles):
+                    cycle_idx = np.arange(c*cycle_trs,(c+1)*cycle_trs)
+                    cycle_idx = np.intersect1d(idx, cycle_idx)
+                    std[:, cycle_idx-((c)*cycle_trs)] += (data[:, cycle_idx] - mean[:, cycle_idx])**2
+                    trcount[cycle_idx] += 1
             else:
                 std[:, idx] = std[:, idx] + (data[:, idx] - mean[:, idx])**2
                 trcount[idx] = trcount[idx] + 1
@@ -206,3 +204,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
