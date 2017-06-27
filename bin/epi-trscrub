@@ -115,13 +115,11 @@ def interp(data, idx, threshold=0.5):
                     # insert roiHi into earlier TRs
                     new = np.repeat(data[x, roiHi+1], roiHi) # < fixed
                     data[x, 0:roiHi] = new
-                    print("***1***")
 
                 elif roiHi >= ntrs:
                     # insert roiLo into later TRs
                     new = np.repeat(data[x, roiLo-1] ,ntrs - roiLo)
                     data[x, roiLo:ntrs + 1] = new
-                    print("***2***")
 
         # now do the final value [is this still relevant?] ?? ?? ??
         if roi <= len(idx) - 1:
@@ -142,14 +140,12 @@ def interp(data, idx, threshold=0.5):
                     # write interp values over data
                     new = np.delete(new, [0, len(new) - 1])
                     data[x, roiLo:roiHi + 1] = new
-                    print("***3***")
 
                 # if our censor vector goes beyond acquisition
                 else:
                     # repeat the last good value
                     new = np.repeat(data[x, roiLo-1] ,ntrs - roiLo)
                     data[x, roiLo:ntrs + 1] = new
-                    print("***4***")
 
     return data, ntrs
 
