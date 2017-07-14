@@ -255,7 +255,7 @@ for SESS in ${DIR_SESS}; do
 
             # add the physio regressors if they exist
             if [ -f ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D ]; then
-                CMD="${CMD} -ort ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D"
+                CMD="${CMD} ${SESS}/PARAMS/det.phys.${ID}.${NUM}.1D"
             fi
 
             # mean white matter + csf regressor
