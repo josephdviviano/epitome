@@ -1,5 +1,5 @@
-![epitome](assets/logo.png "epitome: scriptuit modules for MRI analysis")
-
+epitome
+-------
 epitome is a collection of scriptit modules for pre-processing MRI data, as well as a bundle of command-line tools for processing and analysing.
 
 These tools will be of interest to researchers who want to prototype new analysis strategies in a confirgurable environment with little up-front cost.
