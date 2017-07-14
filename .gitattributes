@@ -1,4 +1,3 @@
-
 assets/fix_training_data/autohawko.RData filter=lfs diff=lfs merge=lfs -text
 assets/fix_training_data/HCP_hp2000.RData filter=lfs diff=lfs merge=lfs -text
 assets/fix_training_data/Standard.RData filter=lfs diff=lfs merge=lfs -text
@@ -29,3 +28,4 @@ assets/README.md filter=lfs diff=lfs merge=lfs -text
 assets/shen_1mm_268_parcellation.nii.gz filter=lfs diff=lfs merge=lfs -text
 assets/shen_2mm_268_parcellation.nii.gz filter=lfs diff=lfs merge=lfs -text
 assets/labels/striatum.labels filter=lfs diff=lfs merge=lfs -text
+assets/mcr_v715/** filter=lfs diff=lfs merge=lfs -text
