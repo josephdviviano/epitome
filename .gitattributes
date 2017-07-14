@@ -28,4 +28,3 @@ assets/README.md filter=lfs diff=lfs merge=lfs -text
 assets/shen_1mm_268_parcellation.nii.gz filter=lfs diff=lfs merge=lfs -text
 assets/shen_2mm_268_parcellation.nii.gz filter=lfs diff=lfs merge=lfs -text
 assets/labels/striatum.labels filter=lfs diff=lfs merge=lfs -text
-assets/mcr_v715/** filter=lfs diff=lfs merge=lfs -text
