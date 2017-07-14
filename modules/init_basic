@@ -23,6 +23,8 @@
 export AFNI_NIFTI_TYPE_WARN='NO'
 export AFNI_DECONFLICT=OVERWRITE
 
+# used for McRetroTS
+
 # variable used to keep track of the current 'space' of the functional data
 # space = 'native', 'T1', 'MNI'
 export space='native'
