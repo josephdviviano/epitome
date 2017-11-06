@@ -31,7 +31,7 @@ Quickstart:
 + Set `SCRIPTIT_DATA` to point to an MRI data directory.
 + Set `SCRIPTIT_MODULES` to point to `epitome/modules`.
 + Set `PATH` to point to `epitome/bin`.
-+ Set `PYTHONPATH` to poing to `epitome`.
++ Set `PYTHONPATH` to point to `epitome`.
 + Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
 + Set `HCP_DATA` to point to a directory that will hold data in the HCP folder.
 + Check your work using `scriptit check`.
