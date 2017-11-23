@@ -24,7 +24,7 @@ for SESS in ${DIR_SESS}; do
             melodic \
                 -i ${SESS}/${input}.${ID}.${NUM}.nii.gz \
                 -o ${SESS}/MELODIC.${ID}.${NUM} \
-                --mask=${mask} \
+                --mask=${SESS}/${mask} \
                 --dimest=lap \
                 --report \
                 --Oall \
