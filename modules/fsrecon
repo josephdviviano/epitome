@@ -13,7 +13,8 @@ for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/T1/*/); do
 
     # this is the subject name in the freesurfer ${SUBJECTS_DIR} directory
     sessname=$(basename ${SESS})
-    subjid="${DIR_EXPT}_${SUB}_${sessname}"
+    # /// removes all directory slashes from subject name, if they exist
+    subjid="${DIR_EXPT}_${SUB///}_${sessname}"
 
     # determine if subject finished successfully
     if [ -f ${SUBJECTS_DIR}/${subjid}/scripts/recon-all.log ]; then
