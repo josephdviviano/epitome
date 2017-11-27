@@ -1,5 +1,0 @@
-assets/fix_training_data/autohawko.RData filter=lfs diff=lfs merge=lfs -text
-assets/fix_training_data/HCP_hp2000.RData filter=lfs diff=lfs merge=lfs -text
-assets/fix_training_data/Standard.RData filter=lfs diff=lfs merge=lfs -text
-assets/fix_training_data/WhII_MB6.RData filter=lfs diff=lfs merge=lfs -text
-assets/fix_training_data/WhII_Standard.RData filter=lfs diff=lfs merge=lfs -text
