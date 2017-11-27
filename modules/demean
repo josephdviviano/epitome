@@ -25,7 +25,7 @@ for SESS in ${DIR_SESS}; do
                 -mean ${SESS}/${input}.${ID}.${NUM}.nii.gz
 
             3dcalc \
-                -prefix ${SESS}/func_detrend.${ID}.${NUM}.nii.gz \
+                -prefix ${SESS}/func_demean.${ID}.${NUM}.nii.gz \
                 -a ${SESS}/${input}.${ID}.${NUM}.nii.gz \
                 -b ${SESS}/func_tmp_mean.${ID}.${NUM}.nii.gz \
                 -expr 'a-b'

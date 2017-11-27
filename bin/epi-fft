@@ -60,7 +60,8 @@ def main():
     # import files, check dimensions. don't load a mask if it isn't defined.
     try:
         func, aff, hdr, dims = epi.utilities.loadnii(func)
-        if mask:
+        print(mask)
+        if isinstance(mask, str):
             mask, _, _, mdims = epi.utilities.loadnii(mask)
             if dims[0:3] != mdims[0:3]:
                 sys.exit('ERROR: fMRI and mask dimensions do not match.')
@@ -68,7 +69,7 @@ def main():
         sys.exit('ERROR: Failed to import data.')
 
     # mask data, or create a fake index that simply represents all of the voxels
-    if mask:
+    if isinstance(mask, np.ndarray):
         func, idx = epi.utilities.maskdata(func, mask)
     else:
         idx = np.arange(dims[0]*dims[1]*dims[2])

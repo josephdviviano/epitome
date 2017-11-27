@@ -1,6 +1,6 @@
-![epitome](assets/logo.png "epitome: scriptuit modules for MRI analysis")
-
-epitome is a collection of scriptuit modules for pre-processing MRI data, as well as a bundle of command-line tools for processing and analysing.
+epitome
+-------
+epitome is a collection of scriptit modules for pre-processing MRI data, as well as a bundle of command-line tools for processing and analysing.
 
 These tools will be of interest to researchers who want to prototype new analysis strategies in a confirgurable environment with little up-front cost.
 
@@ -21,7 +21,7 @@ Written by Joseph D. Viviano 2014-17.
 
 Setup
 -----
-+ install [scriptuit]()
++ install [scriptit](https://github.com/josephdviviano/scriptit)
 
 epitome does not have any direct dependencies, but the scripts it generates rely heavily on well-developed MRI pacakges. The more esoteric packages come bundled with this code, and some custom analysis packages are bundled with epitome under bin/
 
@@ -31,7 +31,7 @@ Quickstart:
 + Set `SCRIPTIT_DATA` to point to an MRI data directory.
 + Set `SCRIPTIT_MODULES` to point to `epitome/modules`.
 + Set `PATH` to point to `epitome/bin`.
-+ Set `PYTHONPATH` to poing to `epitome`.
++ Set `PYTHONPATH` to point to `epitome`.
 + Set `SUBJECTS_DIR` to point to the desired freesurfer subjects folder.
 + Set `HCP_DATA` to point to a directory that will hold data in the HCP folder.
 + Check your work using `scriptit check`.

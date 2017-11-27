@@ -17,6 +17,10 @@
 # On mode selection: 'drop' removes TRs from output file, 'interp' replaces TRs with a linear interpolate between the TR before and after the removed region.
 #
 # The interp version is best used before lowpass filtering, and is the only reasonable option if you are analyzing some form of task data.
+#
+# For details on usage, see:
+# [1] Wig, GS et al. An approach for parcellating human cortical areas using resting-state correlations. 2014. Neuroimage.
+# [2] Power, JD et al. Spurious but systematic correlations in functional connectivity MRI networks arise from subject motion. 2012. Neuroimage.
 
 echo '*** MODULE: trscrub. Removes TRs corrupted by motion. ******************'
 export input=${1}

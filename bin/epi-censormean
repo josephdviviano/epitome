@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 """
-Takes a list of input niftis and input AFNI-formatted motion parameters, 
-calculates the framewise-displacement vector for each run, and takes a TR-wise 
+Takes a list of input niftis and input AFNI-formatted motion parameters,
+calculates the framewise-displacement vector for each run, and takes a TR-wise
 average of the runs using all runs that fall below the framewise displacement
 threshold for that TR.
 
 Outputs the run mean & standard deviation, and a samples-per-TR vector.
 
-Usage: 
+Usage:
     epi-censormean [options] --input <input>... --output <output>
 
 Options:
     -i --input <input>...  a pair of nifti and motion paramater (AFNI) files, comma separated
                                (e.g., run1.nii.gz,run1_motion.1D')
-    -o --output <output>   output nifti of mean. 
+    -o --output <output>   output nifti of mean.
     -f --fd=<fd>           framewise displacement threshold in mm/TR [default: 0.5]
     -r --rad=<rad>         radius of head in mm [default: 50]
     -c --cycles=<cycles>   number of cycles to fold over (for periodic designs)
@@ -21,22 +21,22 @@ Options:
     -q --qc=<qc>           output text vector of number of runs retained per TR
 
 DETAILS:
-    
-    Useful if you have multiple runs of a participant performing the exact same 
-    task, or viewing the exact same stimulus, and would like to minimize the 
+
+    Useful if you have multiple runs of a participant performing the exact same
+    task, or viewing the exact same stimulus, and would like to minimize the
     influence of head motion on the resulting mean.
 
-    For periodic experimental designs, it is sometimes desirable to look at the 
-    mean cycle. To do this, give --cycles the number of periods per run in your 
-    design. At the moment, the number of cycles should be integral with the 
+    For periodic experimental designs, it is sometimes desirable to look at the
+    mean cycle. To do this, give --cycles the number of periods per run in your
+    design. At the moment, the number of cycles should be integral with the
     length of the run, as no interpolation is currently performed on the data.
 
-    If a particular TR has no candidate runs (due to excessive head motion), 
-    those TRs will currently be returned having the value 0 (due to how numpy 
+    If a particular TR has no candidate runs (due to excessive head motion),
+    those TRs will currently be returned having the value 0 (due to how numpy
     handles division by 0).
 
-    Method based on that described in: 
-    
+    Method based on that described in:
+
     Interhemispheric interactions of the human thalamic reticular nucleus.
     Viviano JD, Schneider KA. J Neurosci. 2015 Feb 4;35(5):2026-32.
 """
@@ -84,7 +84,7 @@ def find_surviving_trs(vector, threshold):
 def write_data(data, dims, affine, name):
     data = np.reshape(data, (dims[0], dims[1], dims[2], dims[3]))
     data = nib.nifti1.Nifti1Image(data, affine)
-    data.update_header() # removed header (interferes with AFNI, why?) 
+    data.update_header() # removed header (interferes with AFNI, why?)
     data.header_class(extensions=())
     data.to_filename(name)
 
@@ -101,7 +101,8 @@ def main():
     # cast types
     fd = float(fd)
     rad = float(rad)
-    if cycles: cycles = int(cycles)
+    if cycles:
+        cycles = int(cycles)
 
     # checks inputs
     if len(inputs) <= 1:
@@ -126,7 +127,8 @@ def main():
         print('ERROR: Inputs must be 4D')
         sys.exit()
 
-    if cycles == 1: cycles = None
+    if cycles == 1:
+        cycles = None
 
     if cycles and dims[3] % cycles != 0:
         print('ERROR: Cycles are not integral with the length of the run.')
@@ -137,19 +139,28 @@ def main():
     mean = np.zeros((nvox, dims[3]))
     trcount = np.zeros(dims[3])
 
-    # calculate the mean
+    if cycles:
+        cycle_trs = dims[3] / cycles
+        cycle = np.zeros((nvox, cycle_trs))
+        cycle_trcount = np.zeros(cycle_trs)
+
+    # calculate the mean across all runs
     for i in inputs:
         data, _, _, _ = epi.utilities.loadnii(i)
         idx = find_surviving_trs(inputs[i], fd)
-        trcount[idx] = trcount[idx] + 1
-        mean[:, idx] = mean[:, idx] + data[:, idx]
+        trcount[idx] += 1
+
+        if cycles:
+            for c in range(cycles):
+                cycle_idx = np.arange(c*cycle_trs, (c+1)*cycle_trs)
+                cycle_idx = np.intersect1d(idx, cycle_idx)
+                cycle[:, cycle_idx-((c)*cycle_trs)] += data[:, cycle_idx]
+                cycle_trcount[cycle_idx-((c)*cycle_trs)] += 1
+
+        mean[:, idx] += data[:, idx]
 
     if cycles:
-        mean = np.reshape(mean, (nvox, dims[3]/cycles, cycles))
-        mean = np.sum(mean, axis=2)
-
-        trcount = np.reshape(trcount, (dims[3]/cycles, cycles))
-        trcount = np.sum(trcount, axis=1)
+        cycle = cycle / np.tile(cycle_trcount, [nvox, 1])
 
     mean = mean / np.tile(trcount, [nvox, 1])
 
@@ -157,7 +168,7 @@ def main():
     # note SD is calculated differently than the mean because we can't use
     # the same shortcut as above.
     if var:
-        if cycles: 
+        if cycles:
             std = np.zeros((nvox, dims[3]/cycles))
             trcount = np.zeros(dims[3]/cycles)
         else:
@@ -169,27 +180,23 @@ def main():
             idx = find_surviving_trs(inputs[i], fd)
 
             if cycles:
-                data = np.reshape(data, (nvox, dims[3]/cycles, cycles))
-
-                # does some footwork to map from run to cycles to properly calculate SD
-                for cyc in np.arange(cycles):
-                    cycidx = np.arange(cyc*dims[3]/cycles,(cyc+1)*dims[3]/cycles)
-                    cycidx = np.intersect1d(cycidx, idx) # get this cycle's subset
-                    cycidx = cycidx - (cyc*dims[3]/cycles) # set to start at 0
-                    std[:, cycidx] = std[:, cycidx] + (data[:, cycidx, cyc] - mean[:, cycidx])**2
-                    trcount[cycidx] = trcount[cycidx] + 1
-
+                for c in range(cycles):
+                    cycle_idx = np.arange(c*cycle_trs,(c+1)*cycle_trs)
+                    cycle_idx = np.intersect1d(idx, cycle_idx)
+                    std[:, cycle_idx-((c)*cycle_trs)] += (data[:, cycle_idx] - mean[:, cycle_idx])**2
+                    trcount[cycle_idx] += 1
             else:
                 std[:, idx] = std[:, idx] + (data[:, idx] - mean[:, idx])**2
                 trcount[idx] = trcount[idx] + 1
-        
+
         std = std / np.tile(trcount, [nvox, 1])
 
+    # write outputs
     if cycles:
         dims = (dims[0], dims[1], dims[2], dims[3] / cycles)
-
-    # write outputs
-    write_data(mean, dims, affine, output)
+        write_data(cycle, dims, affine, output)
+    else:
+        write_data(mean, dims, affine, output)
     if var:
         write_data(std, dims, affine, var)
     if qc:
@@ -197,3 +204,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

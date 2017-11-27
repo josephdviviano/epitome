@@ -23,6 +23,10 @@
 export AFNI_NIFTI_TYPE_WARN='NO'
 export AFNI_DECONFLICT=OVERWRITE
 
+# used for McRetroTS
+McRetroTS="$(dirname $(which epi-physio))/run_McRetroTS.sh"
+McRetroTS_dir="$(dirname $(dirname $(which epi-physio)))/assets/mcr_v715/v715/"
+
 # variable used to keep track of the current 'space' of the functional data
 # space = 'native', 'T1', 'MNI'
 export space='native'
@@ -90,7 +94,10 @@ for SESS in $(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/); do
                 # NB! Right now we are NOT using the slice-wise information,
                 # as the slice-wise information assumes alternating+Z! Jeesh!
                 ${McRetroTS} \
-                    ${runfolder}/resp.*.phys ${runfolder}/card.*.phys ${tr} ${slice} ${fs} 0
+                    ${McRetroTS_dir} \
+                    ${runfolder}/resp.*.phys \
+                    ${runfolder}/card.*.phys \
+                    ${tr} ${slice} ${fs} 0
 
                 # Output both the single-slice and multi-slice data
                 1dcat \

@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# ica_aroma input type
+#
+# input: input prefix
+# type: denoising strategy (aggressive and/or conservative) [list: nonaggr aggr]
+#
+# output: func_aroma
+# prereq: init_* motion_deskull nonlinreg_calc_fsl linreg_calc_fsl
+#
+# Runs ICA_AROMA.py on each input functional file. Tested with a pull from https://github.com/rhr-pruim/ICA-AROMA on 2017-07-12.
+
+echo '*** MODULE: ica_aroma. Runs ICA_AROMA.py on each run. *******************'
+export input=${1}
+export type=${2}
+
+DIR_SESS=`ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/`
+for SESS in ${DIR_SESS}; do
+
+    DIR_RUNS=`ls -d -- ${SESS}/RUN*`
+    for RUN in ${DIR_RUNS}; do
+        NUM=`basename ${RUN} | sed 's/[^0-9]//g'`
+
+        # run ICA_AROMA.py, saves everything
+        if [ ! -f ${SESS}/func_aroma.${ID}.${NUM}.nii.gz ]; then
+
+            ICA_AROMA.py \
+                -i ${SESS}/${input}.${ID}.${NUM}.nii.gz \
+                -mc ${SESS}/PARAMS/motion.${ID}.${NUM}.1D \
+                -a ${SESS}/mat_EPI_to_TAL.mat \
+                -w ${SESS}/reg_nlin_TAL_WARP.nii.gz \
+                -m ${SESS}/${mask} \
+                -o ${SESS}/ARMOA.${ID}.${NUM} \
+                -den ${type}
+
+            mv ${SESS}/ARMOA.${ID}.${NUM}/denoised_func_data_*.nii.gz \
+                ${SESS}/func_aroma.${ID}.${NUM}.nii.gz
+
+        fi
+    done
+done
+

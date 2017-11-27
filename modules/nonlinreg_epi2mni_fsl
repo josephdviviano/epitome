@@ -15,7 +15,6 @@ echo '*** MODULE: nonlinreg_epi2mni_fsl. Warps EPI data to MNI space. ********'
 export input=${1}
 export dims=${2}
 
-FSLDIR=$(dirname $(dirname $(which fsl)))
 DIR_SESS=$(ls -d -- ${DIR_DATA}/${DIR_EXPT}/${SUB}/${DATA_TYPE}/*/)
 for SESS in ${DIR_SESS}; do
     SESS=$(basename ${SESS})
@@ -28,7 +27,7 @@ for SESS in ${DIR_SESS}; do
     3dresample \
         -dxyz ${dims} ${dims} ${dims} \
         -prefix ${DIR}/anat_EPI_reg_target.nii.gz \
-        -inset ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz
+        -inset ${DIR_DATA}/${DIR_EXPT}/anat_MNI.nii.gz
 
     DIR_RUNS=$(ls -d -- ${DIR}/RUN*)
     for RUN in ${DIR_RUNS}; do
