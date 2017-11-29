@@ -5,19 +5,17 @@ displacement, or both. Output is a binary 1D file indicating good TRs (1) and
 bad TRs (0).
 
 Usage:
-    epi-censor [options] <func> <output> <motion>
+    epi-censor [options] <motion> <output>
 
 Arguments:
-    <func>          full path to input nifti file.
-    <output>        full path to output 1D file.
     <motion>        full path to AFNI motion parameters.
+    <output>        full path to output 1D file.
 
 Options:
     --DVARS=<DVARS>   full path to DVARS calculation
-    --report=<report> full path to report on TRs scrubbed per subject
     --head=<head>     head radius in mm [default: 50].
     --FD=<FD>         censor TRs with instantaneous motion > x mm [default: 0.3]
-    --DV=<DV>         censor TRs with instantaneous GS fluctuation > x % [default: 0.3]
+    --DV=<DV>         censor TRs with instantaneous GS fluctuation > x % [default: 3]
 
 DETAILS:
     Defaults taken from Gwig et al. 2013 Cerebral Ctx and are subject to change.
@@ -30,11 +28,9 @@ from epitome.docopt import docopt
 
 def main():
     arguments  = docopt(__doc__)
-    func   = arguments['<func>']
-    output = arguments['<output>']
     motion = arguments['<motion>']
+    output = arguments['<output>']
     DVARS  = arguments['--DVARS']
-    report = arguments['--report']
     head   = arguments['--head']
     FD_t   = arguments['--FD']
     DV_t   = arguments['--DV']
@@ -42,7 +38,14 @@ def main():
     if type(head) == list and len(head) > 1:
         head = float(head[0])
 
-    print('calculating outliers on {} using FD={} mm, DVARS={} %, head radius={} mm'.format(func, FD_t, DV_t, head))
+    # convert input numbers to floats
+    if DV_t:
+        DV_t = float(DV_t)
+
+    if FD_t:
+        FD_t = float(FD_t)
+
+    print('calculating outliers on {} using FD={} mm, DVARS={} %, head radius={} mm'.format(motion, FD_t, DV_t, head))
 
     FD = epi.stats.FD(motion, head)
     n_trs = len(FD)
@@ -70,15 +73,7 @@ def main():
     # record number of removed datapoints
     n_retained = n_trs-len(idx)
 
-    # write .1D output
     np.savetxt(output, output_data, fmt='%i')
-    print('TRs retained: {}, Run: {}'.format(str(n_retained), os.path.basename(func)))
-
-    # if we specify a report, write it out
-    if report != None:
-        f = open(report, 'wb')
-        f.write(str(n_retained))
-        f.close()
 
 if __name__ == "__main__":
     main()
