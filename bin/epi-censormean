@@ -186,8 +186,8 @@ def main():
                     std[:, cycle_idx-((c)*cycle_trs)] += (data[:, cycle_idx] - mean[:, cycle_idx])**2
                     trcount[cycle_idx] += 1
             else:
-                std[:, idx] = std[:, idx] + (data[:, idx] - mean[:, idx])**2
-                trcount[idx] = trcount[idx] + 1
+                std[:, idx] += (data[:, idx] - mean[:, idx])**2
+                trcount[idx] += 1
 
         std = std / np.tile(trcount, [nvox, 1])
 
